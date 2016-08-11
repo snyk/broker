@@ -1,0 +1,32 @@
+{
+  "name": "snyk-broker",
+  "description": "[![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io)",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "bin": {
+    "snyk-broker": "./cli/index.js"
+  },
+  "scripts": {
+    "test": "tap -R spec test/*.test.js",
+    "lint": "jscs cli/*.js lib/*.js -v",
+    "check-tests": "! grep 'test.only' test/*.test.js -n",
+    "cover": "tap test/*.test.js --cov --coverage-report=lcov"
+  },
+  "keywords": [],
+  "author": "Remy Sharp",
+  "license": "Apache-2.0",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "tap": "^6.3.0",
+    "tap-only": "0.0.5"
+  },
+  "dependencies": {
+    "clite": "^0.3.0",
+    "debug": "^2.2.0",
+    "dotenv-safe": "^2.3.1",
+    "socket.io": "^1.4.8",
+    "socket.io-client": "^1.4.8"
+  }
+}

@@ -1,0 +1,29 @@
+
+  Usage:
+
+    $ snyk-broker [flags]
+
+  This will run the Snyk broker that allows requests to be proxied to your
+  internal environment, using whitelist control to configure what types of
+  requests are allowed and to where.
+
+  Commands:
+    client .............. run the broker in client mode
+    server .............. run the broker in server mode
+
+  Flags:
+
+    -V, --verbose ........ verbose logging
+    -d, --debug .......... enable debug diagnosis output
+    -v, --version ........ current version
+    -h, --help ........... this help
+
+  Options:
+
+    --env FILE .... use FILE as the .env to configure the broker
+
+  Example:
+
+    $ snyk-broker -c production.json
+
+  For more details see http://github.com/snyk/broker
