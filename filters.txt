@@ -1,0 +1,2 @@
+GET https://${token}@${rawhost}/:name/:repo/master/package.json
+GET https://${token}@${rawhost}/:name/:repo/master/.snyk

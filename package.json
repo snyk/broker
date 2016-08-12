@@ -6,11 +6,14 @@
   "bin": {
     "snyk-broker": "./cli/index.js"
   },
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
-    "test": "tap -R spec test/*.test.js",
+    "test": "tap test/**/*.test.js",
     "lint": "jscs cli/*.js lib/*.js -v",
-    "check-tests": "! grep 'test.only' test/*.test.js -n",
-    "cover": "tap test/*.test.js --cov --coverage-report=lcov"
+    "check-tests": "! grep 'test.only' test/**/*.test.js -n",
+    "cover": "tap test/**/*.test.js --cov --coverage-report=lcov"
   },
   "keywords": [],
   "author": "Remy Sharp",
@@ -23,10 +26,25 @@
     "tap-only": "0.0.5"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "camelcase": "^3.0.0",
+    "clarify": "^2.0.0",
     "clite": "^0.3.0",
+    "configstore": "^2.0.0",
     "debug": "^2.2.0",
-    "dotenv-safe": "^2.3.1",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "request": "^2.74.0",
+    "snyk-config": "^1.0.1",
     "socket.io": "^1.4.8",
     "socket.io-client": "^1.4.8"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Snyk/broker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Snyk/broker/issues"
+  },
+  "homepage": "https://github.com/Snyk/broker#readme"
 }

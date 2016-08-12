@@ -1,7 +1,7 @@
 module.exports = {
   commands: {
-    client: 'cli/client',
-    server: 'cli/server',
+    client: 'lib/client',
+    server: 'lib/server',
     _: 'cli/client',
   },
   options: ['env'],
