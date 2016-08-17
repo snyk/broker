@@ -41,8 +41,63 @@ The project's source code is written in full ES6 (with commonjs modules). This r
 
 ## Configuration
 
+The broker configuration is primarily driven through environment values which can also be stored inside of a local `.env` file. The `.env` file format is a simple key/value pair, i.e.:
+
+```text
+TOKEN=12345678
+# this is a comment
+HOST=foo-bar.com
+```
+
+Note that the configuration is case insensitive and will automatically be normalised to camelCase (as well as keeping your origin casing).
 
 
+
+### Client specific configuration
+
+- `BROKER_SERVER`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
+
+### HTTPS
+
+As the broker needs to run a local server to handle inbound forwarding requests, by default the broker will run using insecure HTTP (and will warn out to the console saying so).
+
+We recommend you run your broker over HTTPS (for clients you could use a self signed certificate, for servers we highly recommend fully signed). To do this, you need to point the broker to your `.key` and `.cert` file from the environment values, or the `.env` file:
+
+```text
+HTTPS_KEY=<path-to.key>
+HTTPS_CERT=<path-to.cert>
+```
+
+When the broker runs, it will use these files to start the local server over HTTPS.
+
+## The accept filter
+
+A JSON file pointed to in the `ACCEPT` environment value controls what can be accepted by the broker. Any requests that do not match the acceptance list will be rejected with a `400` status code.
+
+Below is the Snyk default accept filter, that allows inbound requests to a GitHub enterprise instance for two files only on all your repos, `package.json` and `.snyk`. The following is the contents of the `accept.json` file:
+
+```json
+[
+  {
+    "method": "GET",
+    "path": "/:name/:repo/:branch/package.json",
+    "origin": "https://${TOKEN}@${HOST}",
+  },
+  {
+    "method": "GET",
+    "path": "/:name/:repo/:branch/.snyk",
+    "origin": "https://${TOKEN}@${HOST}",
+  }
+]
+```
+
+Focusing on the first element in the array, there are two important tokens in the `path` property and the `origin` property.
+
+The first, `:param` is an expression that is matched against the URL being requested. This means that the broker server can request any value in the `:name`, `:repo` and `:branch` position.
+
+The second, `${PARAM}` is populated with the matching value in your configuration. This way you can keep your tokens or environment details private.
+
+The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
 
 ## License
 
