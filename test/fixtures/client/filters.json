@@ -1,0 +1,3 @@
+[
+  "GET /magic-patch/${token}/package.json",
+]
