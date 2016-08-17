@@ -1,3 +1,7 @@
 [
-  "GET /magic-patch/${token}/package.json",
+  {
+    "path": "/magic-path/${secret}/package.json",
+    "method": "POST",
+    "origin": "http://localhost:${port}"
+  }
 ]

@@ -1,13 +1,10 @@
-process.stdout.write('\033c');
-
+// process.stdout.write('\033c'); // clear the screen
 const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
-const sinon = require('sinon');
 const request = require('superagent');
 const webserver = require('../../lib/webserver');
 const App = require('../../lib');
-let spy = null;
 let p = 9876;
 
 function port() {
@@ -27,19 +24,20 @@ localServer.all('*', (req, res) => {
   res.send(false);
 });
 
-const server = localServer.listen(port());
+const localPort = port();
+const server = localServer.listen(localPort);
 
-// reset the spy on each test
+// // reset the spy on each test
 // tap.beforeEach(done => {
 //   spy = sinon.spy();
 //   done();
 // });
 
-// // close the server once we're done
-// tap.tearDown(() => server.close());
+// close the server once we're done
+tap.tearDown(() => server.close());
 
-// test('simple end to end proxying', t => {
-(function () {
+test('simple end to end proxying', t => {
+// (function () {
   /**
    * 1. start broker in server mode
    * 2. start broker in client mode and join (1)
@@ -52,28 +50,27 @@ const server = localServer.listen(port());
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
   const server = App(serverPort);
-  let clientId = null;
-
-  server.socket.io.on('identify', _ => client = _);
 
   process.chdir(path.resolve(root, '../fixtures/client'));
-  process.env.TOKEN = 'secret';
-  process.env.brokerServer = `http://localhost:${serverPort}`;
+  process.env.SECRET = 'secret';
+  process.env.PORT = localPort;
+  process.env.ACCEPT = 'filters.json';
+  process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
   const client = App(port());
 
-  client.socket.io.on('open', () => {
-    console.log('client is open and ready to talk');
-    // get the id of the only client
-    request.get(`http://localhost:${serverPort}/broker/REMY-TEST/magic-path/x/package.json`).end((err, res) => {
-      console.log('request came back', res.statusCode);
-      // Do something
+  // wait for the client to successfully connect to the server and identify itself
+  server.socket.io.on('connection', socket => {
+    socket.on('identify', id => {
+      // get the id of the only client
+      const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/package.json`;
+      request.post(url, {}).end((err, res) => {
+        t.equal(res.statusCode, 200, 'statusCode');
+        t.equal(res.body, true, 'body');
+
+        server.close();
+        client.close();
+        t.end();
+      });
     });
   });
-
-
-  // setTimeout(() => {
-  //   server.close();
-  //   client.close();
-  //   t.end();
-  // }, 50000);
-})()
+});

@@ -1,4 +1,12 @@
 [
-  "GET ${token}@${rawhost}/:name/:repo/master/package.json",
-  "GET ${token}@${rawhost}/:name/:repo/master/.snyk"
+  {
+    "method": "GET",
+    "path": "/:name/:repo/:branch/package.json",
+    "origin": "${token}@${rawhost}",
+  },
+  {
+    "method": "GET",
+    "path": "/:name/:repo/:branch/.snyk",
+    "origin": "${token}@${rawhost}",
+  }
 ]
