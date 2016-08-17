@@ -6,7 +6,7 @@
 
 The broker client for proxying requests between your private machines and the external broker system.
 
-The broker forwards requests to the client (this package) and responds. An example use is for communicating with an internal github enterprise server, but this is not intended as the exclusive use.
+The broker forwards requests to the client (this package) and responds. An example use is for communicating with an internal GitHub enterprise server, but this is not intended as the exclusive use.
 
 ## Usage
 
@@ -28,7 +28,29 @@ The project's source code is written in full ES6 (with commonjs modules). This r
 
 <!-- Anything that this project doesn't do? Any special knowledge required?  -->
 
+### Terminology
+
+* Broker: The application that will accept (or reject), transform and forward requests. This entire repository is the broker.
+* Server: server instance of the broker, this accepts HTTPS request and forwards them to the connected broker identified by an ID.
+* Client: the user's client instance of the broker that will accept and reject requests from the server and relay them back and forth to their own internal service.
+* Internal: the system that is private to the user that the broker will manage a specific subset of requests for.
+* Accept: a request that has been accepted based on user defined rules to be forwarded to their own internal systems.
+* Reject: all those requests that are not accepted (these will result in a `400` and a `Blocked` message).
+* Configuration: the user's private environment configuration that controls the accept list and important tokens that allow the broker to access their internal system.
+
+
+## Configuration
+
+
+
+
 ## License
 
 * [License: Apache License, Version 2.0](LICENSE)
 * [Contributing](.github/CONTRIBUTING.md)
+
+# TODO / Aims
+
+- [x] Proxy e2e socket (server -> client -> internal -> client -> server)
+- [ ] Can serve as both client and server
+- [ ] client can forward requests from internal to server

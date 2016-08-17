@@ -1,5 +1,3 @@
-const path = require('path');
-
-module.exports = function (args) {
+module.exports = function () {
   require('../lib/client');
 };

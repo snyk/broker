@@ -13,7 +13,6 @@
 
   Flags:
 
-    -V, --verbose ........ verbose logging
     -d, --debug .......... enable debug diagnosis output
     -v, --version ........ current version
     -h, --help ........... this help
@@ -24,6 +23,6 @@
 
   Example:
 
-    $ snyk-broker -c production.json
+    $ snyk-broker --env production.env
 
   For more details see http://github.com/snyk/broker
