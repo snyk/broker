@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "tap test/**/*.test.js",
-    "lint": "jscs cli/*.js lib/*.js -v",
+    "lint": "eslint cli/*.js lib/**/*.js",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n",
     "cover": "tap test/**/*.test.js --cov --coverage-report=lcov"
   },
@@ -22,6 +22,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "eslint": "^3.3.1",
     "tap": "^6.3.0",
     "tap-only": "0.0.5"
   },
