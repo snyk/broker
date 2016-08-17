@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "eslint": "^3.3.1",
+    "sinon": "^1.17.5",
     "tap": "^6.3.0",
     "tap-only": "0.0.5"
   },
@@ -34,12 +35,14 @@
     "configstore": "^2.0.0",
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
+    "engine.io": "^1.6.11",
+    "engine.io-client": "^1.6.11",
     "express": "^4.14.0",
     "path-to-regexp": "^1.5.3",
+    "primus": "^6.0.1",
+    "primus-emitter": "^3.1.1",
     "request": "^2.74.0",
-    "snyk-config": "^1.0.1",
-    "socket.io": "^1.4.8",
-    "socket.io-client": "^1.4.8"
+    "snyk-config": "^1.0.1"
   },
   "repository": {
     "type": "git",

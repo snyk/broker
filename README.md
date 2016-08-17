@@ -16,7 +16,9 @@ The broker forwards requests to the client (this package) and responds. An examp
 
 To run the broker in daemon mode, use the existing tools on your system like `systemd`. If you're unsure, we can recommend this post on [running as a service](https://certsimple.com/blog/deploy-node-on-linux#node-linux-service-systemd) on your machine.
 
-## How to test
+## Development & how to test
+
+The project's source code is written in full ES6 (with commonjs modules). This requires the source to be developed with node@6. However, during the release process, the code is transpiled to ES5 via babel and is released with node LTS in mind, node@4 and upwards.
 
 <!-- ideally the project will run all tests with `npm install; npm test`,    -->
 <!-- but if requires additional information to test, please include          -->

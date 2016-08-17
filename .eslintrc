@@ -16,6 +16,8 @@
         "SwitchCase": 1
       }
     ],
+    semi: ["error", "always"],
+    "no-unreachable": "error",
     "no-caller": 2,
     "quotes": [
       2,
