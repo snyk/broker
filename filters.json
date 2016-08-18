@@ -2,11 +2,11 @@
   {
     "method": "GET",
     "path": "/:name/:repo/:branch/package.json",
-    "origin": "${token}@${rawhost}",
+    "origin": "${token}@${rawhost}"
   },
   {
     "method": "GET",
     "path": "/:name/:repo/:branch/.snyk",
-    "origin": "${token}@${rawhost}",
+    "origin": "${token}@${rawhost}"
   }
 ]

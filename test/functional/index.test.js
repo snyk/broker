@@ -26,6 +26,7 @@ test('simple end to end proxying', t => {
   process.env.PORT = localPort;
   process.env.ACCEPT = 'filters.json';
   process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
+  process.env.ID = '12345';
   const client = App(port());
 
   // wait for the client to successfully connect to the server and identify itself
