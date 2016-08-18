@@ -52,7 +52,6 @@ HOST=foo-bar.com
 Note that the configuration is case insensitive and will automatically be normalised to camelCase (as well as keeping your origin casing).
 
 
-
 ### Client required configuration
 
 - `BROKER_ID`: this is your unique token to identify and register the client against the broker server.
@@ -104,7 +103,8 @@ The final result is that the broker will accept and forward `GET` requests to my
 
 - [x] Proxy e2e socket (server -> client -> internal -> client -> server)
 - [x] Can serve as both client and server
-- [ ] Client can forward requests from internal to server
+- [x] Client can forward requests from internal to server
+- [ ] Filter relays (i.e. whether the local webserver should accept the inbound request)
 
 # Notes
 
