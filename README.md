@@ -53,8 +53,9 @@ Note that the configuration is case insensitive and will automatically be normal
 
 
 
-### Client specific configuration
+### Client required configuration
 
+- `BROKER_ID`: this is your unique token to identify and register the client against the broker server.
 - `BROKER_SERVER`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
 
 ### HTTPS
@@ -109,3 +110,7 @@ The final result is that the broker will accept and forward `GET` requests to my
 - [x] Proxy e2e socket (server -> client -> internal -> client -> server)
 - [ ] Can serve as both client and server
 - [ ] client can forward requests from internal to server
+
+# Notes
+
+- Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)

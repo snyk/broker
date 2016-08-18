@@ -20,14 +20,14 @@ test('no filters broker', t => {
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
-  const server = App(serverPort);
+  const server = App({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
   process.env.PORT = localPort;
   process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
-  process.env.ID = '12345';
-  const client = App(port());
+  process.env.BROKER_ID = '12345';
+  const client = App({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.socket.io.on('connection', socket => {
