@@ -11,6 +11,10 @@ const localServer = webserver({
   http: true,
 });
 
+localServer.get('/service/:param', (req, res) => {
+  res.send(req.params.param);
+});
+
 localServer.post('/magic-path/secret/package.json', (req, res) => {
   res.send(true);
 });
@@ -30,4 +34,4 @@ module.exports = (tap) => {
     port,
     server,
   };
-}
+};

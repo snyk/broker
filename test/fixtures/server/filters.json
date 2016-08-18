@@ -1,0 +1,7 @@
+[
+  {
+    "path": "/service/:package",
+    "method": "GET",
+    "origin": "http://localhost:${port}"
+  }
+]

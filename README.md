@@ -110,6 +110,10 @@ The final result is that the broker will accept and forward `GET` requests to my
 
 - Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
 
+# Future ideas
+
+- [ ] Add validation middleware support to broker server (to validate client ids)
+
 ## License
 
 * [License: Apache License, Version 2.0](LICENSE)
