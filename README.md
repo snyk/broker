@@ -100,17 +100,17 @@ The second, `${PARAM}` is populated with the matching value in your configuratio
 
 The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
 
-## License
-
-* [License: Apache License, Version 2.0](LICENSE)
-* [Contributing](.github/CONTRIBUTING.md)
-
 # TODO / Aims
 
 - [x] Proxy e2e socket (server -> client -> internal -> client -> server)
-- [ ] Can serve as both client and server
-- [ ] client can forward requests from internal to server
+- [x] Can serve as both client and server
+- [ ] Client can forward requests from internal to server
 
 # Notes
 
 - Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
+
+## License
+
+* [License: Apache License, Version 2.0](LICENSE)
+* [Contributing](.github/CONTRIBUTING.md)
