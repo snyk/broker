@@ -1,6 +1,6 @@
 {
   "name": "snyk-broker",
-  "description": "[![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io)",
+  "description": "Broker for private communication between internal systems and outside public systems",
   "version": "1.0.0",
   "main": "lib/index.js",
   "bin": {
