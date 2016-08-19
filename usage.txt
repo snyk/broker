@@ -13,16 +13,16 @@
 
   Flags:
 
-    -d, --debug .......... enable debug diagnosis output
+    -l, --logs... ........ display logging
     -v, --version ........ current version
     -h, --help ........... this help
 
   Options:
 
-    --env FILE .... use FILE as the .env to configure the broker
+    --port PORT ... specify a local port for the broker to listen on
 
   Example:
 
-    $ snyk-broker --env production.env
+    $ snyk-broker --port 8000
 
   For more details see http://github.com/snyk/broker

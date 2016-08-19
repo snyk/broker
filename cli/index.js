@@ -2,15 +2,12 @@
 const clite = require('clite');
 clite({
   commands: {
-    client: 'lib/client',
-    server: 'lib/server',
-    _: 'cli/client',
+    _: 'cli/exec',
   },
-  options: ['env'],
-  alias: { e: 'env', d: 'dev', V: 'verbose' },
+  options: ['env', 'port'],
+  alias: { l: 'logs' },
   booleans: [
-    'verbose',
-    'dev',
+    'logs',
   ],
   help: 'usage.txt',
 });
