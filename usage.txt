@@ -1,28 +1,31 @@
 
   Usage:
 
-    $ snyk-broker [flags]
+    $ snyk-broker <command> [flags]
 
   This will run the Snyk broker that allows requests to be proxied to your
-  internal environment, using whitelist control to configure what types of
-  requests are allowed and to where.
+  internal environment, using controls to configure what types of
+  requests are allowed and to what end point.
 
   Commands:
     client .............. run the broker in client mode
     server .............. run the broker in server mode
+    init <project> ...... generate the client broker files required
+                          for a given project
 
   Flags:
 
-    -l, --logs... ........ display logging
+    -l, --logs ........... display logging
     -v, --version ........ current version
     -h, --help ........... this help
 
   Options:
 
-    --port PORT ... specify a local port for the broker to listen on
+    --port PORT .......... specify a local port for the broker to
+                           listen on, defaults to port 7341
 
   Example:
 
-    $ snyk-broker --port 8000
+    $ snyk-broker client --port 8000
 
-  For more details see http://github.com/snyk/broker
+  For more details on configuration see http://github.com/snyk/broker

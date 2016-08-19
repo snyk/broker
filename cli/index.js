@@ -2,6 +2,7 @@
 const clite = require('clite');
 clite({
   commands: {
+    init: 'cli/init',
     _: 'cli/exec',
   },
   options: ['env', 'port'],
