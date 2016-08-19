@@ -32,7 +32,7 @@ test('no filters broker', t => {
   const client = App({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
-  server.socket.io.on('connection', socket => {
+  server.io.on('connection', socket => {
     socket.on('identify', id => {
 
       t.plan(2);

@@ -7,8 +7,10 @@ function port() {
 }
 
 // this is our fake local and private web server
-const localServer = webserver({
+const localPort = port();
+const { app:localServer, server } = webserver({
   http: true,
+  port: localPort,
 });
 
 localServer.get('/service/:param', (req, res) => {
@@ -23,8 +25,6 @@ localServer.all('*', (req, res) => {
   res.send(false);
 });
 
-const localPort = port();
-const server = localServer.listen(localPort);
 
 module.exports = (tap) => {
   tap.tearDown(() => server.close());
