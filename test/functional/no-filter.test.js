@@ -27,6 +27,8 @@ test('no filters broker', t => {
   process.env.PORT = localPort;
   process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
+  // invalidate the config require
+  delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
   const client = App({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
