@@ -11,6 +11,7 @@
     "node": ">=4"
   },
   "scripts": {
+    "start": "node lib",
     "es5ify": "babel --ignore=node_modules . -d .",
     "test": "tap -R spec test/**/*.test.js --timeout 60",
     "lint": "eslint cli/*.js lib/**/*.js",
