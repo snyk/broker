@@ -7,7 +7,7 @@ module.exports = (args) => {
   }
 
   if (args.logs) {
-    require('debug').enable('broker');
+    require('debug').enable('broker*');
   }
 
   require(`${__dirname}/../lib/${command}`)(args);

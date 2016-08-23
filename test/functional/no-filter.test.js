@@ -3,7 +3,7 @@ const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
-const App = require('../../lib');
+const app = require('../../lib');
 
 const { port, localPort } = require('../utils')(tap);
 
@@ -20,16 +20,16 @@ test('no filters broker', t => {
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
-  const server = App({ port: serverPort });
+  const server = app.server({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
   process.env.PORT = localPort;
-  process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
+  process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
   // invalidate the config require
   delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
-  const client = App({ port: port() });
+  const client = app.client({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {

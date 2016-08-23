@@ -49,9 +49,4 @@ module.exports = (args) => {
 
     debug(`${project} initialisation complete`);
   });
-
-  // check if we have the directory
-
-
-  // then check if we
 };

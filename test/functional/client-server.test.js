@@ -3,7 +3,7 @@ const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
-const App = require('../../lib');
+const app = require('../../lib');
 const root = __dirname;
 
 const { port, localPort: servicePort } = require('../utils')(tap);
@@ -15,19 +15,19 @@ test('internal sends request through client', t => {
   process.env.ACCEPT = 'filters.json';
   process.env.PORT = servicePort;
   const serverPort = port();
-  const server = App({ port: serverPort });
+  const server = app.server({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
-  process.env.BROKER_SERVER = `http://localhost:${serverPort}`;
+  process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
   const localPort = port();
   // invalidate the config require
   delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
-  const client = App({ port: localPort });
+  const client = app.client({ port: localPort });
 
   // wait for the client to successfully connect to the server and identify itself
-  server.io.on('connection', socket => {
-    socket.on('identify', () => {
+  server.io.once('connection', socket => {
+    socket.once('identify', () => {
       t.plan(2);
 
       t.test('client can forward requests FROM internal service', t => {

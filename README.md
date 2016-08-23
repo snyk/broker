@@ -55,7 +55,7 @@ Note that the configuration is case insensitive and will automatically be normal
 ### Client required configuration
 
 - `BROKER_ID`: this is your unique token to identify and register the client against the broker server.
-- `BROKER_SERVER`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
+- `BROKER_URL`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
 
 ### HTTPS
 
