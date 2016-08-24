@@ -3,13 +3,13 @@
     "//": "used to determine the full dependency tree",
     "method": "GET",
     "path": "/:name/:repo/:branch/package.json",
-    "origin": "https://${TOKEN}@${HOST}"
+    "origin": "https://${TOKEN}@${RAWHOST}"
   },
   {
     "//": "used to check if there's any ignore rules or existing patches",
     "method": "GET",
     "path": "/:name/:repo/:branch/.snyk",
-    "origin": "https://${TOKEN}@${HOST}"
+    "origin": "https://${TOKEN}@${RAWHOST}"
   },
 
   {
@@ -58,6 +58,12 @@
     "//": "create the pull request",
     "method": "POST",
     "path": "/repos/:name/:repo/pulls",
+    "origin": "https://${TOKEN}@${HOST}"
+  },
+  {
+    "//": "update ref",
+    "method": "PATCH",
+    "path": "/repos/:name/:repo/git/refs/:sha",
     "origin": "https://${TOKEN}@${HOST}"
   }
 ]
