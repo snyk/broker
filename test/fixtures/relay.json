@@ -1,0 +1,17 @@
+[
+  {
+    "//": "used for pushing up webhooks from github",
+    "method": "POST",
+    "path": "/",
+    "valid": [
+      {
+        "path": "commits.*.modified.*",
+        "value": "package.json"
+      },
+      {
+        "path": "commits.*.modified.*",
+        "value": ".snyk"
+      }
+    ]
+  }
+]
