@@ -5,8 +5,16 @@
     "path": "/",
     "valid": [
       {
+        "path": "commits.*.added.*",
+        "value": "package.json"
+      },
+      {
         "path": "commits.*.modified.*",
         "value": "package.json"
+      },
+      {
+        "path": "commits.*.added.*",
+        "value": ".snyk"
       },
       {
         "path": "commits.*.modified.*",

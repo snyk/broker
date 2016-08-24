@@ -6,7 +6,7 @@ const request = require('request');
 const app = require('../../lib');
 const root = __dirname;
 
-const { port, localPort: servicePort } = require('../utils')(tap);
+const { port, localPort: servicePort, resetConfig } = require('../utils')(tap);
 
 test('internal sends request through client', t => {
 
@@ -14,16 +14,18 @@ test('internal sends request through client', t => {
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.ACCEPT = 'filters.json';
   process.env.PORT = servicePort;
+  process.env.BROKER_TYPE = 'server';
   const serverPort = port();
-  const server = app.server({ port: serverPort });
+  const server = app.main({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
+  process.env.BROKER_TYPE = 'client';
   const localPort = port();
   // invalidate the config require
-  delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
-  const client = app.client({ port: localPort });
+  resetConfig();
+  const client = app.main({ port: localPort });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
@@ -40,10 +42,12 @@ test('internal sends request through client', t => {
       });
 
       t.test('clean up', t => {
-        server.close();
         client.close();
-        t.ok('sockets closed');
-        t.end();
+        setTimeout(() => {
+          server.close();
+          t.ok('sockets closed');
+          t.end();
+        }, 100);
       });
     });
   });

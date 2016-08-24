@@ -19,7 +19,9 @@ test('simple end to end proxying', t => {
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
-  const server = app.server({ port: serverPort });
+  process.env.BROKER_TYPE = 'server';
+  process.env.ACCEPT = 'filters.json';
+  const server = app.main({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
@@ -27,9 +29,10 @@ test('simple end to end proxying', t => {
   process.env.ACCEPT = 'filters.json';
   process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
+  process.env.BROKER_TYPE = 'client';
   // invalidate the config require
   delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
-  const client = app.client({ port: port() });
+  const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
@@ -48,9 +51,9 @@ test('simple end to end proxying', t => {
 
       t.test('filtered request to broker', t => {
         const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/random.json`;
-        request({ url, 'method': 'post', json: true }, (err, res) => {
+        request({ url, 'method': 'post', json: true }, (err, res, body) => {
           t.equal(res.statusCode, 400, '400 statusCode');
-          t.match(res.body.toString(), /blocked/, '"blocked" body');
+          t.match(body, /blocked/, '"blocked" body: ' + body);
           t.end();
         });
       });
@@ -64,10 +67,12 @@ test('simple end to end proxying', t => {
       });
 
       t.test('clean up', t => {
-        server.close();
         client.close();
-        t.ok('sockets closed');
-        t.end();
+        setTimeout(() => {
+          server.close();
+          t.ok('sockets closed');
+          t.end();
+        }, 100);
       });
     });
   });

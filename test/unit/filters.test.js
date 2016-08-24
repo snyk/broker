@@ -2,7 +2,7 @@ const tap = require('tap').test;
 const Filters = require('../../lib/filters');
 
 tap('filter on body', t => {
-  const filter = Filters(__dirname + '/../fixtures/relay.json');
+  const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
   t.plan(8);
   t.ok('filters loaded');

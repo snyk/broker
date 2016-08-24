@@ -1,7 +1,24 @@
-[
-  {
-    "path": "/service/:package",
-    "method": "GET",
-    "origin": "http://localhost:${port}"
-  }
-]
+{
+  "private": [
+    {
+      "path": "/service/:package",
+      "method": "GET",
+      "origin": "http://localhost:${port}"
+    }
+  ],
+  "public": [
+    {
+      "path": "/service/:package",
+      "method": "GET",
+      "origin": "http://localhost:${port}"
+    },
+
+    {
+      "path": "/magic-path/${secret}/package.json",
+      "method": "POST",
+      "origin": "http://localhost:${port}"
+    }
+
+  ]
+
+}

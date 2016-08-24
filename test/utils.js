@@ -27,11 +27,16 @@ localServer.all('*', (req, res) => {
 
 
 module.exports = (tap) => {
-  tap.tearDown(() => server.close());
+  tap.tearDown(() => {
+    server.close();
+  });
 
   return {
     localPort,
     port,
     server,
+    resetConfig: () => {
+      delete require.cache[require.resolve(__dirname + '/../lib/config.js')];
+    }
   };
 };

@@ -20,7 +20,7 @@ test('no filters broker', t => {
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
-  const server = app.server({ port: serverPort });
+  const server = app.main({ port: serverPort });
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
@@ -29,12 +29,11 @@ test('no filters broker', t => {
   process.env.BROKER_ID = '12345';
   // invalidate the config require
   delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
-  const client = app.client({ port: port() });
+  const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', id => {
-
       t.plan(2);
 
       t.test('successfully broker with no filter should reject', t => {
@@ -47,13 +46,13 @@ test('no filters broker', t => {
       });
 
       t.test('clean up', t => {
-        server.close();
         client.close();
-        t.ok('sockets closed');
-        t.end();
+        setTimeout(() => {
+          server.close();
+          t.ok('sockets closed');
+          t.end();
+        }, 100);
       });
-
-
     });
   });
 

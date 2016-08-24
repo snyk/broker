@@ -99,12 +99,13 @@ The second, `${PARAM}` is populated with the matching value in your configuratio
 
 The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
 
-# TODO / Aims
+### private
 
-- [x] Proxy e2e socket (server -> client -> internal -> client -> server)
-- [x] Can serve as both client and server
-- [x] Client can forward requests from internal to server
-- [ ] Filter relays (i.e. whether the local webserver should accept the inbound request)
+Private filters are for requests that come from the broker server into your client and ask for resources inside your private infrastructure (such as a github enterprise instance).
+
+### public
+
+Public filters are for requests that a recieved on your broker client and are intended to be forwarded to the broker server (such as a github webhook).
 
 # Notes
 
