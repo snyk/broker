@@ -4,7 +4,7 @@ const Filters = require('../../lib/filters');
 tap('filter on body', t => {
   const filter = Filters(__dirname + '/../fixtures/relay.json');
 
-  t.plan(7);
+  t.plan(8);
   t.ok('filters loaded');
 
   filter({
@@ -56,6 +56,16 @@ tap('filter on body', t => {
   }, (error, res) => {
     t.equal(error.message, 'blocked', 'has been blocked');
     t.equal(res, undefined, 'no follow allowed');
+  });
+
+  filter({
+    url: '/',
+    method: 'POST',
+    body: {
+      commits: []
+    }
+  }, (error, res) => {
+    t.equal(error.message, 'blocked', 'has been blocked');
   });
 
 });
