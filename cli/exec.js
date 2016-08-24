@@ -6,9 +6,11 @@ module.exports = (args) => {
     throw new Error(`unknown command "${command}"`);
   }
 
-  if (args.logs) {
+  if (args.verbose) {
     require('debug').enable('broker*');
   }
 
-  require(`${__dirname}/../lib/${command}`)(args);
+  args.client = command === 'client';
+
+  require(`${__dirname}/../lib/index`).main(args);
 };
