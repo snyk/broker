@@ -1,4 +1,4 @@
-var test = require('tap-only');
+const test = require('tap-only');
 
 test('assign', t => {
   const u = {

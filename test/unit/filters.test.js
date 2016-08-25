@@ -64,7 +64,7 @@ tap('filter on body', t => {
     body: {
       commits: []
     }
-  }, (error, res) => {
+  }, error => {
     t.equal(error.message, 'blocked', 'has been blocked');
   });
 
