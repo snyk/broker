@@ -1,7 +1,7 @@
-const tap = require('tap').test;
+const test = require('tap').test;
 const Filters = require('../../lib/filters');
 
-tap('filter on body', t => {
+test('filter on body', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
   t.plan(8);
