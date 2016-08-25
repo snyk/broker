@@ -1,0 +1,11 @@
+version: v1.5.0
+ignore: {}
+patch:
+  'npm:negotiator:20160616':
+    - engine.io > accepts > negotiator:
+        patched: '2016-08-25T11:06:38.384Z'
+  'npm:ws:20160624':
+    - engine.io > ws:
+        patched: '2016-08-25T11:06:38.384Z'
+    - engine.io-client > ws:
+        patched: '2016-08-25T11:06:38.384Z'
