@@ -30,8 +30,6 @@ test('simple end to end proxying', t => {
   process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
   process.env.BROKER_TYPE = 'client';
-  // invalidate the config require
-  delete require.cache[require.resolve(__dirname + '/../../lib/config.js')];
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
@@ -53,7 +51,7 @@ test('simple end to end proxying', t => {
         const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/random.json`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.match(body, /blocked/, '"blocked" body: ' + body);
+          t.equal(body, 'blocked', '"blocked" body: ' + body);
           t.end();
         });
       });
