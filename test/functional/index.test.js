@@ -52,7 +52,7 @@ test('simple end to end proxying', t => {
       t.test('filtered request to broker', t => {
         const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/random.json`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
-          t.equal(res.statusCode, 400, '400 statusCode');
+          t.equal(res.statusCode, 401, '401 statusCode');
           t.match(body, /blocked/, '"blocked" body: ' + body);
           t.end();
         });

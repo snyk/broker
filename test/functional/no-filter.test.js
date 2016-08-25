@@ -39,7 +39,7 @@ test('no filters broker', t => {
       t.test('successfully broker with no filter should reject', t => {
         const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/package.json`;
         request({ url, method: 'post', json: true }, (err, res) => {
-          t.equal(res.statusCode, 400, '400 statusCode');
+          t.equal(res.statusCode, 401, '401 statusCode');
           t.notEqual(res.body, true, 'body not true');
           t.end();
         });
