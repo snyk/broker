@@ -12,5 +12,5 @@ module.exports = (args) => {
 
   args.client = command === 'client';
 
-  require(`${__dirname}/../lib/index`).main(args);
+  return require(`${__dirname}/../lib/index`).main(args);
 };
