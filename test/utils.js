@@ -34,9 +34,6 @@ module.exports = (tap) => {
   return {
     localPort,
     port,
-    server,
-    resetConfig: () => {
-      delete require.cache[require.resolve(__dirname + '/../lib/config.js')];
-    }
+    server
   };
 };
