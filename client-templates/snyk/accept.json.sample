@@ -4,8 +4,13 @@
       {
         "//": "used for pushing up webhooks from github",
         "method": "POST",
-        "path": "/",
+        "path": "/webhook/github",
         "valid": [
+          {
+            "//": "accept all pull request state changes (these don't have files in them)",
+            "path": "pull_request.state",
+            "value": "open"
+          },
           {
             "path": "commits.*.added.*",
             "value": "package.json"
@@ -28,71 +33,113 @@
   "private":
   [
     {
+      "//": "list the user's repos",
+      "method": "GET",
+      "path": "/user/repos",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "rate limit check",
+      "method": "GET",
+      "path": "/rate_limit",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "allow meta lookup on the api version",
+      "method": "GET",
+      "path": "/",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+      "method": "POST",
+      "path": "/repos/:user/:repo/hooks",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to create commit status messages",
+      "method": "POST",
+      "path": "/repos/:user/:repo/statuses/:sha",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "check if repo is public",
+      "method": "GET",
+      "path": "/:user/:repo",
+      "origin": "https://${TOKEN}@${GITHUB}"
+    },
+
+    {
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:branch/package.json",
-      "origin": "https://${TOKEN}@${HOST}/raw"
+      "origin": "https://${TOKEN}@${GITHUB}/raw"
     },
     {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/:name/:repo/:branch/.snyk",
-      "origin": "https://${TOKEN}@${HOST}/raw"
+      "origin": "https://${TOKEN}@${GITHUB}/raw"
     },
 
     {
       "//": "get details of the repo",
       "method": "GET",
       "path": "/repos/:name/:repo",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "get the details of an individual ref",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs/:ref",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "path": "/repos/:name/:repo/pulls",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "add the individual commit for the pull requests",
       "method": "POST",
       "path": "/repos/:name/:repo/git/commits",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "add commit data for new PR",
       "method": "POST",
       "path": "/repos/:name/:repo/git/refs",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "create the ref to add the commits to",
       "method": "POST",
       "path": "/repos/:name/:repo/git/trees",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "create the pull request",
       "method": "POST",
       "path": "/repos/:name/:repo/pulls",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
       "//": "update ref",
       "method": "PATCH",
       "path": "/repos/:name/:repo/git/refs/:sha",
-      "origin": "https://${TOKEN}@${HOST}"
+      "origin": "https://${TOKEN}@${GITHUB_API}"
     }
   ]
 }
