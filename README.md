@@ -16,17 +16,106 @@ The broker forwards requests to the client (this package) and responds. An examp
 
 To run the broker in daemon mode, use the existing tools on your system like `systemd`. If you're unsure, we can recommend this post on [running as a service](https://certsimple.com/blog/deploy-node-on-linux#node-linux-service-systemd) on your machine.
 
+### Installation
+
+The broker as a CLI utility via npm:
+
+```bash
+$ npm install -g snyk-broker
+```
+
+You can also use it as a dependency in a `package.json`. Details on this later.
+
+### Running the client
+
+Running the client will require a unique `BROKER_ID` and a `BROKER_URL` pointing to a broker server. Once you have these, add them to your environment and run the broker in client mode.
+
+However, you may want to use default settings for the `ACCEPT` rules and your environment. This can be first generated using the `init <name>` command:
+
+```bash
+$ broker init snyk --verbose
+```
+
+This will generate two new files: `accept.json` and `.env`. If the files already exist in the current working directory, the `init` command will fail and not overwrite your local copies.
+
+Once you have these files, add your `BROKER_ID` and other details to the `.env` file, then run the broker in client mode from the same directory as the `accept.json` and `.env`:
+
+```bash
+$ broker --verbose
+  broker:client accept.json +0ms
+  broker:client loading rules from accept.json +2ms
+  broker:client running +1ms
+  broker:client connecting to https://broker.snyk.io +26ms
+  broker:client loading 17 new rules +1ms
+  broker:client new filter: get /user/repos +0ms
+  broker:client new filter: get /rate_limit +1ms
+  broker:client new filter: get / +0ms
+  broker:client new filter: post /repos/:user/:repo/hooks +0ms
+  broker:client new filter: post /repos/:user/:repo/statuses/:sha +0ms
+  broker:client new filter: get /:user/:repo +1ms
+  broker:client new filter: get /:name/:repo/:branch/package.json +0ms
+  broker:client new filter: get /:name/:repo/:branch/.snyk +0ms
+  broker:client new filter: get /repos/:name/:repo +0ms
+  broker:client new filter: get /repos/:name/:repo/git/refs +0ms
+  broker:client new filter: get /repos/:name/:repo/git/refs/:ref +0ms
+  broker:client new filter: get /repos/:name/:repo/pulls +0ms
+  broker:client new filter: post /repos/:name/:repo/git/commits +0ms
+  broker:client new filter: post /repos/:name/:repo/git/refs +0ms
+  broker:client new filter: post /repos/:name/:repo/git/trees +0ms
+  broker:client new filter: post /repos/:name/:repo/pulls +0ms
+  broker:client new filter: patch /repos/:name/:repo/git/refs/:sha +1ms
+  broker local server listening @ 7341 +101ms
+  broker:client loading 1 new rules +2ms
+  broker:client new filter: post /webhook/github +1ms
+  broker:client identifying as XXXX-XXXX-XXXX-XXXX-XXXX on https://broker.snyk.io +93ms
+```
+
+It will identify itself against the server and will be now ready to broker inbound and outbound requests that validate fully against the accept rules.
+
+### Running the server
+
+As the server will typically be deployed, it's recommended to use the broker inside of a `package.json`, as per:
+
+```json
+{
+  "name": "broker server",
+  "private": true,
+  "scripts": {
+    "start": "ACCEPT=accept.json broker server --verbose"
+  },
+  "engines": {
+    "node": "6"
+  },
+  "dependencies": {
+    "snyk-broker": "^2.1.1"
+  }
+}
+```
+
+You will also need to include the right environment values (though by default, the server only requires `ACCEPT`), and the `accept.json` file.
+
+The `private` rules should be determined by what you want to allow through the server, but the `public` rules will generally need to be the following:
+
+```json
+  "public": [{
+    "//": "send any type of request to our connected clients",
+    "method": "any",
+    "path": "/*"
+  }]
+```
+
+This `public` rule will ensure everything is forwarded to your clients, and will allow your client to handle blocking out messages.
+
 ## Development & how to test
 
 The project's source code is written in full ES6 (with commonjs modules). This requires the source to be developed with node@6. However, during the release process, the code is transpiled to ES5 via babel and is released with node LTS in mind, node@4 and upwards.
 
-<!-- ideally the project will run all tests with `npm install; npm test`,    -->
-<!-- but if requires additional information to test, please include          -->
-<!-- directions here, bearing in mind a clean starting machine.              -->
+To test, first clone the project, and in the project directory:
 
-## Notes and caveats
-
-<!-- Anything that this project doesn't do? Any special knowledge required?  -->
+```bash
+$ npm install
+$ npm test
+```
 
 ### Terminology
 
@@ -35,9 +124,8 @@ The project's source code is written in full ES6 (with commonjs modules). This r
 * Client: the user's client instance of the broker that will accept and reject requests from the server and relay them back and forth to their own internal service.
 * Internal: the system that is private to the user that the broker will manage a specific subset of requests for.
 * Accept: a request that has been accepted based on user defined rules to be forwarded to their own internal systems.
-* Reject: all those requests that are not accepted (these will result in a `400` and a `Blocked` message).
+* Reject: all those requests that are not accepted (these will result in a `401` and a `Blocked` message).
 * Configuration: the user's private environment configuration that controls the accept list and important tokens that allow the broker to access their internal system.
-
 
 ## Configuration
 
@@ -50,7 +138,6 @@ HOST=foo-bar.com
 ```
 
 Note that the configuration is case insensitive and will automatically be normalised to camelCase (as well as keeping your origin casing).
-
 
 ### Client required configuration
 
@@ -77,18 +164,26 @@ A JSON file pointed to in the `ACCEPT` environment value controls what can be ac
 Below is the Snyk default accept filter, that allows inbound requests to a GitHub enterprise instance for two files only on all your repos, `package.json` and `.snyk`. The following is the contents of the `accept.json` file:
 
 ```json
-[
-  {
-    "method": "GET",
-    "path": "/:name/:repo/:branch/package.json",
-    "origin": "https://${TOKEN}@${HOST}",
-  },
-  {
-    "method": "GET",
-    "path": "/:name/:repo/:branch/.snyk",
-    "origin": "https://${TOKEN}@${HOST}",
-  }
-]
+{
+  "private: [
+    {
+      "method": "GET",
+      "path": "/:name/:repo/:branch/package.json",
+      "origin": "https://${TOKEN}@${HOST}",
+    },
+    {
+      "method": "GET",
+      "path": "/:name/:repo/:branch/.snyk",
+      "origin": "https://${TOKEN}@${HOST}",
+    }
+  ],
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ]
+}
 ```
 
 Focusing on the first element in the array, there are two important tokens in the `path` property and the `origin` property.
@@ -99,21 +194,19 @@ The second, `${PARAM}` is populated with the matching value in your configuratio
 
 The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
 
-### private
+### Private rules
 
 Private filters are for requests that come from the broker server into your client and ask for resources inside your private infrastructure (such as a github enterprise instance).
 
-### public
+### Public rules
 
 Public filters are for requests that a recieved on your broker client and are intended to be forwarded to the broker server (such as a github webhook).
 
-# Notes
+## Notes
 
+- The broker requires at least node@4.latest
 - Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
-
-# Future ideas
-
-- [ ] Add validation middleware support to broker server (to validate client ids)
+- If your private service is using a self signed https certificate, you will need to add the following environment value when runnning the client: `NODE_TLS_REJECT_UNAUTHORIZED=0`
 
 ## License
 
