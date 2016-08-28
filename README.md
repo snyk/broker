@@ -212,3 +212,5 @@ Public filters are for requests that a recieved on your broker client and are in
 
 * [License: Apache License, Version 2.0](LICENSE)
 * [Contributing](.github/CONTRIBUTING.md)
+* [Security](.github/SECURITY.md)
+
