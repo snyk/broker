@@ -165,7 +165,7 @@ Below is the Snyk default accept filter, that allows inbound requests to a GitHu
 
 ```json
 {
-  "private: [
+  "private": [
     {
       "method": "GET",
       "path": "/:name/:repo/:branch/package.json",
