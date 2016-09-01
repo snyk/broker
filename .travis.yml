@@ -13,6 +13,12 @@ before_script:
   - npm prune
 after_success:
   - npm run semantic-release
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: ./scripts/travis_after_success.sh
+  on:
+    all_branches: true
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
