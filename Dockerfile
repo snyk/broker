@@ -18,8 +18,8 @@ ADD . .
 
 # Configure the port
 ####################
-ENV PORT=5000
-EXPOSE 5000
+ENV PORT=7341
+EXPOSE 7341
 
 # Start the Snyk server
 #######################
