@@ -46,8 +46,6 @@ test('client healthcheck', t => {
   process.env.SECRET = 'secret';
   process.env.PORT = localPort;
   process.env.ACCEPT = 'filters.json';
-  // process.env.BROKER_URL = `http://localhost:${serverPort}`;
-  // process.env.BROKER_ID = '12345';
   process.env.BROKER_TYPE = 'client';
   const client = app.main({ port: port() });
 
