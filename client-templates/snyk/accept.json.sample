@@ -94,6 +94,12 @@
       "origin": "https://${TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "get the details of the latest commit to determine its SHA",
+      "method": "GET",
+      "path": "/repos/:name/:repo/commits/HEAD",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs",
