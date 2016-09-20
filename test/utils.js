@@ -7,21 +7,24 @@ function port() {
 }
 
 // this is our fake local and private web server
-const localPort = port();
-const { app:localServer, server } = webserver({
-  http: true,
-  port: localPort,
+const echoServerPort = port();
+const { app: echoServer, server } = webserver({
+  port: echoServerPort,
 });
 
-localServer.get('/service/:param', (req, res) => {
+echoServer.get('/echo-param/:param', (req, res) => {
   res.send(req.params.param);
 });
 
-localServer.post('/magic-path/secret/package.json', (req, res) => {
-  res.send(true);
+echoServer.post('/echo-body/:param?', (req, res) => {
+  const contentType = req.get('Content-Type');
+  if (contentType) {
+    res.type(contentType);
+  }
+  res.send(req.body);
 });
 
-localServer.all('*', (req, res) => {
+echoServer.all('*', (req, res) => {
   res.send(false);
 });
 
@@ -32,7 +35,7 @@ module.exports = (tap) => {
   });
 
   return {
-    localPort,
+    echoServerPort,
     port,
     server
   };

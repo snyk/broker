@@ -1,24 +1,27 @@
 {
   "private": [
     {
-      "path": "/service/:package",
+      "path": "/echo-param/${param}",
       "method": "GET",
-      "origin": "http://localhost:${port}"
+      "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-body",
+      "method": "POST",
+      "origin": "http://localhost:${originPort}"
     }
   ],
   "public": [
     {
-      "path": "/service/:package",
-      "method": "GET",
-      "origin": "http://localhost:${port}"
+      "path": "/echo-param/${param}",
+      "method": "GET"
     },
 
     {
-      "path": "/magic-path/${secret}/package.json",
-      "method": "POST",
-      "origin": "http://localhost:${port}"
+      "path": "/echo-body",
+      "method": "POST"
     }
 
   ]
-
 }

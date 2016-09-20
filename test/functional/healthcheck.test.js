@@ -3,61 +3,66 @@ const test = require('tap-only');
 const path = require('path');
 const request = require('request');
 const app = require('../../lib');
+const root = __dirname;
 
-const { port, localPort } = require('../utils')(tap);
+const { port } = require('../utils')(tap);
 
-test('server healthcheck', t => {
+test('proxy requests originating from behind the broker client', t => {
   /**
    * 1. start broker in server mode
-   * 2. send healthcheck request to server, assert HTTP 200 and `{ ok: true }`
+   * 2. start broker in client mode and join (1)
+   * 3. check /healthcheck on client and server
    */
 
-  const root = __dirname;
+  process.env.ACCEPT = 'filters.json';
 
   process.chdir(path.resolve(root, '../fixtures/server'));
-  const serverPort = port();
   process.env.BROKER_TYPE = 'server';
-  process.env.ACCEPT = 'filters.json';
+  const serverPort = port();
   const server = app.main({ port: serverPort });
 
-  const url = `http://localhost:${serverPort}/healthcheck`;
-  request({url, json: true }, (err, res) => {
-    if (err) {
-      t.fail(err);
-    }
-
-    t.equal(res.statusCode, 200, '200 statusCode');
-    t.equal(res.body['ok'], true, '{ ok: true } in body');
-    server.close();
-    t.end();
-  });
-});
-
-test('client healthcheck', t => {
-  /**
-   * 1. start broker in client mode
-   * 2. send healthcheck request to server, assert HTTP 200 and `{ ok: true }`
-   */
-
-  const root = __dirname;
-
   process.chdir(path.resolve(root, '../fixtures/client'));
-  const serverPort = port();
-  process.env.SECRET = 'secret';
-  process.env.PORT = localPort;
-  process.env.ACCEPT = 'filters.json';
   process.env.BROKER_TYPE = 'client';
-  const client = app.main({ port: port() });
+  process.env.BROKER_ID = '12345';
+  process.env.BROKER_URL = `http://localhost:${serverPort}`;
+  const clientPort = port();
+  const client = app.main({ port: clientPort });
 
-  const url = `http://localhost:${localPort}/healthcheck`;
-  request({url, json: true }, (err, res) => {
-    if (err) {
-      t.fail(err);
-    }
+  t.plan(3);
 
-    t.equal(res.statusCode, 200, '200 statusCode');
-    t.equal(res.body['ok'], true, '{ ok: true } in body');
-    client.close();
-    t.end();
+  t.test('server healthcheck', t => {
+    const url = `http://localhost:${serverPort}/healthcheck`;
+    request({url, json: true }, (err, res) => {
+      if (err) { return t.threw(err); }
+
+      t.equal(res.statusCode, 200, '200 statusCode');
+      t.equal(res.body['ok'], true, '{ ok: true } in body');
+      t.end();
+    });
+  });
+
+  // wait for the client to successfully connect to the server and identify itself
+  server.io.once('connection', socket => {
+    socket.once('identify', () => {
+      t.test('client healthcheck', t => {
+        const url = `http://localhost:${clientPort}/healthcheck`;
+        request({url, json: true }, (err, res) => {
+          if (err) { return t.threw(err); }
+
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body['ok'], true, '{ ok: true } in body');
+          t.end();
+        });
+      });
+
+      t.test('clean up', t => {
+        client.close();
+        setTimeout(() => {
+          server.close();
+          t.ok('sockets closed');
+          t.end();
+        }, 100);
+      });
+    });
   });
 });
