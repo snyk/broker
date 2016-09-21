@@ -10,6 +10,19 @@
       "path": "/echo-body",
       "method": "POST",
       "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-body/filtered",
+      "method": "POST",
+      "origin": "http://localhost:${originPort}",
+      "valid": [
+        {
+          "//": "accept requests with 'proxy.*: please' in their body",
+          "path": "proxy.*",
+          "value": "please"
+        }
+      ]
     }
   ],
   "public": [
@@ -21,7 +34,18 @@
     {
       "path": "/echo-body",
       "method": "POST"
-    }
+    },
 
+    {
+      "path": "/echo-body/filtered",
+      "method": "POST",
+      "valid": [
+        {
+          "//": "accept requests with 'proxy.*: please' in their body",
+          "path": "proxy.*",
+          "value": "please"
+        }
+      ]
+    }
   ]
 }

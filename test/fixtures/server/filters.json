@@ -7,19 +7,19 @@
     },
 
     {
-      "path": "/echo-body",
+      "path": "/echo-body/:param?",
       "method": "POST",
       "origin": "http://localhost:${originPort}"
     }
   ],
   "public": [
     {
-      "path": "/echo-param/${param}",
+      "path": "/*",
       "method": "GET"
     },
 
     {
-      "path": "/echo-body",
+      "path": "/*",
       "method": "POST"
     }
 

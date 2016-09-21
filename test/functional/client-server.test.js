@@ -36,7 +36,7 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', () => {
-      t.plan(4);
+      t.plan(6);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -57,9 +57,32 @@ test('proxy requests originating from behind the broker client', t => {
         });
       });
 
-      t.test('block invalid request', t => {
+      // the filtering happens in the broker client
+      t.test('block request for non-whitelisted url', t => {
         const url = `http://localhost:${clientPort}/not-allowed`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('allow request for valid url with valid body', t => {
+        const url = `http://localhost:${clientPort}/echo-body/filtered`;
+        const body = { proxy: { me: 'please' }};
+        request({ url, method: 'post', json: true, body }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(res.body, body, 'body brokered');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('block request for valid url with invalid body', t => {
+        const url = `http://localhost:${clientPort}/echo-body/filtered`;
+        const body = { proxy: { me: 'now!' }};
+        request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body, 'blocked', '"blocked" body: ' + body);
           t.end();
