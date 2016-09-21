@@ -27,18 +27,20 @@ test('relay swaps values found in BROKER_VAR_SUB', t => {
     url: '/*'
   }], config);
 
+  const body = {
+    BROKER_VAR_SUB: ['url'],
+    url: '${HOST}:${PORT}/webhook'
+  };
+
   route({
     url: '/',
     method: 'POST',
-    body: {
-      BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook'
-    },
+    body: Buffer.from(JSON.stringify(body)),
     headers: {},
   }, () => {
     t.equal(spy.callCount, 1, 'request placed');
     const arg = spy.args[0][0];
-    t.equal(arg.body.url, `${config.HOST}:${config.PORT}/webhook`);
+    t.equal(JSON.parse(arg.body).url, `${config.HOST}:${config.PORT}/webhook`);
     t.end();
   });
 
