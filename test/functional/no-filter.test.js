@@ -5,7 +5,7 @@ const path = require('path');
 const request = require('request');
 const app = require('../../lib');
 
-const { port, localPort } = require('../utils')(tap);
+const { port, echoServerPort } = require('../utils')(tap);
 
 test('no filters broker', t => {
   /**
@@ -16,7 +16,7 @@ test('no filters broker', t => {
    */
 
   const root = __dirname;
-  process.env.ACCEPT = '';
+  process.env.ACCEPT = ''; // no filters provided!
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   const serverPort = port();
@@ -24,7 +24,7 @@ test('no filters broker', t => {
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
-  process.env.PORT = localPort;
+  process.env.ORIGIN_PORT = echoServerPort;
   process.env.BROKER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
   const client = app.main({ port: port() });
@@ -35,10 +35,11 @@ test('no filters broker', t => {
       t.plan(2);
 
       t.test('successfully broker with no filter should reject', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/magic-path/x/package.json`;
+        const url = `http://localhost:${serverPort}/broker/${id}/echo-body`;
+        const body = { test: 'body' };
         request({ url, method: 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.notEqual(res.body, true, 'body not true');
+          t.notSame(res.body, body, 'body not echoed');
           t.end();
         });
       });

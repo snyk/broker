@@ -45,6 +45,7 @@
     "clite": "^0.3.0",
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
+    "ejson": "^2.1.2",
     "engine.io": "^1.6.11",
     "engine.io-client": "^1.6.11",
     "express": "^4.14.0",

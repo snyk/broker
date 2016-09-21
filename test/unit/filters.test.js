@@ -1,6 +1,8 @@
 const test = require('tap').test;
 const Filters = require('../../lib/filters');
 
+const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
+
 test('filter on body', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
@@ -10,13 +12,13 @@ test('filter on body', t => {
   filter({
     url: '/',
     method: 'POST',
-    body: {
+    body: jsonBuffer({
       commits: [
         {
           modified: ['package.json', 'file1.txt']
         }
       ]
-    }
+    })
   }, (error, res) => {
     t.equal(error, null, 'no error');
     t.equal(res, '/', 'allows the path request');
@@ -25,7 +27,7 @@ test('filter on body', t => {
   filter({
     url: '/',
     method: 'POST',
-    body: {
+    body: jsonBuffer({
       commits: [
         {
           modified: ['file2.txt']
@@ -34,7 +36,7 @@ test('filter on body', t => {
           modified: ['.snyk', 'file1.txt']
         }
       ]
-    }
+    })
   }, (error, res) => {
     t.equal(error, null, 'no error');
     t.equal(res, '/', 'allows the path request');
@@ -43,7 +45,7 @@ test('filter on body', t => {
   filter({
     url: '/',
     method: 'POST',
-    body: {
+    body: jsonBuffer({
       commits: [
         {
           modified: ['file2.txt']
@@ -52,7 +54,7 @@ test('filter on body', t => {
           modified: ['file3.txt', 'file1.txt']
         }
       ]
-    }
+    })
   }, (error, res) => {
     t.equal(error.message, 'blocked', 'has been blocked');
     t.equal(res, undefined, 'no follow allowed');
@@ -61,9 +63,9 @@ test('filter on body', t => {
   filter({
     url: '/',
     method: 'POST',
-    body: {
+    body: jsonBuffer({
       commits: []
-    }
+    })
   }, error => {
     t.equal(error.message, 'blocked', 'has been blocked');
   });
