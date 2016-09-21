@@ -36,7 +36,7 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', () => {
-      t.plan(6);
+      t.plan(7);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -44,6 +44,21 @@ test('proxy requests originating from behind the broker client', t => {
         request({ url, method: 'post', json: true, body }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
           t.same(res.body, body, 'body brokered');
+          t.end();
+        });
+      });
+
+      t.test('successfully broker exact bytes of POST body', t => {
+        const url = `http://localhost:${clientPort}/echo-body`;
+        // stringify the JSON unusually to ensure an unusual exact body
+        const body = Buffer.from(
+          JSON.stringify({ some: { example: 'json' }}, null, 5)
+        );
+        const headers = { 'Content-Type': 'application/json' };
+        request({ url, method: 'post', headers, body }, (err, res) => {
+          const responseBody = Buffer.from(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(responseBody, body, 'body brokered exactly');
           t.end();
         });
       });
