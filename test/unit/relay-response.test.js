@@ -10,8 +10,10 @@ tap.beforeEach(done => {
 });
 
 test('relay swaps values found in BROKER_VAR_SUB', t => {
-  process.env.HOST = 'localhost';
-  process.env.PORT = '8001';
+  const config = {
+    HOST: 'localhost',
+    PORT: '8001',
+  };
 
   const relay = proxyquire('../../lib/relay', {
     'request': (options, fn) => {
@@ -23,7 +25,7 @@ test('relay swaps values found in BROKER_VAR_SUB', t => {
   const route = relay([{
     method: 'any',
     url: '/*'
-  }]);
+  }], config);
 
   route({
     url: '/',
@@ -36,7 +38,7 @@ test('relay swaps values found in BROKER_VAR_SUB', t => {
   }, () => {
     t.equal(spy.callCount, 1, 'request placed');
     const arg = spy.args[0][0];
-    t.equal(arg.body.url, `${process.env.HOST}:${process.env.PORT}/webhook`);
+    t.equal(arg.body.url, `${config.HOST}:${config.PORT}/webhook`);
     t.end();
   });
 
