@@ -61,6 +61,13 @@
     },
 
     {
+      "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+      "method": "DELETE",
+      "path": "/repos/:owner/:repo/hooks/:id",
+      "origin": "https://${TOKEN}@${GITHUB_API}"
+    },
+
+    {
       "//": "used to create commit status messages",
       "method": "POST",
       "path": "/repos/:user/:repo/statuses/:sha",
