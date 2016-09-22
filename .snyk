@@ -1,11 +1,15 @@
 version: v1.5.2
-ignore: {}
+ignore:
+  'npm:ws:20160624':
+    - engine.io-client > ws:
+        reason: >-
+          The ws@1.1.1-style behaviour introduced by the patch is incompatible
+          with transferring NodeJS buffers over engine.io transports
+        expires: '2016-10-22T14:53:52.379Z'
 patch:
   'npm:negotiator:20160616':
     - engine.io > accepts > negotiator:
-        patched: '2016-08-31T09:40:29.491Z'
+        patched: '2016-09-22T14:52:24.968Z'
   'npm:ws:20160624':
-    - engine.io-client > ws:
-        patched: '2016-08-31T09:40:29.491Z'
     - engine.io > ws:
-        patched: '2016-08-31T09:40:29.491Z'
+        patched: '2016-09-22T14:52:24.968Z'
