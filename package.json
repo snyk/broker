@@ -16,9 +16,7 @@
     "lint": "eslint cli/*.js lib/**/*.js",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n",
     "cover": "tap test/**/*.test.js --timeout 60 --cov --coverage-report=lcov",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "keywords": [],
   "author": "Remy Sharp",
@@ -48,8 +46,8 @@
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
     "ejson": "^2.1.2",
-    "engine.io": "^1.6.11",
-    "engine.io-client": "^1.6.11",
+    "engine.io": "Snyk/engine.io#1.6.11-patched",
+    "engine.io-client": "Snyk/engine.io-client#1.6.11-patched",
     "express": "^4.14.0",
     "path-to-regexp": "^1.5.3",
     "primus": "^6.0.1",
