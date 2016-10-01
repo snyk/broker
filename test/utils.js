@@ -24,6 +24,10 @@ echoServer.post('/echo-body/:param?', (req, res) => {
   res.send(req.body);
 });
 
+echoServer.post('/echo-headers', (req, res) => {
+  res.json(req.headers);
+});
+
 echoServer.all('*', (req, res) => {
   res.send(false);
 });

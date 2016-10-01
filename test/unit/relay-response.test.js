@@ -10,6 +10,8 @@ tap.beforeEach(done => {
 });
 
 test('relay swaps values found in BROKER_VAR_SUB', t => {
+  const brokerId = 'test-broker';
+
   const config = {
     HOST: 'localhost',
     PORT: '8001',
@@ -25,7 +27,7 @@ test('relay swaps values found in BROKER_VAR_SUB', t => {
   const route = relay([{
     method: 'any',
     url: '/*'
-  }], config);
+  }], config)(brokerId);
 
   const body = {
     BROKER_VAR_SUB: ['url'],
