@@ -10,7 +10,14 @@
       "path": "/echo-body/:param?",
       "method": "POST",
       "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-headers",
+      "method": "POST",
+      "origin": "http://localhost:${originPort}"
     }
+
   ],
   "public": [
     {

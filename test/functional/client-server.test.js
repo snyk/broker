@@ -35,8 +35,8 @@ test('proxy requests originating from behind the broker client', t => {
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
-    socket.once('identify', () => {
-      t.plan(7);
+    socket.once('identify', (id) => {
+      t.plan(8);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -100,6 +100,16 @@ test('proxy requests originating from behind the broker client', t => {
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.end();
+        });
+      });
+
+      t.test('broker ID is included in headers from server to private', t => {
+        const url = `http://localhost:${clientPort}/echo-headers`;
+        request({ url, method: 'post' }, (err, res) => {
+          const responseBody = JSON.parse(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(responseBody['x-broker-id'], id, 'X-Broker-Id header sent');
           t.end();
         });
       });

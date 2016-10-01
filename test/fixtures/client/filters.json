@@ -23,7 +23,14 @@
           "value": "please"
         }
       ]
+    },
+
+    {
+      "path": "/echo-headers",
+      "method": "POST",
+      "origin": "http://localhost:${originPort}"
     }
+
   ],
   "public": [
     {
@@ -46,6 +53,12 @@
           "value": "please"
         }
       ]
+    },
+
+    {
+      "path": "/echo-headers",
+      "method": "POST"
     }
+
   ]
 }
