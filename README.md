@@ -30,7 +30,7 @@ You can also use it as a dependency in a `package.json`. Details on this later.
 
 ### Running the client
 
-Running the client will require a unique `BROKER_ID` and a `BROKER_URL` pointing to a broker server. Once you have these, add them to your environment and run the broker in client mode.
+Running the client will require a unique `BROKER_ID` and a `BROKER_SERVER_URL` pointing to a broker server. Once you have these, add them to your environment and run the broker in client mode.
 
 However, you may want to use default settings for the `ACCEPT` rules and your environment. This can be first generated using the `init <name>` command:
 
@@ -144,7 +144,7 @@ Note that the configuration is case insensitive and will automatically be normal
 ### Client required configuration
 
 - `BROKER_ID`: this is your unique token to identify and register the client against the broker server.
-- `BROKER_URL`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
+- `BROKER_SERVER_URL`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
 
 ### HTTPS
 

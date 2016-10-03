@@ -28,7 +28,7 @@ test('proxy requests originating from behind the broker server', t => {
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
   process.env.BROKER_ID = '12345';
-  process.env.BROKER_URL = `http://localhost:${serverPort}`;
+  process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   process.env.ORIGIN_PORT = echoServerPort;
   const client = app.main({ port: port() });
 

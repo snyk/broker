@@ -16,6 +16,6 @@ test('cli throws when missing broker server', t => {
     cli({
       _: ['client']
     });
-  }, 'BROKER_URL');
+  }, 'BROKER_SERVER_URL');
   t.end();
 });

@@ -25,7 +25,7 @@ test('no filters broker', t => {
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.SECRET = 'secret';
   process.env.ORIGIN_PORT = echoServerPort;
-  process.env.BROKER_URL = `http://localhost:${serverPort}`;
+  process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   process.env.BROKER_ID = '12345';
   const client = app.main({ port: port() });
 
