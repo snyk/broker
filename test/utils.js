@@ -28,6 +28,10 @@ echoServer.post('/echo-headers', (req, res) => {
   res.json(req.headers);
 });
 
+echoServer.get('/echo-query', (req, res) => {
+  res.json(req.query);
+});
+
 echoServer.all('*', (req, res) => {
   res.send(false);
 });

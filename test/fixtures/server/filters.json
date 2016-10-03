@@ -16,6 +16,12 @@
       "path": "/echo-headers",
       "method": "POST",
       "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-query",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
     }
 
   ],
