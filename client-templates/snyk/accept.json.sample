@@ -85,13 +85,13 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:branch/package.json",
-      "origin": "https://${TOKEN}@${GITHUB}/raw"
+      "origin": "https://${TOKEN}@${GITHUB_RAW}"
     },
     {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/:name/:repo/:branch/.snyk",
-      "origin": "https://${TOKEN}@${GITHUB}/raw"
+      "origin": "https://${TOKEN}@${GITHUB_RAW}"
     },
 
     {
