@@ -36,7 +36,7 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', (id) => {
-      t.plan(8);
+      t.plan(9);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -110,6 +110,17 @@ test('proxy requests originating from behind the broker client', t => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(responseBody['x-broker-id'], id, 'X-Broker-Id header sent');
+          t.end();
+        });
+      });
+
+      t.test('querystring parameters are brokered', t => {
+        const url = `http://localhost:${clientPort}/echo-query?shape=square&colour=yellow`;
+        request({ url, method: 'get' }, (err, res) => {
+          const responseBody = JSON.parse(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(responseBody, {shape: 'square', colour: 'yellow'},
+            'querystring brokered');
           t.end();
         });
       });
