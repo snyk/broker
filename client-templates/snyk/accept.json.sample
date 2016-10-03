@@ -36,123 +36,123 @@
       "//": "list the user's repos",
       "method": "GET",
       "path": "/user/repos",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "rate limit check",
       "method": "GET",
       "path": "/rate_limit",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "allow meta lookup on the api version",
       "method": "GET",
       "path": "/",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
       "method": "POST",
       "path": "/repos/:user/:repo/hooks",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
       "method": "DELETE",
       "path": "/repos/:owner/:repo/hooks/:id",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "used to create commit status messages",
       "method": "POST",
       "path": "/repos/:user/:repo/statuses/:sha",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
     {
       "//": "check if repo is public",
       "method": "GET",
       "path": "/:user/:repo",
-      "origin": "https://${TOKEN}@${GITHUB}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB}"
     },
 
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:branch/package.json",
-      "origin": "https://${TOKEN}@${GITHUB_RAW}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/:name/:repo/:branch/.snyk",
-      "origin": "https://${TOKEN}@${GITHUB_RAW}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
 
     {
       "//": "get details of the repo",
       "method": "GET",
       "path": "/repos/:name/:repo",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "get the details of the latest commit to determine its SHA",
       "method": "GET",
       "path": "/repos/:name/:repo/commits/HEAD",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "get the details of an individual ref",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs/:ref",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "path": "/repos/:name/:repo/pulls",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "add the individual commit for the pull requests",
       "method": "POST",
       "path": "/repos/:name/:repo/git/commits",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "add commit data for new PR",
       "method": "POST",
       "path": "/repos/:name/:repo/git/refs",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "create the ref to add the commits to",
       "method": "POST",
       "path": "/repos/:name/:repo/git/trees",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "create the pull request",
       "method": "POST",
       "path": "/repos/:name/:repo/pulls",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "update ref",
       "method": "PATCH",
       "path": "/repos/:name/:repo/git/refs/:sha",
-      "origin": "https://${TOKEN}@${GITHUB_API}"
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     }
   ]
 }
