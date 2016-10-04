@@ -129,12 +129,13 @@ test('proxy requests originating from behind the broker server', t => {
         });
       });
 
-      t.test('broker token is included in headers from client to private', t => {
+      // don't leak broker tokens to systems on the client side
+      t.test('broker token is not included in headers from client to private', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
         request({ url, method: 'post' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['x-broker-token'], token, 'X-Broker-Token header sent');
+          t.equal(responseBody['x-broker-token'], undefined, 'X-Broker-Token header not sent');
           t.end();
         });
       });
