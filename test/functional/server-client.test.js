@@ -27,18 +27,18 @@ test('proxy requests originating from behind the broker server', t => {
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
-  process.env.BROKER_ID = '12345';
+  process.env.BROKER_TOKEN = '12345';
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   process.env.ORIGIN_PORT = echoServerPort;
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
-    socket.on('identify', id => {
+    socket.on('identify', token => {
       t.plan(11);
 
       t.test('successfully broker POST', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         const body = { some: { example: 'json' }};
         request({ url, method: 'post', json: true, body }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -48,7 +48,7 @@ test('proxy requests originating from behind the broker server', t => {
       });
 
       t.test('successfully broker exact bytes of POST body', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         // stringify the JSON unusually to ensure an unusual exact body
         const body = Buffer.from(
           JSON.stringify({ some: { example: 'json' }}, null, 5)
@@ -63,7 +63,7 @@ test('proxy requests originating from behind the broker server', t => {
       });
 
       t.test('successfully broker GET', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-param/xyz`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-param/xyz`;
         request({ url, method: 'get' }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(res.body, 'xyz', 'body brokered');
@@ -73,10 +73,10 @@ test('proxy requests originating from behind the broker server', t => {
 
       // the variable substitution takes place in the broker client
       t.test('variable subsitution', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         const body = {
           BROKER_VAR_SUB: ['swap.me'],
-          swap: { me: '${BROKER_TYPE}:${BROKER_ID}' },
+          swap: { me: '${BROKER_TYPE}:${BROKER_TOKEN}' },
         };
         request({ url, method: 'post', json: true, body }, (err, res) => {
           const swappedBody = {
@@ -91,7 +91,7 @@ test('proxy requests originating from behind the broker server', t => {
 
       // the filtering happens in the broker client
       t.test('block request for non-whitelisted url', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/not-allowed`;
+        const url = `http://localhost:${serverPort}/broker/${token}/not-allowed`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body, 'blocked', '"blocked" body: ' + body);
@@ -101,7 +101,7 @@ test('proxy requests originating from behind the broker server', t => {
 
       // the filtering happens in the broker client
       t.test('allow request for valid url with valid body', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body/filtered`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body/filtered`;
         const body = { proxy: { me: 'please' }};
         request({ url, method: 'post', json: true, body }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -112,7 +112,7 @@ test('proxy requests originating from behind the broker server', t => {
 
       // the filtering happens in the broker client
       t.test('block request for valid url with invalid body', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body/filtered`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body/filtered`;
         const body = { proxy: { me: 'now!' }};
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
@@ -122,25 +122,25 @@ test('proxy requests originating from behind the broker server', t => {
       });
 
       t.test('bad broker id', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}XXX/echo-body`;
+        const url = `http://localhost:${serverPort}/broker/${token}XXX/echo-body`;
         request({ url, 'method': 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 404, '404 statusCode');
           t.end();
         });
       });
 
-      t.test('broker ID is included in headers from client to private', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-headers`;
+      t.test('broker token is included in headers from client to private', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
         request({ url, method: 'post' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['x-broker-id'], id, 'X-Broker-Id header sent');
+          t.equal(responseBody['x-broker-token'], token, 'X-Broker-Token header sent');
           t.end();
         });
       });
 
       t.test('querystring parameters are brokered', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-query?shape=square&colour=yellow`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-query?shape=square&colour=yellow`;
         request({ url, method: 'get' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');

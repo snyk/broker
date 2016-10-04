@@ -28,14 +28,14 @@ test('proxy requests originating from behind the broker client', t => {
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
-  process.env.BROKER_ID = '12345';
+  process.env.BROKER_TOKEN = '12345';
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   const clientPort = port();
   const client = app.main({ port: clientPort });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
-    socket.once('identify', (id) => {
+    socket.once('identify', token => {
       t.plan(9);
 
       t.test('successfully broker POST', t => {
@@ -104,12 +104,14 @@ test('proxy requests originating from behind the broker client', t => {
         });
       });
 
+      // this validates that the broker *server* sends to the correct broker token
+      // header to the echo-server
       t.test('broker ID is included in headers from server to private', t => {
         const url = `http://localhost:${clientPort}/echo-headers`;
         request({ url, method: 'post' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['x-broker-id'], id, 'X-Broker-Id header sent');
+          t.equal(responseBody['x-broker-token'], token, 'X-Broker-Token header sent');
           t.end();
         });
       });
