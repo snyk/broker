@@ -26,16 +26,16 @@ test('no filters broker', t => {
   process.env.SECRET = 'secret';
   process.env.ORIGIN_PORT = echoServerPort;
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
-  process.env.BROKER_ID = '12345';
+  process.env.BROKER_TOKEN = '12345';
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
-    socket.on('identify', id => {
+    socket.on('identify', token => {
       t.plan(2);
 
       t.test('successfully broker with no filter should reject', t => {
-        const url = `http://localhost:${serverPort}/broker/${id}/echo-body`;
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         const body = { test: 'body' };
         request({ url, method: 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
