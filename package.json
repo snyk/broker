@@ -57,7 +57,8 @@
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
     "undefsafe": "^1.2.0",
-    "snyk": "^1.19.1"
+    "snyk": "^1.19.1",
+    "js-yaml": "^3.6.1"
   },
   "repository": {
     "type": "git",
