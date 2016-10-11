@@ -10,6 +10,8 @@ function port() {
 const echoServerPort = port();
 const { app: echoServer, server } = webserver({
   port: echoServerPort,
+  key: process.env.TEST_KEY, // Optional
+  cert: process.env.TEST_CERT, // Optional
 });
 
 echoServer.get('/echo-param/:param', (req, res) => {
