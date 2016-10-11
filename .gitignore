@@ -2,3 +2,4 @@
 .env
 .nyc_output
 coverage
+/test/fixtures/certs/tmp

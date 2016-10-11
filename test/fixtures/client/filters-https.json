@@ -1,0 +1,75 @@
+{
+  "private": [
+    {
+      "path": "/echo-param/${param}",
+      "method": "GET",
+      "origin": "https://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-body",
+      "method": "POST",
+      "origin": "https://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-body/filtered",
+      "method": "POST",
+      "origin": "https://localhost:${originPort}",
+      "valid": [
+        {
+          "//": "accept requests with 'proxy.*: please' in their body",
+          "path": "proxy.*",
+          "value": "please"
+        }
+      ]
+    },
+
+    {
+      "path": "/echo-headers",
+      "method": "POST",
+      "origin": "https://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-query",
+      "method": "GET",
+      "origin": "https://localhost:${originPort}"
+    }
+
+  ],
+  "public": [
+    {
+      "path": "/echo-param/${param}",
+      "method": "GET"
+    },
+
+    {
+      "path": "/echo-body",
+      "method": "POST"
+    },
+
+    {
+      "path": "/echo-body/filtered",
+      "method": "POST",
+      "valid": [
+        {
+          "//": "accept requests with 'proxy.*: please' in their body",
+          "path": "proxy.*",
+          "value": "please"
+        }
+      ]
+    },
+
+    {
+      "path": "/echo-headers",
+      "method": "POST"
+    },
+
+    {
+      "path": "/echo-query",
+      "method": "GET"
+    }
+
+  ]
+}
