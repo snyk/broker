@@ -21,6 +21,14 @@
           },
           {
             "path": "commits.*.added.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.added.*",
             "value": ".snyk"
           },
           {
@@ -85,6 +93,18 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:branch/package.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:branch/Gemfile.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:branch/Gemfile",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
