@@ -51,15 +51,15 @@
     "engine.io": "Snyk/engine.io#1.6.11-patched",
     "engine.io-client": "Snyk/engine.io-client#1.6.11-patched",
     "express": "^4.14.0",
+    "js-yaml": "^3.6.1",
     "path-to-regexp": "^1.5.3",
     "primus": "^6.0.1",
     "primus-emitter": "^3.1.1",
     "request": "^2.74.0",
+    "snyk": "^1.25.2",
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
-    "undefsafe": "^1.2.0",
-    "snyk": "^1.25.2",
-    "js-yaml": "^3.6.1"
+    "undefsafe": "^1.2.0"
   },
   "repository": {
     "type": "git",
