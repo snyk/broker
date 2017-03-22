@@ -1,13 +1,9 @@
 const fs = require('then-fs');
 const path = require('path');
 const root = path.resolve(__dirname, '../client-templates/');
+const logger = require('../log');
 
 module.exports = (args) => {
-  if (args.logs) {
-    require('debug').enable('broker');
-  }
-
-  const debug = require('debug')('broker');
 
   const project = args._[0];
   if (!project) {
@@ -39,7 +35,7 @@ module.exports = (args) => {
   }).then(files => {
     for (const file of files) {
       const newfile = file.replace(/\.sample$/, '');
-      debug(`generating: ${newfile}`);
+      logger.debug(`generating: ${newfile}`);
       fs.createReadStream(
         path.resolve(dir, file)
       ).pipe(fs.createWriteStream(
@@ -47,6 +43,6 @@ module.exports = (args) => {
       ));
     }
 
-    debug(`${project} initialisation complete`);
+    logger.info(`${project} initialisation complete`);
   });
 };
