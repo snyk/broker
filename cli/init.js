@@ -1,7 +1,7 @@
 const fs = require('then-fs');
 const path = require('path');
 const root = path.resolve(__dirname, '../client-templates/');
-const logger = require('../log');
+const logger = require('../lib/log');
 
 module.exports = (args) => {
 
