@@ -36,7 +36,8 @@
     "semantic-release": "^4.3.5",
     "sinon": "^1.17.5",
     "tap": "^6.3.0",
-    "tap-only": "0.0.5"
+    "tap-only": "0.0.5",
+    "tmp": "0.0.31"
   },
   "dependencies": {
     "babel-runtime": "^6.11.6",
