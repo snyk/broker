@@ -33,6 +33,7 @@
     "babel-preset-stage-3": "^6.11.0",
     "eslint": "^3.3.1",
     "proxyquire": "^1.7.10",
+    "require-reload": "^0.2.2",
     "semantic-release": "^4.3.5",
     "sinon": "^1.17.5",
     "tap": "^6.3.0",
@@ -61,6 +62,7 @@
     "snyk": "^1.25.2",
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
+    "tunnel": "0.0.4",
     "undefsafe": "^1.2.0"
   },
   "repository": {
