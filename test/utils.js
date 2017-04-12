@@ -34,6 +34,12 @@ echoServer.get('/echo-query', (req, res) => {
   res.json(req.query);
 });
 
+echoServer.get(
+  '/nested/path-with/wildcard/and-an-escaped-slash/to/:filename',
+  (req, res) => {
+    res.send(req.params.filename);
+  });
+
 echoServer.all('*', (req, res) => {
   res.send(false);
 });

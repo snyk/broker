@@ -35,6 +35,12 @@
       "path": "/echo-query",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/nested/path-with/wild*/to/file.ext",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
     }
 
   ],
