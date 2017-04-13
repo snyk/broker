@@ -35,7 +35,7 @@ test('proxy requests originating from behind the broker server', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', token => {
-      t.plan(11);
+      t.plan(12);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
@@ -150,6 +150,20 @@ test('proxy requests originating from behind the broker server', t => {
           t.end();
         });
       });
+
+      t.test('sucessfully broker GET to an escaped url with a wildcard filter',
+             t => {
+               // url is escaped: %2F <=> `/`,
+               // filter path is "/nested/path-with/wild*/to/file.ext"
+               const url = `http://localhost:${serverPort}/broker/${token}/` +
+                       'nested/path-with/wildcard/and-an-escaped-slash/to%2F' +
+                       'file.ext';
+               request({ url, method: 'get' }, (err, res) => {
+                 t.equal(res.statusCode, 200, '200 statusCode');
+                 t.equal(res.body, 'file.ext', 'filename brokered');
+                 t.end();
+               });
+             });
 
       t.test('clean up', t => {
         client.close();
