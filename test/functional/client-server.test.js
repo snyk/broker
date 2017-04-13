@@ -28,7 +28,7 @@ test('proxy requests originating from behind the broker client', t => {
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
-  process.env.BROKER_TOKEN = '12345';
+  process.env.BROKER_TOKEN = 'C481349B-4014-43D9-B59D-BA41E1315001'; // uuid.v4
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   const clientPort = port();
   const client = app.main({ port: clientPort });
@@ -111,7 +111,8 @@ test('proxy requests originating from behind the broker client', t => {
         request({ url, method: 'post' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['x-broker-token'], token, 'X-Broker-Token header sent');
+          t.equal(responseBody['x-broker-token'], token.toLowerCase(),
+                  'X-Broker-Token header present and lowercased');
           t.end();
         });
       });
