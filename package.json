@@ -50,7 +50,7 @@
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
     "ejson": "^2.1.2",
-    "engine.io": "^1.8.3",
+    "engine.io": "^3.1.0",
     "engine.io-client": "^1.8.3",
     "es6-promise": "^4.1.0",
     "express": "^4.14.0",
