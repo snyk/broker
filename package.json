@@ -66,10 +66,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Snyk/broker.git"
+    "url": "https://github.com/snyk/broker.git"
   },
   "bugs": {
-    "url": "https://github.com/Snyk/broker/issues"
+    "url": "https://github.com/snyk/broker/issues"
   },
   "homepage": "https://github.com/snyk/broker#readme"
 }
