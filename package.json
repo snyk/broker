@@ -17,9 +17,7 @@
     "lint": "eslint cli/*.js lib/**/*.js",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n",
     "cover": "tap test/**/*.test.js --timeout 60 --cov --coverage-report=lcov",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "keywords": [],
   "author": "Remy Sharp",
@@ -61,7 +59,6 @@
     "primus": "^6.0.1",
     "primus-emitter": "^3.1.1",
     "request": "^2.74.0",
-    "snyk": "^1.30.1",
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.4",
@@ -74,6 +71,5 @@
   "bugs": {
     "url": "https://github.com/Snyk/broker/issues"
   },
-  "homepage": "https://github.com/Snyk/broker#readme",
-  "snyk": true
+  "homepage": "https://github.com/snyk/broker#readme"
 }
