@@ -47,11 +47,11 @@
     "camelcase": "^3.0.0",
     "clarify": "^2.0.0",
     "clite": "^0.3.0",
-    "debug": "^2.2.0",
+    "debug": "^2.6.7",
     "dotenv": "^2.0.0",
     "ejson": "^2.1.2",
-    "engine.io": "^1.8.3",
-    "engine.io-client": "^1.8.3",
+    "engine.io": "^3.1.0",
+    "engine.io-client": "socketio/engine.io-client#753c180fa54d2576ec890fb89caccaeb1a299fc7",
     "es6-promise": "^4.1.0",
     "express": "^4.14.0",
     "js-yaml": "^3.6.1",
@@ -59,7 +59,6 @@
     "primus": "^6.0.1",
     "primus-emitter": "^3.1.1",
     "request": "^2.74.0",
-    "snyk": "^1.25.2",
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.4",
@@ -67,10 +66,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Snyk/broker.git"
+    "url": "https://github.com/snyk/broker.git"
   },
   "bugs": {
-    "url": "https://github.com/Snyk/broker/issues"
+    "url": "https://github.com/snyk/broker/issues"
   },
-  "homepage": "https://github.com/Snyk/broker#readme"
+  "homepage": "https://github.com/snyk/broker#readme"
 }
