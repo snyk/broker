@@ -34,7 +34,7 @@ test('init creates files from specified bitbucket', t => {
     if (err) { throw err; }
     process.chdir(path);
 
-    init({_: ['bitbucket']})
+    init({_: ['bitbucket-server']})
       .then(() => Promise.all([
         fs.stat('.env'),
         fs.stat('accept.json'),

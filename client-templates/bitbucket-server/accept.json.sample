@@ -16,25 +16,25 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse/package.json",
+      "path": "/projects/:project/repos/:repo/browse*/package.json",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse/Gemfile.lock",
+      "path": "/projects/:project/repos/:repo/browse*/Gemfile.lock",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse/Gemfile",
+      "path": "/projects/:project/repos/:repo/browse*/Gemfile",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse/pom.xml ",
+      "path": "/projects/:project/repos/:repo/browse*/pom.xml",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {

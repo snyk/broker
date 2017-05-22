@@ -41,7 +41,7 @@ $ broker init github --verbose
 
 for Bitbucket Server use:
 ```bash
-$ broker init bitbucket --verbose
+$ broker init bitbucket-server --verbose
 ```
 
 This will generate two new files: `accept.json` and `.env`. If the files already exist in the current working directory, the `init` command will fail and not overwrite your local copies.
