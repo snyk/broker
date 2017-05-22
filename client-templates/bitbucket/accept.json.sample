@@ -1,0 +1,47 @@
+{
+  "private":
+  [
+    {
+      "//": "list the user's projects",
+      "method": "GET",
+      "path": "/projects",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "list the user's repos",
+      "method": "GET",
+      "path": "/repos",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+     },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse/package.json",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse/Gemfile.lock",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse/Gemfile",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse/pom.xml ",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse/.snyk",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    }
+  ]
+}

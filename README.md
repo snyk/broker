@@ -32,10 +32,16 @@ You can also use it as a dependency in a `package.json`. Details on this later.
 
 Running the client will require a unique `BROKER_TOKEN` and a `BROKER_SERVER_URL` pointing to a broker server. Once you have these, add them to your environment and run the broker in client mode.
 
-However, you may want to use default settings for the `ACCEPT` rules and your environment. This can be first generated using the `init <name>` command:
+However, you may want to use default settings for the `ACCEPT` rules and your environment. This can be first generated using the `init <template>` command:
 
+for Github use:
 ```bash
-$ broker init snyk --verbose
+$ broker init github --verbose
+```
+
+for Bitbucket Server use:
+```bash
+$ broker init bitbucket --verbose
 ```
 
 This will generate two new files: `accept.json` and `.env`. If the files already exist in the current working directory, the `init` command will fail and not overwrite your local copies.
