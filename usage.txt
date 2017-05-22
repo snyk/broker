@@ -11,8 +11,8 @@
   Commands:
     client .............. run the broker in client mode
     server .............. run the broker in server mode
-    init <project> ...... generate the client broker files required
-                          for a given project
+    init <template> ..... generate the client broker files required
+                          for a given template (github or bitbucket)
 
   Flags:
 

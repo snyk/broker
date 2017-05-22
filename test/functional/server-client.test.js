@@ -87,7 +87,7 @@ test('proxy requests originating from behind the broker server', t => {
           t.same(res.body, swappedBody, 'body brokered');
           t.end();
         });
-      })
+      });
 
       // the filtering happens in the broker client
       t.test('block request for non-whitelisted url', t => {
@@ -164,6 +164,23 @@ test('proxy requests originating from behind the broker server', t => {
                  t.end();
                });
              });
+
+      t.test('content-length is not set when using chunked http', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
+        request({ url, method: 'get',
+          headers: [{'Transfer-Encoding': 'chunked'}] }, (err, res) => {
+          t.notOk(res.headers['Content-Length'], 'no content-length header');
+          t.end();
+        });
+      });
+
+      t.test('content-length is set without chunked http', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.ok(res.headers['Content-Length'], 'found content-length header');
+          t.end();
+        });
+      });
 
       t.test('clean up', t => {
         client.close();
