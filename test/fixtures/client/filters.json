@@ -26,6 +26,18 @@
     },
 
     {
+      "path": "/echo-headers/github",
+      "method": "POST",
+      "origin": "http://githubToken@localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-headers/bitbucket",
+      "method": "POST",
+      "origin": "http://bitbucketUser:bitbucketPassword@localhost:${originPort}"
+    },
+
+    {
       "path": "/echo-headers",
       "method": "POST",
       "origin": "http://localhost:${originPort}"

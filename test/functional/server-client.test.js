@@ -35,7 +35,7 @@ test('proxy requests originating from behind the broker server', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', token => {
-      t.plan(12);
+      t.plan(16);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
@@ -176,8 +176,34 @@ test('proxy requests originating from behind the broker server', t => {
 
       t.test('content-length is set without chunked http', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
-        request({ url, method: 'get' }, (err, res) => {
-          t.ok(res.headers['Content-Length'], 'found content-length header');
+        request({ url, method: 'post'}, (err, res) => {
+          t.ok(res.headers['content-length'], 'found content-length header');
+          t.end();
+        });
+      });
+
+      t.test('auth header is replaced when url contains token', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/github`;
+        const headers = {Authorization: 'broker auth'};
+        request({ url, method: 'post', headers }, (err, res) => {
+          const responseBody = JSON.parse(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(responseBody.authorization, 'token githubToken',
+            'auth header was replaced by github token');
+          t.end();
+        });
+      });
+
+      t.test('auth header is is replaced when url contains basic auth', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/bitbucket`;
+        const headers = {};
+        request({ url, method: 'post', headers }, (err, res) => {
+          const responseBody = JSON.parse(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          const auth = responseBody.authorization.replace('Basic ', '');
+          const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
+          t.equal(encodedAuth, 'bitbucketUser:bitbucketPassword',
+            'auth header is set correctly');
           t.end();
         });
       });
