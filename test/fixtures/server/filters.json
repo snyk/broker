@@ -13,7 +13,7 @@
     },
 
     {
-      "path": "/echo-headers",
+      "path": "/echo-headers/:param?",
       "method": "POST",
       "origin": "http://localhost:${originPort}"
     },

@@ -128,30 +128,6 @@ test('proxy requests originating from behind the broker client', t => {
         });
       });
 
-      t.test('auth header is replaced when url contains token', t => {
-        const url = `http://githubToken@localhost:${clientPort}/echo-headers`;
-        const headers = [{authorization: 'broker auth'}];
-        request({ url, method: 'post', headers }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['authorization'], 'token githubToken',
-            'auth header was replaced by github token');
-          t.end();
-        });
-      });
-
-      t.test('auth header is is deleted when url contains basic auth', t => {
-        const url = `http://username@pass@localhost:${clientPort}/echo-headers`;
-        const headers = [{authorization: 'broker auth'}];
-        request({ url, method: 'post', headers }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.notOk(responseBody['authorization'], 'token githubToken',
-            'auth header was deleted, to prefer creds on the url');
-          t.end();
-        });
-      });
-
       t.test('clean up', t => {
         client.close();
         setTimeout(() => {
