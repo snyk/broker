@@ -13,7 +13,7 @@ module.exports = (args) => {
   const dir = path.resolve(root, project);
 
   return fs.readdir(root).then(files => {
-    if (!files.includes(project)) {
+    if (files.indexOf(project) === -1) {
       throw new Error(`${project} is an invalid template name`);
     }
 
