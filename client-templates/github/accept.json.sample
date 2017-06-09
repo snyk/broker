@@ -139,6 +139,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "get the head commit of an individual ref",
+      "method": "GET",
+      "path": "/repos/:name/:repo/git/refs/heads/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "get the details of an individual ref",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs/:ref",
@@ -178,6 +184,12 @@
       "//": "update ref",
       "method": "PATCH",
       "path": "/repos/:name/:repo/git/refs/:sha",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "update ref head",
+      "method": "PATCH",
+      "path": "/repos/:name/:repo/git/refs/heads/:ref",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     }
   ]
