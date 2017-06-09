@@ -34,8 +34,8 @@ test('proxy requests originating from behind the broker client', t => {
   t.plan(6);
 
   const serverHealth = `http://localhost:${serverPort}/healthcheck`;
-  const serverClientHealth = `http://localhost:${serverPort}/` +
-          `broker/${BROKER_TOKEN}`;
+  const connectionStatus = `http://localhost:${serverPort}/` +
+          `connection-status/${BROKER_TOKEN}`;
   const clientHealth = `http://localhost:${clientPort}/healthcheck`;
   t.test('server healthcheck', t => {
     request({url: serverHealth, json: true }, (err, res) => {
@@ -60,8 +60,8 @@ test('proxy requests originating from behind the broker client', t => {
         });
       });
 
-      t.test('serve client-health with connected client', t => {
-        request({url: serverClientHealth, json: true }, (err, res) => {
+      t.test('check connection-status with connected client', t => {
+        request({url: connectionStatus, json: true }, (err, res) => {
           if (err) { return t.threw(err); }
 
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -70,10 +70,10 @@ test('proxy requests originating from behind the broker client', t => {
         });
       });
 
-      t.test('server client-health after client disconnected', t => {
+      t.test('check connection-status after client disconnected', t => {
         client.close();
         setTimeout(() => {
-          request({url: serverClientHealth, json: true }, (err, res) => {
+          request({url: connectionStatus, json: true }, (err, res) => {
             if (err) { return t.threw(err); }
 
             t.equal(res.statusCode, 404, '404 statusCode');
@@ -82,10 +82,10 @@ test('proxy requests originating from behind the broker client', t => {
         }, 100);
       });
 
-      t.test('server client-health after client re-connected', t => {
+      t.test('check connection-status after client re-connected', t => {
         client = app.main({ port: clientPort });
         setTimeout(() => {
-          request({url: serverClientHealth, json: true }, (err, res) => {
+          request({url: connectionStatus, json: true }, (err, res) => {
             if (err) { return t.threw(err); }
 
             t.equal(res.statusCode, 200, '200 statusCode');
