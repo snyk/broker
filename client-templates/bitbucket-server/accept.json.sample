@@ -22,6 +22,12 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/package-lock.json",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/Gemfile.lock",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
