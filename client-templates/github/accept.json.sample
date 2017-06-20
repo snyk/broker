@@ -53,6 +53,14 @@
           },
           {
             "path": "commits.*.added.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.added.*",
             "value": ".snyk"
           },
           {
@@ -147,6 +155,12 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:branch*/requirements.txt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:branch*/yarn.lock",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
