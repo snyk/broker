@@ -29,6 +29,14 @@
           },
           {
             "path": "commits.*.added.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.added.*",
             "value": ".snyk"
           },
           {
