@@ -38,6 +38,12 @@
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/yarn.lock",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/projects/:project/repos/:repo/browse/.snyk",
