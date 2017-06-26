@@ -1,4 +1,5 @@
 sudo: false
+dist: trusty
 language: node_js
 cache:
   directories:
@@ -8,11 +9,13 @@ notifications:
 node_js:
   - 4
   - 6
+  - 8
 before_script:
   - npm run es5ify
   - npm prune
 after_success:
   - npm run semantic-release
+  - 'curl -s -H "Content-Type: application/json" --data "{\"build\": true}" -X POST https://registry.hub.docker.com/u/snyk/broker/trigger/${DOCKER_TOKEN}/'
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
