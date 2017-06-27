@@ -20,14 +20,20 @@ RUN broker init github
 # or provide as runtime args `-e`    #
 ######################################
 
-# The host where your GitHub Enterprise is running, excluding scheme.
-ENV GITHUB=your.ghe.domain.com
-
 # Your unique broker identifier, copied from snyk.io org settings page
 # ENV BROKER_TOKEN <broker-token>
 
 # Your personal access token to your github.com / GHE account
 # ENV GITHUB_TOKEN <github-token>
+
+# The host where your GitHub Enterprise is running, excluding scheme.
+ENV GITHUB=your.ghe.domain.com
+
+# The URL that the github API should be accessed at.
+ENV GITHUB_API $GITHUB/api/v3
+
+# The URL where raw file content is accessed, excluding scheme.
+ENV GITHUB_RAW $GITHUB/raw
 
 # The port used by the broker client to accept webhooks
 # Default value is 7341
@@ -42,12 +48,6 @@ ENV PORT 7341
 #######################################
 # Generic Broker Client configuration #
 #######################################
-
-# The URL that the github API should be accessed at.
-ENV GITHUB_API $GITHUB/api/v3
-
-# The URL where raw file content is accessed, excluding scheme.
-ENV GITHUB_RAW $GITHUB/raw
 
 # The URL of the Snyk broker server
 ENV BROKER_SERVER_URL https://broker.snyk.io
