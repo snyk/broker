@@ -32,6 +32,9 @@ ENV BITBUCKET_PASSWORD <password>
 # Your Bitbucket Server host, excluding scheme
 ENV BITBUCKET your.bitbucket.server.hostname
 
+# The Bitbucket server API URL
+ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
+
 # The port used by the broker client to accept internal connections
 # Default value is 7341
 ENV PORT 7341
@@ -41,8 +44,6 @@ ENV PORT 7341
 # Generic Broker Client configuration #
 #######################################
 
-# The Bitbucket server API URL
-ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
 
 # The URL of the Snyk broker server
 ENV BROKER_SERVER_URL https://broker.snyk.io
