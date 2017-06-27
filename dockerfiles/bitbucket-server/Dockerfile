@@ -32,6 +32,11 @@ ENV BITBUCKET_PASSWORD <password>
 # Your Bitbucket Server host, excluding scheme
 ENV BITBUCKET your.bitbucket.server.hostname
 
+# The port used by the broker client to accept internal connections
+# Default value is 7341
+ENV PORT 7341
+
+
 #######################################
 # Generic Broker Client configuration #
 #######################################
@@ -50,6 +55,6 @@ ENV ACCEPT accept.json
 
 
 HEALTHCHECK --interval=10s --timeout=1s \
-  CMD wget -sq http://localhost:7341/healthcheck
+  CMD wget -sq http://localhost:$PORT/healthcheck
 
 CMD ["broker", "--verbose"]
