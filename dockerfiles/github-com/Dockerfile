@@ -1,4 +1,4 @@
-FROM node:6-alpine
+FROM node:6-slim
 
 MAINTAINER Snyk Ltd
 
