@@ -4,221 +4,138 @@
 
 ***
 
-# @snyk/broker
+# snyk/broker
 
-The broker client for proxying requests between your private machines and the external broker system.
+Snyk broker proxies access between snyk.io and source-code management systems (SCMs) such as GitHub Enterprise, GitHub.com and Bitbucket Server.
 
-The broker forwards requests to the client (this package) and responds. An example use is for communicating with an internal GitHub enterprise server, but this is not intended as the exclusive use.
+The broker server and client establish an applicative tunnel, proxying requests from snyk.io to the SCM (fetching manifest files from monitored repositories), and vice versa (webhooks posted by the SCM).
+
+The broker client runs within the user's internal network, keeping sensitive data such as SCM tokens within the network perimeter. The applicative tunnel scans and whitelists only relevant requests, narrowing down the access permissions to the bare minimum required for Snyk to actively monitor a repository.
 
 ## Usage
 
-<!-- Explain how to install, how to run the tool if it's on the cli, or how  -->
-<!-- to use the project in the author code. If this is a node module, please -->
-<!-- also document the usage API.                                            -->
+The broker client is published as a set of docker images, each configured for a specific SCM. Custom configuration is provided as environment variables.
 
-To run the broker in daemon mode, use the existing tools on your system like `systemd`. If you're unsure, we can recommend this post on [running as a service](https://certsimple.com/blog/deploy-node-on-linux#node-linux-service-systemd) on your machine.
+### GitHub.com
 
-### Installation
+To use the the broker client with GitHub.com, pull the `github-com` tag. The following environment variables are needed to customize the broker client:
 
-The broker as a CLI utility via npm:
+- `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
+- `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
+- `PORT` - the local port at which the broker client accepts connections. Default is 7341.
+- `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by GitHub.com webhooks, such as `http://my.broker.client:7341`
 
-```bash
-$ npm install -g snyk-broker
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:7341
+           snyk/broker:github-com
 ```
 
-You can also use it as a dependency in a `package.json`. Details on this later.
+#### Derived docker image
 
-### Running the client
+Another option is to build your own docker image and override relevant environment variables:
 
-Running the client will require a unique `BROKER_TOKEN` and a `BROKER_SERVER_URL` pointing to a broker server. Once you have these, add them to your environment and run the broker in client mode.
+```
+FROM snyk/broker:github-com
 
-However, you may want to use default settings for the `ACCEPT` rules and your environment. This can be first generated using the `init <template>` command:
-
-for Github use:
-```bash
-$ broker init github --verbose
+ENV BROKER_TOKEN      secret-broker-token
+ENV GITHUB_TOKEN      secret-github-token
+ENV PORT              8000
+ENV BROKER_CLIENT_URL http://my.broker.client:7341
 ```
 
-for Bitbucket Server use:
-```bash
-$ broker init bitbucket-server --verbose
+### GitHub Enterprise
+
+To use the the broker client with a GitHub Enterprise deployment, pull the `github-enterprise` tag. The following environment variables are needed to customize the broker client:
+
+- `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
+- `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
+- `GITHUB` - the hostname of your GitHub Enterprise deployment, such as `your.ghe.domain.com`.
+- `GITHUB_API` - the API endpoint of your GitHub Enterprise deployment. Should be `$GITHUB/api/v3`.
+- `GITHUB_RAW` - the raw file access endpoint of your GitHub Enterprise deployment. Should be `$GITHUB/raw`.
+- `PORT` - the local port at which the broker client accepts connections. Default is 7341.
+- `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your GitHub Enterprise deployment webhooks, such as `http://my.broker.client:7341`
+
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e GITHUB=your.ghe.domain.com \
+           -e GITHUB_API=your.ghe.domain.com/api/v3 \
+           -e GITHUB_RAW=your.ghe.domain.com/raw \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000
+       snyk/broker:github-enterprise
 ```
 
-This will generate two new files: `accept.json` and `.env`. If the files already exist in the current working directory, the `init` command will fail and not overwrite your local copies.
+#### Derived docker image
 
-Once you have these files, add your `BROKER_TOKEN` and other details to the `.env` file, then run the broker in client mode from the same directory as the `accept.json` and `.env`:
+Another option is to build your own docker image and override relevant environment variables:
 
-```bash
-$ broker --verbose
-  broker:client accept.json +0ms
-  broker:client loading rules from accept.json +2ms
-  broker:client running +1ms
-  broker:client connecting to https://broker.snyk.io +26ms
-  broker:client loading 17 new rules +1ms
-  broker:client new filter: get /user/repos +0ms
-  broker:client new filter: get /rate_limit +1ms
-  broker:client new filter: get / +0ms
-  broker:client new filter: post /repos/:user/:repo/hooks +0ms
-  broker:client new filter: post /repos/:user/:repo/statuses/:sha +0ms
-  broker:client new filter: get /:user/:repo +1ms
-  broker:client new filter: get /:name/:repo/:branch/package.json +0ms
-  broker:client new filter: get /:name/:repo/:branch/.snyk +0ms
-  broker:client new filter: get /repos/:name/:repo +0ms
-  broker:client new filter: get /repos/:name/:repo/git/refs +0ms
-  broker:client new filter: get /repos/:name/:repo/git/refs/:ref +0ms
-  broker:client new filter: get /repos/:name/:repo/pulls +0ms
-  broker:client new filter: post /repos/:name/:repo/git/commits +0ms
-  broker:client new filter: post /repos/:name/:repo/git/refs +0ms
-  broker:client new filter: post /repos/:name/:repo/git/trees +0ms
-  broker:client new filter: post /repos/:name/:repo/pulls +0ms
-  broker:client new filter: patch /repos/:name/:repo/git/refs/:sha +1ms
-  broker local server listening @ 7341 +101ms
-  broker:client loading 1 new rules +2ms
-  broker:client new filter: post /webhook/github +1ms
-  broker:client identifying as XXXX-XXXX-XXXX-XXXX-XXXX on https://broker.snyk.io +93ms
+```
+FROM snyk/broker:github-enterprise
+
+ENV BROKER_TOKEN      secret-broker-token
+ENV GITHUB_TOKEN      secret-github-token
+ENV GITHUB            your.ghe.domain.com
+ENV GITHUB_API        your.ghe.domain.com/api/v3
+ENV GITHUB_RAW        your.ghe.domain.com/raw
+ENV PORT              8000
+ENV BROKER_CLIENT_URL http://my.broker.client:8000
 ```
 
-It will identify itself against the server and will be now ready to broker inbound and outbound requests that validate fully against the accept rules.
+### Bitbucket Server
 
-### Running the server
+To use the the broker client with a Bitbucket Server deployment, pull the `bitbucket-server` tag. The following environment variables are needed to customize the broker client:
 
-As the server will typically be deployed, it's recommended to use the broker inside of a `package.json`, as per:
+- `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
+- `BITBUCKET_USERNAME` - the Bitbucket Server username.
+- `BITBUCKET_PASSWORD` - the Bitbucket Server password.
+- `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
+- `BITBUCKET_API` - the API endpoint of your Bitbucket Server deployment. Should be `$BITBUCKET/rest/api/1.0`.
+- `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 
-```json
-{
-  "name": "broker server",
-  "private": true,
-  "scripts": {
-    "start": "ACCEPT=accept.json broker server --verbose"
-  },
-  "engines": {
-    "node": "6"
-  },
-  "dependencies": {
-    "snyk-broker": "^2.1.1"
-  }
-}
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e BITBUCKET_USERNAME=username \
+           -e BITBUCKET_PASSWORD=password \
+           -e BITBUCKET=your.bitbucket-server.domain.com \
+           -e BITBUCKET_API=your.bitbucket-server.domain.com/rest/api/1.0 \
+           -e PORT=8000 \
+       snyk/broker:bitbucket-server
 ```
 
-You will also need to include the right environment values (though by default, the server only requires `ACCEPT`), and the `accept.json` file.
+#### Derived docker image
 
-The `private` rules should be determined by what you want to allow through the server, but the `public` rules will generally need to be the following:
+Another option is to build your own docker image and override relevant environment variables:
 
-```json
-  "public": [{
-    "//": "send any type of request to our connected clients",
-    "method": "any",
-    "path": "/*"
-  }]
+```
+FROM snyk/broker:bitbucket-server
+
+ENV BROKER_TOKEN        secret-broker-token
+ENV BITBUCKET_USERNAME  username
+ENV BITBUCKET_PASSWORD  password
+ENV BITBUCKET           your.bitbucket-server.domain.com
+ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
+ENV PORT                8000
 ```
 
-This `public` rule will ensure everything is forwarded to your clients, and will allow your client to handle blocking out messages.
-
-## Development & how to test
-
-The project's source code is written in full ES6 (with commonjs modules). This requires the source to be developed with node@6. However, during the release process, the code is transpiled to ES5 via babel and is released with node LTS in mind, node@4 and upwards.
-
-To test, first clone the project, and in the project directory:
-
-```bash
-$ npm install
-$ npm test
-```
-
-### Terminology
-
-* Broker: The application that will accept (or reject), transform and forward requests. This entire repository is the broker.
-* Server: server instance of the broker, this accepts HTTPS request and forwards them to the connected broker identified by an ID.
-* Client: the user's client instance of the broker that will accept and reject requests from the server and relay them back and forth to their own internal service.
-* Internal: the system that is private to the user that the broker will manage a specific subset of requests for.
-* Accept: a request that has been accepted based on user defined rules to be forwarded to their own internal systems.
-* Reject: all those requests that are not accepted (these will result in a `401` and a `Blocked` message).
-* Configuration: the user's private environment configuration that controls the accept list and important tokens that allow the broker to access their internal system.
-
-## Configuration
-
-The broker configuration is primarily driven through environment values which can also be stored inside of a local `.env` file. The `.env` file format is a simple key/value pair, i.e.:
-
-```text
-TOKEN=12345678
-# this is a comment
-HOST=foo-bar.com
-```
-
-Note that the configuration is case insensitive and will automatically be normalised to camelCase (as well as keeping your origin casing).
-
-### Client required configuration
-
-- `BROKER_TOKEN`: this is your unique token to identify and register the client against the broker server.
-- `BROKER_SERVER_URL`: typically this will point to `https://broker.snyk.io` but if you want to run your own broker, this value should point to your broker server address.
-
-### HTTPS
-
-As the broker needs to run a local server to handle inbound forwarding requests, by default the broker will run using insecure HTTP (and will warn out to the console saying so).
-
-We recommend you run your broker over HTTPS (for clients you could use a self signed certificate, for servers we highly recommend fully signed). To do this, you need to point the broker to your `.key` and `.cert` file from the environment values, or the `.env` file:
-
-```text
-HTTPS_KEY=<path-to.key>
-HTTPS_CERT=<path-to.cert>
-```
-
-When the broker runs, it will use these files to start the local server over HTTPS.
-
-## The accept filter
-
-A JSON file pointed to in the `ACCEPT` environment value controls what can be accepted by the broker. Any requests that do not match the acceptance list will be rejected with a `400` status code.
-
-Below is the Snyk default accept filter, that allows inbound requests to a GitHub enterprise instance for two files only on all your repos, `package.json` and `.snyk`. The following is the contents of the `accept.json` file:
-
-```json
-{
-  "private": [
-    {
-      "method": "GET",
-      "path": "/:name/:repo/:branch/package.json",
-      "origin": "https://${TOKEN}@${HOST}",
-    },
-    {
-      "method": "GET",
-      "path": "/:name/:repo/:branch/.snyk",
-      "origin": "https://${TOKEN}@${HOST}",
-    }
-  ],
-  "public": [
-    {
-      "method": "any",
-      "path": "/*"
-    }
-  ]
-}
-```
-
-Focusing on the first element in the array, there are two important tokens in the `path` property and the `origin` property.
-
-The first, `:param` is an expression that is matched against the URL being requested. This means that the broker server can request any value in the `:name`, `:repo` and `:branch` position.
-
-The second, `${PARAM}` is populated with the matching value in your configuration. This way you can keep your tokens or environment details private.
-
-The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
-
-### Private rules
-
-Private filters are for requests that come from the broker server into your client and ask for resources inside your private infrastructure (such as a github enterprise instance).
-
-### Public rules
-
-Public filters are for requests that a recieved on your broker client and are intended to be forwarded to the broker server (such as a github webhook).
-
-## Notes
-
-- The broker requires at least node@4.latest
-- Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
-- If your private service is using an unrecognized certificate, you will need to supply a Certificate Authority file and add the following environment value when runnning the client: `CA_CERT=ca.cert.pem` - Client will load your CA certificate and use it for requests to your internal service
-
-## License
-
-* [License: Apache License, Version 2.0](LICENSE)
-* [Contributing](.github/CONTRIBUTING.md)
-* [Security](SECURITY.md)
-
+* [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
+* [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
+* [Security](https://github.com/snyk/broker/blob/master/SECURITY.md)
