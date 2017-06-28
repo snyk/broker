@@ -62,6 +62,6 @@ ENV ACCEPT accept.json
 EXPOSE $PORT
 
 HEALTHCHECK --interval=10s --timeout=1s \
-  CMD wget -sq http://localhost:$PORT/healthcheck
+  CMD wget -q --spider http://localhost:$PORT/healthcheck
 
 CMD ["broker", "--verbose"]
