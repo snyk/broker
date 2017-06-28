@@ -18,7 +18,7 @@ The broker client is published as a set of docker images, each configured for a 
 
 ### GitHub.com
 
-To use the the broker client with GitHub.com, pull the `github-com` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with GitHub.com, pull the `snyk/broker:github-com` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
 - `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
@@ -34,7 +34,7 @@ docker run -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
-           -e BROKER_CLIENT_URL=http://my.broker.client:7341
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000
            snyk/broker:github-com
 ```
 
@@ -48,12 +48,12 @@ FROM snyk/broker:github-com
 ENV BROKER_TOKEN      secret-broker-token
 ENV GITHUB_TOKEN      secret-github-token
 ENV PORT              8000
-ENV BROKER_CLIENT_URL http://my.broker.client:7341
+ENV BROKER_CLIENT_URL http://my.broker.client:8000
 ```
 
 ### GitHub Enterprise
 
-To use the the broker client with a GitHub Enterprise deployment, pull the `github-enterprise` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with a GitHub Enterprise deployment, pull the `snyk/broker:github-enterprise` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
 - `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
@@ -97,9 +97,9 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 ### Bitbucket Server
 
-To use the the broker client with a Bitbucket Server deployment, pull the `bitbucket-server` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with a Bitbucket Server deployment, pull the `snyk/broker:bitbucket-server` tag. The following environment variables are needed to customize the broker client:
 
-- `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
+- `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Server integration settings view.
 - `BITBUCKET_USERNAME` - the Bitbucket Server username.
 - `BITBUCKET_PASSWORD` - the Bitbucket Server password.
 - `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
