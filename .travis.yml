@@ -14,8 +14,10 @@ before_script:
   - npm run es5ify
   - npm prune
 after_success:
+  # publish to npmjs and create a GH release; auto-detects master branch pushes and acts on them only
   - npm run semantic-release
-  - 'curl -s -H "Content-Type: application/json" --data "{\"build\": true}" -X POST https://registry.hub.docker.com/u/snyk/broker/trigger/${DOCKER_TOKEN}/'
+  # manually detect master branch push, and post a dockerhub trigger to build the docker images
+  - 'if [ "$TRAVIS_BRANCH" = "master" ]; then curl -s -H "Content-Type: application/json" --data "{\"build\": true}" -X POST https://registry.hub.docker.com/u/snyk/broker/trigger/${DOCKER_TOKEN}/; fi'
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
