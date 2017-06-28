@@ -34,8 +34,8 @@ docker run -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
-           -e BROKER_CLIENT_URL=http://my.broker.client:8000
-           snyk/broker:github-com
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+       snyk/broker:github-com
 ```
 
 #### Derived docker image
@@ -75,7 +75,7 @@ docker run -p 8000:8000 \
            -e GITHUB_API=your.ghe.domain.com/api/v3 \
            -e GITHUB_RAW=your.ghe.domain.com/raw \
            -e PORT=8000 \
-           -e BROKER_CLIENT_URL=http://my.broker.client:8000
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
        snyk/broker:github-enterprise
 ```
 
@@ -135,6 +135,8 @@ ENV BITBUCKET           your.bitbucket-server.domain.com
 ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
+
+### Misc
 
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
 * [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
