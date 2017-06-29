@@ -31,12 +31,16 @@ test('proxy requests originating from behind the broker client', t => {
   const clientPort = port();
   let client = app.main({ port: clientPort });
 
-  t.plan(6);
+  t.plan(7);
 
   const serverHealth = `http://localhost:${serverPort}/healthcheck`;
   const connectionStatus = `http://localhost:${serverPort}/` +
           `connection-status/${BROKER_TOKEN}`;
   const clientHealth = `http://localhost:${clientPort}/healthcheck`;
+
+  // instantiated and connected later
+  let customHealthClient;
+
   t.test('server healthcheck', t => {
     request({url: serverHealth, json: true }, (err, res) => {
       if (err) { return t.threw(err); }
@@ -95,7 +99,33 @@ test('proxy requests originating from behind the broker client', t => {
         }, 20);
       });
 
+      t.test('custom healthcheck endpoint', t => {
+        // launch second client to test custom client healthcheck
+        process.env.BROKER_HEALTHCHECK_PATH = '/custom/healthcheck/endpoint';
+        const customClientPort = port();
+        const customClientHealth =
+          `http://localhost:${customClientPort}/custom/healthcheck/endpoint`;
+
+        customHealthClient = app.main({ port: customClientPort });
+
+        server.io.once('connection', socket => {
+          socket.once('identify', () => {
+            t.test('client custom healthcheck', t => {
+              request({url: customClientHealth, json: true }, (err, res) => {
+                if (err) { return t.threw(err); }
+
+                t.equal(res.statusCode, 200, '200 statusCode');
+                t.equal(res.body['ok'], true, '{ ok: true } in body');
+                t.end();
+              });
+            });
+            t.end();
+          });
+        });
+      });
+
       t.test('clean up', t => {
+        customHealthClient.close();
         client.close();
         setTimeout(() => {
           server.close();
