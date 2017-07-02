@@ -52,10 +52,13 @@ ENV BROKER_SERVER_URL https://broker.snyk.io
 # Bitbucket Server instance
 ENV ACCEPT accept.json
 
+# The path for the broker's internal healthcheck URL. Must start with a '/'.
+ENV BROKER_HEALTHCHECK_PATH /healthcheck
 
 
+EXPOSE $PORT
 
 HEALTHCHECK --interval=10s --timeout=1s \
-  CMD wget -q --spider http://localhost:$PORT/healthcheck
+  CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
 
 CMD ["broker", "--verbose"]
