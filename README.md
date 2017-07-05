@@ -136,6 +136,62 @@ ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
 
+### Advanced Configuration
+
+#### HTTPS
+
+The broker client runs an HTTP server by default. It can be configured to run an HTTPS server for local connections. This requires an SSL certificate and a private key to be provided to the docker container at runtime.
+
+For example, if your certificate files are found locally at `./private/broker.crt` and `./private/broker.key`, provide these files to the docker container by mounting the folder and using the `HTTPS_CERT` and `HTTPS_KEY` environment variables:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e HTTPS_CERT=/private/broker.crt \
+           -e HTTPS_KEY=/private/broker.key \
+           -e BROKER_CLIENT_URL=https://my.broker.client:8000 \
+           -v /local/path/to/private:/private \
+       snyk/broker:github-com
+```
+
+Note that `BROKER_CLIENT_URL` now has the HTTPS scheme.
+
+#### SCM with a self-signed certificate
+
+The broker client establishes HTTPS connections to the SCM. If your SCM is serving a self-signed certificate, you can provide the CA certificate to the broker client.
+
+For example, if your CA certificate is at `./private/ca.cert.pem`, provide it to the docker container by mounting the folder and using the `CA_CERT` environment variable:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e BITBUCKET_USERNAME=username \
+           -e BITBUCKET_PASSWORD=password \
+           -e BITBUCKET=your.bitbucket-server.domain.com \
+           -e BITBUCKET_API=your.bitbucket-server.domain.com/rest/api/1.0 \
+           -e PORT=8000 \
+           -e CA_CERT=/private/ca.cert.pem \
+           -v /local/path/to/private:/private \
+       snyk/broker:bitbucket-server
+```
+
+### Custom white-listing filter
+
+The default white-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the white-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [SCM type]`. The created `accept.json` is the default filter for the chosen SCM. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:
+
+```
+docker run -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=https://my.broker.client:8000 \
+           -e ACCEPT=/private/accept.json
+           -v /local/path/to/private:/private \
+       snyk/broker:github-com
+```
+
 ### Misc
 
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
