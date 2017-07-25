@@ -10,7 +10,7 @@ WORKDIR /home/node
 USER node
 
 # Generate default accept filter
-RUN broker init bitbucket-server
+RUN broker init gitlab
 
 
 
