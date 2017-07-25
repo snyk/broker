@@ -1,0 +1,31 @@
+{
+  "private":
+  [
+    {
+      "//": "list the user's projects",
+      "method": "GET",
+      "path": "/api/v3/projects",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v3/projects/:project/repository/files",
+      "origin": "https://${GITLAB}",
+      "validParams": {
+        "file_path": [
+          "package.json",
+          "yarn.lock",
+          "package-lock.json",
+          "Gemfile",
+          "Gemfile.lock",
+          "pom.xml",
+          "requirements.txt",
+          "build.gradle",
+          "build.sbt",
+          ".snyk"
+        ]
+      }
+    }
+  ]
+}
