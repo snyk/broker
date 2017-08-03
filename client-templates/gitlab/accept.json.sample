@@ -4,28 +4,68 @@
     {
       "//": "list the user's projects",
       "method": "GET",
-      "path": "/api/v3/projects",
+      "path": "/api/v4/projects",
       "origin": "https://${GITLAB}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/api/v3/projects/:project/repository/files",
-      "origin": "https://${GITLAB}",
-      "validParams": {
-        "file_path": [
-          "package.json",
-          "yarn.lock",
-          "package-lock.json",
-          "Gemfile",
-          "Gemfile.lock",
-          "pom.xml",
-          "requirements.txt",
-          "build.gradle",
-          "build.sbt",
-          ".snyk"
-        ]
-      }
+      "path": "/api/v4/projects/:project/repository/files*/package.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/package-lock.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Gemfile.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Gemfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/pom.xml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/requirements.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/build.gradle",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/build.sbt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/.snyk",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
