@@ -2,6 +2,12 @@
   "private":
   [
     {
+      "//": "identify user",
+      "method": "GET",
+      "path": "/api/v4/user",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "list the user's projects",
       "method": "GET",
       "path": "/api/v4/projects",
