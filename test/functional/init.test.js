@@ -6,7 +6,7 @@ const init = require('../../cli/init');
 
 tmp.setGracefulCleanup(); // always remove temporary directories
 
-test('init creates files from specified client-templates', t => {
+test('init creates files from github template', t => {
   const originalWorkDir = process.cwd();
   t.teardown(() => process.chdir(originalWorkDir));
 
@@ -26,7 +26,7 @@ test('init creates files from specified client-templates', t => {
   });
 });
 
-test('init creates files from specified bitbucket', t => {
+test('init creates files from bitbucket-server template', t => {
   const originalWorkDir = process.cwd();
   t.teardown(() => process.chdir(originalWorkDir));
 
@@ -35,6 +35,26 @@ test('init creates files from specified bitbucket', t => {
     process.chdir(path);
 
     init({_: ['bitbucket-server']})
+      .then(() => Promise.all([
+        fs.stat('.env'),
+        fs.stat('accept.json'),
+      ]))
+      .then(stats => {
+        t.ok(stats.every(Boolean), 'all templated files created');
+        t.end();
+      });
+  });
+});
+
+test('init creates files from gitlab template', t => {
+  const originalWorkDir = process.cwd();
+  t.teardown(() => process.chdir(originalWorkDir));
+
+  tmp.dir({ unsafeCleanup: true }, (err, path) => {
+    if (err) { throw err; }
+    process.chdir(path);
+
+    init({_: ['gitlab']})
       .then(() => Promise.all([
         fs.stat('.env'),
         fs.stat('accept.json'),
