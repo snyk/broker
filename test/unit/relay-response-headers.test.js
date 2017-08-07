@@ -30,7 +30,7 @@ test('relay swaps header values found in BROKER_VAR_SUB', t => {
   }], config)(brokerToken);
 
   const headers = {
-    BROKER_VAR_SUB: 'private-token,replaceme',
+    'x-broker-var-sub': 'private-token,replaceme',
     donttouch: 'not to be changed ${VALUE}',
     'private-token': 'Bearer ${SECRET_TOKEN}',
     replaceme: 'replace ${VALUE}',
