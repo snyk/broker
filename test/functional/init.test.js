@@ -6,62 +6,29 @@ const init = require('../../cli/init');
 
 tmp.setGracefulCleanup(); // always remove temporary directories
 
-test('init creates files from github template', t => {
-  const originalWorkDir = process.cwd();
-  t.teardown(() => process.chdir(originalWorkDir));
+const templates = ['bitbucket-server', 'github', 'gitlab'];
 
-  tmp.dir({ unsafeCleanup: true }, (err, path) => {
-    if (err) { throw err; }
-    process.chdir(path);
+templates.forEach(template => {
+  test(`init creates files from "${template}" template`, t => {
+    const originalWorkDir = process.cwd();
+    t.teardown(() => process.chdir(originalWorkDir));
 
-    init({_: ['github']})
-    .then(() => Promise.all([
-      fs.stat('.env'),
-      fs.stat('accept.json'),
-    ]))
-    .then(stats => {
-      t.ok(stats.every(Boolean), 'all templated files created');
-      t.end();
+    tmp.dir({ unsafeCleanup: true }, (err, path) => {
+      if (err) { throw err; }
+      process.chdir(path);
+
+      init({_: [template]})
+      .then(() => Promise.all([
+        fs.stat('.env'),
+        fs.stat('accept.json'),
+      ]))
+      .then(stats => {
+        t.ok(stats.every(Boolean), 'all templated files created');
+        t.doesNotThrow(
+          () => JSON.parse(fs.readFileSync('accept.json')),
+          'accept.json is valid JSON');
+        t.end();
+      });
     });
-  });
-});
-
-test('init creates files from bitbucket-server template', t => {
-  const originalWorkDir = process.cwd();
-  t.teardown(() => process.chdir(originalWorkDir));
-
-  tmp.dir({ unsafeCleanup: true }, (err, path) => {
-    if (err) { throw err; }
-    process.chdir(path);
-
-    init({_: ['bitbucket-server']})
-      .then(() => Promise.all([
-        fs.stat('.env'),
-        fs.stat('accept.json'),
-      ]))
-      .then(stats => {
-        t.ok(stats.every(Boolean), 'all templated files created');
-        t.end();
-      });
-  });
-});
-
-test('init creates files from gitlab template', t => {
-  const originalWorkDir = process.cwd();
-  t.teardown(() => process.chdir(originalWorkDir));
-
-  tmp.dir({ unsafeCleanup: true }, (err, path) => {
-    if (err) { throw err; }
-    process.chdir(path);
-
-    init({_: ['gitlab']})
-      .then(() => Promise.all([
-        fs.stat('.env'),
-        fs.stat('accept.json'),
-      ]))
-      .then(stats => {
-        t.ok(stats.every(Boolean), 'all templated files created');
-        t.end();
-      });
   });
 });
