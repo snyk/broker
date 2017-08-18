@@ -35,7 +35,7 @@ test('proxy requests originating from behind the broker server', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', token => {
-      t.plan(16);
+      t.plan(19);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
@@ -117,6 +117,36 @@ test('proxy requests originating from behind the broker server', t => {
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('allow request for valid url with valid query param', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-query/filtered`;
+        const qs = { proxyMe: 'please' };
+        request({ url, method: 'get', json: true, qs }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(res.body, qs, 'querystring brokered');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('block request for valid url with invalid query param', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-query/filtered`;
+        const qs = { proxyMe: 'now!' };
+        request({ url, 'method': 'get', qs }, (err, res, body) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('block request for valid url with missing query param', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-query/filtered`;
+        request({ url, 'method': 'get' }, (err, res, body) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
       });

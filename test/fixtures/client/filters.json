@@ -1,7 +1,7 @@
 {
   "private": [
     {
-      "path": "/echo-param/${param}",
+      "path": "/echo-param/:param",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
     },
@@ -50,6 +50,18 @@
     },
 
     {
+      "path": "/echo-query/filtered",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}",
+      "valid": [
+        {
+          "queryParam": "proxyMe",
+          "values": ["please"]
+        }
+      ]
+    },
+
+    {
       "path": "/nested/path-with/wild*/to/file.ext",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
@@ -58,7 +70,7 @@
   ],
   "public": [
     {
-      "path": "/echo-param/${param}",
+      "path": "/echo-param/:param",
       "method": "GET"
     },
 
@@ -87,7 +99,18 @@
     {
       "path": "/echo-query",
       "method": "GET"
-    }
+    },
+
+    {
+      "path": "/echo-query/filtered",
+      "method": "GET",
+      "valid": [
+          {
+            "queryParam": "proxyMe",
+            "values": ["please"],
+          }
+        ]
+    },
 
   ]
 }

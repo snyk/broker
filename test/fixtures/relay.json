@@ -21,5 +21,47 @@
         "value": ".snyk"
       }
     ]
+  },
+  {
+    "method": "GET",
+    "path": "/filtered-on-query",
+    "valid": [
+      {
+        "queryParam": "filePath",
+        "values": [
+          "**/package.json",
+          "**/yarn.lock"
+        ]
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/filtered-on-query-and-body",
+    "valid": [
+      {
+        "queryParam": "filePath",
+        "values": [
+          "**/package.json",
+          "**/yarn.lock"
+        ]
+      },
+      {
+        "path": "commits.*.added.*",
+        "value": "package.json"
+      },
+      {
+        "path": "commits.*.modified.*",
+        "value": "package.json"
+      },
+      {
+        "path": "commits.*.added.*",
+        "value": ".snyk"
+      },
+      {
+        "path": "commits.*.modified.*",
+        "value": ".snyk"
+      }
+    ]
   }
 ]

@@ -1,7 +1,7 @@
 {
   "private": [
     {
-      "path": "/echo-param/${param}",
+      "path": "/echo-param/:param",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
     },
@@ -20,6 +20,12 @@
 
     {
       "path": "/echo-query",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-query/:param?",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
     }

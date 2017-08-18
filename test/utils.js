@@ -30,7 +30,7 @@ echoServer.post('/echo-headers/:param?', (req, res) => {
   res.json(req.headers);
 });
 
-echoServer.get('/echo-query', (req, res) => {
+echoServer.get('/echo-query/:param?', (req, res) => {
   res.json(req.query);
 });
 
