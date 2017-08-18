@@ -3,6 +3,7 @@ const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
+// require('request-debug')(request);
 const app = require('../../lib');
 const root = __dirname;
 
@@ -36,7 +37,7 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', token => {
-      t.plan(9);
+      t.plan(12);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -100,6 +101,36 @@ test('proxy requests originating from behind the broker client', t => {
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('allow request for valid url with valid query param', t => {
+        const url = `http://localhost:${clientPort}/echo-query/filtered`;
+        const qs = { proxyMe: 'please' };
+        request({ url, method: 'get', json: true, qs }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(res.body, qs, 'querystring brokered');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('block request for valid url with invalid query param', t => {
+        const url = `http://localhost:${clientPort}/echo-query/filtered`;
+        const qs = { proxyMe: 'now!' };
+        request({ url, 'method': 'get', qs }, (err, res, body) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker client
+      t.test('block request for valid url with missing query param', t => {
+        const url = `http://localhost:${clientPort}/echo-query/filtered`;
+        request({ url, 'method': 'get' }, (err, res, body) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
       });

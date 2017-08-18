@@ -33,16 +33,19 @@ module.exports = (args) => {
       return files;
     });
   }).then(files => {
-    for (const file of files) {
-      const newfile = file.replace(/\.sample$/, '');
-      logger.debug(`generating: ${newfile}`);
-      fs.createReadStream(
-        path.resolve(dir, file)
-      ).pipe(fs.createWriteStream(
-        path.resolve(process.cwd(), newfile)
-      ));
-    }
-
-    logger.info(`${project} initialisation complete`);
-  });
+    return Promise.all(
+      files.map(file =>
+        new Promise((resolve, reject) => {
+          const newfile = file.replace(/\.sample$/, '');
+          logger.debug(`generating: ${newfile}`);
+          const reader = fs.createReadStream(path.resolve(dir, file));
+          const writer =
+            fs.createWriteStream(path.resolve(process.cwd(), newfile));
+          reader.pipe(writer)
+            .on('finish', resolve)
+            .on('error', reject);
+        })
+      )
+    );
+  }).then(() => logger.info(`${project} initialisation complete`));
 };
