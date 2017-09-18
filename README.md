@@ -30,7 +30,8 @@ To use the the broker client with GitHub.com, pull the `snyk/broker:github-com` 
 You can run the docker container by providing the relevant configuration:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
@@ -68,7 +69,8 @@ To use the the broker client with a GitHub Enterprise deployment, pull the `snyk
 You can run the docker container by providing the relevant configuration:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e GITHUB=your.ghe.domain.com \
@@ -111,7 +113,8 @@ To use the the broker client with a Bitbucket Server deployment, pull the `snyk/
 You can run the docker container by providing the relevant configuration:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e BITBUCKET_USERNAME=username \
            -e BITBUCKET_PASSWORD=password \
@@ -150,7 +153,8 @@ To use the the broker client with Gitlab.com or an on-prem Gitlab deployment, pu
 You can run the docker container by providing the relevant configuration:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITLAB_TOKEN=secret-gitlab-token \
            -e GITLAB=your.gitlab.domain.com \
@@ -180,7 +184,8 @@ The broker client runs an HTTP server by default. It can be configured to run an
 For example, if your certificate files are found locally at `./private/broker.crt` and `./private/broker.key`, provide these files to the docker container by mounting the folder and using the `HTTPS_CERT` and `HTTPS_KEY` environment variables:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
@@ -200,7 +205,8 @@ The broker client establishes HTTPS connections to the SCM. If your SCM is servi
 For example, if your CA certificate is at `./private/ca.cert.pem`, provide it to the docker container by mounting the folder and using the `CA_CERT` environment variable:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e BITBUCKET_USERNAME=username \
            -e BITBUCKET_PASSWORD=password \
@@ -217,7 +223,8 @@ docker run -p 8000:8000 \
 The default white-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the white-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [SCM type]`. The created `accept.json` is the default filter for the chosen SCM. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:
 
 ```
-docker run -p 8000:8000 \
+docker run --restart=always \
+           -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
