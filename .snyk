@@ -13,4 +13,8 @@ ignore:
     - engine.io-client > parsejson:
         reason: None given
         expires: '2017-10-26T07:31:28.759Z'
+  'npm:mime:20170907':
+    - '*':
+        reason: None given
+        expires: '2018-10-28T08:51:34.715Z'
 patch: {}
