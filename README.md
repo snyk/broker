@@ -18,7 +18,7 @@ The broker client is published as a set of docker images, each configured for a 
 
 ### GitHub.com
 
-To use the the broker client with GitHub.com, pull the `snyk/broker:github-com` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with GitHub.com, run `docker pull snyk/broker:github-com`. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
 - `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
@@ -54,7 +54,7 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 ### GitHub Enterprise
 
-To use the the broker client with a GitHub Enterprise deployment, pull the `snyk/broker:github-enterprise` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with a GitHub Enterprise deployment, run `docker pull snyk/broker:github-enterprise` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
 - `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
@@ -99,7 +99,7 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 ### Bitbucket Server
 
-To use the the broker client with a Bitbucket Server deployment, pull the `snyk/broker:bitbucket-server` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with a Bitbucket Server deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Server integration settings view.
 - `BITBUCKET_USERNAME` - the Bitbucket Server username.
@@ -141,7 +141,7 @@ ENV PORT                8000
 
 ### Gitlab
 
-To use the the broker client with Gitlab.com or an on-prem Gitlab deployment, pull the `snyk/broker:gitlab` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with Gitlab.com or an on-prem Gitlab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your Gitlab integration settings view.
 - `GITLAB_TOKEN` - a Gitlab personal access token with `api` scope
