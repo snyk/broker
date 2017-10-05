@@ -1,4 +1,12 @@
 {
+  "public":
+  [
+      {
+        "//": "used for pushing up webhooks from gitlab",
+        "method": "POST",
+        "path": "/webhook/gitlab/:webhookId"
+      }
+  ],
   "private":
   [
     {
@@ -101,6 +109,24 @@
           ]
         }
       ]
+    },
+    {
+      "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/hooks",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+      "method": "DELETE",
+      "path": "/api/v4/projects/:project/hooks/:id",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create commit status messages",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/statuses/:sha",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
