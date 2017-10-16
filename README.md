@@ -147,6 +147,7 @@ To use the the broker client with Gitlab.com or an on-prem Gitlab deployment, ru
 - `GITLAB_TOKEN` - a Gitlab personal access token with `api` scope
 - `GITLAB` - the hostname of your Gitlab deployment, such as `your.gitlab.domain.com` or `gitlab.com`.
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
+- `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by GitLab.com webhooks, such as `http://my.broker.client:7341`
 
 #### Command-line arguments
 
@@ -158,6 +159,7 @@ docker run --restart=always \
            -e BROKER_TOKEN=secret-broker-token \
            -e GITLAB_TOKEN=secret-gitlab-token \
            -e GITLAB=your.gitlab.domain.com \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
            -e PORT=8000 \
        snyk/broker:gitlab
 ```
