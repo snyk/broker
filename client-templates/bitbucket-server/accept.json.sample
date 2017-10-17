@@ -84,14 +84,14 @@
     {
       "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
       "method": "POST",
-      "path": "/projects/:projectKey/repos/:repoSlug/webhooks",
-      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/webhooks",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET}"
     },
     {
       "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
       "method": "DELETE",
-      "path": "/projects/:projectKey/repos/:repoSlug/webhooks/:webhookId",
-      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/webhooks/:webhookId",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET}"
     },
     {
       "//": "used to create commit status messages",
