@@ -1,6 +1,6 @@
 [![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io)
 
-[![Known Vulnerabilities](https://snyk.io/test/npm/snyk-broker/badge.svg?style=flat-square)](https://snyk.io/test/npm/snyk-broker)
+[![Known Vulnerabilities](https://snyk.io/test/github/snyk/broker/badge.svg?style=flat-square)](https://snyk.io/test/github/snyk/broker)
 
 ***
 
