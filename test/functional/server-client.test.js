@@ -171,11 +171,18 @@ test('proxy requests originating from behind the broker server', t => {
       });
 
       t.test('querystring parameters are brokered', t => {
-        const url = `http://localhost:${serverPort}/broker/${token}/echo-query?shape=square&colour=yellow`;
+        const url = `http://localhost:${serverPort}/broker/${token}/` +
+                'echo-query?shape=square&colour=yellow&' +
+                'url_as_param=https%3A%2F%2Fclojars.org%2Fsearch%3Fq%3Dbtc&' +
+                'one_more_top_level_param=true';
         request({ url, method: 'get' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.same(responseBody, {shape: 'square', colour: 'yellow'},
+          t.same(responseBody, {
+            shape: 'square', colour: 'yellow',
+            url_as_param: 'https://clojars.org/search?q=btc',
+            one_more_top_level_param: 'true',
+          },
             'querystring brokered');
           t.end();
         });
