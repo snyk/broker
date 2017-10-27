@@ -5,14 +5,14 @@ ignore:
   'npm:debug:20170905':
     - primus > setheader > debug:
         reason: None given
-        expires: '2017-10-26T07:31:28.759Z'
+        expires: '2018-10-26T07:31:28.759Z'
     - primus > access-control > setheader > debug:
         reason: None given
-        expires: '2017-10-26T07:31:28.759Z'
+        expires: '2018-10-26T07:31:28.759Z'
   'npm:parsejson:20170908':
     - engine.io-client > parsejson:
         reason: None given
-        expires: '2017-10-26T07:31:28.759Z'
+        expires: '2018-10-26T07:31:28.759Z'
   'npm:mime:20170907':
     - '*':
         reason: None given
