@@ -40,6 +40,11 @@ echoServer.get(
     res.send(req.params.filename);
   });
 
+echoServer.get('/repos/owner/repo/contents/folder/package.json',
+  (req, res) => {
+    res.json({headers: req.headers, query: req.query, url: req.url});
+  });
+
 echoServer.all('*', (req, res) => {
   res.send(false);
 });

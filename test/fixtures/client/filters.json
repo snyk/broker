@@ -61,6 +61,13 @@
       ]
     },
 
+
+    {
+      "path": "/repos/:repo/:owner/contents/folder*/package.json",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
+    },
+
     {
       "path": "/nested/path-with/wild*/to/file.ext",
       "method": "GET",
@@ -107,10 +114,9 @@
       "valid": [
           {
             "queryParam": "proxyMe",
-            "values": ["please"],
+            "values": ["please"]
           }
         ]
-    },
-
+    }
   ]
 }

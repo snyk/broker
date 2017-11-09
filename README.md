@@ -60,7 +60,6 @@ To use the the broker client with a GitHub Enterprise deployment, run `docker pu
 - `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
 - `GITHUB` - the hostname of your GitHub Enterprise deployment, such as `your.ghe.domain.com`.
 - `GITHUB_API` - the API endpoint of your GitHub Enterprise deployment. Should be `$GITHUB/api/v3`.
-- `GITHUB_RAW` - the raw file access endpoint of your GitHub Enterprise deployment. Should be `$GITHUB/raw`.
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 - `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your GitHub Enterprise deployment webhooks, such as `http://my.broker.client:7341`
 
@@ -75,7 +74,6 @@ docker run --restart=always \
            -e GITHUB_TOKEN=secret-github-token \
            -e GITHUB=your.ghe.domain.com \
            -e GITHUB_API=your.ghe.domain.com/api/v3 \
-           -e GITHUB_RAW=your.ghe.domain.com/raw \
            -e PORT=8000 \
            -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
        snyk/broker:github-enterprise
@@ -92,7 +90,6 @@ ENV BROKER_TOKEN      secret-broker-token
 ENV GITHUB_TOKEN      secret-github-token
 ENV GITHUB            your.ghe.domain.com
 ENV GITHUB_API        your.ghe.domain.com/api/v3
-ENV GITHUB_RAW        your.ghe.domain.com/raw
 ENV PORT              8000
 ENV BROKER_CLIENT_URL http://my.broker.client:8000
 ```

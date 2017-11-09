@@ -46,9 +46,6 @@ ENV GITHUB github.com
 # The URL that the github API should be accessed, excluding scheme.
 ENV GITHUB_API api.github.com
 
-# The URL where raw file content is accessed, excluding scheme.
-ENV GITHUB_RAW raw.githubusercontent.com
-
 # The URL of the Snyk broker server
 ENV BROKER_SERVER_URL https://broker.snyk.io
 
