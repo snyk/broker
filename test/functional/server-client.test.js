@@ -27,6 +27,7 @@ test('proxy requests originating from behind the broker server', t => {
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
+  process.env.GITHUB = 'github.com';
   process.env.BROKER_TOKEN = '12345';
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
   process.env.ORIGIN_PORT = echoServerPort;
@@ -35,7 +36,7 @@ test('proxy requests originating from behind the broker server', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', token => {
-      t.plan(19);
+      t.plan(21);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
@@ -241,6 +242,31 @@ test('proxy requests originating from behind the broker server', t => {
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
           t.equal(encodedAuth, 'bitbucketUser:bitbucketPassword',
             'auth header is set correctly');
+          t.end();
+        });
+      });
+
+      t.test('/raw is rewritten to /contents for GH users', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/owner/repo/HEAD/folder/package.json`;
+        const headers = {};
+        request({ url, method: 'get', headers, json: true }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body.headers.accept, 'application/vnd.github.2.11.raw',
+            'injected raw headers');
+          t.equal(res.body.query.ref, 'HEAD',
+            'extracted ref as query parameter');
+          t.equal(res.body.url,
+            '/repos/owner/repo/contents/folder/package.json?ref=HEAD',
+            'get correct full url');
+          t.end();
+        });
+      });
+
+      t.test('/raw is not rewritten to /contents for unsupported manifest file', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/owner/repo/HEAD/folder/unsupportedFile.ext`;
+        const headers = {};
+        request({ url, method: 'get', headers }, (err, res) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
       });
