@@ -20,8 +20,8 @@ ignore:
   'npm:ws:20171108':
     - engine.io > ws:
         reason: None given
-        expires: '2017-12-10T08:48:56.153Z'
+        expires: '2018-12-10T08:48:56.153Z'
     - engine.io-client > ws:
         reason: None given
-        expires: '2017-12-10T08:48:56.154Z'
+        expires: '2018-12-10T08:48:56.154Z'
 patch: {}
