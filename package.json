@@ -17,9 +17,7 @@
     "lint": "eslint cli/*.js lib/**/*.js",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n",
     "cover": "tap test/**/*.test.js --timeout 60 --cov --coverage-report=lcov",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "keywords": [],
   "author": "Remy Sharp",
@@ -67,8 +65,7 @@
     "snyk-config": "^1.0.1",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.4",
-    "undefsafe": "^1.2.0",
-    "snyk": "^1.49.1"
+    "undefsafe": "^1.2.0"
   },
   "repository": {
     "type": "git",
