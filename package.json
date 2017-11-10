@@ -74,5 +74,6 @@
   "bugs": {
     "url": "https://github.com/snyk/broker/issues"
   },
-  "homepage": "https://github.com/snyk/broker#readme"
+  "homepage": "https://github.com/snyk/broker#readme",
+  "snyk": true
 }
