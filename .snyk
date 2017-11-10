@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.7.1
+version: v1.8.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:debug:20170905':
@@ -17,4 +17,11 @@ ignore:
     - '*':
         reason: None given
         expires: '2018-10-28T08:51:34.715Z'
+  'npm:ws:20171108':
+    - engine.io > ws:
+        reason: None given
+        expires: '2017-12-10T08:48:56.153Z'
+    - engine.io-client > ws:
+        reason: None given
+        expires: '2017-12-10T08:48:56.154Z'
 patch: {}
