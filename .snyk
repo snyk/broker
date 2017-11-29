@@ -24,4 +24,8 @@ ignore:
     - engine.io-client > ws:
         reason: None given
         expires: '2018-12-10T08:48:56.154Z'
+  'npm:moment:20170905':
+    - bunyan > moment:
+        reason: None given
+        expires: '2018-12-29T16:09:34.452Z'
 patch: {}
