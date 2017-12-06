@@ -3,3 +3,4 @@
 .nyc_output
 coverage
 /test/fixtures/certs/tmp
+accept.json

@@ -6,7 +6,7 @@ const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 test('filter on body', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
-  t.plan(9);
+  t.plan(14);
   t.pass('filters loaded');
 
   filter({
@@ -71,6 +71,87 @@ test('filter on body', t => {
     t.equal(res, undefined, 'no follow allowed');
   });
 
+  filter({
+    url: '/graphql',
+    method: 'POST',
+    body: jsonBuffer({
+      query: `{
+        repositoryOwner(login: "_REPO_OWNER_") {
+          repository(name: "_REPO_NAME_") {
+            object(expression: "_BRANCH_/_NAME_") {
+              ... on Tree {
+                entries {
+                  name
+                  type
+                  object {
+                    ... on Tree {
+                      entries {
+                        name
+                        type
+                        object {
+                          ...on Tree {
+                            entries {
+                              name
+                              type
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }`,
+    })
+  }, (error, res) => {
+    t.equal(error, null, 'no error');
+    t.equal(res, '/graphql', 'allows the path request');
+  });
+
+  filter({
+    url: '/graphql',
+    method: 'POST',
+    body: jsonBuffer({
+      // "NoSQL injection"
+      query: `{
+        repositoryOwner(login: "search: "{\"username\": {\"$regex\": \"sue\"}, \"email\": {\"$regex\": \"sue\"}}"") {
+          repository(name: "_REPO_NAME_") {
+            object(expression: "_BRANCH_/_NAME_") {
+              ... on Tree {
+                entries {
+                  name
+                  type
+                  object {
+                    ... on Tree {
+                      entries {
+                        name
+                        type
+                        object {
+                          ...on Tree {
+                            entries {
+                              name
+                              type
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }`,
+    })
+  }, (error, res) => {
+    t.ok(error, 'got an error');
+    t.equal(error.message, 'blocked', 'has been blocked');
+    t.equal(res, undefined, 'no follow allowed');
+  });
 });
 
 test('filter on querystring', t => {
