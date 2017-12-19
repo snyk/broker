@@ -28,6 +28,12 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "list the user's visible projects",
+      "method": "GET",
+      "path": "/api/v3/projects/visible",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/package.json",
