@@ -103,6 +103,7 @@ To use the the broker client with a Bitbucket Server deployment, run `docker pul
 - `BITBUCKET_PASSWORD` - the Bitbucket Server password.
 - `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
 - `BITBUCKET_API` - the API endpoint of your Bitbucket Server deployment. Should be `$BITBUCKET/rest/api/1.0`.
+- `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your Bitbucket Server for webhooks, such as `http://my.broker.client:7341`
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 
 #### Command-line arguments
@@ -117,6 +118,7 @@ docker run --restart=always \
            -e BITBUCKET_PASSWORD=password \
            -e BITBUCKET=your.bitbucket-server.domain.com \
            -e BITBUCKET_API=your.bitbucket-server.domain.com/rest/api/1.0 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
            -e PORT=8000 \
        snyk/broker:bitbucket-server
 ```
