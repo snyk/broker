@@ -33,6 +33,10 @@ ENV GITLAB your.gitlab.server.hostname
 # Default value is 7341
 ENV PORT 7341
 
+# The URL of your broker client (including scheme and port)
+# This will be used as the webhook payload URL coming in from Gitlab
+# ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
+
 
 #######################################
 # Generic Broker Client configuration #

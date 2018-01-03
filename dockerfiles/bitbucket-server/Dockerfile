@@ -39,6 +39,10 @@ ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
 # Default value is 7341
 ENV PORT 7341
 
+# The URL of your broker client (including scheme and port)
+# This will be used as the webhook payload URL coming in from
+# your Bitbucket Server.
+# ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
 
 #######################################
 # Generic Broker Client configuration #
