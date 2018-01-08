@@ -116,6 +116,12 @@
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET}"
+    },
+    {
+      "//": "used to query for open pull requests by branch",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
+      "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET}"
     }
   ]
 }
