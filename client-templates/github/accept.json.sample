@@ -68,10 +68,22 @@
             "value": ".snyk"
           }
         ]
-      }
+      },
+    {
+      "//": "used for pushing up webhooks from github",
+      "method": "POST",
+      "path": "/webhook/github/:webhookId"
+    }
   ],
   "private":
   [
+    {
+      "//": "list the user's info, and validate their credentials",
+      "method": "GET",
+      "path": "/user",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
     {
       "//": "list the user's repos",
       "method": "GET",
@@ -111,6 +123,13 @@
       "//": "used to create commit status messages",
       "method": "POST",
       "path": "/repos/:user/:repo/statuses/:sha",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to get branch info",
+      "method": "GET",
+      "path": "/repos/:user/:repo/branches/:branch",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
