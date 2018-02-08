@@ -1,74 +1,11 @@
 {
   "public":
   [
-      {
-        "//": "used for pushing up webhooks from github",
-        "method": "POST",
-        "path": "/webhook/github",
-        "valid": [
-          {
-            "//": "accept all pull request state changes (these don't have files in them)",
-            "path": "pull_request.state",
-            "value": "open"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "package.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "package.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "package-lock.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "package-lock.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Gemfile.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Gemfile.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "requirements.txt"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "requirements.txt"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "pom.xml"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "pom.xml"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "yarn.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "yarn.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": ".snyk"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": ".snyk"
-          }
-        ]
-      },
+    {
+      "//": "used for pushing up webhooks from github",
+      "method": "POST",
+      "path": "/webhook/github"
+    },
     {
       "//": "used for pushing up webhooks from github",
       "method": "POST",
