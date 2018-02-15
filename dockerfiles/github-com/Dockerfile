@@ -43,8 +43,11 @@ ENV PORT 7341
 # GitHub host is github.com
 ENV GITHUB github.com
 
-# The URL that the github API should be accessed, excluding scheme.
+# Github API endpoint, excluding scheme.
 ENV GITHUB_API api.github.com
+
+# Github GraphQL API endpoint, excluding scheme.
+ENV GITHUB_GRAPHQL api.github.com
 
 # The URL of the Snyk broker server
 ENV BROKER_SERVER_URL https://broker.snyk.io
