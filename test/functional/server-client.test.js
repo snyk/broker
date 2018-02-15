@@ -4,6 +4,7 @@ const test = require('tap-only');
 const path = require('path');
 const request = require('request');
 const app = require('../../lib');
+const version = require('../../lib/version');
 const root = __dirname;
 
 const { port, echoServerPort } = require('../utils')(tap);
@@ -18,25 +19,40 @@ test('proxy requests originating from behind the broker server', t => {
    * Note: client is forwarding requests to echo-server defined in test/util.js
    */
 
-  process.env.ACCEPT = 'filters.json';
+  const ACCEPT = 'filters.json';
+  process.env.ACCEPT = ACCEPT;
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.BROKER_TYPE = 'server';
   const serverPort = port();
   const server = app.main({ port: serverPort });
 
-  process.chdir(path.resolve(root, '../fixtures/client'));
+  const clientRootPath = path.resolve(root, '../fixtures/client');
+  process.chdir(clientRootPath);
+  const BROKER_SERVER_URL = `http://localhost:${serverPort}`;
+  const BROKER_TOKEN = '98f04768-50d3-46fa-817a-9ee6631e9970'
   process.env.BROKER_TYPE = 'client';
   process.env.GITHUB = 'github.com';
-  process.env.BROKER_TOKEN = '12345';
-  process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
+  process.env.BROKER_TOKEN = BROKER_TOKEN;
+  process.env.BROKER_SERVER_URL = BROKER_SERVER_URL;
   process.env.ORIGIN_PORT = echoServerPort;
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
-    socket.on('identify', token => {
-      t.plan(21);
+    socket.on('identify', clientData => {
+      const token = clientData.token;
+      t.plan(22);
+
+      t.test('identification', t => {
+        const filters = require(`${clientRootPath}/${ACCEPT}`);
+        t.equal(clientData.token, BROKER_TOKEN, 'correct token');
+        t.deepEqual(clientData.metadata, {
+          version,
+          filters,
+        }, 'correct metadata');
+        t.end();
+      });
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
@@ -82,7 +98,7 @@ test('proxy requests originating from behind the broker server', t => {
         request({ url, method: 'post', json: true, body }, (err, res) => {
           const swappedBody = {
             BROKER_VAR_SUB: ['swap.me'],
-            swap: { me: 'client:12345' },
+            swap: { me: `client:${token}` },
           };
           t.equal(res.statusCode, 200, '200 statusCode');
           t.same(res.body, swappedBody, 'body brokered');

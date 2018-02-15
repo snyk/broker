@@ -39,7 +39,8 @@ test('correctly use supplied CA cert on client for connections', t => {
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
-    socket.on('identify', token => {
+    socket.on('identify', clientData => {
+      const token = clientData.token;
       t.test('get an error trying to connect to a server with unknown CA', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {

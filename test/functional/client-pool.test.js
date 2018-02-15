@@ -40,7 +40,8 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
-    socket.on('identify', token => {
+    socket.on('identify', clientData => {
+      const token = clientData.token;
       t.test('successfully broker POST with 1st connected client', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
