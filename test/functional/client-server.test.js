@@ -36,7 +36,7 @@ test('proxy requests originating from behind the broker client', t => {
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
-    socket.once('identify', token => {
+    socket.once('identify', clientData => {
       t.plan(12);
 
       t.test('successfully broker POST', t => {
@@ -142,7 +142,7 @@ test('proxy requests originating from behind the broker client', t => {
         request({ url, method: 'post' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(responseBody['x-broker-token'], token.toLowerCase(),
+          t.equal(responseBody['x-broker-token'], clientData.token.toLowerCase(),
                   'X-Broker-Token header present and lowercased');
           t.end();
         });

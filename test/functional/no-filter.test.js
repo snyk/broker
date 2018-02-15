@@ -31,7 +31,8 @@ test('no filters broker', t => {
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
-    socket.on('identify', token => {
+    socket.on('identify', clientData => {
+      const token = clientData.token;
       t.plan(2);
 
       t.test('successfully broker with no filter should reject', t => {

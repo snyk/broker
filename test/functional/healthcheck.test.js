@@ -46,7 +46,8 @@ test('proxy requests originating from behind the broker client', t => {
       if (err) { return t.threw(err); }
 
       t.equal(res.statusCode, 200, '200 statusCode');
-      t.equal(res.body['ok'], true, '{ ok: true } in body');
+      t.equal(res.body.ok, true, '{ ok: true } in body');
+      t.ok(res.body.version, 'version in body');
       t.end();
     });
   });
@@ -59,7 +60,8 @@ test('proxy requests originating from behind the broker client', t => {
           if (err) { return t.threw(err); }
 
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(res.body['ok'], true, '{ ok: true } in body');
+          t.equal(res.body.ok, true, '{ ok: true } in body');
+          t.ok(res.body.version, 'version in body');
           t.end();
         });
       });
@@ -69,7 +71,8 @@ test('proxy requests originating from behind the broker client', t => {
           if (err) { return t.threw(err); }
 
           t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(res.body['ok'], true, '{ ok: true } in body');
+          t.equal(res.body.ok, true, '{ ok: true } in body');
+          t.ok(res.body.version, 'version in body');
           t.end();
         });
       });
@@ -93,7 +96,8 @@ test('proxy requests originating from behind the broker client', t => {
             if (err) { return t.threw(err); }
 
             t.equal(res.statusCode, 200, '200 statusCode');
-            t.equal(res.body['ok'], true, '{ ok: true } in body');
+            t.equal(res.body.ok, true, '{ ok: true } in body');
+            t.ok(res.body.version, 'version in body');
             t.end();
           });
         }, 20);
@@ -115,7 +119,8 @@ test('proxy requests originating from behind the broker client', t => {
                 if (err) { return t.threw(err); }
 
                 t.equal(res.statusCode, 200, '200 statusCode');
-                t.equal(res.body['ok'], true, '{ ok: true } in body');
+                t.equal(res.body.ok, true, '{ ok: true } in body');
+                t.ok(res.body.version, 'version in body');
                 t.end();
               });
             });
