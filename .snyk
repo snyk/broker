@@ -1,31 +1,13 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.8.0
+version: v1.10.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:debug:20170905':
-    - primus > setheader > debug:
+    - '* > debug':
         reason: None given
-        expires: '2018-10-26T07:31:28.759Z'
-    - primus > access-control > setheader > debug:
+        expires: '2019-03-17T18:04:05.445Z'
+  'npm:hoek:20180212':
+    - '* > hoek':
         reason: None given
-        expires: '2018-10-26T07:31:28.759Z'
-  'npm:parsejson:20170908':
-    - engine.io-client > parsejson:
-        reason: None given
-        expires: '2018-10-26T07:31:28.759Z'
-  'npm:mime:20170907':
-    - '*':
-        reason: None given
-        expires: '2018-10-28T08:51:34.715Z'
-  'npm:ws:20171108':
-    - engine.io > ws:
-        reason: None given
-        expires: '2018-12-10T08:48:56.153Z'
-    - engine.io-client > ws:
-        reason: None given
-        expires: '2018-12-10T08:48:56.154Z'
-  'npm:moment:20170905':
-    - bunyan > moment:
-        reason: None given
-        expires: '2018-12-29T16:09:34.452Z'
+        expires: '2019-03-17T18:04:05.446Z'
 patch: {}
