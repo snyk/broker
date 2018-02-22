@@ -30,10 +30,10 @@ RUN broker init github
 ENV GITHUB=your.ghe.domain.com
 
 # Github API endpoint, excluding scheme.
-ENV GITHUB_API $GITHUB/api/v3
+ENV GITHUB_API your.ghe.domain.com/api/v3
 
 # Github GraphQL API endpoint, excluding scheme.
-ENV GITHUB_GRAPHQL $GITHUB/api
+ENV GITHUB_GRAPHQL your.ghe.domain.com/api
 
 # The port used by the broker client to accept webhooks
 # Default value is 7341
