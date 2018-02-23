@@ -77,7 +77,7 @@ test('filter on body', t => {
     body: jsonBuffer({
       query: `{
         repositoryOwner(login: "_REPO_OWNER_") {
-          repository(name: "_REPO_NAME_") {
+          repository(name: "_REPO-NAME_") {
             object(expression: "_BRANCH_/_NAME_") {
               ... on Tree {
                 entries {
@@ -89,7 +89,7 @@ test('filter on body', t => {
                         name
                         type
                         object {
-                          ...on Tree {
+                          ... on Tree {
                             entries {
                               name
                               type
@@ -130,7 +130,7 @@ test('filter on body', t => {
                         name
                         type
                         object {
-                          ...on Tree {
+                          ... on Tree {
                             entries {
                               name
                               type
