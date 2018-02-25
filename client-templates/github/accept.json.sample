@@ -282,7 +282,7 @@
         {
           "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
           "path": "query",
-          "regex": "{\\s*repositoryOwner\\(login:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*repository\\(name:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*object\\(expression:\\s*\"([a-zA-Z0-9-_./:]+)\"\\)\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.on\\s+Tree\\s*{\\s*entries\\s*{\\s*name\\s+type\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}"
+          "regex": "{\\s*repositoryOwner\\(login:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*repository\\(name:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*object\\(expression:\\s*\"([a-zA-Z0-9-_./:]+)\"\\)\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s*{\\s*entries\\s*{\\s*name\\s+type\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}"
         }
       ]
     }

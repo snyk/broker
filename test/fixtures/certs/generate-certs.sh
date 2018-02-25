@@ -16,7 +16,7 @@ openssl req \
   -new \
   -nodes \
   -key ca/my-root-ca.key.pem \
-  -days 1024 \
+  -days 3650 \
   -out ca/my-root-ca.crt.pem \
   -subj "/C=US/ST=Utah/L=Provo/O=Internal Signing Authority/CN=${FQDN}"
 
@@ -41,7 +41,7 @@ openssl x509 \
   -CAkey ca/my-root-ca.key.pem \
   -CAcreateserial \
   -out server/cert.pem \
-  -days 500
+  -days 3650
 
 # Create a public key, for funzies
 # see https://gist.github.com/coolaj86/f6f36efce2821dfb046d
