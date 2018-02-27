@@ -203,9 +203,9 @@ docker run --restart=always \
 
 Note that `BROKER_CLIENT_URL` now has the HTTPS scheme.
 
-#### SCM with a self-signed certificate
+#### SCM with an internal certificate
 
-The broker client establishes HTTPS connections to the SCM. If your SCM is serving a self-signed certificate, you can provide the CA certificate to the broker client.
+By default, the broker client establishes HTTPS connections to the SCM. If your SCM is serving an internal certificate (signed by your own CA), you can provide the CA certificate to the broker client.
 
 For example, if your CA certificate is at `./private/ca.cert.pem`, provide it to the docker container by mounting the folder and using the `CA_CERT` environment variable:
 
