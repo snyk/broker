@@ -134,6 +134,27 @@
     },
 
     {
+      "//": "used to get status checks on a branch",
+      "method": "GET",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to create status checks on a branch",
+      "method": "POST",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to delete status checks on a branch",
+      "method": "DELETE",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
       "//": "check if repo is public",
       "method": "GET",
       "path": "/:user/:repo",
