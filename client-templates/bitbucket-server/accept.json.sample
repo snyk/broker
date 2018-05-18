@@ -78,7 +78,7 @@
     {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse/.snyk",
+      "path": "/projects/:project/repos/:repo/browse*/.snyk",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET_API}"
     },
     {
@@ -108,7 +108,7 @@
     {
       "//": "used to create or update a file for fix PRs",
       "method": "PUT",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/:path",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
       "origin": "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@${BITBUCKET}"
     },
     {
