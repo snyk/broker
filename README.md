@@ -6,7 +6,7 @@
 
 # snyk/broker
 
-Snyk Broker proxies access between snyk.io and your Git repositories, such as GitHub Enterprise, GitHub.com and Bitbucket Server. Snyk Broker can also be used to enable a secure connection with your on-premise Jira deployment.  
+Snyk Broker proxies access between snyk.io and your Git repositories, such as GitHub Enterprise, GitHub.com and Bitbucket Server. Snyk Broker can also be used to enable a secure connection with your on-premise Jira deployment.
 
 The Broker server and client establish an applicative tunnel, proxying requests from snyk.io to the Git (fetching manifest files from monitored repositories), and vice versa (webhooks posted by the Git).
 
@@ -349,7 +349,14 @@ docker run --restart=always \
        snyk/broker:github-com
 ```
 
-### Misc
+### Mounting Secrets
+Sometime it is required to load sensitive configurations (GitHub/Snyk's token) from a file instead from environment variables. Broker is using [dotenv](https://www.npmjs.com/package/dotenv) to load the config, so the process is relatively simple:
+* Create a file named `.env` and put your sensitive config there:
+* Mount this file (for example, using [Kuberentes secret](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#create-a-pod-that-has-access-to-the-secret-data-through-a-volume)). Mount the file to be somewhere like `/broker`.
+* Change the workdir of the docker image to be `/broker`/
+Example of such file is located in your broker container at $HOME/.env
+
+## Misc
 
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
 * [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
