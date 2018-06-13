@@ -53,6 +53,22 @@
           },
           {
             "path": "commits.*.added.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.added.*",
             "value": "yarn.lock"
           },
           {
