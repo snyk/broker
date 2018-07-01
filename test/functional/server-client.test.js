@@ -42,7 +42,7 @@ test('proxy requests originating from behind the broker server', t => {
   server.io.on('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.plan(22);
+      t.plan(20);
 
       t.test('identification', t => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -258,31 +258,6 @@ test('proxy requests originating from behind the broker server', t => {
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
           t.equal(encodedAuth, 'bitbucketUser:bitbucketPassword',
             'auth header is set correctly');
-          t.end();
-        });
-      });
-
-      t.test('/raw is rewritten to /contents for GH users', t => {
-        const url = `http://localhost:${serverPort}/broker/${token}/owner/repo/HEAD/folder/package.json`;
-        const headers = {};
-        request({ url, method: 'get', headers, json: true }, (err, res) => {
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.equal(res.body.headers.accept, 'application/vnd.github.2.11.raw',
-            'injected raw headers');
-          t.equal(res.body.query.ref, 'HEAD',
-            'extracted ref as query parameter');
-          t.equal(res.body.url,
-            '/repos/owner/repo/contents/folder/package.json?ref=HEAD',
-            'get correct full url');
-          t.end();
-        });
-      });
-
-      t.test('/raw is not rewritten to /contents for unsupported manifest file', t => {
-        const url = `http://localhost:${serverPort}/broker/${token}/owner/repo/HEAD/folder/unsupportedFile.ext`;
-        const headers = {};
-        request({ url, method: 'get', headers }, (err, res) => {
-          t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
       });
