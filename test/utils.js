@@ -1,5 +1,7 @@
 // process.stdout.write('\033c'); // clear the screen
 const webserver = require('../lib/webserver');
+const basicAuth = require('express-basic-auth');
+
 let p = 9876;
 
 function port() {
@@ -12,6 +14,12 @@ const { app: echoServer, server } = webserver({
   port: echoServerPort,
   httpsKey: process.env.TEST_KEY, // Optional
   httpsCert: process.env.TEST_CERT, // Optional
+});
+
+echoServer.get('/basic-auth', basicAuth({
+  users: { 'user@email.com': 'aB}*1' }
+}), (req, res) => {
+  res.send(req.headers.authorization);
 });
 
 echoServer.get('/echo-param/:param', (req, res) => {
