@@ -1,6 +1,5 @@
 // process.stdout.write('\033c'); // clear the screen
 const webserver = require('../lib/webserver');
-const basicAuth = require('express-basic-auth');
 
 let p = 9876;
 

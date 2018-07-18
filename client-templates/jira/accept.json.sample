@@ -6,14 +6,24 @@
     {
       "//": "identify user",
       "method": "GET",
-      "path": "/rest/api/2/myself",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/myself",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to get a list of all Jira projects",
       "method": "GET",
-      "path": "/rest/api/2/project",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}",
+      "path": "/project",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      },
       "valid": [
         {
           "queryParam": "expand",
@@ -26,44 +36,79 @@
     {
       "//": "used to get a Jira project",
       "method": "GET",
-      "path": "/rest/api/2/project/:project",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/project/:project",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to get createmeta for a jira project & issueType",
       "method": "GET",
-      "path": "/rest/api/2/issue/createmeta",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}",
+      "path": "/issue/createmeta",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
-
+    {
       "//": "used to get jira issue",
       "method": "GET",
-      "path": "/rest/api/2/issue/:issue",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/issue/:issue",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to create jira issue",
       "method": "POST",
-      "path": "/rest/api/2/issue",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/issue",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to create jira issue link",
       "method": "POST",
-      "path": "/rest/api/2/issue/:issue/remotelink",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/issue/:issue/remotelink",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to get assignable users",
       "method": "GET",
-      "path": "/rest/api/2/user/assignable/search",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/user/assignable/search",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     },
     {
       "//": "used to get available components",
       "method": "GET",
-      "path": "/rest/api/2/project/:project/components",
-      "origin": "https://${JIRA_USERNAME}:${JIRA_PASSWORD}@${JIRA}"
+      "path": "/project/:project/components",
+      "origin": "https://${JIRA_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
     }
   ]
 }

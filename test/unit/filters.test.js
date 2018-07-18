@@ -21,7 +21,7 @@ test('filter on body', t => {
     })
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/', 'allows the path request');
+    t.equal(res.url, '/', 'allows the path request');
   });
 
   filter({
@@ -39,7 +39,7 @@ test('filter on body', t => {
     })
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/', 'allows the path request');
+    t.equal(res.url, '/', 'allows the path request');
   });
 
   filter({
@@ -108,7 +108,7 @@ test('filter on body', t => {
     })
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/graphql', 'allows the path request');
+    t.equal(res.url, '/graphql', 'allows the path request');
   });
 
   filter({
@@ -165,7 +165,7 @@ test('filter on querystring', t => {
     method: 'GET',
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/filtered-on-query?filePath=/path/to/package.json',
+    t.equal(res.url, '/filtered-on-query?filePath=/path/to/package.json',
       'allows the path request');
   });
 
@@ -174,7 +174,7 @@ test('filter on querystring', t => {
     method: 'GET',
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/filtered-on-query?filePath=yarn.lock',
+    t.equal(res.url, '/filtered-on-query?filePath=yarn.lock',
       'allows the path request');
   });
 
@@ -213,7 +213,7 @@ test('filter on query and body', t => {
     })
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/filtered-on-query-and-body', 'allows the path request');
+    t.equal(res.url, '/filtered-on-query-and-body', 'allows the path request');
   });
 
   filter({
@@ -221,7 +221,7 @@ test('filter on query and body', t => {
     method: 'POST'
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res, '/filtered-on-query-and-body?filePath=/path/to/package.json',
+    t.equal(res.url, '/filtered-on-query-and-body?filePath=/path/to/package.json',
       'allows the path request');
   });
 
@@ -252,5 +252,29 @@ test('filter on query and body', t => {
   }, (error, res) => {
     t.equal(error.message, 'blocked', 'has been blocked');
     t.equal(res, undefined, 'no follow allowed');
+  });
+});
+
+test('filter with auth', t => {
+  const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
+
+  t.plan(5);
+  t.pass('filters loaded');
+
+  filter({
+    url: '/basic-auth',
+    method: 'GET',
+  }, (error, res) => {
+    t.equal(error, null, 'no error');
+    t.equal(res.auth, `Basic ${new Buffer('user:pass').toString('base64')}`,
+      'basic auth header returned');
+  });
+
+  filter({
+    url: '/token-auth',
+    method: 'GET',
+  }, (error, res) => {
+    t.equal(error, null, 'no error');
+    t.equal(res.auth, 'Token 1234', 'token auth header returned');
   });
 });

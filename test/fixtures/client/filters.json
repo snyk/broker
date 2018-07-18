@@ -3,7 +3,12 @@
     {
       "path": "/basic-auth",
       "method": "GET",
-      "origin": "http://${username}:${password}@localhost:${originPort}"
+      "origin": "http://localhost:${originPort}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${username}",
+        "password": "${password}"
+      }
     },
 
     {
