@@ -16,9 +16,7 @@ const { app: echoServer, server } = webserver({
   httpsCert: process.env.TEST_CERT, // Optional
 });
 
-echoServer.get('/basic-auth', basicAuth({
-  users: { 'user@email.com': 'aB}*1' }
-}), (req, res) => {
+echoServer.get('/basic-auth', (req, res) => {
   res.send(req.headers.authorization);
 });
 

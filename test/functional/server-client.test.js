@@ -37,7 +37,7 @@ test('proxy requests originating from behind the broker server', t => {
   process.env.BROKER_SERVER_URL = BROKER_SERVER_URL;
   process.env.ORIGIN_PORT = echoServerPort;
   process.env.USERNAME = 'user@email.com';
-  process.env.PASSWORD = 'aB}*1';
+  process.env.PASSWORD = 'aB}#/:%40*1';
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
