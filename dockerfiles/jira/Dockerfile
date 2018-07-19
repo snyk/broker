@@ -27,7 +27,7 @@ ENV BROKER_TOKEN <broker-token>
 ENV JIRA_USERNAME <username>
 ENV JIRA_PASSWORD <password>
 
-# Your Jira Server URL
+# Your Jira Server URL, including scheme and hostname
 ENV JIRA_BASE_URL https://your.jira.server.hostname
 
 # The port used by the broker client to accept internal connections
