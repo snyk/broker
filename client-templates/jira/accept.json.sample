@@ -7,7 +7,7 @@
       "//": "identify user",
       "method": "GET",
       "path": "/rest/api/2/myself",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -18,7 +18,7 @@
       "//": "used to get a list of all Jira projects",
       "method": "GET",
       "path": "/rest/api/2/project",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -37,7 +37,7 @@
       "//": "used to get a Jira project",
       "method": "GET",
       "path": "/rest/api/2/project/:project",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -48,7 +48,7 @@
       "//": "used to get createmeta for a jira project & issueType",
       "method": "GET",
       "path": "/rest/api/2/issue/createmeta",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -59,7 +59,7 @@
       "//": "used to get jira issue",
       "method": "GET",
       "path": "/rest/api/2/issue/:issue",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -70,7 +70,7 @@
       "//": "used to create jira issue",
       "method": "POST",
       "path": "/rest/api/2/issue",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -81,7 +81,7 @@
       "//": "used to create jira issue link",
       "method": "POST",
       "path": "/rest/api/2/issue/:issue/remotelink",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -92,7 +92,7 @@
       "//": "used to get assignable users",
       "method": "GET",
       "path": "/rest/api/2/user/assignable/search",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
@@ -103,7 +103,7 @@
       "//": "used to get available components",
       "method": "GET",
       "path": "/rest/api/2/project/:project/components",
-      "origin": "https://${JIRA}",
+      "origin": "${JIRA_BASE_URL}",
       "auth": {
         "scheme": "basic",
         "username": "${JIRA_USERNAME}",
