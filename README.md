@@ -188,7 +188,6 @@ To use the the broker client with a Jira deployment, run `docker pull snyk/broke
 - `JIRA_USERNAME` - the Jira username.
 - `JIRA_PASSWORD` - the Jira password.
 - `JIRA` - the hostname of your Jira deployment, such as `your.jira.domain.com`.
-- `JIRA_API` - the API endpoint of your Jira deployment. Should be `$JIRA/rest/api/2`.
 - `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your Jira for webhooks, such as `http://my.broker.client:7341`
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 
@@ -203,7 +202,6 @@ docker run --restart=always \
            -e JIRA_USERNAME=username \
            -e JIRA_PASSWORD=password \
            -e JIRA=your.jira.domain.com \
-           -e JIRA_API=your.jira.domain.com/rest/api/2 \
            -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
            -e PORT=8000 \
        snyk/broker:jira
@@ -217,10 +215,9 @@ Another option is to build your own docker image and override relevant environme
 FROM snyk/broker:jira
 
 ENV BROKER_TOKEN        secret-broker-token
-ENV JIRA_USERNAME  username
-ENV JIRA_PASSWORD  password
-ENV JIRA           your.jira.domain.com
-ENV JIRA_API       your.jira.domain.com/rest/api/2
+ENV JIRA_USERNAME       username
+ENV JIRA_PASSWORD       password
+ENV JIRA                your.jira.domain.com
 ENV PORT                8000
 ```
 
