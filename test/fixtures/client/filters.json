@@ -1,6 +1,17 @@
 {
   "private": [
     {
+      "path": "/basic-auth",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${username}",
+        "password": "${password}"
+      }
+    },
+
+    {
       "path": "/echo-param/:param",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
@@ -76,6 +87,11 @@
 
   ],
   "public": [
+    {
+      "path": "/basic-auth",
+      "method": "GET"
+    },
+
     {
       "path": "/echo-param/:param",
       "method": "GET"

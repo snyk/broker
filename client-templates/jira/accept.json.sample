@@ -1,0 +1,114 @@
+{
+  "public":
+  [],
+  "private":
+  [
+    {
+      "//": "identify user",
+      "method": "GET",
+      "path": "/rest/api/2/myself",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get a list of all Jira projects",
+      "method": "GET",
+      "path": "/rest/api/2/project",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      },
+      "valid": [
+        {
+          "queryParam": "expand",
+          "values": [
+            "issueTypes"
+          ]
+        }
+      ]
+    },
+    {
+      "//": "used to get a Jira project",
+      "method": "GET",
+      "path": "/rest/api/2/project/:project",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get createmeta for a jira project & issueType",
+      "method": "GET",
+      "path": "/rest/api/2/issue/createmeta",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get jira issue",
+      "method": "GET",
+      "path": "/rest/api/2/issue/:issue",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to create jira issue",
+      "method": "POST",
+      "path": "/rest/api/2/issue",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to create jira issue link",
+      "method": "POST",
+      "path": "/rest/api/2/issue/:issue/remotelink",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get assignable users",
+      "method": "GET",
+      "path": "/rest/api/2/user/assignable/search",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get available components",
+      "method": "GET",
+      "path": "/rest/api/2/project/:project/components",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    }
+  ]
+}

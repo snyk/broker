@@ -30,19 +30,21 @@ test('proxy requests originating from behind the broker server', t => {
   const clientRootPath = path.resolve(root, '../fixtures/client');
   process.chdir(clientRootPath);
   const BROKER_SERVER_URL = `http://localhost:${serverPort}`;
-  const BROKER_TOKEN = '98f04768-50d3-46fa-817a-9ee6631e9970'
+  const BROKER_TOKEN = '98f04768-50d3-46fa-817a-9ee6631e9970';
   process.env.BROKER_TYPE = 'client';
   process.env.GITHUB = 'github.com';
   process.env.BROKER_TOKEN = BROKER_TOKEN;
   process.env.BROKER_SERVER_URL = BROKER_SERVER_URL;
   process.env.ORIGIN_PORT = echoServerPort;
+  process.env.USERNAME = 'user@email.com';
+  process.env.PASSWORD = 'aB}#/:%40*1';
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.plan(20);
+      t.plan(21);
 
       t.test('identification', t => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -257,6 +259,19 @@ test('proxy requests originating from behind the broker server', t => {
           const auth = responseBody.authorization.replace('Basic ', '');
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
           t.equal(encodedAuth, 'bitbucketUser:bitbucketPassword',
+            'auth header is set correctly');
+          t.end();
+        });
+      });
+
+      t.test('successfully broker on endpoint that forwards requests with basic auth', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/basic-auth`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+
+          const auth = res.body.replace('Basic ', '');
+          const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
+          t.equal(encodedAuth, `${process.env.USERNAME}:${process.env.PASSWORD}`,
             'auth header is set correctly');
           t.end();
         });

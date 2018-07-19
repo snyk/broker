@@ -44,6 +44,11 @@ for Bitbucket Server use:
 $ broker init bitbucket-server --verbose
 ```
 
+for Jira use:
+```bash
+$ broker init jira --verbose
+```
+
 This will generate two new files: `accept.json` and `.env`. If the files already exist in the current working directory, the `init` command will fail and not overwrite your local copies.
 
 Once you have these files, add your `BROKER_TOKEN` and other details to the `.env` file, then run the broker in client mode from the same directory as the `accept.json` and `.env`:
@@ -201,6 +206,56 @@ The first, `:param` is an expression that is matched against the URL being reque
 The second, `${PARAM}` is populated with the matching value in your configuration. This way you can keep your tokens or environment details private.
 
 The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
+
+### Authorization
+
+To provide authorization data, there are two options. For simple token based authentication, the token can be provided directly in the `origin` URL (as shown in the example above). For basic auth, we recommend you provide an `auth` object in the following format:
+
+```json
+{
+  "private": [
+    {
+      "method": "GET",
+      "path": "/myself",
+      "origin": "https://${HOST}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${USERNAME}",
+        "password": "${PASSWORD}"
+      }
+    },
+  ],
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ]
+}
+```
+
+For token based auth, this would be provided like so:
+```json
+{
+  "private": [
+    {
+      "method": "GET",
+      "path": "/myself",
+      "origin": "https://${HOST}",
+      "auth": {
+        "scheme": "token",
+        "token": "${TOKEN}"
+      }
+    },
+  ],
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ]
+}
+```
 
 ### Private rules
 
