@@ -20,6 +20,7 @@ test('tryJSONParse', t => {
   t.same(tryJSONParse(null), {}, 'null parses as empty');
   t.same(tryJSONParse(data), {}, 'objects parse as empty');
   t.same(tryJSONParse("nonsense"), {}, 'malformed strings parse as empty');
+  t.same(tryJSONParse("null"), {}, 'null strings parse as empty');
 
   t.end();
 });
