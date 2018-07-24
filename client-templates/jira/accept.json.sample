@@ -4,6 +4,17 @@
   "private":
   [
     {
+      "//": "get jira server info",
+      "method": "GET",
+      "path": "/rest/api/2/serverInfo",
+      "origin": "${JIRA_BASE_URL}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${JIRA_USERNAME}",
+        "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
       "//": "identify user",
       "method": "GET",
       "path": "/rest/api/2/myself",
