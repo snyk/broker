@@ -244,6 +244,18 @@ docker run --restart=always \
 
 Note that `BROKER_CLIENT_URL` now has the HTTPS scheme.
 
+
+#### Monitoring
+
+The broker exposes an endpoint at `/healthcheck`, which can be used to monitor the health of the running application. This endpoint returns `200 OK` status code when the application is healthy, and will return a JSON object containing `ok: true`.
+
+To change the location of this endpoint, you can specify an alternative path via an environment variable:
+
+```
+ENV BROKER_HEALTHCHECK_PATH /path/to/healthcheck
+```
+
+
 #### SCM with an internal certificate
 
 By default, the broker client establishes HTTPS connections to the SCM. If your SCM is serving an internal certificate (signed by your own CA), you can provide the CA certificate to the broker client.

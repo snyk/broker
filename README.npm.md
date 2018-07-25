@@ -12,10 +12,6 @@ The broker forwards requests to the client (this package) and responds. An examp
 
 ## Usage
 
-<!-- Explain how to install, how to run the tool if it's on the cli, or how  -->
-<!-- to use the project in the author code. If this is a node module, please -->
-<!-- also document the usage API.                                            -->
-
 To run the broker in daemon mode, use the existing tools on your system like `systemd`. If you're unsure, we can recommend this post on [running as a service](https://certsimple.com/blog/deploy-node-on-linux#node-linux-service-systemd) on your machine.
 
 ### Installation
@@ -84,6 +80,8 @@ $ broker --verbose
 ```
 
 It will identify itself against the server and will be now ready to broker inbound and outbound requests that validate fully against the accept rules.
+
+By default the broker client will be running on port `7341`. You can specify the port which the client runs on by providing a `--port XXXX` argument, for example `broker --port 8001`.
 
 ### Running the server
 
@@ -169,6 +167,16 @@ HTTPS_CERT=<path-to.cert>
 ```
 
 When the broker runs, it will use these files to start the local server over HTTPS.
+
+### Monitoring
+
+The broker exposes an endpoint at `/healthcheck`, which can be used to monitor the health of the running application. This endpoint returns `200 OK` status code when the application is healthy, and will return a JSON object containing `ok: true`.
+
+To change the location of this endpoint, you can specify an alternative path in the `.env` file:
+
+```text
+BROKER_HEALTHCHECK_PATH=/path/to/healthcheck
+```
 
 ## The accept filter
 
