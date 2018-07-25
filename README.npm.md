@@ -12,10 +12,6 @@ The broker forwards requests to the client (this package) and responds. An examp
 
 ## Usage
 
-<!-- Explain how to install, how to run the tool if it's on the cli, or how  -->
-<!-- to use the project in the author code. If this is a node module, please -->
-<!-- also document the usage API.                                            -->
-
 To run the broker in daemon mode, use the existing tools on your system like `systemd`. If you're unsure, we can recommend this post on [running as a service](https://certsimple.com/blog/deploy-node-on-linux#node-linux-service-systemd) on your machine.
 
 ### Installation
