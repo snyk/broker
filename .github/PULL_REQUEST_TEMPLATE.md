@@ -1,6 +1,5 @@
 - [ ] Ready for review
-- [ ] Follows CONTRIBUTING rules
-- [ ] Reviewed by @ … (Snyk internal team)
+- [ ] Follows [CONTRIBUTING](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md) rules
 
 #### What does this PR do?
 
@@ -12,9 +11,6 @@
 
 
 #### Any background context you want to provide?
-
-
-#### What are the relevant tickets?
 
 
 #### Screenshots
