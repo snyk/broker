@@ -10,7 +10,7 @@ WORKDIR /home/node
 USER node
 
 # Generate default accept filter
-RUN broker init github
+RUN broker init github-com
 
 
 
@@ -42,6 +42,9 @@ ENV PORT 7341
 
 # GitHub host is github.com
 ENV GITHUB github.com
+
+# GitHub hos for raw file view
+ENV GITHUB_RAW raw.githubusercontent.com
 
 # Github API endpoint, excluding scheme.
 ENV GITHUB_API api.github.com
