@@ -1,0 +1,394 @@
+{
+  "public":
+  [
+      {
+        "//": "used for pushing up webhooks from github",
+        "method": "POST",
+        "path": "/webhook/github",
+        "valid": [
+          {
+            "//": "accept all pull request state changes (these don't have files in them)",
+            "path": "pull_request.state",
+            "value": "open"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "package.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "package.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "package-lock.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "package-lock.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "requirements.txt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "requirements.txt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": ".snyk"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": ".snyk"
+          }
+        ]
+      },
+    {
+      "//": "used for pushing up webhooks from github",
+      "method": "POST",
+      "path": "/webhook/github/:webhookId"
+    }
+  ],
+  "private":
+  [
+    {
+      "//": "list the user's info, and validate their credentials",
+      "method": "GET",
+      "path": "/user",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "list the user's repos",
+      "method": "GET",
+      "path": "/user/repos",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "rate limit check",
+      "method": "GET",
+      "path": "/rate_limit",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "allow meta lookup on the api version",
+      "method": "GET",
+      "path": "/",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+      "method": "POST",
+      "path": "/repos/:user/:repo/hooks",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+      "method": "DELETE",
+      "path": "/repos/:owner/:repo/hooks/:id",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to create commit status messages",
+      "method": "POST",
+      "path": "/repos/:user/:repo/statuses/:sha",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to list branches on a repo",
+      "method": "GET",
+      "path": "/repos/:user/:repo/branches",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to get branch info",
+      "method": "GET",
+      "path": "/repos/:user/:repo/branches/:branch",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to get status checks on a branch",
+      "method": "GET",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to create status checks on a branch",
+      "method": "POST",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "used to delete status checks on a branch",
+      "method": "DELETE",
+      "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "check if repo is public",
+      "method": "GET",
+      "path": "/:user/:repo",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB}"
+    },
+
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/package.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/package.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/package-lock.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/package-lock.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Gemfile.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/Gemfile.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Gemfile",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/Gemfile",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/pom.xml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/pom.xml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/requirements.txt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/requirements.txt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/yarn.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/yarn.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/build.gradle",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/build.gradle",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/build.sbt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/build.sbt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/.snyk",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/.snyk",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+
+    {
+      "//": "get details of the repo",
+      "method": "GET",
+      "path": "/repos/:name/:repo",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "get the details of the latest commit to determine its SHA",
+      "method": "GET",
+      "path": "/repos/:name/:repo/commits/HEAD",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "get a list of all the refs to match find whether an existing PR is open",
+      "method": "GET",
+      "path": "/repos/:name/:repo/git/refs",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "get the head commit of an individual ref",
+      "method": "GET",
+      "path": "/repos/:name/:repo/git/refs/heads/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "get the details of an individual ref",
+      "method": "GET",
+      "path": "/repos/:name/:repo/git/refs/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "search for open snyk pull requests",
+      "method": "GET",
+      "path": "/repos/:name/:repo/pulls",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "add the individual commit for the pull requests",
+      "method": "POST",
+      "path": "/repos/:name/:repo/git/commits",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "add commit data for new PR",
+      "method": "POST",
+      "path": "/repos/:name/:repo/git/refs",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "create the ref to add the commits to",
+      "method": "POST",
+      "path": "/repos/:name/:repo/git/trees",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "create the pull request",
+      "method": "POST",
+      "path": "/repos/:name/:repo/pulls",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "update ref",
+      "method": "PATCH",
+      "path": "/repos/:name/:repo/git/refs/:sha",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "update ref head",
+      "method": "PATCH",
+      "path": "/repos/:name/:repo/git/refs/heads/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "query graphql",
+      "method": "POST",
+      "path": "/graphql",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_GRAPHQL}",
+      "valid": [
+        {
+          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
+          "path": "query",
+          "regex": "{\\s*repositoryOwner\\(login:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*repository\\(name:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*object\\(expression:\\s*\"([a-zA-Z0-9-_./:]+)\"\\)\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s*{\\s*entries\\s*{\\s*name\\s+type\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}"
+        }
+      ]
+    }
+  ]
+}

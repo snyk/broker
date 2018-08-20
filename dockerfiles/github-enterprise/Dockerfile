@@ -10,7 +10,7 @@ WORKDIR /home/node
 USER node
 
 # Generate default accept filter
-RUN broker init github
+RUN broker init github-enterprise
 
 
 
