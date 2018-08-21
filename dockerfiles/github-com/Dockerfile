@@ -43,7 +43,7 @@ ENV PORT 7341
 # GitHub host is github.com
 ENV GITHUB github.com
 
-# GitHub hos for raw file view
+# GitHub host for serving raw files
 ENV GITHUB_RAW raw.githubusercontent.com
 
 # Github API endpoint, excluding scheme.
