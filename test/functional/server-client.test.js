@@ -155,7 +155,7 @@ test('proxy requests originating from behind the broker server', t => {
       t.test('block request for valid url with invalid query param', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-query/filtered`;
         const qs = { proxyMe: 'now!' };
-        request({ url, 'method': 'get', qs }, (err, res, body) => {
+        request({ url, 'method': 'get', qs }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
@@ -164,7 +164,7 @@ test('proxy requests originating from behind the broker server', t => {
       // the filtering happens in the broker client
       t.test('block request for valid url with missing query param', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-query/filtered`;
-        request({ url, 'method': 'get' }, (err, res, body) => {
+        request({ url, 'method': 'get' }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
@@ -199,27 +199,27 @@ test('proxy requests originating from behind the broker server', t => {
           t.equal(res.statusCode, 200, '200 statusCode');
           t.same(responseBody, {
             shape: 'square', colour: 'yellow',
-            url_as_param: 'https://clojars.org/search?q=btc',
-            one_more_top_level_param: 'true',
+            url_as_param: 'https://clojars.org/search?q=btc', // eslint-disable-line
+            one_more_top_level_param: 'true', // eslint-disable-line
           },
-            'querystring brokered');
+          'querystring brokered');
           t.end();
         });
       });
 
       t.test('sucessfully broker GET to an escaped url with a wildcard filter',
-             t => {
-               // url is escaped: %2F <=> `/`,
-               // filter path is "/nested/path-with/wild*/to/file.ext"
-               const url = `http://localhost:${serverPort}/broker/${token}/` +
+        t => {
+          // url is escaped: %2F <=> `/`,
+          // filter path is "/nested/path-with/wild*/to/file.ext"
+          const url = `http://localhost:${serverPort}/broker/${token}/` +
                        'nested/path-with/wildcard/and-an-escaped-slash/to%2F' +
                        'file.ext';
-               request({ url, method: 'get' }, (err, res) => {
-                 t.equal(res.statusCode, 200, '200 statusCode');
-                 t.equal(res.body, 'file.ext', 'filename brokered');
-                 t.end();
-               });
-             });
+          request({ url, method: 'get' }, (err, res) => {
+            t.equal(res.statusCode, 200, '200 statusCode');
+            t.equal(res.body, 'file.ext', 'filename brokered');
+            t.end();
+          });
+        });
 
       t.test('content-length is not set when using chunked http', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;

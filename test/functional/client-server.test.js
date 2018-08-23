@@ -120,7 +120,7 @@ test('proxy requests originating from behind the broker client', t => {
       t.test('block request for valid url with invalid query param', t => {
         const url = `http://localhost:${clientPort}/echo-query/filtered`;
         const qs = { proxyMe: 'now!' };
-        request({ url, 'method': 'get', qs }, (err, res, body) => {
+        request({ url, 'method': 'get', qs }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
@@ -129,7 +129,7 @@ test('proxy requests originating from behind the broker client', t => {
       // the filtering happens in the broker client
       t.test('block request for valid url with missing query param', t => {
         const url = `http://localhost:${clientPort}/echo-query/filtered`;
-        request({ url, 'method': 'get' }, (err, res, body) => {
+        request({ url, 'method': 'get' }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });
@@ -143,7 +143,7 @@ test('proxy requests originating from behind the broker client', t => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(responseBody['x-broker-token'], clientData.token.toLowerCase(),
-                  'X-Broker-Token header present and lowercased');
+            'X-Broker-Token header present and lowercased');
           t.end();
         });
       });

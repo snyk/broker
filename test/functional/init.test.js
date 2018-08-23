@@ -18,17 +18,17 @@ templates.forEach(template => {
       process.chdir(path);
 
       init({_: [template]})
-      .then(() => Promise.all([
-        fs.stat('.env'),
-        fs.stat('accept.json'),
-      ]))
-      .then(stats => {
-        t.ok(stats.every(Boolean), 'all templated files created');
-        t.doesNotThrow(
-          () => JSON.parse(fs.readFileSync('accept.json')),
-          'accept.json is valid JSON');
-        t.end();
-      });
+        .then(() => Promise.all([
+          fs.stat('.env'),
+          fs.stat('accept.json'),
+        ]))
+        .then(stats => {
+          t.ok(stats.every(Boolean), 'all templated files created');
+          t.doesNotThrow(
+            () => JSON.parse(fs.readFileSync('accept.json')),
+            'accept.json is valid JSON');
+          t.end();
+        });
     });
   });
 });
