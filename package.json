@@ -23,11 +23,11 @@
     "test": "test"
   },
   "devDependencies": {
-    "eslint": "^4.11.0",
+    "eslint": "^5.4.0",
     "proxyquire": "^1.7.10",
     "require-reload": "^0.2.2",
     "sinon": "^1.17.5",
-    "tap": "^6.3.0",
+    "tap": "^12.0.0",
     "tap-only": "0.0.5",
     "tmp": "0.0.33"
   },
