@@ -21,7 +21,7 @@ The broker client is published as a set of docker images, each configured for a 
 To use the the broker client with GitHub.com, run `docker pull snyk/broker:github-com`. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
-- `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
+- `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 - `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by GitHub.com webhooks, such as `http://my.broker.client:7341`
 
@@ -57,7 +57,7 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 To use the the broker client with a GitHub Enterprise deployment, run `docker pull snyk/broker:github-enterprise` tag. The following environment variables are needed to customize the broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your snyk org settings view.
-- `GITHUB_TOKEN` - a personal access token with full `repo` and `admin:repo_hook` scopes.
+- `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
 - `GITHUB` - the hostname of your GitHub Enterprise deployment, such as `your.ghe.domain.com`.
 - `GITHUB_API` - the API endpoint of your GitHub Enterprise deployment. Should be `your.ghe.domain.com/api/v3`.
 - `GITHUB_GRAPHQL` - the graphql endpoint of your GitHub Enterprise deployment. Should be `your.ghe.domain.com/api`.
