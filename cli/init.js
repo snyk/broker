@@ -5,16 +5,16 @@ const logger = require('../lib/log');
 
 module.exports = (args) => {
 
-  const project = args._[0];
-  if (!project) {
+  const template = args._[0];
+  if (!template) {
     throw new Error('init requires a template name');
   }
 
-  const dir = path.resolve(root, project);
+  const dir = path.resolve(root, template);
 
   return fs.readdir(root).then(files => {
-    if (files.indexOf(project) === -1) {
-      throw new Error(`${project} is an invalid template name`);
+    if (files.indexOf(template) === -1) {
+      throw new Error(`${template} is an invalid template name`);
     }
 
     return fs.readdir(dir);
@@ -37,7 +37,7 @@ module.exports = (args) => {
       files.map(file =>
         new Promise((resolve, reject) => {
           const newfile = file.replace(/\.sample$/, '');
-          logger.debug(`generating: ${newfile}`);
+          logger.debug({ templateFile: newfile }, 'generating template file');
           const reader = fs.createReadStream(path.resolve(dir, file));
           const writer =
             fs.createWriteStream(path.resolve(process.cwd(), newfile));
@@ -47,5 +47,5 @@ module.exports = (args) => {
         })
       )
     );
-  }).then(() => logger.info(`${project} initialisation complete`));
+  }).then(() => logger.info({ template }, 'initialisation complete'));
 };
