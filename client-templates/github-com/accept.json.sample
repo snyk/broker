@@ -82,6 +82,14 @@
           {
             "path": "commits.*.modified.*",
             "value": ".snyk"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "packages.config"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "packages.config"
           }
         ]
       },
@@ -297,6 +305,18 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:path*/build.sbt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/packages.config",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/packages.config",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
