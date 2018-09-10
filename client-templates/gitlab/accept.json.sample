@@ -88,6 +88,12 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/packages.config",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -111,7 +117,8 @@
             "**/requirements.txt",
             "**/build.gradle",
             "**/build.sbt",
-            "**/.snyk"
+            "**/.snyk",
+            "**/packages.config"
           ]
         }
       ]
