@@ -31,7 +31,7 @@ test('proxy requests originating from behind the broker client', t => {
   const clientPort = port();
   let client = app.main({ port: clientPort });
 
-  t.plan(7);
+  t.plan(9);
 
   const serverHealth = `http://localhost:${serverPort}/healthcheck`;
   const connectionStatus = `http://localhost:${serverPort}/` +
@@ -55,12 +55,14 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', () => {
-      t.test('client healthcheck', t => {
+      t.test('client healthcheck after connection', t => {
         request({url: clientHealth, json: true }, (err, res) => {
           if (err) { return t.threw(err); }
 
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(res.body.ok, true, '{ ok: true } in body');
+          t.equal(res.body.websocketConnectionOpen, true, '{ websocketConnectionOpen: true } in body');
+          t.ok(res.body.brokerServerUrl, 'brokerServerUrl in body');
           t.ok(res.body.version, 'version in body');
           t.end();
         });
@@ -89,6 +91,29 @@ test('proxy requests originating from behind the broker client', t => {
         }, 100);
       });
 
+      t.test('misconfigured client fails healthcheck', t => {
+        // set a bad server url
+        process.env.BROKER_SERVER_URL = 'https://snyk.io';
+        var badClient = app.main({ port: clientPort });
+        // revert to a good server url
+        process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
+
+        request({url: clientHealth, json: true }, (err, res) => {
+          if (err) { return t.threw(err); }
+    
+          t.equal(res.statusCode, 500, '500 statusCode');
+          t.equal(res.body.ok, false, '{ ok: false } in body');
+          t.equal(res.body.websocketConnectionOpen, false, '{ websocketConnectionOpen: false } in body');
+          t.ok(res.body.brokerServerUrl, 'brokerServerUrl in body');
+          t.ok(res.body.version, 'version in body');
+
+          badClient.close();
+          setTimeout(() => {
+            t.end();
+          }, 100);
+        });
+      });
+
       t.test('check connection-status after client re-connected', t => {
         client = app.main({ port: clientPort });
         setTimeout(() => {
@@ -101,6 +126,19 @@ test('proxy requests originating from behind the broker client', t => {
             t.end();
           });
         }, 20);
+      });
+
+      t.test('client healthcheck after reconnection', t => {
+        request({url: clientHealth, json: true }, (err, res) => {
+          if (err) { return t.threw(err); }
+
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body.ok, true, '{ ok: true } in body');
+          t.equal(res.body.websocketConnectionOpen, true, '{ websocketConnectionOpen: true } in body');
+          t.ok(res.body.brokerServerUrl, 'brokerServerUrl in body');
+          t.ok(res.body.version, 'version in body');
+          t.end();
+        });
       });
 
       t.test('custom healthcheck endpoint', t => {
