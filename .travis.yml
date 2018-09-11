@@ -9,11 +9,9 @@ notifications:
 node_js:
   - 8
 before_script:
-  - npm run es5ify
   - npm prune
 after_success:
-  # publish to npmjs and create a GH release; auto-detects master branch pushes and acts on them only
-  - npm run semantic-release
+  - npx semantic-release
 branches:
   only:
     - master
