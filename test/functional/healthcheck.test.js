@@ -17,7 +17,7 @@ test('proxy requests originating from behind the broker client', t => {
    */
 
   process.env.ACCEPT = 'filters.json';
-
+  
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.BROKER_TYPE = 'server';
   const serverPort = port();
@@ -92,11 +92,9 @@ test('proxy requests originating from behind the broker client', t => {
       });
 
       t.test('misconfigured client fails healthcheck', t => {
-        // set a bad server url
-        process.env.BROKER_SERVER_URL = 'https://snyk.io';
-        var badClient = app.main({ port: clientPort });
-        // revert to a good server url
-        process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
+        var badClient = app.main({ port: clientPort, config: {
+          brokerServerUrl: 'http://no-such-server',
+        }});
 
         request({url: clientHealth, json: true }, (err, res) => {
           if (err) { return t.threw(err); }
