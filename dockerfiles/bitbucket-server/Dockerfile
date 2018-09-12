@@ -68,7 +68,4 @@ ENV BROKER_CLIENT_VALIDATION_BASIC_AUTH "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD
 
 EXPOSE $PORT
 
-HEALTHCHECK --interval=60s --timeout=10s \
-  CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
-
 CMD ["broker", "--verbose"]

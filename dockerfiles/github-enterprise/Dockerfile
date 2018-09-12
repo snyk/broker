@@ -68,7 +68,4 @@ ENV BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER "token $GITHUB_TOKEN"
 
 EXPOSE $PORT
 
-HEALTHCHECK --interval=60s --timeout=10s \
-  CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
-
 CMD ["broker", "--verbose"]
