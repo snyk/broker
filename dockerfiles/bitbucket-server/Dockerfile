@@ -59,10 +59,16 @@ ENV ACCEPT accept.json
 # The path for the broker's internal healthcheck URL. Must start with a '/'.
 ENV BROKER_HEALTHCHECK_PATH /healthcheck
 
+# Bitbucket server validation url, checked by broker client healthcheck endpoint
+ENV BROKER_CLIENT_VALIDATION_URL https://$BITBUCKET/rest/api/1.0/projects
+
+# Bitbucket server basic auth creds
+ENV BROKER_CLIENT_VALIDATION_BASIC_AUTH "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD"
+
 
 EXPOSE $PORT
 
-HEALTHCHECK --interval=10s --timeout=1s \
+HEALTHCHECK --interval=60s --timeout=10s \
   CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
 
 CMD ["broker", "--verbose"]

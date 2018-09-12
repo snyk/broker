@@ -187,7 +187,7 @@ To use the the broker client with a Jira deployment, run `docker pull snyk/broke
 - `BROKER_TOKEN` - the snyk broker token, obtained from your Jira integration settings view.
 - `JIRA_USERNAME` - the Jira username.
 - `JIRA_PASSWORD` - the Jira password.
-- `JIRA_BASE_URL` - the URL of your Jira deployment, such as `https://your.jira.domain.com`.
+- `JIRA_HOSTNAME` - the hostname of your Jira deployment, such as `your.jira.domain.com`.
 - `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your Jira for webhooks, such as `http://my.broker.client:7341`
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 
@@ -201,7 +201,7 @@ docker run --restart=always \
            -e BROKER_TOKEN=secret-broker-token \
            -e JIRA_USERNAME=username \
            -e JIRA_PASSWORD=password \
-           -e JIRA_BASE_URL=https://your.jira.domain.com \
+           -e JIRA_HOSTNAME=your.jira.domain.com \
            -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
            -e PORT=8000 \
        snyk/broker:jira
@@ -217,9 +217,42 @@ FROM snyk/broker:jira
 ENV BROKER_TOKEN        secret-broker-token
 ENV JIRA_USERNAME       username
 ENV JIRA_PASSWORD       password
-ENV JIRA_BASE_URL       https://your.jira.domain.com
+ENV JIRA_HOSTNAME       your.jira.domain.com
 ENV PORT                8000
 ```
+
+### Monitoring
+
+#### Healthcheck
+
+The broker exposes an endpoint at `/healthcheck`, which can be used to monitor the health of the running application. This endpoint responds with status code `200 OK` when the internal request is successful, and returns `{ ok: true }` in the response body.
+
+In the case of the broker client, this endpoint also reports on the status of the broker websocket connection.  If the websocket connection is not open, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
+
+To change the location of the healthcheck endpoint, you can specify an alternative path via an environment variable:
+
+```
+ENV BROKER_HEALTHCHECK_PATH /path/to/healthcheck
+```
+
+#### Systemcheck
+
+The broker client exposes an endpoint at `/systemcheck`, which can be used to validate the brokered service (SCM or the like) connectivity and credentials. This endpoint causes the broker client to make a request to a preconfigured URL, and report on the success of the request. The supported configuration is:
+
+* `BROKER_CLIENT_VALIDATION_URL` - the URL to which the request will be made.
+* `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER` - [optional] the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_BASIC_AUTH`.
+* `BROKER_CLIENT_VALIDATION_BASIC_AUTH` - [optional] the basic auth credentials (`username:password`) to be base64 encoded and placed in the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER`.
+* `BROKER_CLIENT_VALIDATION_METHOD` - [optional] the HTTP method of the request (default is `GET`).
+* `BROKER_CLIENT_VALIDATION_TIMEOUT_MS` - [optional] the request timeout in milliseconds (default is 5000 ms).
+
+This endpoint responds with status code `200 OK` when the internal request is successful, and returns `{ ok: true }` in the response body. If the internal request fails, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
+
+To change the location of the systemcheck endpoint, you can specify an alternative path via an environment variable:
+
+```
+ENV BROKER_SYSTEMCHECK_PATH /path/to/systemcheck
+```
+
 
 ### Advanced Configuration
 
@@ -243,18 +276,6 @@ docker run --restart=always \
 ```
 
 Note that `BROKER_CLIENT_URL` now has the HTTPS scheme.
-
-
-#### Monitoring
-
-The broker exposes an endpoint at `/healthcheck`, which can be used to monitor the health of the running application. This endpoint returns `200 OK` status code when the application is healthy, and will return a JSON object containing `ok: true`.
-
-To change the location of this endpoint, you can specify an alternative path via an environment variable:
-
-```
-ENV BROKER_HEALTHCHECK_PATH /path/to/healthcheck
-```
-
 
 #### SCM with an internal certificate
 
