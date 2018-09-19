@@ -59,10 +59,13 @@ ENV ACCEPT accept.json
 # The path for the broker's internal healthcheck URL. Must start with a '/'.
 ENV BROKER_HEALTHCHECK_PATH /healthcheck
 
+# GitHub Enterprise validation url, checked by broker client healthcheck endpoint
+ENV BROKER_CLIENT_VALIDATION_URL https://$GITHUB_API/user
+
+# GitHub Enterprise validation request Authorization header
+ENV BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER "token $GITHUB_TOKEN"
+
 
 EXPOSE $PORT
-
-HEALTHCHECK --interval=10s --timeout=1s \
-  CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
 
 CMD ["broker", "--verbose"]

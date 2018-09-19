@@ -27,8 +27,11 @@ ENV BROKER_TOKEN <broker-token>
 ENV JIRA_USERNAME <username>
 ENV JIRA_PASSWORD <password>
 
+# Your Jira Server host
+ENV JIRA_HOSTNAME your.jira.server.hostname
+
 # Your Jira Server URL, including scheme and hostname
-ENV JIRA_BASE_URL https://your.jira.server.hostname
+ENV JIRA_BASE_URL https://$JIRA_HOSTNAME
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
@@ -54,10 +57,13 @@ ENV ACCEPT accept.json
 # The path for the broker's internal healthcheck URL. Must start with a '/'.
 ENV BROKER_HEALTHCHECK_PATH /healthcheck
 
+# Jira validation url, checked by broker client healthcheck endpoint
+ENV BROKER_CLIENT_VALIDATION_URL https://$JIRA_HOSTNAME/rest/api/2/myself
+
+# Jira basic auth creds
+ENV BROKER_CLIENT_VALIDATION_BASIC_AUTH "$JIRA_USERNAME:$JIRA_PASSWORD"
+
 
 EXPOSE $PORT
-
-HEALTHCHECK --interval=10s --timeout=1s \
-  CMD wget -q --spider http://localhost:${PORT}${BROKER_HEALTHCHECK_PATH}
 
 CMD ["broker", "--verbose"]
