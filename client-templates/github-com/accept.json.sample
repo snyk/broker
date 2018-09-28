@@ -131,6 +131,13 @@
     },
 
     {
+      "//": "get a user's repo",
+      "method": "GET",
+      "path": "/repos/:user/:repo",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
       "//": "rate limit check",
       "method": "GET",
       "path": "/rate_limit",
