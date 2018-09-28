@@ -31,6 +31,17 @@
         "password": "${BITBUCKET_PASSWORD}"
       }
      },
+     {
+      "//": "fetch a given repo",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
