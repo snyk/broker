@@ -47,7 +47,7 @@
     "lodash.mapvalues": "^4.6.0",
     "minimatch": "^3.0.4",
     "path-to-regexp": "^1.5.3",
-    "primus": "^6.0.1",
+    "primus": "^7.2.3",
     "primus-emitter": "^3.1.1",
     "qs": "^6.5.2",
     "request": "^2.88.0",
