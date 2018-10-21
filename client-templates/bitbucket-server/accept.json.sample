@@ -261,6 +261,50 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-    }
+    },
+    {
+      "//": "used to create a Code Insights report",
+      "method": "PUT",
+      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+      }
+  },
+  {
+      "//": "used to remove a Code Insights report",
+      "method": "DELETE",
+      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+  },
+  {
+      "//": "used to add Code Insights annotations to a report",
+      "method": "POST",
+      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+  },
+  {
+      "//": "used to remove Code Insights annotations for a report",
+      "method": "DELETE",
+      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+  }
   ]
 }
