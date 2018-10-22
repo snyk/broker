@@ -21,6 +21,17 @@
       }
     },
     {
+      "//": "list the project's repos",
+      "method": "GET",
+      "path": "/projects/:projectKey/repos",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "list the user's repos",
       "method": "GET",
       "path": "/repos",
