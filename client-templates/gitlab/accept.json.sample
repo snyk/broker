@@ -177,6 +177,18 @@
       "method": "POST",
       "path": "/api/v4/projects/:project/merge_requests",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "list the user's groups",
+      "method": "GET",
+      "path": "/api/v4/groups",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "list of projects in a group",
+      "method": "GET",
+      "path": "/api/v4/groups/:id/projects",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
