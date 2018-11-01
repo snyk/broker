@@ -30,9 +30,6 @@ ENV JIRA_PASSWORD <password>
 # Your Jira Server host
 ENV JIRA_HOSTNAME your.jira.server.hostname
 
-# Your Jira Server URL, including scheme and hostname
-ENV JIRA_BASE_URL https://$JIRA_HOSTNAME
-
 # The port used by the broker client to accept internal connections
 # Default value is 7341
 ENV PORT 7341
