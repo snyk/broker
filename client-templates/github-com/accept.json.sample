@@ -124,9 +124,23 @@
     },
 
     {
-      "//": "list the user's repos",
+      "//": "list the logged in user's repos",
       "method": "GET",
       "path": "/user/repos",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "list a user's repos",
+      "method": "GET",
+      "path": "/users/:username/repos",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+
+    {
+      "//": "list an orgs's repos",
+      "method": "GET",
+      "path": "/orgs/:username/repos",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
 
