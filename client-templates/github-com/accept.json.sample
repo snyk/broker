@@ -106,6 +106,14 @@
           {
             "path": "commits.*.modified.*",
             "value": "*.vbproj"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "*.fsproj"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "*.fsproj"
           }
         ]
       },
@@ -373,6 +381,18 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:path*/*.csproj",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/*.fsproj",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/*.fsproj",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
