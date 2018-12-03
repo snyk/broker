@@ -21,52 +21,18 @@ RUN broker init github-com
 ######################################
 
 # Your unique broker identifier, copied from snyk.io org settings page
-# ENV BROKER_TOKEN <broker-token>
+ENV BROKER_TOKEN <broker-token>
 
 # Your personal access token to your github.com / GHE account
-# ENV GITHUB_TOKEN <github-token>
+ENV GITHUB_TOKEN <github-token>
 
 # The port used by the broker client to accept webhooks
 # Default value is 7341
-ENV PORT 7341
+# ENV PORT 7341
 
 # The URL of your broker client (including scheme and port)
 # This will be used as the webhook payload URL coming in from GitHub
 # ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
-
-
-
-#######################################
-# Generic Broker Client configuration #
-#######################################
-
-# GitHub host is github.com
-ENV GITHUB github.com
-
-# GitHub host for serving raw files
-ENV GITHUB_RAW raw.githubusercontent.com
-
-# Github API endpoint, excluding scheme.
-ENV GITHUB_API api.github.com
-
-# Github GraphQL API endpoint, excluding scheme.
-ENV GITHUB_GRAPHQL api.github.com
-
-# The URL of the Snyk broker server
-ENV BROKER_SERVER_URL https://broker.snyk.io
-
-# The fine detail accept rules that allow Snyk to make API requests to your
-# GitHub account
-ENV ACCEPT accept.json
-
-# The path for the broker's internal healthcheck URL. Must start with a '/'.
-ENV BROKER_HEALTHCHECK_PATH /healthcheck
-
-# GitHub validation url, checked by broker client healthcheck endpoint
-ENV BROKER_CLIENT_VALIDATION_URL https://$GITHUB_API/user
-
-# GitHub validation request Authorization header
-ENV BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER "token $GITHUB_TOKEN"
 
 
 EXPOSE $PORT

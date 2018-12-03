@@ -31,31 +31,11 @@ ENV GITLAB your.gitlab.server.hostname
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
-ENV PORT 7341
+# ENV PORT 7341
 
 # The URL of your broker client (including scheme and port)
 # This will be used as the webhook payload URL coming in from Gitlab
 # ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
-
-
-#######################################
-# Generic Broker Client configuration #
-#######################################
-
-
-# The URL of the Snyk broker server
-ENV BROKER_SERVER_URL https://broker.snyk.io
-
-# The fine detail accept rules that allow Snyk to make API requests to your
-# Bitbucket Server instance
-ENV ACCEPT accept.json
-
-# The path for the broker's internal healthcheck URL. Must start with a '/'.
-ENV BROKER_HEALTHCHECK_PATH /healthcheck
-
-# GitLab validation url, checked by broker client healthcheck endpoint
-ENV BROKER_CLIENT_VALIDATION_URL https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN
-
 
 
 EXPOSE $PORT
