@@ -349,6 +349,28 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
+  },
+  {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project. we're using atlassian's SDK api. Because atlassian's BB server rest api currently doesn't support such functionality",
+      "method": "GET",
+      "path": "/plugins/servlet/applinks/whoami",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+  },
+  {
+    "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
+    "method": "GET",
+    "path": "/projects/:projectKey",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
   }
   ]
 }
