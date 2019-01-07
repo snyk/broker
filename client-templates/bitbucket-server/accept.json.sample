@@ -316,8 +316,8 @@
       "username": "${BITBUCKET_USERNAME}",
       "password": "${BITBUCKET_PASSWORD}"
       }
-  },
-  {
+    },
+    {
       "//": "used to remove a Code Insights report",
       "method": "DELETE",
       "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
@@ -327,8 +327,8 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-  },
-  {
+    },
+    {
       "//": "used to add Code Insights annotations to a report",
       "method": "POST",
       "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
@@ -338,8 +338,8 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-  },
-  {
+    },
+    {
       "//": "used to remove Code Insights annotations for a report",
       "method": "DELETE",
       "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
@@ -349,8 +349,8 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-  },
-  {
+    },
+    {
       "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project. we're using atlassian's SDK api. Because atlassian's BB server rest api currently doesn't support such functionality",
       "method": "GET",
       "path": "/plugins/servlet/applinks/whoami",
@@ -360,17 +360,39 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-  },
-  {
-    "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
-    "method": "GET",
-    "path": "/projects/:projectKey",
-    "origin": "https://${BITBUCKET}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
+    },
+    {
+      "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
+      "method": "GET",
+      "path": "/projects/:projectKey",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to check if the user has admin or higher permissions",
+      "method": "GET",
+      "path": "/admin/permissions/users",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get all the users. it's called only for admin permissioned user. to retrieve all the repos they can access",
+      "method": "GET",
+      "path": "/users",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
     }
-  }
   ]
 }
