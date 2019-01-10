@@ -210,6 +210,18 @@
       "method": "GET",
       "path": "/api/v4/groups/:id/projects",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "get current user. so we'll be able to fetch it's projects",
+      "method": "GET",
+      "path": "/api/v4/user",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "get user's projects",
+      "method": "GET",
+      "path": "/api/v4/users/:user/projects",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
