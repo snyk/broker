@@ -222,6 +222,12 @@
       "method": "GET",
       "path": "/api/v4/users/:user/projects",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "get all users. so we'll be able to fetch projects that admin can access",
+      "method": "GET",
+      "path": "/api/v4/users",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
