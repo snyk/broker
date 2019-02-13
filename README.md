@@ -141,13 +141,13 @@ ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
 
-### Gitlab
+### GitLab
 
-To use the the broker client with Gitlab.com or an on-prem Gitlab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are needed to customize the broker client:
+To use the the broker client with GitLab.com or an on-prem GitLab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are needed to customize the broker client:
 
-- `BROKER_TOKEN` - the snyk broker token, obtained from your Gitlab integration settings view.
-- `GITLAB_TOKEN` - a Gitlab personal access token with `api` scope
-- `GITLAB` - the hostname of your Gitlab deployment, such as `your.gitlab.domain.com` or `gitlab.com`.
+- `BROKER_TOKEN` - the snyk broker token, obtained from your GitLab integration settings view.
+- `GITLAB_TOKEN` - a GitLab personal access token with `api` scope
+- `GITLAB` - the hostname of your GitLab deployment, such as `your.gitlab.domain.com` or `GitLab.com`.
 - `PORT` - the local port at which the broker client accepts connections. Default is 7341.
 - `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by GitLab.com webhooks, such as `http://my.broker.client:7341`
 
