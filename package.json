@@ -42,7 +42,7 @@
     "engine.io": "^3.2.0",
     "engine.io-client": "^3.2.1",
     "express": "^4.16.3",
-    "js-yaml": "^3.13.0",
+    "js-yaml": "^3.13.1",
     "lodash.escaperegexp": "^4.1.2",
     "lodash.mapvalues": "^4.6.0",
     "minimatch": "^3.0.4",
