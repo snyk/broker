@@ -130,6 +130,24 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Gopkg.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Gopkg.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/vendor.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -158,7 +176,10 @@
             "**/*.csproj",
             "**/*.vbproj",
             "**/*.fsproj",
-            "**/project.json"
+            "**/project.json",
+            "**/Gopkg.toml",
+            "**/Gopkg.lock",
+            "**/vendor.json"
           ]
         }
       ]
