@@ -40,11 +40,11 @@ echoServer.get('/echo-query/:param?', (req, res) => {
 });
 
 echoServer.get(
-  '/nested/path-with/wildcard/and-an-escaped-slash/to/:filename',
+  '/long/nested/*',
   (req, res) => {
-    res.send(req.params.filename);
+    res.send(req.originalUrl);
   });
-
+  
 echoServer.get('/repos/owner/repo/contents/folder/package.json',
   (req, res) => {
     res.json({headers: req.headers, query: req.query, url: req.url});
