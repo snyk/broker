@@ -44,7 +44,7 @@ test('proxy requests originating from behind the broker server', t => {
   server.io.on('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.plan(21);
+      t.plan(22);
 
       t.test('identification', t => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -207,16 +207,24 @@ test('proxy requests originating from behind the broker server', t => {
         });
       });
 
-      t.test('sucessfully broker GET to an escaped url with a wildcard filter',
+      t.test('approved URLs are blocked when escaped',
         t => {
-          // url is escaped: %2F <=> `/`,
-          // filter path is "/nested/path-with/wild*/to/file.ext"
           const url = `http://localhost:${serverPort}/broker/${token}/` +
-                       'nested/path-with/wildcard/and-an-escaped-slash/to%2F' +
-                       'file.ext';
+                       'long/nested%2Fpath%2Fto%2Ffile.ext';
+          request({ url, method: 'get' }, (err, res) => {
+            t.equal(res.statusCode, 401, '401 statusCode');
+            t.equal(res.body, 'blocked', 'request is blocked');
+            t.end();
+          });
+        });
+
+      t.test('approved URLs are brokered when escaped as expected',
+        t => {
+          const url = `http://localhost:${serverPort}/broker/${token}/` +
+                       'long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext';
           request({ url, method: 'get' }, (err, res) => {
             t.equal(res.statusCode, 200, '200 statusCode');
-            t.equal(res.body, 'file.ext', 'filename brokered');
+            t.equal(res.body, '/long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext', 'proper brokered URL');
             t.end();
           });
         });

@@ -293,7 +293,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpackage.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/package-lock.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpackage-lock.json",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -305,7 +317,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FGemfile.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/Gemfile",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FGemfile",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -317,7 +341,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpom.xml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/requirements.txt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Frequirements.txt",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -329,13 +365,30 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fyarn.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/build.gradle",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fbuild.gradle",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/build.sbt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fbuild.sbt",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -347,7 +400,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpackages.config",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+   },
+   {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/*.csproj",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2F*.csproj",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -359,7 +424,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2F*.fsproj",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/*.vbproj",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2F*.vbproj",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -371,7 +448,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fproject.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/Gopkg.toml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FGopkg.toml",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -383,7 +472,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FGopkg.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/vendor/vendor.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fvendor%2Fvendor.json",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
@@ -392,7 +493,12 @@
       "path": "/repos/:name/:repo/contents/:path*/.snyk",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2F.snyk",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
     {
       "//": "get details of the repo",
       "method": "GET",

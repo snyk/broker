@@ -54,7 +54,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpackage.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/package-lock.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
       "origin": "https://${GITLAB}"
     },
     {
@@ -66,7 +78,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FGemfile.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/Gemfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FGemfile",
       "origin": "https://${GITLAB}"
     },
     {
@@ -78,7 +102,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpom.xml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/requirements.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Frequirements.txt",
       "origin": "https://${GITLAB}"
     },
     {
@@ -90,7 +126,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fyarn.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/build.gradle",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
       "origin": "https://${GITLAB}"
     },
     {
@@ -102,7 +150,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fbuild.sbt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/packages.config",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpackages.config",
       "origin": "https://${GITLAB}"
     },
     {
@@ -114,7 +174,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.csproj",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/*.vbproj",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.vbproj",
       "origin": "https://${GITLAB}"
     },
     {
@@ -126,7 +198,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.fsproj",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/project.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fproject.json",
       "origin": "https://${GITLAB}"
     },
     {
@@ -138,7 +222,19 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FGopkg.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/Gopkg.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FGopkg.lock",
       "origin": "https://${GITLAB}"
     },
     {
@@ -148,9 +244,21 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fvendor.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F.snyk",
       "origin": "https://${GITLAB}"
     },
     {
@@ -163,23 +271,41 @@
           "queryParam": "file_path",
           "values": [
             "**/package.json",
+            "**%2Fpackage.json",
             "**/yarn.lock",
+            "**%2Fyarn.lock",
             "**/package-lock.json",
+            "**%2Fpackage-lock.json",
             "**/Gemfile",
+            "**%2FGemfile",
             "**/Gemfile.lock",
+            "**%2FGemfile.lock",
             "**/pom.xml",
+            "**%2Fpom.xml",
             "**/requirements.txt",
+            "**%2Frequirements.txt",
             "**/build.gradle",
+            "**%2Fbuild.gradle",
             "**/build.sbt",
+            "**%2Fbuild.sbt",
             "**/.snyk",
+            "**%2F.snyk",
             "**/packages.config",
+            "**%2Fpackages.config",
             "**/*.csproj",
+            "**%2F*.csproj",
             "**/*.vbproj",
+            "**%2F*.vbproj",
             "**/*.fsproj",
+            "**%2F*.fsproj",
             "**/project.json",
+            "**%2Fproject.json",
             "**/Gopkg.toml",
+            "**%2FGopkg.toml",
             "**/Gopkg.lock",
-            "**/vendor.json"
+            "**%2FGopkg.lock",
+            "**/vendor.json",
+            "**%2Fvendor.json"
           ]
         }
       ]

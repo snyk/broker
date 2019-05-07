@@ -80,11 +80,16 @@
     },
 
     {
-      "path": "/nested/path-with/wild*/to/file.ext",
+      "path": "/long/nested/path/to/file.ext",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
     }
-
   ],
   "public": [
     {
