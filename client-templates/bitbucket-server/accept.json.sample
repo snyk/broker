@@ -67,7 +67,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpackage.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/package-lock.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpackage-lock.json",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -89,7 +111,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2FGemfile.lock",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/Gemfile",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2FGemfile",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -111,7 +155,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpom.xml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/requirements.txt",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Frequirements.txt",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -133,7 +199,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fyarn.lock",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/build.gradle",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fbuild.gradle",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -155,7 +243,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fbuild.sbt",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/packages.config",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpackages.config",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -177,7 +287,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.csproj",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/*.vbproj",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.vbproj",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -199,7 +331,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.fsproj",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/project.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2Fproject.json",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -221,7 +375,29 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2FGopkg.toml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/Gopkg.lock",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2FGopkg.lock",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -241,9 +417,31 @@
       }
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/vendor%2Fvendor.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/.snyk",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to check if there's any ignore rules or existing patches",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F.snyk",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
