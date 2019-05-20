@@ -408,7 +408,7 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*/vendor/vendor.json",
+      "path": "/projects/:project/repos/:repo/browse*/vendor.json",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -419,7 +419,7 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*%2Fvendor%2Fvendor.json",
+      "path": "/projects/:project/repos/:repo/browse*%2Fvendor.json",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
