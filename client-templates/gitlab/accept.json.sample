@@ -250,6 +250,30 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/composer.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/composer.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -305,7 +329,11 @@
             "**/Gopkg.lock",
             "**%2FGopkg.lock",
             "**/vendor.json",
-            "**%2Fvendor.json"
+            "**%2Fvendor.json",
+            "**/composer.lock",
+            "**%2Fcomposer.lock",
+            "**/composer.json",
+            "**%2Fcomposer.json"
           ]
         }
       ]
