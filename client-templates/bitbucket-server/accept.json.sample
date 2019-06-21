@@ -54,6 +54,17 @@
       }
     },
     {
+      "//": "read all file names to find manifests",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/files/:searchPath?",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/package.json",
