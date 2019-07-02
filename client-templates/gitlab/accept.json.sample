@@ -274,6 +274,18 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/project.assets.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fproject.assets.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -333,7 +345,9 @@
             "**/composer.lock",
             "**%2Fcomposer.lock",
             "**/composer.json",
-            "**%2Fcomposer.json"
+            "**%2Fcomposer.json",
+            "**/project.assets.json",
+            "**%2Fproject.assets.json"
           ]
         }
       ]
