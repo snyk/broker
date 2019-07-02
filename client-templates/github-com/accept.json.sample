@@ -884,6 +884,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "get list of all files in a repo",
+      "method": "GET",
+      "path": "/repos/:name/:repo/git/trees/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "query graphql",
       "method": "POST",
       "path": "/graphql",
