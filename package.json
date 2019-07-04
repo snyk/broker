@@ -14,7 +14,9 @@
     "dev": "node lib | ./node_modules/.bin/bunyan",
     "test": "npm run lint && CI=1 tap -R spec test/**/*.test.js --timeout 60",
     "lint": "eslint -c .eslintrc cli lib test && ./lintVerifier.sh",
-    "check-tests": "! grep 'test.only' test/**/*.test.js -n"
+    "check-tests": "! grep 'test.only' test/**/*.test.js -n",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [],
   "author": "Snyk.io",
@@ -55,7 +57,8 @@
     "then-fs": "^2.0.0",
     "tunnel": "0.0.4",
     "undefsafe": "^2.0.2",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "snyk": "^1.192.0"
   },
   "repository": {
     "type": "git",
