@@ -1,0 +1,20 @@
+{search(
+ query: "repo:snyk-fixtures/goof is:pr state2:open head:snyk- is:merged", type: ISSUE, last: 5      ) {
+      edges {
+          node {
+               ... on PullRequest {
+                      url
+                      title
+                      createdAt
+                      headRefName
+                      state
+                      mergeable
+                      body
+                      repository {
+                               name
+                       }
+                  }
+              }
+          }
+      }
+  }

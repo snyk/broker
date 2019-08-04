@@ -78,6 +78,11 @@
         "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
         "path": "query",
         "regex": "{\\s*repositoryOwner\\(login:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*repository\\(name:\\s*\"([a-zA-Z0-9-_.]+)\"\\)\\s*{\\s*object\\(expression:\\s*\"([a-zA-Z0-9-_./:]+)\"\\)\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s+{\\s*entries\\s*{\\s*name\\s+type\\s+object\\s*{\\s*\\.\\.\\.\\s*on\\s+Tree\\s*{\\s*entries\\s*{\\s*name\\s+type\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}"
+      },
+      {
+        "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
+        "path": "query",
+        "regex": "{\\s*search\\(\\s*query: \"repo:[a-zA-Z0-9-_.]+\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\s*(is:[a-zA-Z]+)?\", type: ISSUE, last: [0-9]+\\s*\\)\\s*{\\s*edges {\\s*node {\\s*\\.\\.\\. on PullRequest {\\s*url\\s*title\\s*createdAt\\s*headRefName\\s*state\\s*mergeable\\s*body\\s*repository\\s*{\\s*name\\s*}\\s*}\\s*}\\s*}\\s*}\\s*}\\s*"
       }
     ]
   },
