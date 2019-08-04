@@ -1,4 +1,6 @@
 const test = require('tap').test;
+const fs = require('fs');
+
 const Filters = require('../../lib/filters');
 
 const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
@@ -6,7 +8,6 @@ const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 test('filter on body', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
-  t.plan(14);
   t.pass('filters loaded');
 
   filter({
@@ -71,11 +72,12 @@ test('filter on body', t => {
     t.equal(res, undefined, 'no follow allowed');
   });
 
-  filter({
-    url: '/graphql',
-    method: 'POST',
-    body: jsonBuffer({
-      query: `{
+  t.test('graphql - find globs - valid query', (t) => {
+    filter({
+      url: '/graphql',
+      method: 'POST',
+      body: jsonBuffer({
+        query: `{
         repositoryOwner(login: "_REPO_OWNER_") {
           repository(name: "_REPO-NAME_") {
             object(expression: "_BRANCH_/_NAME_") {
@@ -105,18 +107,20 @@ test('filter on body', t => {
           }
         }
       }`,
-    })
-  }, (error, res) => {
-    t.equal(error, null, 'no error');
-    t.equal(res.url, '/graphql', 'allows the path request');
+      })
+    }, (error, res) => {
+      t.equal(error, null, 'no error');
+      t.equal(res.url, '/graphql', 'allows the path request');
+    });
+    t.end();
   });
 
-  filter({
-    url: '/graphql',
-    method: 'POST',
-    body: jsonBuffer({
-      // "NoSQL injection"
-      query: `{
+  t.test('graphql - find globs - noSQL injection', (t) => {
+    filter({
+      url: '/graphql',
+      method: 'POST',
+      body: jsonBuffer({
+        query: `{
         repositoryOwner(login: "search: "{\"username\": {\"$regex\": \"sue\"}, \"email\": {\"$regex\": \"sue\"}}"") {
           repository(name: "_REPO_NAME_") {
             object(expression: "_BRANCH_/_NAME_") {
@@ -146,12 +150,68 @@ test('filter on body', t => {
           }
         }
       }`,
-    })
-  }, (error, res) => {
-    t.ok(error, 'got an error');
-    t.equal(error.message, 'blocked', 'has been blocked');
-    t.equal(res, undefined, 'no follow allowed');
+      })
+    }, (error, res) => {
+      t.ok(error, 'got an error');
+      t.equal(error.message, 'blocked', 'has been blocked');
+      t.equal(res, undefined, 'no follow allowed');
+    });
+    t.end();
   });
+
+  t.test('graphql - find pull requests - invalid', (t) => {
+    filter({
+      url: '/graphql',
+      method: 'POST',
+      body: jsonBuffer({
+        query: fs
+          .readFileSync(__dirname + '/../fixtures/client/github/graphql/find-pull-requests-invalid-query.txt')
+          .toString('utf-8'),
+      })
+    }, (error, res) => {
+      t.ok(error, 'got an error');
+      t.equal(error.message, 'blocked', 'has been blocked');
+      t.equal(res, undefined, 'no follow allowed');
+      t.end();
+    });
+  });
+
+  t.test('graphql - find pull requests - open', (t) => {
+    filter({
+      url: '/graphql',
+      method: 'POST',
+      body: jsonBuffer({
+        query: fs
+          .readFileSync(__dirname + '/../fixtures/client/github/graphql/find-pull-requests-open.txt')
+          .toString('utf-8'),
+      })
+    }, (error, res) => {
+
+      t.equal(error, null, 'no error');
+      t.equal(res.url, '/graphql', 'allows the path request');
+      t.end();
+    });
+  });
+
+  t.test('graphql - find pull requests - closed', (t) => {
+    filter({
+      url: '/graphql',
+      method: 'POST',
+      body: jsonBuffer({
+        query: fs
+          .readFileSync(__dirname + '/../fixtures/client/github/graphql/find-pull-requests-closed.txt')
+          .toString('utf-8'),
+      })
+    }, (error, res) => {
+
+      t.equal(error, null, 'no error');
+      t.equal(res.url, '/graphql', 'allows the path request');
+      t.end();
+    });
+  });
+
+  t.end();
+
 });
 
 test('filter on querystring', t => {
