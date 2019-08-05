@@ -51,7 +51,7 @@
     "primus-emitter": "^3.1.1",
     "qs": "^6.5.2",
     "request": "^2.88.0",
-    "snyk-config": "^2.2.1",
+    "snyk-config": "^2.2.3",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.4",
     "undefsafe": "^2.0.2",
