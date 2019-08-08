@@ -890,6 +890,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "used to get repo's contributors list",
+      "method": "GET",
+      "path": "/repos/:owner/:repo/contributors",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "query graphql",
       "method": "POST",
       "path": "/graphql",
