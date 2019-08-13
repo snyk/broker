@@ -423,6 +423,12 @@
       "method": "GET",
       "path": "/api/v4/users",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to get repo's contributors list",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/contributors",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
