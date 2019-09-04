@@ -78,7 +78,8 @@ test('proxy requests originating from behind the broker client', t => {
         const url = `http://localhost:${clientPort}/not-allowed`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.message, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.reason, 'Request does not match any accept rule, blocking HTTP request', 'Block message');
           t.end();
         });
       });
@@ -100,7 +101,7 @@ test('proxy requests originating from behind the broker client', t => {
         const body = { proxy: { me: 'now!' }};
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.message, 'blocked', '"blocked" body: ' + body);
           t.end();
         });
       });

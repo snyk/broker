@@ -113,7 +113,8 @@ test('proxy requests originating from behind the broker server', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/not-allowed`;
         request({ url, 'method': 'post', json: true }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.message, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.reason, 'Response does not match any accept rule, blocking websocket request', 'Block message');
           t.end();
         });
       });
@@ -135,7 +136,8 @@ test('proxy requests originating from behind the broker server', t => {
         const body = { proxy: { me: 'now!' }};
         request({ url, 'method': 'post', json: true, body }, (err, res, body) => {
           t.equal(res.statusCode, 401, '401 statusCode');
-          t.equal(body, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.message, 'blocked', '"blocked" body: ' + body);
+          t.equal(body.reason, 'Response does not match any accept rule, blocking websocket request', 'Block message');
           t.end();
         });
       });
@@ -211,9 +213,10 @@ test('proxy requests originating from behind the broker server', t => {
         t => {
           const url = `http://localhost:${serverPort}/broker/${token}/` +
                        'long/nested%2Fpath%2Fto%2Ffile.ext';
-          request({ url, method: 'get' }, (err, res) => {
+          request({ url, method: 'get', json: true }, (err, res) => {
             t.equal(res.statusCode, 401, '401 statusCode');
-            t.equal(res.body, 'blocked', 'request is blocked');
+            t.equal(res.body.message, 'blocked', 'Block message');
+            t.equal(res.body.reason, 'Response does not match any accept rule, blocking websocket request', 'Block message');
             t.end();
           });
         });
