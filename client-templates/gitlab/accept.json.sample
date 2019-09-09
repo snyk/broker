@@ -427,7 +427,7 @@
     {
       "//": "used to get repo's contributors list",
       "method": "GET",
-      "path": "/api/v4/projects/:project/repository/contributors",
+      "path": "/api/v4/projects/:project/repository/commits",
       "origin": "https://${GITLAB}"
     }
   ]
