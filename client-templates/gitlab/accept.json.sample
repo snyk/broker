@@ -429,6 +429,12 @@
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/commits",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "get a specific commit identified by the commit hash or name of a branch or tag.",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/commits/:sha",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
