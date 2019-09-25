@@ -615,6 +615,17 @@
       }
     },
     {
+      "//": "get a specific commit identified by the commit hash or name of a branch",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to create a Code Insights report",
       "method": "PUT",
       "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
