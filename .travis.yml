@@ -1,9 +1,7 @@
 sudo: false
 dist: bionic
 language: node_js
-cache:
-  directories:
-    - node_modules
+cache: npm
 notifications:
   email: false
 node_js:
