@@ -117,6 +117,22 @@ The `private` rules should be determined by what you want to allow through the s
 
 This `public` rule will ensure everything is forwarded to your clients, and will allow your client to handle blocking out messages.
 
+Sometimes large amounts of data need to be transferred in a response to a request. In these instances it might makes sense to stream
+the data for these requests:
+
+```json
+  "public": [{
+    "//": "accept any requests to our connected clients",
+    "method": "any",
+    "path": "/blobs/*",
+    "stream": true
+  }, {
+    "//": "accept any requests to our connected clients",
+    "method": "any",
+    "path": "/*"
+  }],
+```
+
 ## Development & how to test
 
 The project's source code is written in full ES6 (with commonjs modules). This requires the source to be developed with node@6. However, during the release process, the code is transpiled to ES5 via babel and is released with node LTS in mind, node@4 and upwards.
@@ -284,4 +300,3 @@ Public filters are for requests that a recieved on your broker client and are in
 * [License: Apache License, Version 2.0](LICENSE)
 * [Contributing](.github/CONTRIBUTING.md)
 * [Security](SECURITY.md)
-
