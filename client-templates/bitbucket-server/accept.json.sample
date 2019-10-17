@@ -1,14 +1,12 @@
 {
-  "public":
-  [
-      {
-        "//": "used for pushing up webhooks from bitbucket-server",
-        "method": "POST",
-        "path": "/webhook/bitbucket-server/:webhookId"
-      }
+  "public": [
+    {
+      "//": "used for pushing up webhooks from bitbucket-server",
+      "method": "POST",
+      "path": "/webhook/bitbucket-server/:webhookId"
+    }
   ],
-  "private":
-  [
+  "private": [
     {
       "//": "list the user's projects",
       "method": "GET",
@@ -41,8 +39,8 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
-     },
-     {
+    },
+    {
       "//": "fetch a given repo",
       "method": "GET",
       "path": "/projects/:project/repos/:repo",
@@ -527,6 +525,17 @@
       }
     },
     {
+      "//": "get list of API capabilities",
+      "method": "GET",
+      "path": "/rest/capabilities",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/webhooks",
@@ -628,18 +637,18 @@
     {
       "//": "used to create a Code Insights report",
       "method": "PUT",
-      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
+      "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report",
       "origin": "https://${BITBUCKET}",
       "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
       }
     },
     {
       "//": "used to remove a Code Insights report",
       "method": "DELETE",
-      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report",
+      "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
@@ -650,7 +659,18 @@
     {
       "//": "used to add Code Insights annotations to a report",
       "method": "POST",
-      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+      "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "get list of API capabilities for Code Insights",
+      "method": "GET",
+      "path": "/rest/insights/:apiVersion/capabilities",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
@@ -661,7 +681,7 @@
     {
       "//": "used to remove Code Insights annotations for a report",
       "method": "DELETE",
-      "path": "/rest/insights/1.0/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+      "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
