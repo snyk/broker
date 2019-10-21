@@ -15,6 +15,27 @@ const { app: echoServer, server } = webserver({
   httpsCert: process.env.TEST_CERT, // Optional
 });
 
+echoServer.get(
+  '/test-blob/1',
+  (req, res) => {
+    res.setHeader('test-orig-url', req.originalUrl);
+    res.status(299);
+
+    const buf = new Buffer(500);
+    for (var i=0; i<500; i++) {
+      buf.writeUInt8(i & 0xFF, i);
+    }
+    res.send(buf);
+  });
+
+echoServer.get(
+  '/test-blob/2',
+  (req, res) => {
+    res.setHeader('test-orig-url', req.originalUrl);
+    res.status(500);
+    res.send('Test Error');
+  });
+
 echoServer.get('/basic-auth', (req, res) => {
   res.send(req.headers.authorization);
 });
@@ -44,7 +65,7 @@ echoServer.get(
   (req, res) => {
     res.send(req.originalUrl);
   });
-  
+
 echoServer.get('/repos/owner/repo/contents/folder/package.json',
   (req, res) => {
     res.json({headers: req.headers, query: req.query, url: req.url});

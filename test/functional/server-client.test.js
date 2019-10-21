@@ -44,7 +44,7 @@ test('proxy requests originating from behind the broker server', t => {
   server.io.on('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.plan(22);
+      t.plan(24);
 
       t.test('identification', t => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -284,6 +284,49 @@ test('proxy requests originating from behind the broker server', t => {
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
           t.equal(encodedAuth, `${process.env.USERNAME}:${process.env.PASSWORD}`,
             'auth header is set correctly');
+          t.end();
+        });
+      });
+
+      t.test('successfully stream data', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/test-blob/1`;
+        request({
+          url,
+          method: 'get',
+          encoding: null
+        }, (err, res, body) => {
+
+          // No encoding is only possible when streaming
+          // data as we otherwise encode the data
+          // when making the request on the client.
+
+          t.equal(res.statusCode, 299, '299 statusCode');
+          t.equal(res.headers['test-orig-url'],
+            '/test-blob/1', 'orig URL');
+
+          // Check that the server response with the correct data
+
+          const buf = new Buffer(500);
+          for (var i=0; i<500; i++) {
+            buf.writeUInt8(i & 0xFF, i);
+          }
+          t.deepEqual(body, buf);
+
+          t.end();
+        });
+      });
+
+      t.test('fail to stream data', t => {
+        const url = `http://localhost:${serverPort}/broker/${token}/test-blob/2`;
+        request({
+          url,
+          method: 'get',
+          encoding: null
+        }, (err, res, body) => {
+          t.equal(res.statusCode, 500, '500 statusCode');
+          t.equal(res.headers['test-orig-url'],
+            '/test-blob/2', 'orig URL');
+          t.equal(String(body), 'Test Error');
           t.end();
         });
       });

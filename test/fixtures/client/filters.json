@@ -72,6 +72,11 @@
       ]
     },
 
+    {
+      "path": "/test-blob/*",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
+    },
 
     {
       "path": "/repos/:repo/:owner/contents/folder*/package.json",
