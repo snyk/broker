@@ -114,13 +114,13 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/api/v4/projects/:project/repository/files*/requirements.txt",
+      "path": "/api/v4/projects/:project/repository/files*/*req*.txt",
       "origin": "https://${GITLAB}"
     },
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/api/v4/projects/:project/repository/files*%2Frequirements.txt",
+      "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
       "origin": "https://${GITLAB}"
     },
     {
@@ -324,8 +324,8 @@
             "**%2FGemfile.lock",
             "**/pom.xml",
             "**%2Fpom.xml",
-            "**/requirements.txt",
-            "**%2Frequirements.txt",
+            "**/*req*.txt",
+            "**%2F*req*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/build.sbt",

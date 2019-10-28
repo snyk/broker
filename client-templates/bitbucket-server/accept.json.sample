@@ -175,7 +175,7 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*/requirements.txt",
+      "path": "/projects/:project/repos/:repo/browse*/*req*.txt",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -186,7 +186,7 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*%2Frequirements.txt",
+      "path": "/projects/:project/repos/:repo/browse*%2F*req*.txt",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
