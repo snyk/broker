@@ -17,7 +17,7 @@ test('proxy requests originating from behind the broker client', t => {
    */
 
   process.env.ACCEPT = 'filters.json';
-  
+
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.BROKER_TYPE = 'server';
   const serverPort = port();
@@ -72,9 +72,13 @@ test('proxy requests originating from behind the broker client', t => {
         request({url: connectionStatus, json: true }, (err, res) => {
           if (err) { return t.threw(err); }
 
+          const expectedFilters = require('../fixtures/client/filters.json');
+
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(res.body.ok, true, '{ ok: true } in body');
           t.ok(res.body.clients[0].version, 'client version in body');
+
+          t.deepEqual(res.body.clients[0].filters, expectedFilters, 'correct client filters in body');
           t.end();
         });
       });
@@ -98,7 +102,7 @@ test('proxy requests originating from behind the broker client', t => {
 
         request({url: clientHealth, json: true }, (err, res) => {
           if (err) { return t.threw(err); }
-    
+
           t.equal(res.statusCode, 500, '500 statusCode');
           t.equal(res.body.ok, false, '{ ok: false } in body');
           t.equal(res.body.websocketConnectionOpen, false, '{ websocketConnectionOpen: false } in body');
