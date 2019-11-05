@@ -292,6 +292,30 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Podfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FPodfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Podfile.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FPodfile.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -353,7 +377,11 @@
             "**/composer.json",
             "**%2Fcomposer.json",
             "**/project.assets.json",
-            "**%2Fproject.assets.json"
+            "**%2Fproject.assets.json",
+            "**/Podfile",
+            "**%2FPodfile",
+            "**/Podfile.lock",
+            "**%2FPodfile.lock"
           ]
         }
       ]

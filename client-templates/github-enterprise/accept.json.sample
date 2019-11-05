@@ -172,6 +172,22 @@
             "path": "commits.*.modified.*",
             "value": "project.assets.json"
           }
+          {
+            "path": "commits.*.added.*",
+            "value": "Podfile"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Podfile"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Podfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Podfile.lock"
+          }
         ]
       },
     {
@@ -546,6 +562,30 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*%2Fproject.assets.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Podfile",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FPodfile",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Podfile.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FPodfile.lock",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
