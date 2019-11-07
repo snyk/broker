@@ -80,6 +80,7 @@ test('proxy requests originating from behind the broker client', t => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.equal(body.message, 'blocked', '"blocked" body: ' + body);
           t.equal(body.reason, 'Request does not match any accept rule, blocking HTTP request', 'Block message');
+          t.equal(body.url, '/not-allowed', 'Blocked url');
           t.end();
         });
       });
