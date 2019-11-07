@@ -171,7 +171,7 @@
           {
             "path": "commits.*.modified.*",
             "value": "project.assets.json"
-          }
+          },
           {
             "path": "commits.*.added.*",
             "value": "Podfile"
