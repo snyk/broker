@@ -1,4 +1,6 @@
-#/bin/bash
+#! /usr/bin/env bash
+
+set -eo pipefail
 
 echo "Linting JSON files..."
 for file in $(find ./client-templates -type f -name *.json.sample); do
