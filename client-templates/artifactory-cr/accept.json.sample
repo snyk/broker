@@ -1,0 +1,30 @@
+{
+  "public":
+  [
+    {
+      "//": "send any type of request to our connected server",
+      "method": "any",
+      "path": "/*"
+    }
+  ],
+  "private":
+  [
+    {
+      "//": "Get the about page",
+      "method": "GET",
+      "path": "/v2/token",
+      "origin": "https://${ARTIFACTORYCR_HOSTNAME}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${ARTIFACTORYCR_USERNAME}",
+        "password": "${ARTIFACTORYCR_PASSWORD}"
+      }
+    },
+    {
+      "//": "Get the about page",
+      "method": "GET",
+      "path": "/v2/*",
+      "origin": "https://${ARTIFACTORYCR_HOSTNAME}"
+    }
+  ]
+}
