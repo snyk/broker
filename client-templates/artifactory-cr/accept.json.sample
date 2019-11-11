@@ -10,7 +10,7 @@
   "private":
   [
     {
-      "//": "Get the about page",
+      "//": "Handle authentication",
       "method": "GET",
       "path": "/v2/token",
       "origin": "https://${ARTIFACTORYCR_HOSTNAME}",
@@ -21,7 +21,7 @@
       }
     },
     {
-      "//": "Get the about page",
+      "//": "Query the V2 API",
       "method": "GET",
       "path": "/v2/*",
       "origin": "https://${ARTIFACTORYCR_HOSTNAME}"
