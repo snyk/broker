@@ -150,6 +150,18 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/gradle.properties",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgradle.properties",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/build.sbt",
       "origin": "https://${GITLAB}"
     },
