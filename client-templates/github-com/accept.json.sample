@@ -61,6 +61,22 @@
           },
           {
             "path": "commits.*.added.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.added.*",
             "value": "build.sbt"
           },
           {
@@ -513,6 +529,30 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:path*%2Fbuild.gradle",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/gradle.properties",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fgradle.properties",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/gradle.properties",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*%2Fgradle.properties",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
