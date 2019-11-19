@@ -5,8 +5,14 @@ const path = require('path');
 const app = require('../../lib');
 const root = __dirname;
 
-process.env.TEST_KEY = path.resolve(root, '../fixtures/certs/server/privkey.pem');
-process.env.TEST_CERT = path.resolve(root, '../fixtures/certs/server/fullchain.pem');
+process.env.TEST_KEY = path.resolve(
+  root,
+  '../fixtures/certs/server/privkey.pem'
+);
+process.env.TEST_CERT = path.resolve(
+  root,
+  '../fixtures/certs/server/fullchain.pem'
+);
 
 const { port, echoServerPort } = require('../utils')(tap);
 
@@ -41,13 +47,17 @@ test('correctly use supplied CA cert on client for connections', t => {
   server.io.once('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.test('get an error trying to connect to a server with unknown CA', t => {
-        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
-        request({ url, method: 'post', json: true }, (err, res) => {
-          t.equal(res.statusCode, 500, '500 statusCode');
-          t.end();
-        });
-      });
+      t.test(
+        'get an error trying to connect to a server with unknown CA',
+        t => {
+          const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
+          request({ url, method: 'post', json: true }, (err, res) => {
+            console.log(47, res.statusCode, res.body);
+            t.equal(res.statusCode, 500, '500 statusCode');
+            t.end();
+          });
+        }
+      );
 
       t.test('close', t => {
         client.close();
@@ -61,13 +71,14 @@ test('correctly use supplied CA cert on client for connections', t => {
         });
 
         // Specify CA file
-        process.env.CA_CERT = '../certs/ca/my-root-ca.crt.pem';
+        // process.env.CA_CERT = '../certs/ca/my-root-ca.crt.pem';
         client = app.main({ port: port() });
       });
 
       t.test('successfully broker POST with CA set', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
+          console.log(71, res.statusCode, res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
           t.end();
         });
