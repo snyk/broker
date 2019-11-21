@@ -15,6 +15,11 @@ const { app: echoServer, server } = webserver({
   httpsCert: process.env.TEST_CERT, // Optional
 });
 
+echoServer.get('/test', (req, res) => {
+  res.status(200);
+  res.send('All good');
+});
+
 echoServer.get(
   '/test-blob/1',
   (req, res) => {

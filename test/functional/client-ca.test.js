@@ -20,12 +20,13 @@ test('correctly use supplied CA cert on client for connections', t => {
    * 6. send request to the server and expect success
    */
 
-  t.plan(5);
+  t.plan(6);
 
   process.env.ACCEPT = 'filters.json';
 
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.BROKER_TYPE = 'server';
+  let clientPort;
   const serverPort = port();
   const server = app.main({ port: serverPort });
 
@@ -62,12 +63,22 @@ test('correctly use supplied CA cert on client for connections', t => {
 
         // Specify CA file
         process.env.CA_CERT = '../certs/ca/my-root-ca.crt.pem';
-        client = app.main({ port: port() });
+        process.env.BROKER_CLIENT_VALIDATION_URL = `https://localhost:${echoServerPort}/test`;
+        clientPort = port();
+        client = app.main({ port: clientPort });
       });
 
       t.test('successfully broker POST with CA set', t => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.end();
+        });
+      });
+
+      t.test('successfully call systemcheck with CA set', t => {
+        const url = `http://localhost:${clientPort}/systemcheck`;
+        request({ url, json: true }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
           t.end();
         });
