@@ -54,7 +54,7 @@
     "request": "^2.88.0",
     "snyk-config": "^2.2.3",
     "then-fs": "^2.0.0",
-    "tunnel": "0.0.4",
+    "tunnel": "0.0.6",
     "undefsafe": "^2.0.2",
     "uuid": "^3.3.3"
   },
