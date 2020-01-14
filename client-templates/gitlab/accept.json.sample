@@ -1,14 +1,12 @@
 {
-  "public":
-  [
-      {
-        "//": "used for pushing up webhooks from gitlab",
-        "method": "POST",
-        "path": "/webhook/gitlab/:webhookId"
-      }
+  "public": [
+    {
+      "//": "used for pushing up webhooks from gitlab",
+      "method": "POST",
+      "path": "/webhook/gitlab/:webhookId"
+    }
   ],
-  "private":
-  [
+  "private": [
     {
       "//": "identify user",
       "method": "GET",
@@ -157,6 +155,42 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*%2Fgradle.properties",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Directory.Build.targets",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.targets",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Directory.Build.props",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.props",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Packages.props",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FPackages.props",
       "origin": "https://${GITLAB}"
     },
     {

@@ -1,344 +1,340 @@
 {
-  "public":
-  [
-      {
-        "//": "used for pushing up webhooks from github",
-        "method": "POST",
-        "path": "/webhook/github",
-        "valid": [
-          {
-            "//": "accept all pull request state changes (these don't have files in them)",
-            "path": "pull_request.state",
-            "value": "open"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "package.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "package.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "package-lock.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "package-lock.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Gemfile.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Gemfile.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "*req*.txt"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "*req*.txt"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "pom.xml"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "pom.xml"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "build.gradle"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "build.gradle"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "gradle.properties"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "gradle.properties"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "gradle.properties"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "gradle.properties"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "build.sbt"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "build.sbt"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "yarn.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "yarn.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": ".snyk"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": ".snyk"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "packages.config"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "packages.config"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "*.csproj"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "*.csproj"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "*.vbproj"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "*.vbproj"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "*.fsproj"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "*.fsproj"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "project.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "project.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Gopkg.toml"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Gopkg.toml"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Gopkg.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Gopkg.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "vendor.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "vendor.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "composer.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "composer.lock"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "composer.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "composer.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "project.assets.json"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "project.assets.json"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Podfile"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Podfile"
-          },
-          {
-            "path": "commits.*.added.*",
-            "value": "Podfile.lock"
-          },
-          {
-            "path": "commits.*.modified.*",
-            "value": "Podfile.lock"
-          }
-        ]
-      },
+  "public": [
+    {
+      "//": "used for pushing up webhooks from github",
+      "method": "POST",
+      "path": "/webhook/github",
+      "valid": [
+        {
+          "//": "accept all pull request state changes (these don't have files in them)",
+          "path": "pull_request.state",
+          "value": "open"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "package.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "package.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "package-lock.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "package-lock.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Gemfile.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Gemfile.lock"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "*req*.txt"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "*req*.txt"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "pom.xml"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "pom.xml"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "build.gradle"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "build.gradle"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "gradle.properties"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "gradle.properties"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Packages.props"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Packages.props"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Directory.Build.props"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Directory.Build.props"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Directory.Build.targets"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Directory.Build.targets"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "build.sbt"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "build.sbt"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "yarn.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "yarn.lock"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": ".snyk"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": ".snyk"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "packages.config"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "packages.config"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "*.csproj"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "*.csproj"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "*.vbproj"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "*.vbproj"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "*.fsproj"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "*.fsproj"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "project.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "project.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Gopkg.toml"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Gopkg.toml"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Gopkg.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Gopkg.lock"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "vendor.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "vendor.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "composer.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "composer.lock"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "composer.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "composer.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "project.assets.json"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "project.assets.json"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Podfile"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Podfile"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Podfile.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Podfile.lock"
+        }
+      ]
+    },
     {
       "//": "used for pushing up webhooks from github",
       "method": "POST",
       "path": "/webhook/github/:webhookId"
     }
   ],
-  "private":
-  [
+  "private": [
     {
       "//": "search for user's repos",
       "method": "GET",
       "path": "/search/repositories",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "list the user's info, and validate their credentials",
       "method": "GET",
       "path": "/user",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "list the user's orgs",
       "method": "GET",
       "path": "/user/orgs",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "list the logged in user's repos",
       "method": "GET",
       "path": "/user/repos",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "list a user's repos",
       "method": "GET",
       "path": "/users/:username/repos",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "list an orgs's repos",
       "method": "GET",
       "path": "/orgs/:username/repos",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "get a user's repo",
       "method": "GET",
       "path": "/repos/:user/:repo",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "rate limit check",
       "method": "GET",
       "path": "/rate_limit",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "allow meta lookup on the api version",
       "method": "GET",
       "path": "/",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
       "method": "POST",
       "path": "/repos/:user/:repo/hooks",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
       "method": "DELETE",
       "path": "/repos/:owner/:repo/hooks/:id",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to create commit status messages",
       "method": "POST",
       "path": "/repos/:user/:repo/statuses/:sha",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to list branches on a repo",
       "method": "GET",
       "path": "/repos/:user/:repo/branches",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to get branch info",
       "method": "GET",
       "path": "/repos/:user/:repo/branches/:branch",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to get status checks on a branch",
       "method": "GET",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to create status checks on a branch",
       "method": "POST",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "used to delete status checks on a branch",
       "method": "DELETE",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
-
     {
       "//": "check if repo is public",
       "method": "GET",
       "path": "/:user/:repo",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB}"
     },
-
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
@@ -553,6 +549,78 @@
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "path": "/:name/:repo/:path*%2Fgradle.properties",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Packages.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FPackages.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/Packages.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*%2FPackages.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Directory.Build.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/Directory.Build.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*%2FDirectory.Build.props",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/Directory.Build.targets",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.targets",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*/Directory.Build.targets",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/:name/:repo/:path*%2FDirectory.Build.targets",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
     },
     {
