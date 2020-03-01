@@ -635,6 +635,72 @@
       }
     },
     {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/*.yaml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.yaml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/*.yml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.yml",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/*.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2F*.json",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/.snyk",

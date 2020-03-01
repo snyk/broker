@@ -362,6 +362,42 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/*.yaml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.yaml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/*.yml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.yml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/*.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine Cloud Config issues",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2F*.json",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
