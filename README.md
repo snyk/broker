@@ -160,7 +160,7 @@ docker run --restart=always \
            -e BROKER_TOKEN=secret-broker-token \
            -e ARTIFACTORYCR_USERNAME=username \
            -e ARTIFACTORYCR_PASSWORD=password \
-           -e ARTIFACTORYCR_HOSTNAME=your.artifacotry-server.domain.com \
+           -e ARTIFACTORYCR_HOSTNAME=your.artifactory-server.domain.com \
        snyk/broker:artifactory-cr
 ```
 
