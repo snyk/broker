@@ -7,7 +7,7 @@
     "broker": "./cli/index.js"
   },
   "engines": {
-    "node": "8"
+    "node": "12"
   },
   "scripts": {
     "start": "node lib",
