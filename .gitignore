@@ -1,6 +1,7 @@
 /node_modules/
 .env
 .nyc_output
+.vscode
 coverage
 /test/fixtures/certs/tmp
 accept.json
