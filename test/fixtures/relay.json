@@ -28,10 +28,7 @@
     "valid": [
       {
         "queryParam": "filePath",
-        "values": [
-          "**/package.json",
-          "**/yarn.lock"
-        ]
+        "values": ["**/package.json", "**/yarn.lock"]
       }
     ]
   },
@@ -41,10 +38,7 @@
     "valid": [
       {
         "queryParam": "filePath",
-        "values": [
-          "**/package.json",
-          "**/yarn.lock"
-        ]
+        "values": ["**/package.json", "**/yarn.lock"]
       },
       {
         "path": "commits.*.added.*",

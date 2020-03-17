@@ -1,0 +1,13 @@
+{
+  "//": "Cut down example accept.json for GitHub to test filter logic",
+  "public": [],
+  "private":
+  [
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/package.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    } 
+  ]
+}
