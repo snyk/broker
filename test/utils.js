@@ -29,8 +29,8 @@ echoServer.get(
     res.setHeader('test-orig-url', req.originalUrl);
     res.status(299);
 
-    const buf = new Buffer(500);
-    for (var i=0; i<500; i++) {
+    const buf = Buffer.alloc(500);
+    for (let i = 0; i < 500; i++) {
       buf.writeUInt8(i & 0xFF, i);
     }
     res.send(buf);

@@ -172,6 +172,7 @@ test('filter on body', t => {
       url: '/graphql',
       method: 'POST',
       body: jsonBuffer({
+        /* eslint-disable no-useless-escape */
         query: `{
         repositoryOwner(login: "search: "{\"username\": {\"$regex\": \"sue\"}, \"email\": {\"$regex\": \"sue\"}}"") {
           repository(name: "_REPO_NAME_") {
@@ -202,6 +203,7 @@ test('filter on body', t => {
           }
         }
       }`,
+      /* eslint-enable no-useless-escape */
       })
     }, (error, res) => {
       t.ok(error, 'got an error');
@@ -520,7 +522,7 @@ test('filter with auth', t => {
     method: 'GET',
   }, (error, res) => {
     t.equal(error, null, 'no error');
-    t.equal(res.auth, `Basic ${new Buffer('user:pass').toString('base64')}`,
+    t.equal(res.auth, `Basic ${Buffer.from('user:pass').toString('base64')}`,
       'basic auth header returned');
   });
 

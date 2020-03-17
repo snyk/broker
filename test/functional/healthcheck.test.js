@@ -96,7 +96,7 @@ test('proxy requests originating from behind the broker client', t => {
       });
 
       t.test('misconfigured client fails healthcheck', t => {
-        var badClient = app.main({ port: clientPort, config: {
+        const badClient = app.main({ port: clientPort, config: {
           brokerServerUrl: 'http://no-such-server',
         }});
 

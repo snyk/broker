@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "allowJs": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "pretty": true,
+
+    "strict": true,
+    "noImplicitAny": false,
+    "alwaysStrict": false,
+
+    "noUnusedLocals": true,
+  },
+  "include": ["./lib/**/*", "./cli/**/*"],
+}

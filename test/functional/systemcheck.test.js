@@ -89,7 +89,7 @@ test('broker client systemcheck endpoint', t => {
       t.equal(res.body.ok, true, '{ ok: true } in body');
       t.equal(res.body.brokerClientValidationUrl, 'https://httpbin.org/headers', 'validation url present');
       t.ok(res.body.testResponse.body.headers['User-Agent'], 'user-agent header is present in validation request');
-      const expectedAuthHeader = `Basic ${Buffer('username:password').toString('base64')}`;
+      const expectedAuthHeader = `Basic ${Buffer.from('username:password').toString('base64')}`;
       t.equal(res.body.testResponse.body.headers.Authorization, expectedAuthHeader, 'proper authorization header in request');
 
       client.close();

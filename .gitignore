@@ -6,3 +6,5 @@ coverage
 /test/fixtures/certs/tmp
 accept.json
 package-lock.json
+/dist
+.eslintcache

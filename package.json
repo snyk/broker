@@ -1,19 +1,25 @@
 {
   "name": "snyk-broker",
   "description": "Broker for private communication between internal systems and outside public systems",
-  "main": "lib/index.js",
+  "files": [
+    "dist",
+    "client-templates"
+  ],
+  "main": "dist/lib/index.js",
   "bin": {
-    "snyk-broker": "./cli/index.js",
-    "broker": "./cli/index.js"
+    "snyk-broker": "./dist/cli/index.js",
+    "broker": "./dist/cli/index.js"
   },
   "engines": {
     "node": "12"
   },
   "scripts": {
-    "start": "node lib",
-    "dev": "node lib | ./node_modules/.bin/bunyan",
+    "build": "tsc",
+    "prepare": "npm run build && rm -rf ./dist/client-templates && cp -Rf ./client-templates ./dist",
+    "start": "node .",
+    "dev": "tsc-watch --project tsconfig.json --onSuccess 'node .' | ./node_modules/.bin/bunyan",
     "test": "npm run lint && CI=1 tap -j1 -R spec test/**/*.test.js --timeout 60",
-    "lint": "eslint -c .eslintrc cli lib test && ./lintVerifier.sh",
+    "lint": "eslint --color --cache '{cli,lib,test}/**/*.{js,ts}'",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n"
   },
   "keywords": [],
@@ -23,14 +29,19 @@
     "test": "test"
   },
   "devDependencies": {
-    "eslint": "^7.2.0",
+    "@types/node": "^12.12.47",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "compression": "^1.7.4",
+    "eslint": "^7.2.0",
     "proxyquire": "^2.1.3",
     "require-reload": "^0.2.2",
     "sinon": "^9.0.2",
     "tap": "^14.10.7",
     "tap-only": "0.0.5",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.1",
+    "tsc-watch": "^4.2.3",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
