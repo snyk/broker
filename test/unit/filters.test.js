@@ -7,7 +7,7 @@ const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 
 test('Filter on URL', t => {
   t.test('for GitHub private filters', (t) => {
-    t.plan(3);
+    t.plan(4);
     
     const ruleSource = require(__dirname + '/../fixtures/accept/github.json');
     const filter = Filters(ruleSource.private);
@@ -36,6 +36,18 @@ test('Filter on URL', t => {
         t.equal(res, undefined, 'no follow allowed');
       });
   
+      t.end();
+    });
+
+    t.test('should block when path includes directory traversal', (t) => {
+      filter({
+        url: '/repos/angular/angular/contents/path/to/docs/../../sensitive/file.js',
+        method: 'GET',
+      }, (error, res) => {
+        t.equal(error.message, 'blocked', 'has been blocked');
+        t.equal(res, undefined, 'no follow allowed');
+      });
+
       t.end();
     });
 
