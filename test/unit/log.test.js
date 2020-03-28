@@ -31,6 +31,7 @@ test('log sanitization of sensitive information', t => {
   log.info({
     token: sensitiveInfo,
     result: sensitiveInfo,
+    origin: sensitiveInfo,
     url: sensitiveInfo,
     httpUrl: sensitiveInfo,
     ioUrl: sensitiveInfo,
