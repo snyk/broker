@@ -1,0 +1,15 @@
+{
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ],
+  "private": [
+    {
+      "method": "any",
+      "path": "/*",
+      "origin": "${ARTIFACTORY_URL}"
+    }
+  ]
+}
