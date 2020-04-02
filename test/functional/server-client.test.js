@@ -44,7 +44,7 @@ test('proxy requests originating from behind the broker server', t => {
   server.io.on('connection', socket => {
     socket.on('identify', clientData => {
       const token = clientData.token;
-      t.plan(24);
+      t.plan(26);
 
       t.test('identification', t => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -285,6 +285,29 @@ test('proxy requests originating from behind the broker server', t => {
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
           t.equal(encodedAuth, `${process.env.USERNAME}:${process.env.PASSWORD}`,
             'auth header is set correctly');
+          t.end();
+        });
+      });
+
+      t.test('ignores accept-encoding', t => {
+        // Create "big" param so it would trigger sending compressed response
+        const msg = 'hello-'.repeat(200);
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-param/${msg}`;
+        request({ url, method: 'get', gzip: true }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body, msg, 'body');
+          t.end();
+        });
+      });
+
+      t.test('ignores accept-encoding', t => {
+        // Create "big" param so it would trigger sending compressed response
+        const msg = 'hello-'.repeat(200);
+        const headers = {'Accept-Encoding': 'deflate'};
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-param/${msg}`;
+        request({ url, method: 'get', headers }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body, msg, 'body');
           t.end();
         });
       });

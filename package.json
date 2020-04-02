@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
+    "compression": "^1.7.4",
     "proxyquire": "^1.7.10",
     "require-reload": "^0.2.2",
     "sinon": "^1.17.5",
