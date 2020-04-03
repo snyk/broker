@@ -1,3 +1,4 @@
+const compression = require('compression');
 // process.stdout.write('\033c'); // clear the screen
 const webserver = require('../lib/webserver');
 
@@ -14,6 +15,8 @@ const { app: echoServer, server } = webserver({
   httpsKey: process.env.TEST_KEY, // Optional
   httpsCert: process.env.TEST_CERT, // Optional
 });
+
+echoServer.use(compression());
 
 echoServer.get('/test', (req, res) => {
   res.status(200);
