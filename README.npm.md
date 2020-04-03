@@ -287,7 +287,7 @@ Private filters are for requests that come from the broker server into your clie
 
 ### Public rules
 
-Public filters are for requests that a recieved on your broker client and are intended to be forwarded to the broker server (such as a github webhook).
+Public filters are for requests that are received on your broker client and are intended to be forwarded to the broker server (such as a github webhook).
 
 ## Notes
 

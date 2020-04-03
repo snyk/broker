@@ -18,7 +18,7 @@ The Broker client is published as a set of Docker images, each configured for a 
 
 ### GitHub.com
 
-To use the the Broker client with GitHub.com, run `docker pull snyk/broker:github-com`. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with GitHub.com, run `docker pull snyk/broker:github-com`. The following environment variables are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - the Snyk Broker token, obtained from your Snyk Org settings view (app.snyk.io).
 - `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
@@ -54,7 +54,7 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 ### GitHub Enterprise
 
-To use the the Broker client with a GitHub Enterprise deployment, run `docker pull snyk/broker:github-enterprise` tag. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with a GitHub Enterprise deployment, run `docker pull snyk/broker:github-enterprise` tag. The following environment variables are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - the Snyk Broker token, obtained from your Snyk Org settings view (app.snyk.io).
 - `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
@@ -99,15 +99,15 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 ### Bitbucket Server
 
-To use the the Broker client with a Bitbucket Server deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with a Bitbucket Server deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Server integration settings view (app.snyk.io).
 - `BITBUCKET_USERNAME` - the Bitbucket Server username.
 - `BITBUCKET_PASSWORD` - the Bitbucket Server password.
 - `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
 - `BITBUCKET_API` - the API endpoint of your Bitbucket Server deployment. Should be `$BITBUCKET/rest/api/1.0`.
-- `BROKER_CLIENT_URL` - the full URL of the broker client as it will be accessible by your Bitbucket Server for webhooks, such as `http://my.broker.client:7341`
-- `PORT` - the local port at which the broker client accepts connections. Default is 7341.
+- `BROKER_CLIENT_URL` - the full URL of the Broker client as it will be accessible by your Bitbucket Server for webhooks, such as `http://my.broker.client:7341`
+- `PORT` - the local port at which the Broker client accepts connections. Default is 7341.
 
 #### Command-line arguments
 
@@ -143,7 +143,7 @@ ENV PORT                8000
 
 ### Artifactory Container Registry
 
-To use the the broker client with an Artifactory Container Registry deployment, run `docker pull snyk/broker:artifactory-cr` tag. The following environment variables are needed to customize the broker client:
+To use the Broker client with an Artifactory Container Registry deployment, run `docker pull snyk/broker:artifactory-cr` tag. The following environment variables are needed to customize the Broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your Artifactory CR integration settings view.
 - `ARTIFACTORYCR_USERNAME` - the Artifactory CR username.
@@ -179,7 +179,7 @@ ENV ARTIFACTORYCR_HOSTNAME  your.artifactory.domain.com
 
 ### GitLab
 
-To use the the Broker client with GitLab.com or an on-prem GitLab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with GitLab.com or an on-prem GitLab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - the Snyk Broker token, obtained from your GitLab integration settings view (app.snyk.io).
 - `GITLAB_TOKEN` - a GitLab personal access token with `api` scope
@@ -216,9 +216,39 @@ ENV BROKER_CLIENT_URL   http://my.broker.client:8000
 ENV PORT                8000
 ```
 
+### Artifactory 
+
+To use the Broker client with an artifactory deployment, run `docker pull snyk/broker:artifactory` tag. The following environment variables are needed to customize the Broker client:
+
+- `BROKER_TOKEN` - the snyk broker token, obtained from your artifactory integration settings view.
+- `ARTIFACTORY_URL` - the hostname of your artifactory deployment, such as `yourdomain.artifactory.com`.
+
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e ARTIFACTORY_URL=yourdomain.artifactory.com \
+       snyk/broker:artifactory
+```
+
+#### Derived docker image
+
+Another option is to build your own docker image and override relevant environment variables:
+
+```
+FROM snyk/broker:artifactory
+
+ENV BROKER_TOKEN      secret-broker-token
+ENV ARTIFACTORY_URL   yourdomain.artifactory.com
+```
+
 ### Jira
 
-To use the the Broker client with a Jira deployment, run `docker pull snyk/broker:jira` tag. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with a Jira deployment, run `docker pull snyk/broker:jira` tag. The following environment variables are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - the Snyk Broker token, obtained from your Jira integration settings view.
 - `JIRA_USERNAME` - the Jira username.
