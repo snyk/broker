@@ -221,7 +221,7 @@ ENV PORT                8000
 To use the Broker client with an artifactory deployment, run `docker pull snyk/broker:artifactory` tag. The following environment variables are needed to customize the Broker client:
 
 - `BROKER_TOKEN` - the snyk broker token, obtained from your artifactory integration settings view.
-- `ARTIFACTORY_URL` - the hostname of your artifactory deployment, such as `yourdomain.artifactory.com`.
+- `ARTIFACTORY_URL` - the hostname of your artifactory deployment, such as `<yourdomain>.artifactory.com`.
 
 #### Command-line arguments
 
@@ -231,7 +231,7 @@ You can run the docker container by providing the relevant configuration:
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
-           -e ARTIFACTORY_URL=yourdomain.artifactory.com \
+           -e ARTIFACTORY_URL=<yourdomain>.artifactory.com \
        snyk/broker:artifactory
 ```
 
@@ -243,7 +243,7 @@ Another option is to build your own docker image and override relevant environme
 FROM snyk/broker:artifactory
 
 ENV BROKER_TOKEN      secret-broker-token
-ENV ARTIFACTORY_URL   yourdomain.artifactory.com
+ENV ARTIFACTORY_URL   <yourdomain>.artifactory.com
 ```
 
 ### Jira
