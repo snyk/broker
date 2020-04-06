@@ -141,41 +141,6 @@ ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
 
-### Artifactory Container Registry
-
-To use the Broker client with an Artifactory Container Registry deployment, run `docker pull snyk/broker:artifactory-cr` tag. The following environment variables are needed to customize the Broker client:
-
-- `BROKER_TOKEN` - the snyk broker token, obtained from your Artifactory CR integration settings view.
-- `ARTIFACTORYCR_USERNAME` - the Artifactory CR username.
-- `ARTIFACTORYCR_PASSWORD` - the Artifactory CR password.
-- `ARTIFACTORYCR_HOSTNAME` - the hostname of your Artifactory CR deployment, such as `your.artifactory.domain.com`.
-
-#### Command-line arguments
-
-You can run the docker container by providing the relevant configuration:
-
-```
-docker run --restart=always \
-           -p 8000:8000 \
-           -e BROKER_TOKEN=secret-broker-token \
-           -e ARTIFACTORYCR_USERNAME=username \
-           -e ARTIFACTORYCR_PASSWORD=password \
-           -e ARTIFACTORYCR_HOSTNAME=your.artifactory-server.domain.com \
-       snyk/broker:artifactory-cr
-```
-
-#### Derived docker image
-
-Another option is to build your own docker image and override relevant environment variables:
-
-```
-FROM snyk/broker:artifactory-cr
-
-ENV BROKER_TOKEN            secret-broker-token
-ENV ARTIFACTORYCR_USERNAME  username
-ENV ARTIFACTORYCR_PASSWORD  password
-ENV ARTIFACTORYCR_HOSTNAME  your.artifactory.domain.com
-```
 
 ### GitLab
 
