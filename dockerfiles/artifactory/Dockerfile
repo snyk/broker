@@ -23,9 +23,9 @@ RUN broker init artifactory
 # Your unique Broker identifier
 ENV BROKER_TOKEN <broker-token>
 
-# Your Artifactory URL to artifactory and repository
+# Your Artifactory URL to artifactory
 # NOTA BENE: without `/` character in the end of URL
-ENV ARTIFACTORY_URL <yourdomain>.artifactory.com
+ENV ARTIFACTORY_URL <yourdomain>.artifactory.com/artifactory
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
