@@ -1664,21 +1664,9 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
-      "//": "add the individual commit for the pull requests",
-      "method": "POST",
-      "path": "/repos/:name/:repo/git/commits",
-      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-    },
-    {
       "//": "create branches for new commits",
       "method": "POST",
       "path": "/repos/:name/:repo/git/refs",
-      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-    },
-    {
-      "//": "create the ref to add the commits to",
-      "method": "POST",
-      "path": "/repos/:name/:repo/git/trees",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
