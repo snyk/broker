@@ -344,6 +344,33 @@ docker run --restart=always \
        snyk/broker:github-com
 ```
 
+#### Types of Filtering
+
+##### By Header
+
+Add a validation block with the following key/values:
+
+| Key | Value | Value Type | Example |
+|-|-|-|-|
+| header | The name of the header you wish to filter on. If this is defined then the named header must explicitly exist on the request otherwise it will be blocked | String | `accept` |
+| values | The header value must match one of the defined strings | Array\<String\> | `["application/vnd.github.v4.sha"]` |
+
+For example, to only allow the SHA Media Type accept header for requests to the GitHub Commits API you would add the following:
+
+```
+{
+    "method": "GET",
+    "path": "/repos/:name/:repo/commits/:ref",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}",
+    "valid": [
+        {
+            "header": "accept",
+            "values": ["application/vnd.github.v4.sha"]
+        }
+    ]
+}
+```
+
 ### Mounting Secrets
 Sometime it is required to load sensitive configurations (GitHub/Snyk's token) from a file instead from environment variables. Broker is using [dotenv](https://www.npmjs.com/package/dotenv) to load the config, so the process is relatively simple:
 * Create a file named `.env` and put your sensitive config there:

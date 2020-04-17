@@ -52,6 +52,10 @@ echoServer.get('/echo-param/:param', (req, res) => {
   res.send(req.params.param);
 });
 
+echoServer.get('/echo-param-protected/:param', (req, res) => {
+  res.send(req.params.param);
+});
+
 echoServer.post('/echo-body/:param?', (req, res) => {
   const contentType = req.get('Content-Type');
   if (contentType) {
