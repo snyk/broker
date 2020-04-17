@@ -284,6 +284,14 @@ To change the location of the systemcheck endpoint, you can specify an alternati
 ENV BROKER_SYSTEMCHECK_PATH /path/to/systemcheck
 ```
 
+#### Logging
+
+By default the log level of the Broker is set to INFO. All SCM responses regardless of HTTP status code will be logged by the Broker client. The following settings can be set in your environment variables to alter the logging behaviour:
+
+| Key  | Default | Notes |
+|---|---|---|
+| LOG_LEVEL | info | Set to "debug" for all logs |
+| LOG_ENABLE_BODY | false | Set to "true" to include the response body in the Client logs |
 
 ### Advanced Configuration
 
