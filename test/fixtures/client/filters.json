@@ -94,6 +94,18 @@
       "path": "/long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext",
       "method": "GET",
       "origin": "http://localhost:${originPort}"
+    },
+
+    {
+      "path": "/echo-param-protected/:param",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}",
+      "valid": [
+        {
+          "header": "accept",
+          "values": ["valid.accept.header"]
+        }
+      ]
     }
   ],
   "public": [
@@ -143,6 +155,16 @@
             "values": ["please"]
           }
         ]
+    },
+    {
+      "path": "/echo-param-protected/:param",
+      "method": "GET",
+      "valid": [
+        {
+          "header": "accept",
+          "values": ["valid.accept.header"]
+        }
+      ]
     }
   ]
 }

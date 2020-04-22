@@ -33,9 +33,21 @@
     {
       "path": "/test-blob/*",
       "method": "GET",
-      "origin": "http://localhost:${originPort}",
-    }
+      "origin": "http://localhost:${originPort}"
+    },
 
+    {
+      "//": "Block on headers",
+      "path": "/echo-param-protected/:param",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}",
+      "valid": [
+        {
+          "header": "accept",
+          "values": ["valid.accept.header"]
+        }
+      ]
+    }
   ],
   "public": [
     {

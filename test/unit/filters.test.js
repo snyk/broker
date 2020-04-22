@@ -435,6 +435,80 @@ test('Filter on query and body', t => {
   });
 });
 
+test('Filter on headers', t => {
+  t.plan(3);
+  
+  t.test('should block if the provided header does not match those specified in the whitelist', (t) => {
+    const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
+
+    filter({
+      url: '/accept-header',
+      method: 'GET',
+      headers: {
+        accept: 'unlisted.header'
+      }
+    }, (error, res) => {
+      t.equal(error.message, 'blocked', 'has been blocked');
+      t.equal(res, undefined, 'no follow allowed');
+    });
+
+    t.end();
+  });
+
+  t.test('should block if the whitelist specifies a required header but no matching header key is provided', (t) => {
+    const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
+
+    filter({
+      url: '/accept-header',
+      method: 'GET',
+    }, (error, res) => {
+      t.equal(error.message, 'blocked', 'has been blocked');
+      t.equal(res, undefined, 'no follow allowed');
+    });
+
+    t.end();
+  });
+
+  t.test('For GitHub', (t) => {
+    const ruleSource = require(__dirname + '/../fixtures/accept/github.json');
+    const filter = Filters(ruleSource.private);
+
+    t.plan(2);
+
+    t.test('should allow the sha media type header when requesting a branch SHA to prevent patch information being returned', (t) => {
+      const url ='/repos/owner/repo-name/commits/master';
+
+      filter({
+        url,
+        method: 'GET',
+        headers: {
+          accept: 'application/vnd.github.v4.sha'
+        }
+      }, (error, res) => {
+        t.equal(error, null, 'no error');
+        t.isLike(res.url, url, 'contains expected path');
+      });
+  
+      t.end();
+    });
+
+    t.test('should block the cryptographer header when requesting a branch SHA to prevent patch information being returned', (t) => {
+      filter({
+        url: '/repos/owner/repo-name/commits/master',
+        method: 'GET',
+        headers: {
+          accept: 'application/vnd.github.cryptographer-preview'
+        }
+      }, (error, res) => {
+        t.equal(error.message, 'blocked', 'has been blocked');
+        t.equal(res, undefined, 'no follow allowed');
+      });
+  
+      t.end();
+    });
+  });
+});
+
 test('filter with auth', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 

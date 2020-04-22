@@ -47,8 +47,20 @@
       "path": "/echo-query",
       "method": "GET",
       "origin": "https://localhost:${originPort}"
-    }
+    },
 
+    {
+      "//": "Block on headers",
+      "path": "/echo-param-protected/:param",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}",
+      "valid": [
+        {
+          "header": "accept",
+          "values": ["valid.accept.header"]
+        }
+      ]
+    }
   ],
   "public": [
     {

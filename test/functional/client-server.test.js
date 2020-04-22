@@ -37,7 +37,7 @@ test('proxy requests originating from behind the broker client', t => {
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', socket => {
     socket.once('identify', clientData => {
-      t.plan(12);
+      t.plan(14);
 
       t.test('successfully broker POST', t => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -132,6 +132,24 @@ test('proxy requests originating from behind the broker client', t => {
       t.test('block request for valid url with missing query param', t => {
         const url = `http://localhost:${clientPort}/echo-query/filtered`;
         request({ url, 'method': 'get' }, (err, res) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.end();
+        });
+      });
+
+      t.test('allow request for valid url with valid accept header', t => {
+        const url = `http://localhost:${clientPort}/echo-param-protected/xyz`;
+        request({ url, method: 'get', headers: { ACCEPT: 'valid.accept.header', accept: 'valid.accept.header' } }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body, 'xyz', 'body brokered');
+          t.end();
+        });
+      });
+
+      t.test('block request for valid url with invalid accept header', t => {
+        const invalidAcceptHeader = 'invalid.accept.header';
+        const url = `http://localhost:${clientPort}/echo-param-protected/xyz`;
+        request({ url, method: 'get', headers: { ACCEPT: invalidAcceptHeader, accept: invalidAcceptHeader } }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
         });

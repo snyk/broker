@@ -98,5 +98,16 @@
       "scheme": "token",
       "token": "1234"
     }
+  },
+  {
+    "//": "accept header whitelist",
+    "method": "GET",
+    "path": "/accept-header",
+    "valid": [
+      {
+        "header": "accept",
+        "values": ["allowed.header"]
+      }
+    ]
   }
 ]
