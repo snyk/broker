@@ -1226,12 +1226,6 @@
       "origin": "https://${GITLAB}"
     },
     {
-      "//": "used to create commits for fix merge request",
-      "method": "POST",
-      "path": "/api/v4/projects/:project/repository/commits",
-      "origin": "https://${GITLAB}"
-    },
-    {
       "//": "used to create merge request for fix merge request",
       "method": "POST",
       "path": "/api/v4/projects/:project/merge_requests",
