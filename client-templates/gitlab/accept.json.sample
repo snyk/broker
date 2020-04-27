@@ -124,6 +124,18 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/requirements/*.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Frequirements%2F*.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
       "origin": "https://${GITLAB}"
     },
@@ -396,6 +408,8 @@
             "**%2Fpom.xml",
             "**/*req*.txt",
             "**%2F*req*.txt",
+            "**/requirements/*.txt",
+            "**%2Frequirements%2F*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/build.sbt",
