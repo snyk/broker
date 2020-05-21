@@ -47,7 +47,7 @@
     "lodash.escaperegexp": "^4.1.2",
     "lodash.mapvalues": "^4.6.0",
     "minimatch": "^3.0.4",
-    "node-cache": "^4.2.1",
+    "node-cache": "^5.1.0",
     "path-to-regexp": "^1.8.0",
     "primus": "^6.0.1",
     "primus-emitter": "^3.1.1",
