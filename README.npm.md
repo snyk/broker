@@ -281,6 +281,29 @@ For token based auth, this would be provided like so:
 }
 ```
 
+For bearer based auth (e.g: BitBucket Server personal access tokens), this would be provided like so:
+```json
+{
+  "private": [
+    {
+      "method": "GET",
+      "path": "/myself",
+      "origin": "https://${HOST}",
+      "auth": {
+        "scheme": "bearer",
+        "bearer": "${BEARER}"
+      }
+    },
+  ],
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ]
+}
+```
+
 ### Private rules
 
 Private filters are for requests that come from the broker server into your client and ask for resources inside your private infrastructure (such as a github enterprise instance).

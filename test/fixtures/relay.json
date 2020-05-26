@@ -109,5 +109,14 @@
         "values": ["allowed.header"]
       }
     ]
+  },
+  {
+    "//": "token auth route",
+    "method": "GET",
+    "path": "/bearer-auth",
+    "auth": {
+      "scheme": "bearer",
+      "bearer": "1234"
+    }
   }
 ]

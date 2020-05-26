@@ -8,14 +8,14 @@ const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 test('Filter on URL', t => {
   t.test('for GitHub private filters', (t) => {
     t.plan(4);
-    
+
     const ruleSource = require(__dirname + '/../fixtures/accept/github.json');
     const filter = Filters(ruleSource.private);
     t.pass('Filters loaded');
 
     t.test('should allow valid /repos path to manifest', (t) => {
       const url = '/repos/angular/angular/contents/package.json';
-      
+
       filter({
         url,
         method: 'GET',
@@ -23,7 +23,7 @@ test('Filter on URL', t => {
         t.equal(error, null, 'no error');
         t.isLike(res.url, url, 'contains expected path');
       });
-  
+
       t.end();
     });
 
@@ -35,7 +35,7 @@ test('Filter on URL', t => {
         t.equal(error.message, 'blocked', 'has been blocked');
         t.equal(res, undefined, 'no follow allowed');
       });
-  
+
       t.end();
     });
 
@@ -333,7 +333,7 @@ test('Filter on querystring', t => {
 
       t.end();
     });
-      
+
     t.end();
   });
 });
@@ -415,7 +415,7 @@ test('Filter on query and body', t => {
       t.end();
     });
 
-    t.test('should ignore any non-manifest files after the fragment identifier', (t) => {    
+    t.test('should ignore any non-manifest files after the fragment identifier', (t) => {
       filter({
         url: '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
         method: 'POST',
@@ -437,7 +437,7 @@ test('Filter on query and body', t => {
 
 test('Filter on headers', t => {
   t.plan(3);
-  
+
   t.test('should block if the provided header does not match those specified in the whitelist', (t) => {
     const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
@@ -488,7 +488,7 @@ test('Filter on headers', t => {
         t.equal(error, null, 'no error');
         t.isLike(res.url, url, 'contains expected path');
       });
-  
+
       t.end();
     });
 
@@ -503,7 +503,7 @@ test('Filter on headers', t => {
         t.equal(error.message, 'blocked', 'has been blocked');
         t.equal(res, undefined, 'no follow allowed');
       });
-  
+
       t.end();
     });
   });
@@ -512,7 +512,7 @@ test('Filter on headers', t => {
 test('filter with auth', t => {
   const filter = Filters(require(__dirname + '/../fixtures/relay.json'));
 
-  t.plan(5);
+  t.plan(7);
   t.pass('filters loaded');
 
   filter({
@@ -530,5 +530,13 @@ test('filter with auth', t => {
   }, (error, res) => {
     t.equal(error, null, 'no error');
     t.equal(res.auth, 'Token 1234', 'token auth header returned');
+  });
+
+  filter({
+    url: '/bearer-auth',
+    method: 'GET',
+  }, (error, res) => {
+    t.equal(error, null, 'no error');
+    t.equal(res.auth, 'Bearer 1234', 'bearer auth header returned');
   });
 });
