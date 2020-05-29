@@ -15,10 +15,10 @@ Please do not log security concerns as GitHub issues, as that could alert attack
 
 | CVE | Versions affected | Additional information | Reported by |
 |-|-|-|-|
-| [CVE-2020-7648](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7648) | <= 4.72.1 | Allows arbitrary file reads by appending the URL with a fragment identifier and a whitelisted path | Wing Chan of The Hut Group |
-| [CVE-2020-7649](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7649) | < 4.73.0 | Allows arbitrary file reads via directory traversal | Wing Chan of The Hut Group |
-| [CVE-2020-7650](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7650) | <= 4.73.0 | Allow arbitrary file reads of any files ending in the following extensions: yaml, yml or json | Wing Chan of The Hut Group |
-| [CVE-2020-7651](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7651) | < 4.79.0 | Allows partial file reads via patch history from GitHub Commits API | Wing Chan of The Hut Group |
-| [CVE-2020-7652](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7652) | < 4.80.0 | Allows arbitrary file reads by renaming files to match whitelisted paths | Wing Chan of The Hut Group |
-| [CVE-2020-7653](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7653) | < 4.80.0 | Allows arbitrary file reads by creating symlinks to match whitelisted paths | Wing Chan of The Hut Group |
-| [CVE-2020-7654](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7654) | <= 4.73.0 | Logs private keys if logging level is set to DEBUG | Wing Chan of The Hut Group |
+| [CVE-2020-7648](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570607) | <= 4.72.1 | Allows arbitrary file reads by appending the URL with a fragment identifier and a whitelisted path | Wing Chan of The Hut Group |
+| [CVE-2020-7649](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570608) | < 4.73.0 | Allows arbitrary file reads via directory traversal | Wing Chan of The Hut Group |
+| [CVE-2020-7650](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570609) | <= 4.73.0 | Allow arbitrary file reads of any files ending in the following extensions: yaml, yml or json | Wing Chan of The Hut Group |
+| [CVE-2020-7651](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570610) | < 4.79.0 | Allows partial file reads via patch history from GitHub Commits API | Wing Chan of The Hut Group |
+| [CVE-2020-7652](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570611) | < 4.80.0 | Allows arbitrary file reads by renaming files to match whitelisted paths | Wing Chan of The Hut Group |
+| [CVE-2020-7653](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570612) | < 4.80.0 | Allows arbitrary file reads by creating symlinks to match whitelisted paths | Wing Chan of The Hut Group |
+| [CVE-2020-7654](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570613) | <= 4.73.0 | Logs private keys if logging level is set to DEBUG | Wing Chan of The Hut Group |
