@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node lib",
     "dev": "node lib | ./node_modules/.bin/bunyan",
-    "test": "npm run lint && CI=1 tap -R spec test/**/*.test.js --timeout 60",
+    "test": "npm run lint && CI=1 tap -j1 -R spec test/**/*.test.js --timeout 60",
     "lint": "eslint -c .eslintrc cli lib test && ./lintVerifier.sh",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n"
   },
@@ -28,7 +28,7 @@
     "proxyquire": "^2.1.3",
     "require-reload": "^0.2.2",
     "sinon": "^9.0.2",
-    "tap": "^12.7.0",
+    "tap": "^14.10.7",
     "tap-only": "0.0.5",
     "tmp": "^0.2.1"
   },
