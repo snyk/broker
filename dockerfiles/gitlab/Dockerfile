@@ -2,8 +2,9 @@ FROM node:12-buster-slim
 
 MAINTAINER Snyk Ltd
 
-# Install broker
 RUN npm install --global snyk-broker
+
+RUN apt-get update && apt-get install -y ca-certificates
 
 # Don't run as root
 WORKDIR /home/node
