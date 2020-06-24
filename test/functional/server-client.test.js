@@ -328,8 +328,8 @@ test('proxy requests originating from behind the broker server', t => {
 
           // Check that the server response with the correct data
 
-          const buf = new Buffer(500);
-          for (var i=0; i<500; i++) {
+          const buf = Buffer.alloc(500);
+          for (let i = 0; i < 500; i++) {
             buf.writeUInt8(i & 0xFF, i);
           }
           t.deepEqual(body, buf);
