@@ -1,10 +1,6 @@
 {
   "name": "snyk-broker",
   "description": "Broker for private communication between internal systems and outside public systems",
-  "files": [
-    "dist",
-    "client-templates"
-  ],
   "main": "dist/lib/index.js",
   "bin": {
     "snyk-broker": "./dist/cli/index.js",
