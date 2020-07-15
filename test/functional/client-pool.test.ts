@@ -84,7 +84,7 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', (t) => 
       });
 
       t.test('clean up', (t) => {
-        secondClient.close();
+        (secondClient as any).close();
         setTimeout(() => {
           server.close();
           t.ok('sockets closed');

@@ -183,8 +183,9 @@ test('proxy requests originating from behind the broker client', (t) => {
       // header to the echo-server
       t.test('broker ID is included in headers from server to private', (t) => {
         const url = `http://localhost:${clientPort}/echo-headers`;
+        // TODO: replace request module
         request({ url, method: 'post' }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
+          const responseBody = res.body;
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(
             responseBody['x-broker-token'],
@@ -198,7 +199,7 @@ test('proxy requests originating from behind the broker client', (t) => {
       t.test('querystring parameters are brokered', (t) => {
         const url = `http://localhost:${clientPort}/echo-query?shape=square&colour=yellow`;
         request({ url, method: 'get' }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
+          const responseBody = res.body;
           t.equal(res.statusCode, 200, '200 statusCode');
           t.same(
             responseBody,

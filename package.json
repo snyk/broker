@@ -15,7 +15,7 @@
     "prepare": "npm run build && rm -rf ./dist/client-templates && cp -Rf ./client-templates ./dist",
     "start": "node .",
     "dev": "tsc-watch --project tsconfig.json --onSuccess 'node .' | ./node_modules/.bin/bunyan",
-    "test": "npm run lint && CI=1 tap -j1 -R spec test/**/*.test.js --timeout 60",
+    "test": "CI=1 tap --no-cov -j1 -R spec 'test/**/*.test.ts' --timeout 60",
     "lint": "prettier --check '{lib,test,cli}/**/*.{js,ts}' && eslint --color --cache '{cli,lib,test}/**/*.{js,ts}'",
     "check-tests": "! grep 'test.only' test/**/*.test.js -n"
   },
@@ -43,6 +43,8 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@types/bunyan": "^1.8.6",
+    "@types/request": "^2.48.5",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.12",
     "camelcase": "^5.3.1",
@@ -64,6 +66,7 @@
     "qs": "^6.9.1",
     "request": "^2.88.0",
     "snyk-config": "^3.1.1",
+    "source-map-support": "^0.5.19",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
     "undefsafe": "^2.0.2",

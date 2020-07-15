@@ -13,7 +13,7 @@
     "noImplicitAny": false,
     "alwaysStrict": false,
 
-    "noUnusedLocals": true,
+    "noUnusedLocals": true
   },
-  "include": ["./lib/**/*", "./cli/**/*"],
+  "include": ["./lib/**/*", "./cli/**/*"]
 }

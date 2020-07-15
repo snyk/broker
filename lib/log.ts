@@ -1,7 +1,7 @@
-const bunyan = require('bunyan');
-const escapeRegExp = require('lodash.escaperegexp');
-const mapValues = require('lodash.mapvalues');
-const config = require('./config');
+import * as bunyan from 'bunyan';
+import * as escapeRegExp from 'lodash.escaperegexp';
+import * as mapValues from 'lodash.mapvalues';
+import { config } from './config';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
@@ -72,11 +72,10 @@ const log = bunyan.createLogger({
     ioUrl: sanitise,
     headers: sanitiseHeaders,
   },
+  level: (process.env.LOG_LEVEL ?? 'info') as any,
 });
 
-log.level(process.env.LOG_LEVEL || 'info');
-
 // pin sanitation function on the log so it can be used publicly
-log.sanitise = sanitise;
+(log as any).sanitise = sanitise;
 
-module.exports = log;
+export const logger = log;

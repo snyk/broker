@@ -5,7 +5,7 @@ test('config', (t) => {
   const token = (process.env.BROKER_TOKEN = '1234');
   process.env.FOO_BAR = '$FOO/bar';
 
-  const config = require('../../lib/config');
+  const { config } = require('../../lib/config');
 
   t.equal(config.foo, foo, 'foo');
   t.equal(config.brokerToken, token, 'BROKER_TOKEN');

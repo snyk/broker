@@ -1,11 +1,35 @@
-const primus = require('primus');
-const request = require('request');
-const socket = require('./socket');
-const relay = require('../relay');
-const logger = require('../log');
-const version = require('../version');
+import * as primus from 'primus';
+import * as request from 'request';
+import { createSocket } from './socket';
+import * as relay from '../relay';
+import { logger } from '../log';
+import * as version from '../version';
 
-module.exports = ({ port = null, config = {}, filters = {} }) => {
+interface Config {
+  brokerToken: string;
+  brokerServerUrl: string;
+  brokerHealthcheckPath?: string;
+  brokerSystemcheckPath?: string;
+  brokerClientValidationMethod: string;
+  brokerClientValidationTimeoutMs: number;
+  brokerClientValidationUrl: string;
+  brokerClientValidationAuthorizationHeader?: string;
+  brokerClientValidationBasicAuth?: string;
+  caCert?: string;
+}
+
+export function startClient({
+  port,
+  config,
+  filters,
+}: {
+  port: number;
+  config: Config;
+  filters: {
+    private: string | unknown[];
+    public: string | unknown[];
+  };
+}) {
   logger.info({ version }, 'running in client mode');
 
   const identifyingMetadata = {
@@ -13,10 +37,10 @@ module.exports = ({ port = null, config = {}, filters = {} }) => {
     filters,
   };
 
-  const io = socket({
+  const io = createSocket({
     token: config.brokerToken,
     url: config.brokerServerUrl,
-    filters: filters.private,
+    filters: filters?.private || [],
     config,
     identifyingMetadata,
   });
@@ -25,7 +49,7 @@ module.exports = ({ port = null, config = {}, filters = {} }) => {
   const { app, server } = require('../webserver')(config, port);
 
   // IMPORTANT: defined before relay (`app.all('/*', ...`)
-  app.get(config.brokerHealthcheckPath || '/healthcheck', (req, res) => {
+  app.get(config.brokerHealthcheckPath ?? '/healthcheck', (req, res) => {
     // healthcheck state depends on websocket connection status
     // value of primus.Spark.OPEN means the websocket connection is open
     const isConnOpen = io.readyState === primus.Spark.OPEN;
@@ -40,25 +64,37 @@ module.exports = ({ port = null, config = {}, filters = {} }) => {
     return res.status(status).json(data);
   });
 
-  app.get(config.brokerSystemcheckPath || '/systemcheck', (req, res) => {
+  app.get(config.brokerSystemcheckPath ?? '/systemcheck', (req, res) => {
     // Systemcheck is the broker client's ability to assert the network
     // reachability and some correctness of credentials for the service
     // being proxied by the broker client.
 
     const brokerClientValidationMethod =
-      config.brokerClientValidationMethod || 'GET';
+      config.brokerClientValidationMethod ?? 'GET';
     const brokerClientValidationTimeoutMs =
-      config.brokerClientValidationTimeoutMs || 5000;
+      config.brokerClientValidationTimeoutMs ?? 5000;
 
-    const data = {
-      brokerClientValidationUrl: logger.sanitise(
+    const data: {
+      brokerClientValidationUrl: string;
+      brokerClientValidationMethod: string;
+      brokerClientValidationTimeoutMs: number;
+      ok?: boolean;
+      testError?: any;
+      testResponse?: any;
+      error?: string;
+      brokerClientValidationUrlStatusCode?: number;
+    } = {
+      brokerClientValidationUrl: (logger as any).sanitise(
         config.brokerClientValidationUrl,
       ),
       brokerClientValidationMethod,
       brokerClientValidationTimeoutMs,
     };
 
-    const validationRequestHeaders = {
+    const validationRequestHeaders: {
+      'user-agent': string;
+      authorization?: string;
+    } = {
       'user-agent': 'Snyk Broker client ' + version,
     };
 
@@ -102,7 +138,7 @@ module.exports = ({ port = null, config = {}, filters = {} }) => {
         data.brokerClientValidationUrlStatusCode = responseStatusCode;
 
         // check for 2xx status code
-        const goodStatusCode = /^2/.test(responseStatusCode);
+        const goodStatusCode = /^2/.test(responseStatusCode.toString(10));
         if (!goodStatusCode) {
           data.ok = false;
           data.error =
@@ -143,4 +179,4 @@ module.exports = ({ port = null, config = {}, filters = {} }) => {
       });
     },
   };
-};
+}

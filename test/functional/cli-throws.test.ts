@@ -11,7 +11,7 @@ test('cli throws when missing broker id', (t) => {
 });
 
 test('cli throws when missing broker server', (t) => {
-  process.env.BROKER_TOKEN = 1;
+  process.env.BROKER_TOKEN = '1';
   t.throws(() => {
     cli({
       _: ['client'],

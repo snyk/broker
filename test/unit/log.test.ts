@@ -23,19 +23,19 @@ test('log sanitization of sensitive information', (t) => {
   const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
   const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
 
-  const log = require('../../lib/log');
+  const { logger } = require('../../lib/log');
 
   // setup logger output capturing
-  const logs = [];
+  const logs: string[] = [];
   const testStream = new stream.Writable();
   testStream._write = function (chunk, encoding, done) {
     logs.push(chunk.toString());
     done();
   };
-  log.addStream({ stream: testStream });
+  logger.addStream({ stream: testStream });
 
   // try to log sensitive information
-  log.info({
+  logger.info({
     token: sensitiveInfo,
     result: sensitiveInfo,
     origin: sensitiveInfo,

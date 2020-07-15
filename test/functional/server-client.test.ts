@@ -199,7 +199,7 @@ test('proxy requests originating from behind the broker server', (t) => {
         (t) => {
           const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
           request({ url, method: 'post' }, (err, res) => {
-            const responseBody = JSON.parse(res.body);
+            const responseBody = res.body;
             t.equal(res.statusCode, 200, '200 statusCode');
             t.equal(
               responseBody['x-broker-token'],
@@ -218,7 +218,7 @@ test('proxy requests originating from behind the broker server', (t) => {
           'url_as_param=https%3A%2F%2Fclojars.org%2Fsearch%3Fq%3Dbtc&' +
           'one_more_top_level_param=true';
         request({ url, method: 'get' }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
+          const responseBody = res.body;
           t.equal(res.statusCode, 200, '200 statusCode');
           t.same(
             responseBody,
@@ -288,7 +288,7 @@ test('proxy requests originating from behind the broker server', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/github`;
         const headers = { Authorization: 'broker auth' };
         request({ url, method: 'post', headers }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
+          const responseBody = res.body;
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(
             responseBody.authorization,
@@ -303,7 +303,7 @@ test('proxy requests originating from behind the broker server', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/bitbucket`;
         const headers = {};
         request({ url, method: 'post', headers }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
+          const responseBody = res.body;
           t.equal(res.statusCode, 200, '200 statusCode');
           const auth = responseBody.authorization.replace('Basic ', '');
           const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');

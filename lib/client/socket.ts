@@ -1,28 +1,42 @@
 require('../patch-https-request-for-proxying');
 
-const Primus = require('primus');
-const relay = require('../relay');
-const logger = require('../log');
+import * as Primus from 'primus';
+import * as relay from '../relay';
+import { logger } from '../log';
 
-module.exports = ({ url, token, filters, config, identifyingMetadata }) => {
+class BrokerError extends ReferenceError {
+  public code: string;
+
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export function createSocket({
+  url,
+  token,
+  filters,
+  config,
+  identifyingMetadata,
+}) {
   if (!token) {
     // null, undefined, empty, etc.
     logger.error({ token }, 'missing client token');
-    const error = new ReferenceError(
+    throw new BrokerError(
       'BROKER_TOKEN is required to successfully identify itself to the server',
+      'MISSING_BROKER_TOKEN',
     );
-    error.code = 'MISSING_BROKER_TOKEN';
-    throw error;
   }
 
   if (!url) {
     // null, undefined, empty, etc.
     logger.error({ url }, 'missing broker url');
-    const error = new ReferenceError(
+    throw new BrokerError(
       'BROKER_SERVER_URL is required to connect to the broker server',
+      'MISSING_BROKER_SERVER_URL',
     );
-    error.code = 'MISSING_BROKER_SERVER_URL';
-    throw error;
   }
 
   const Socket = Primus.createSocket({
@@ -93,4 +107,4 @@ module.exports = ({ url, token, filters, config, identifyingMetadata }) => {
   // io.open();
 
   return io;
-};
+}
