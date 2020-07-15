@@ -1,8 +1,8 @@
-const test  = require('tap').test;
+const test = require('tap').test;
 
 const tryJSONParse = require('../../lib/try-json-parse');
 
-test('tryJSONParse', t => {
+test('tryJSONParse', (t) => {
   const data = {
     number: '123',
     animals: ['dog', 'cat'],

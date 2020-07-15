@@ -1,6 +1,6 @@
 const test = require('tap-only');
 
-test('assign', t => {
+test('assign', (t) => {
   const u = {
     id: 1234,
     url: 'prod',
