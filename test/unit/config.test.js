@@ -1,8 +1,8 @@
 const test = require('tap-only');
 
-test('config', t => {
-  const foo = process.env.FOO = 'bar';
-  const token = process.env.BROKER_TOKEN = '1234';
+test('config', (t) => {
+  const foo = (process.env.FOO = 'bar');
+  const token = (process.env.BROKER_TOKEN = '1234');
   process.env.FOO_BAR = '$FOO/bar';
 
   const config = require('../../lib/config');

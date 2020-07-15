@@ -6,9 +6,7 @@ clite({
     _: 'cli/exec',
   },
   options: ['env', 'port'],
-  alias: { V: 'verbose', 'v': 'version' },
-  booleans: [
-    'verbose',
-  ],
+  alias: { V: 'verbose', v: 'version' },
+  booleans: ['verbose'],
   help: 'usage.txt',
 });

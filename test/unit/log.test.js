@@ -1,17 +1,24 @@
 const test = require('tap-only');
 const stream = require('stream');
 
-test('log sanitization of sensitive information', t => {
-  const brokerTk = process.env.BROKER_TOKEN = 'BROKER_123';
-  const githubTk = process.env.GITHUB_TOKEN = 'GITHUB_123';
-  const gitlabTk = process.env.GITLAB_TOKEN = 'GITLAB_123';
-  const bbUser = process.env.BITBUCKET_USERNAME = 'BB_USER';
-  const bbPass = process.env.BITBUCKET_PASSWORD = 'BB_PASS';
-  const jiraUser = process.env.JIRA_USERNAME = 'JRA_USER';
-  const jiraPass = process.env.JIRA_PASSWORD = 'JRA_PASS';
+test('log sanitization of sensitive information', (t) => {
+  const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
+  const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
+  const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
+  const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
+  const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
+  const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
+  const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
 
-  const sensitiveInfo =
-    [brokerTk, githubTk, gitlabTk, bbUser, bbPass, jiraUser, jiraPass].join();
+  const sensitiveInfo = [
+    brokerTk,
+    githubTk,
+    gitlabTk,
+    bbUser,
+    bbPass,
+    jiraUser,
+    jiraPass,
+  ].join();
   const sanitizedTokens = '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN}';
   const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
   const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';

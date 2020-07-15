@@ -4,12 +4,12 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 let spy = null;
 
-tap.beforeEach(done => {
+tap.beforeEach((done) => {
   spy = sinon.spy();
   done();
 });
 
-test('relay swaps header values found in BROKER_VAR_SUB', t => {
+test('relay swaps header values found in BROKER_VAR_SUB', (t) => {
   const brokerToken = 'test-broker';
 
   const config = {
@@ -24,10 +24,15 @@ test('relay swaps header values found in BROKER_VAR_SUB', t => {
     },
   }).response;
 
-  const route = relay([{
-    method: 'any',
-    url: '/*',
-  }], config)(brokerToken);
+  const route = relay(
+    [
+      {
+        method: 'any',
+        url: '/*',
+      },
+    ],
+    config,
+  )(brokerToken);
 
   const headers = {
     'x-broker-var-sub': 'private-token,replaceme',
@@ -36,17 +41,19 @@ test('relay swaps header values found in BROKER_VAR_SUB', t => {
     replaceme: 'replace ${VALUE}',
   };
 
-  route({
-    url: '/',
-    method: 'GET',
-    headers: headers,
-  }, () => {
-    t.equal(spy.callCount, 1, 'request placed');
-    const arg = spy.args[0][0];
-    t.equal(arg.headers['private-token'], `Bearer ${config.SECRET_TOKEN}`);
-    t.equal(arg.headers.replaceme, `replace ${config.VALUE}`);
-    t.equal(arg.headers.donttouch, 'not to be changed ${VALUE}');
-    t.end();
-  });
-
+  route(
+    {
+      url: '/',
+      method: 'GET',
+      headers: headers,
+    },
+    () => {
+      t.equal(spy.callCount, 1, 'request placed');
+      const arg = spy.args[0][0];
+      t.equal(arg.headers['private-token'], `Bearer ${config.SECRET_TOKEN}`);
+      t.equal(arg.headers.replaceme, `replace ${config.VALUE}`);
+      t.equal(arg.headers.donttouch, 'not to be changed ${VALUE}');
+      t.end();
+    },
+  );
 });

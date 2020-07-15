@@ -7,7 +7,7 @@ const root = __dirname;
 
 const { port, echoServerPort } = require('../utils')(tap);
 
-test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
+test('correctly handle pool of multiple clients with same BROKER_TOKEN', (t) => {
   /**
    * 1. start broker in server mode
    * 2. start broker in client mode and join
@@ -39,10 +39,10 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
   let secondClient = {};
 
   // wait for the client to successfully connect to the server and identify itself
-  server.io.once('connection', socket => {
-    socket.on('identify', clientData => {
+  server.io.once('connection', (socket) => {
+    socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.test('successfully broker POST with 1st connected client', t => {
+      t.test('successfully broker POST with 1st connected client', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -50,18 +50,18 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
         });
       });
 
-      t.test('launch a 2nd client', t => {
-        server.io.on('connection', socket => {
+      t.test('launch a 2nd client', (t) => {
+        server.io.on('connection', (socket) => {
           socket.once('identify', () => {
             t.ok('2nd client connected');
             t.end();
           });
         });
 
-        secondClient = app.main({ port: (port() - 1) }); // Run it on a different port
+        secondClient = app.main({ port: port() - 1 }); // Run it on a different port
       });
 
-      t.test('successfully broker POST with 2nd client', t => {
+      t.test('successfully broker POST with 2nd client', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -69,13 +69,13 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
         });
       });
 
-      t.test('close 1st client', t => {
+      t.test('close 1st client', (t) => {
         client.close();
         t.ok('1st client closed');
         t.end();
       });
 
-      t.test('successfully broker POST with 2nd client', t => {
+      t.test('successfully broker POST with 2nd client', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
@@ -83,7 +83,7 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', t => {
         });
       });
 
-      t.test('clean up', t => {
+      t.test('clean up', (t) => {
         secondClient.close();
         setTimeout(() => {
           server.close();

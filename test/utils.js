@@ -23,26 +23,22 @@ echoServer.get('/test', (req, res) => {
   res.send('All good');
 });
 
-echoServer.get(
-  '/test-blob/1',
-  (req, res) => {
-    res.setHeader('test-orig-url', req.originalUrl);
-    res.status(299);
+echoServer.get('/test-blob/1', (req, res) => {
+  res.setHeader('test-orig-url', req.originalUrl);
+  res.status(299);
 
-    const buf = Buffer.alloc(500);
-    for (let i = 0; i < 500; i++) {
-      buf.writeUInt8(i & 0xFF, i);
-    }
-    res.send(buf);
-  });
+  const buf = Buffer.alloc(500);
+  for (let i = 0; i < 500; i++) {
+    buf.writeUInt8(i & 0xff, i);
+  }
+  res.send(buf);
+});
 
-echoServer.get(
-  '/test-blob/2',
-  (req, res) => {
-    res.setHeader('test-orig-url', req.originalUrl);
-    res.status(500);
-    res.send('Test Error');
-  });
+echoServer.get('/test-blob/2', (req, res) => {
+  res.setHeader('test-orig-url', req.originalUrl);
+  res.status(500);
+  res.send('Test Error');
+});
 
 echoServer.get('/basic-auth', (req, res) => {
   res.send(req.headers.authorization);
@@ -72,21 +68,17 @@ echoServer.get('/echo-query/:param?', (req, res) => {
   res.json(req.query);
 });
 
-echoServer.get(
-  '/long/nested/*',
-  (req, res) => {
-    res.send(req.originalUrl);
-  });
+echoServer.get('/long/nested/*', (req, res) => {
+  res.send(req.originalUrl);
+});
 
-echoServer.get('/repos/owner/repo/contents/folder/package.json',
-  (req, res) => {
-    res.json({headers: req.headers, query: req.query, url: req.url});
-  });
+echoServer.get('/repos/owner/repo/contents/folder/package.json', (req, res) => {
+  res.json({ headers: req.headers, query: req.query, url: req.url });
+});
 
 echoServer.all('*', (req, res) => {
   res.send(false);
 });
-
 
 module.exports = (tap) => {
   tap.tearDown(() => {
@@ -96,6 +88,6 @@ module.exports = (tap) => {
   return {
     echoServerPort,
     port,
-    server
+    server,
   };
 };
