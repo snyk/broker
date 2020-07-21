@@ -8,3 +8,7 @@ accept.json
 package-lock.json
 /dist
 .eslintcache
+
+
+# Test coverage reports
+reports/
