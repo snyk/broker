@@ -14,6 +14,7 @@ const { app: echoServer, server } = webserver({
   port: echoServerPort,
   httpsKey: process.env.TEST_KEY, // Optional
   httpsCert: process.env.TEST_CERT, // Optional
+  httpsPassphrase: process.env.TEST_PASSPHRASE, // Optional
 });
 
 echoServer.use(compression());
