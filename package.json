@@ -45,12 +45,12 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@types/minimist": "^1.2.0",
     "@types/request": "^2.48.5",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.12",
     "camelcase": "^5.3.1",
     "clarify": "^2.0.0",
-    "clite": "^0.3.0",
     "dotenv": "^6.2.0",
     "ejson": "^2.2.0",
     "engine.io": "^3.4.0",
@@ -60,6 +60,7 @@
     "lodash.escaperegexp": "^4.1.2",
     "lodash.mapvalues": "^4.6.0",
     "minimatch": "^3.0.4",
+    "minimist": "^1.2.5",
     "node-cache": "^5.1.0",
     "path-to-regexp": "^1.8.0",
     "primus": "^6.0.1",
