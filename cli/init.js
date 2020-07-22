@@ -1,66 +1,63 @@
-const fs = require('then-fs');
+const { promises: fsp, createReadStream, createWriteStream } = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '../client-templates/');
 const logger = require('../lib/log');
 
-module.exports = (args) => {
-  const template = args._[0];
-  if (!template) {
+module.exports = async (args) => {
+  const templateName = args._[0];
+  if (!templateName) {
     throw new Error('init requires a template name');
   }
 
-  const dir = path.resolve(root, template);
+  const templateDir = path.resolve(root, templateName);
 
-  return fs
-    .readdir(root)
-    .then((files) => {
-      if (files.indexOf(template) === -1) {
-        throw new Error(`${template} is an invalid template name`);
+  const rootFiles = await fsp.readdir(root);
+
+  if (!rootFiles.includes(templateName)) {
+    throw new Error(`${templateName} is an invalid template name`);
+  }
+
+  const templateFiles = await fsp.readdir(templateDir);
+
+  // check if any of the files exist on disk already, and if so, abort.
+  const filesWithAccessData = await Promise.all(
+    templateFiles.map(async (file) => {
+      file = file.replace(/\.sample$/, '');
+
+      try {
+        await fsp.access(file);
+
+        return { file, exists: true };
+      } catch (error) {
+        return { file, exists: false };
       }
+    }),
+  );
 
-      return fs.readdir(dir);
-    })
-    .then((files) => {
-      // check if any of the files exist on disk already, and if so, abort.
-      return Promise.all(
-        files.map((file) => {
-          file = file.replace(/\.sample$/, '');
-          return fs
-            .stat(file)
-            .then(() => file)
-            .catch(() => false);
-        }),
-      ).then((stats) => {
-        const exists = stats.filter(Boolean);
+  const existingFiles = filesWithAccessData.filter(({ exists }) => exists);
 
-        if (exists.length) {
-          throw new Error(
-            'The following file(s) exist and cannot be overwritten, please move them: ' +
-              exists.map((_) => `${_}`).join(' '),
+  if (existingFiles.length) {
+    const existingFileNames = existingFiles.map(({ file }) => file).join(' ');
+
+    throw new Error(
+      `The following file(s) exist and cannot be overwritten, please move them: ${existingFileNames}`,
+    );
+  }
+
+  await Promise.all(
+    templateFiles.map(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const newfile = file.replace(/\.sample$/, '');
+          logger.debug({ templateFile: newfile }, 'generating template file');
+          const reader = createReadStream(path.resolve(templateDir, file));
+          const writer = createWriteStream(
+            path.resolve(process.cwd(), newfile),
           );
-        }
-        // if any files exist, throw
-        return files;
-      });
-    })
-    .then((files) => {
-      return Promise.all(
-        files.map(
-          (file) =>
-            new Promise((resolve, reject) => {
-              const newfile = file.replace(/\.sample$/, '');
-              logger.debug(
-                { templateFile: newfile },
-                'generating template file',
-              );
-              const reader = fs.createReadStream(path.resolve(dir, file));
-              const writer = fs.createWriteStream(
-                path.resolve(process.cwd(), newfile),
-              );
-              reader.pipe(writer).on('finish', resolve).on('error', reject);
-            }),
-        ),
-      );
-    })
-    .then(() => logger.info({ template }, 'initialisation complete'));
+          reader.pipe(writer).on('finish', resolve).on('error', reject);
+        }),
+    ),
+  );
+
+  logger.info({ templateName }, 'initialisation complete');
 };
