@@ -19,7 +19,7 @@ templates.forEach((template) => {
       }
       process.chdir(path);
 
-      init({ _: [template] })
+      init(template)
         .then(() => Promise.all([fs.stat('.env'), fs.stat('accept.json')]))
         .then((stats) => {
           t.ok(stats.every(Boolean), 'all templated files created');
