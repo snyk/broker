@@ -17,10 +17,10 @@ if (args.help) {
   process.exit(0);
 }
 
-if (args._[0] === 'init') {
-  init(args._[1]).then(() => process.exit(0));
-}
-
-if (args._.length === 0) {
+const command = args._[0];
+if (command === 'init') {
+  const templateName = args._[1];
+  init(templateName).then(() => process.exit(0));
+} else {
   exec(args);
 }

@@ -3,8 +3,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '../client-templates/');
 const logger = require('../lib/log');
 
-module.exports = async (args) => {
-  const templateName = args._[0];
+module.exports = async (templateName) => {
   if (!templateName) {
     throw new Error('init requires a template name');
   }
