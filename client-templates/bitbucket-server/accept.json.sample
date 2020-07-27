@@ -657,6 +657,28 @@
       }
     },
     {
+      "//": "used to scan Dockerfile",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*/Dockerfile",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to scan Dockerfile",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/browse*%2FDockerfile",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/projects/:project/repos/:repo/browse*/.snyk",

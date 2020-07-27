@@ -375,6 +375,18 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to scan Dockerfile",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to scan Dockerfile",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to check if there's any ignore rules or existing patches",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
