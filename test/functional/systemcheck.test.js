@@ -1,11 +1,10 @@
-const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
 const app = require('../../lib');
 const root = __dirname;
 
-const { port } = require('../utils')(tap);
+const { port, createTestServer } = require('../utils');
 
 test('broker client systemcheck endpoint', (t) => {
   /**
@@ -15,6 +14,12 @@ test('broker client systemcheck endpoint', (t) => {
    * 4. stop client and check it's on "disconnected" in the server
    * 5. restart client with same token, make sure it's not in "disconnected"
    */
+
+  const { testServer } = createTestServer();
+
+  t.teardown(() => {
+    testServer.close();
+  });
 
   process.env.ACCEPT = 'filters.json';
 

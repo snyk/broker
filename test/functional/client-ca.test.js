@@ -1,8 +1,8 @@
-const tap = require('tap');
 const test = require('tap-only');
 const request = require('request');
 const path = require('path');
 const app = require('../../lib');
+const { createTestServer, port } = require('../utils');
 const root = __dirname;
 
 process.env.TEST_KEY = path.resolve(
@@ -14,8 +14,6 @@ process.env.TEST_CERT = path.resolve(
   '../fixtures/certs/server/fullchain.pem',
 );
 
-const { port, echoServerPort } = require('../utils')(tap);
-
 test('correctly use supplied CA cert on client for connections', (t) => {
   /**
    * 1. start broker in server mode
@@ -25,6 +23,12 @@ test('correctly use supplied CA cert on client for connections', (t) => {
    * 5. start broker in client mode with supplied CA cert
    * 6. send request to the server and expect success
    */
+
+  const { echoServerPort, testServer } = createTestServer();
+
+  t.teardown(() => {
+    testServer.close();
+  });
 
   t.plan(6);
 

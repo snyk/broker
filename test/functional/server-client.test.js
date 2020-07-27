@@ -1,5 +1,3 @@
-// process.stdout.write('\033c'); // clear the screen
-const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
@@ -7,7 +5,7 @@ const app = require('../../lib');
 const version = require('../../lib/version');
 const root = __dirname;
 
-const { port, echoServerPort } = require('../utils')(tap);
+const { port, createTestServer } = require('../utils');
 
 test('proxy requests originating from behind the broker server', (t) => {
   /**
@@ -18,6 +16,12 @@ test('proxy requests originating from behind the broker server', (t) => {
    *
    * Note: client is forwarding requests to echo-server defined in test/util.js
    */
+
+  const { echoServerPort, testServer } = createTestServer();
+
+  t.teardown(() => {
+    testServer.close();
+  });
 
   const ACCEPT = 'filters.json';
   process.env.ACCEPT = ACCEPT;
