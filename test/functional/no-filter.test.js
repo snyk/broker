@@ -1,11 +1,8 @@
-// process.stdout.write('\033c'); // clear the screen
-const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
 const app = require('../../lib');
-
-const { port, echoServerPort } = require('../utils')(tap);
+const { port, createTestServer } = require('../utils');
 
 test('no filters broker', (t) => {
   /**
@@ -14,6 +11,12 @@ test('no filters broker', (t) => {
    * 3. run local http server that replicates "private serevr"
    * 4. send request to server for X file
    */
+
+  const { echoServerPort, testServer } = createTestServer();
+
+  t.teardown(() => {
+    testServer.close();
+  });
 
   const root = __dirname;
   process.env.ACCEPT = ''; // no filters provided!

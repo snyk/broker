@@ -1,11 +1,9 @@
-const tap = require('tap');
 const test = require('tap-only');
 const path = require('path');
 const request = require('request');
 const app = require('../../lib');
+const { createTestServer, port } = require('../utils');
 const root = __dirname;
-
-const { port, echoServerPort } = require('../utils')(tap);
 
 test('correctly handle pool of multiple clients with same BROKER_TOKEN', (t) => {
   /**
@@ -19,6 +17,12 @@ test('correctly handle pool of multiple clients with same BROKER_TOKEN', (t) => 
    * 8. connection through server should still work through 2nd client
    *
    */
+
+  const { echoServerPort, testServer } = createTestServer();
+
+  t.teardown(() => {
+    testServer.close();
+  });
 
   t.plan(6);
 
