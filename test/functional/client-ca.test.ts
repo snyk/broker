@@ -1,20 +1,9 @@
-const test = require('tap-only');
-const request = require('request');
-const path = require('path');
-const app = require('../../lib');
-const { createTestServer, port } = require('../utils');
-const root = __dirname;
+import * as request from 'request';
+import * as path from 'path';
+import * as app from '../../lib';
+import { createTestServer, port } from '../utils';
 
-process.env.TEST_KEY = path.resolve(
-  root,
-  '../fixtures/certs/server/privkey.pem',
-);
-process.env.TEST_CERT = path.resolve(
-  root,
-  '../fixtures/certs/server/fullchain.pem',
-);
-
-test('correctly use supplied CA cert on client for connections', (t) => {
+test('correctly use supplied CA cert on client for connections', () => {
   /**
    * 1. start broker in server mode
    * 2. start broker in client mode
@@ -24,85 +13,81 @@ test('correctly use supplied CA cert on client for connections', (t) => {
    * 6. send request to the server and expect success
    */
 
+  const root = __dirname;
+
+  process.env.TEST_KEY = path.resolve(
+    root,
+    '../fixtures/certs/server/privkey.pem',
+  );
+  process.env.TEST_CERT = path.resolve(
+    root,
+    '../fixtures/certs/server/fullchain.pem',
+  );
+
   const { echoServerPort, testServer } = createTestServer();
 
-  t.teardown(() => {
-    testServer.close();
-  });
-
-  t.plan(6);
-
   process.env.ACCEPT = 'filters.json';
-
   process.chdir(path.resolve(root, '../fixtures/server'));
   process.env.BROKER_TYPE = 'server';
   let clientPort;
   const serverPort = port();
-  const server = app.main({ port: serverPort });
+  const server = app.main({ port: serverPort } as any);
 
   process.chdir(path.resolve(root, '../fixtures/client'));
   process.env.BROKER_TYPE = 'client';
   process.env.BROKER_TOKEN = '12345';
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
-  process.env.ORIGIN_PORT = echoServerPort;
+  process.env.ORIGIN_PORT = echoServerPort as any;
   process.env.ACCEPT = 'filters-https.json'; // We need to connect to the https version of _internal service_
-  let client = app.main({ port: port() });
+  let client = app.main({ port: port() } as any);
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', (socket) => {
     socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.test(
-        'get an error trying to connect to a server with unknown CA',
-        (t) => {
-          const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
-          request({ url, method: 'post', json: true }, (err, res) => {
-            t.equal(res.statusCode, 500, '500 statusCode');
-            t.end();
-          });
-        },
-      );
-
-      t.test('close', (t) => {
-        client.close();
-        t.ok('client closed');
-        t.end();
+      test('get an error trying to connect to a server with unknown CA', (done) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
+        request({ url, method: 'post', json: true }, (err, res) => {
+          expect(res.statusCode).toEqual(500);
+          client.close();
+          done();
+        });
       });
 
-      t.test('launch a new client with CA set', (t) => {
+      test('launch a new client with CA set', (done) => {
         server.io.on('connection', (socket) => {
-          socket.once('identify', t.end);
+          socket.once('identify', done);
         });
 
         // Specify CA file
         process.env.CA_CERT = '../certs/ca/my-root-ca.crt.pem';
         process.env.BROKER_CLIENT_VALIDATION_URL = `https://localhost:${echoServerPort}/test`;
         clientPort = port();
-        client = app.main({ port: clientPort });
+        client = app.main({ port: clientPort } as any);
       });
 
-      t.test('successfully broker POST with CA set', (t) => {
+      test('successfully broker POST with CA set', (done) => {
         const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
         request({ url, method: 'post', json: true }, (err, res) => {
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.end();
+          expect(res.statusCode).toEqual(200);
+          done();
         });
       });
 
-      t.test('successfully call systemcheck with CA set', (t) => {
+      test('successfully call systemcheck with CA set', (done) => {
         const url = `http://localhost:${clientPort}/systemcheck`;
         request({ url, json: true }, (err, res) => {
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.end();
+          expect(res.statusCode).toEqual(200);
+          done();
         });
       });
 
-      t.test('clean up', (t) => {
+      test('clean up', (done) => {
         client.close();
         setTimeout(() => {
           server.close();
-          t.ok('sockets closed');
-          t.end();
+          testServer.close();
+          done();
         }, 100);
       });
     });
