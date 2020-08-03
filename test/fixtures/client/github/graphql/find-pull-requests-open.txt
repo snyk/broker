@@ -17,4 +17,10 @@
                }
           }
       }
+      rateLimit {
+        limit
+        cost
+        remaining
+        resetAt
+      }
   }
