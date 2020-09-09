@@ -1790,6 +1790,11 @@
           "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
           "path": "query",
           "regex": "{\\s*search\\(\\s*query: \"repo:[a-zA-Z0-9-_.]+\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\s*(is:[a-zA-Z]+)?\", type: ISSUE, last: [0-9]+\\s*\\)\\s*{\\s*edges {\\s*node {\\s*\\.\\.\\. on PullRequest {\\s*url\\s*title\\s*createdAt\\s*headRefName\\s*state\\s*mergeable\\s*body\\s*repository\\s*{\\s*name\\s*}\\s*}\\s*}\\s*}\\s*}\\s*rateLimit\\s*{\\s*limit\\s*cost\\s*remaining\\s*resetAt\\s*}\\s*}\\s*"
+        },
+        {
+          "//": "query to get file SHA",
+          "path": "query",
+          "regex": "{\\s*repository\\(\\s*owner:\\s*\"[a-zA-Z0-9-_.]+\",\\s*name:\\s*\"[a-zA-Z0-9-_.]+\"\\)\\s*{\\s*object\\(\\s*expression:\\s*\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\"\\)\\s*{\\s*\\.\\.\\.\\s*on\\s*Blob\\s*{\\s*oid\\,\\s*}\\s*}\\s*}\\s*}\\s*"
         }
       ]
     }
