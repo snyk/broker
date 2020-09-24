@@ -9,6 +9,7 @@ describe('log', () => {
     const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
     const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
     const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
+    const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
 
     const log = require('../../lib/log');
 
@@ -16,12 +17,14 @@ describe('log', () => {
       brokerTk,
       githubTk,
       gitlabTk,
+      azureReposToken,
       bbUser,
       bbPass,
       jiraUser,
       jiraPass,
     ].join();
-    const sanitizedTokens = '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN}';
+    const sanitizedTokens =
+      '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
 
@@ -55,6 +58,7 @@ describe('log', () => {
     expect(logged).not.toMatch(bbPass);
     expect(logged).not.toMatch(jiraUser);
     expect(logged).not.toMatch(jiraPass);
+    expect(logged).not.toMatch(azureReposToken);
 
     // assert sensitive data is masked
     expect(logged).toMatch(sanitizedBitBucket);
