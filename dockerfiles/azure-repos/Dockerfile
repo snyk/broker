@@ -29,7 +29,6 @@ ENV AZURE_REPOS_HOST dev.azure.com
 
 # Your unique Broker identifier
 ENV BROKER_TOKEN <broker-token>
-ENV BROKER_CLIENT_VALIDATION_BASIC_AUTH "PAT:$AZURE_REPOS_TOKEN"
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
