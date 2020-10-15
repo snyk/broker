@@ -142,11 +142,11 @@
         },
         {
           "queryParam": "download",
-          "values": [true]
+          "values": ["true"]
         },
         {
           "queryParam": "includeContent",
-          "values": [true]
+          "values": ["true"]
         }
       ],
       "auth": {
@@ -166,11 +166,11 @@
         },
         {
           "queryParam": "download",
-          "values": [false]
+          "values": ["false"]
         },
         {
           "queryParam": "includeContent",
-          "values": [false]
+          "values": ["false"]
         }
       ],
       "auth": {
