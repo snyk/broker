@@ -2,7 +2,8 @@
   "public": [
     {
       "method": "any",
-      "path": "/*"
+      "path": "/*",
+      "stream": true
     }
   ],
   "private": [
