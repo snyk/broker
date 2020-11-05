@@ -641,3 +641,28 @@ describe('with auth', () => {
     );
   });
 });
+
+describe('Github big files (optional rules)', () => {
+  const rules = JSON.parse(
+    loadFixture(path.join('accept', 'github-big-files.json')),
+  );
+  const filter = Filters(rules.private);
+
+  it('should allow the get file sha API', (done) => {
+    filter(
+      {
+        url: '/graphql',
+        method: 'POST',
+        body: jsonBuffer({
+          query:
+            '{\n        repository(owner: "some-owner", name: "some-name") {\n          object(expression: "refs/heads/some-thing:a/path/to/package-lock.json") {\n            ... on Blob {\n              oid,\n            }\n          }\n        }\n      }',
+        }),
+      },
+      (error, res) => {
+        expect(error).toBeNull();
+        expect(res.url).toEqual('/graphql');
+        done();
+      },
+    );
+  });
+});
