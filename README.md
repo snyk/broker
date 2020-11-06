@@ -29,7 +29,7 @@ To use the Broker client with GitHub.com, run `docker pull snyk/broker:github-co
 
 You can run the Docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -43,7 +43,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:github-com
 
 ENV BROKER_TOKEN      secret-broker-token
@@ -68,7 +68,7 @@ To use the Broker client with a GitHub Enterprise deployment, run `docker pull s
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -85,7 +85,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:github-enterprise
 
 ENV BROKER_TOKEN      secret-broker-token
@@ -113,7 +113,7 @@ To use the Broker client with a Bitbucket Server deployment, run `docker pull sn
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -130,7 +130,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:bitbucket-server
 
 ENV BROKER_TOKEN        secret-broker-token
@@ -156,7 +156,7 @@ To use the Broker client with GitLab.com or an on-prem GitLab deployment, run `d
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -171,7 +171,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:gitlab
 
 ENV BROKER_TOKEN        secret-broker-token
@@ -195,7 +195,7 @@ To use the Broker client with [Azure](https://azure.microsoft.com/en-us/services
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -210,7 +210,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:azure-repos
 
 ENV BROKER_TOKEN        secret-broker-token
@@ -231,7 +231,7 @@ To use the Broker client with an artifactory deployment, run `docker pull snyk/b
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -243,7 +243,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:artifactory
 
 ENV BROKER_TOKEN      secret-broker-token
@@ -265,7 +265,7 @@ To use the Broker client with a Jira deployment, run `docker pull snyk/broker:ji
 
 You can run the docker container by providing the relevant configuration:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -281,7 +281,7 @@ docker run --restart=always \
 
 Another option is to build your own docker image and override relevant environment variables:
 
-```
+```dockerfile
 FROM snyk/broker:jira
 
 ENV BROKER_TOKEN        secret-broker-token
@@ -301,7 +301,7 @@ In the case of the Broker client, this endpoint also reports on the status of th
 
 To change the location of the healthcheck endpoint, you can specify an alternative path via an environment variable:
 
-```
+```dockerfile
 ENV BROKER_HEALTHCHECK_PATH /path/to/healthcheck
 ```
 
@@ -319,7 +319,7 @@ This endpoint responds with status code `200 OK` when the internal request is su
 
 To change the location of the systemcheck endpoint, you can specify an alternative path via an environment variable:
 
-```
+```dockerfile
 ENV BROKER_SYSTEMCHECK_PATH /path/to/systemcheck
 ```
 
@@ -340,7 +340,7 @@ The Broker client runs an HTTP server by default. It can be configured to run an
 
 For example, if your certificate files are found locally at `./private/broker.crt` and `./private/broker.key`, provide these files to the docker container by mounting the folder and using the `HTTPS_CERT` and `HTTPS_KEY` environment variables:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -361,7 +361,7 @@ By default, the Broker client establishes HTTPS connections to the Git. If your 
 
 For example, if your CA certificate is at `./private/ca.cert.pem`, provide it to the docker container by mounting the folder and using the `CA_CERT` environment variable:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -379,7 +379,7 @@ docker run --restart=always \
 
 The default approved-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the approved-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [Git type]`. The created `accept.json` is the default filter for the chosen Git. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:
 
-```
+```console
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
@@ -404,7 +404,7 @@ Add a validation block with the following key/values:
 
 For example, to only allow the SHA Media Type accept header for requests to the GitHub Commits API you would add the following:
 
-```
+```json
 {
     "method": "GET",
     "path": "/repos/:name/:repo/commits/:ref",
