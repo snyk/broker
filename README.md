@@ -425,6 +425,23 @@ Sometime it is required to load sensitive configurations (GitHub/Snyk's token) f
 * Change the workdir of the docker image to be `/broker`/
 Example of such file is located in your broker container at $HOME/.env
 
+### Troubleshooting
+
+#### Support of big manifest files (> 1Mb) for GitHub / GitHub Enterprise
+
+One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests might be fetching big manifest files (> 1Mb) failure. To address this issue, additional Blob API endpoint should be whitelisted in `accept.json`:
+
+- should be in `private` array
+```json
+{
+    "//": "used to get given manifest file",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/git/blobs/:sha",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+}
+```
+**Note** To ensure the maximum possible security, we do not enable this rule by default, as usage of this endpoint means that the Snyk platform can theoretically access all files in this repository, as the path does not include specific allowed file names.
+
 ## Misc
 
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
