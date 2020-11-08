@@ -605,6 +605,26 @@ describe('filters', () => {
       );
     });
   });
+
+  describe('for GHE', () => {
+    const rules = JSON.parse(loadFixture(path.join('accept', 'ghe.json')));
+    const filter = Filters(rules.private);
+
+    it('should allow valid encoded /Dockerfile path to manifest', () => {
+      const url =
+        '/repos/repo-owner/repo-name/contents/%2Fsome-path%2FDockerfile?ref=master';
+      filter(
+        {
+          url,
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toMatch(url);
+        },
+      );
+    });
+  });
 });
 
 describe('with auth', () => {
