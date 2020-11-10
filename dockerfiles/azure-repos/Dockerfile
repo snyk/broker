@@ -1,4 +1,4 @@
-FROM node:12-slim
+FROM node:12-buster-slim
 
 LABEL maintainer="Snyk Ltd"
 
