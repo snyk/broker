@@ -199,6 +199,16 @@
       }
     },
     {
+      "//": "update status of given pull request",
+      "method": "POST",
+      "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/statuses",
+      "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+      "auth": {
+        "scheme": "basic",
+        "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+      }
+    },
+    {
       "//": "find PR for given repository",
       "method": "GET",
       "path": "/:owner/_apis/git/repositories/:repo/pullrequests",
