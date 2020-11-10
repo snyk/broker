@@ -1,4 +1,4 @@
-FROM node:12-slim
+FROM node:12-buster-slim
 
 MAINTAINER Snyk Ltd
 
@@ -27,6 +27,10 @@ ENV BROKER_TOKEN <broker-token>
 # Your Artifactory URL to artifactory
 # NOTA BENE: without `/` character in the end of URL
 ENV ARTIFACTORY_URL <yourdomain>.artifactory.com/artifactory
+
+# Provide RES_BODY_URL_SUB with the URL of the artifactory without credentials and http protocol
+# This URL substitution is required for NPM integration
+ENV RES_BODY_URL_SUB=http://<yourdomain>.artifactory.com/artifactory
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
