@@ -291,6 +291,47 @@ ENV JIRA_HOSTNAME       your.jira.domain.com
 ENV PORT                8000
 ```
 
+### Container registry agent
+
+To use the Broker client with a container registry agent deployment, run `docker
+pull snyk/broker:container-registry-agent`. The following environment variables
+are mandatory to configure the Broker client:
+
+- `BROKER_TOKEN` - The Snyk Broker token, obtained from your Container registry integration settings (app.snyk.io).
+- `BROKER_CLIENT_URL` - The URL of your broker client (including scheme and - port) used by container registry agent to call back to Snyk.
+- `CR_AGENT_URL` - The hostname of your container registry agent.
+- `CR_CREDENTIALS` - Base64-encoded credentials json used by agent to access container registry.
+- `PORT` - The local port at which the Broker client accepts connections. Default is 7341.
+
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e CR_AGENT_URL=agent-url \
+           -e CR_CREDENTIALS=base64-encoded-credentials-json \
+           -e PORT=8000 \
+       snyk/broker:container-registry-agent
+```
+
+#### Derived docker image
+
+Another option is to build your own docker image and override relevant environment variables:
+
+```dockerfile
+FROM snyk/broker:container-registry-agent
+
+ENV BROKER_TOKEN          secret-broker-token
+ENV BROKER_CLIENT_URL     http://my.broker.client:8000
+ENV CR_AGENT_URL          agent-hostname
+ENV CR_CREDENTIALS        base64-encoded-credentials-json
+ENV PORT                  8000
+```
+
 ### Monitoring
 
 #### Healthcheck
