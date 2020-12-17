@@ -10,6 +10,8 @@ describe('log', () => {
     const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
     const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
+    const artifactoryUrl = (process.env.ARTIFACTORY_URL =
+      'http://basic:auth@artifactory.com');
 
     const log = require('../../lib/log');
 
@@ -22,11 +24,13 @@ describe('log', () => {
       bbPass,
       jiraUser,
       jiraPass,
+      artifactoryUrl,
     ].join();
     const sanitizedTokens =
       '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
+    const sanitizedArtifactory = '${ARTIFACTORY_URL}';
 
     // setup logger output capturing
     const logs: string[] = [];
@@ -59,10 +63,12 @@ describe('log', () => {
     expect(logged).not.toMatch(jiraUser);
     expect(logged).not.toMatch(jiraPass);
     expect(logged).not.toMatch(azureReposToken);
+    expect(logged).not.toMatch(artifactoryUrl);
 
     // assert sensitive data is masked
     expect(logged).toMatch(sanitizedBitBucket);
     expect(logged).toMatch(sanitizedTokens);
     expect(logged).toMatch(sanitizedJira);
+    expect(logged).toMatch(sanitizedArtifactory);
   });
 });
