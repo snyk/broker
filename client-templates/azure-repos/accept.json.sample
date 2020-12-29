@@ -133,7 +133,11 @@
             "**/Podfile",
             "**%2FPodfile",
             "**/Podfile.lock",
-            "**%2FPodfile.lock"
+            "**%2FPodfile.lock",
+            "**/go.mod",
+            "**%2Fgo.mod",
+            "**/go.sum",
+            "**%2Fgo.sum"
           ]
         },
         {

@@ -375,6 +375,30 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/go.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/go.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to scan Dockerfile",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
@@ -454,7 +478,11 @@
             "**/Podfile",
             "**%2FPodfile",
             "**/Podfile.lock",
-            "**%2FPodfile.lock"
+            "**%2FPodfile.lock",
+            "**/go.mod",
+            "**%2Fgo.mod",
+            "**/go.sum",
+            "**%2Fgo.sum"
           ]
         }
       ]
@@ -773,6 +801,30 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/go.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/go.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to create ignore rules or patches",
       "method": "POST",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -838,7 +890,11 @@
             "**/Podfile",
             "**%2FPodfile",
             "**/Podfile.lock",
-            "**%2FPodfile.lock"
+            "**%2FPodfile.lock",
+            "**/go.mod",
+            "**%2Fgo.mod",
+            "**/go.sum",
+            "**%2Fgo.sum"
           ]
         }
       ]
@@ -1156,6 +1212,30 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/go.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/go.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to update ignore rules or existing patches",
       "method": "PUT",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -1221,12 +1301,16 @@
             "**/Podfile",
             "**%2FPodfile",
             "**/Podfile.lock",
-            "**%2FPodfile.lock"
+            "**%2FPodfile.lock",
+            "**/go.mod",
+            "**%2Fgo.mod",
+            "**/go.sum",
+            "**%2Fgo.sum"
           ]
         }
       ]
     },
-    
+
     {
       "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
       "method": "POST",
