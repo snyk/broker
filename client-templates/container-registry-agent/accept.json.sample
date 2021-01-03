@@ -43,7 +43,7 @@
   {
     "//": "lists tags/images in a repository",
     "method": "GET",
-    "path": "/list/:repo",
+    "path": "/list/*",
     "origin": "${CR_AGENT_URL}"
   },
   {
