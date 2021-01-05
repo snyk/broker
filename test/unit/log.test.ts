@@ -12,6 +12,9 @@ describe('log', () => {
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
     const artifactoryUrl = (process.env.ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
+    const crAgentUrl = (process.env.CR_AGENT_URL =
+      'CONTAINER_REGISTRY_AGENT_URL');
+    const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
 
     const log = require('../../lib/log');
 
@@ -25,12 +28,15 @@ describe('log', () => {
       jiraUser,
       jiraPass,
       artifactoryUrl,
+      crAgentUrl,
+      crCredentials,
     ].join();
     const sanitizedTokens =
       '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
+    const sanitizedCRData = '${CR_AGENT_URL},${CR_CREDENTIALS}';
 
     // setup logger output capturing
     const logs: string[] = [];
@@ -64,11 +70,14 @@ describe('log', () => {
     expect(logged).not.toMatch(jiraPass);
     expect(logged).not.toMatch(azureReposToken);
     expect(logged).not.toMatch(artifactoryUrl);
+    expect(logged).not.toMatch(crAgentUrl);
+    expect(logged).not.toMatch(crCredentials);
 
     // assert sensitive data is masked
     expect(logged).toMatch(sanitizedBitBucket);
     expect(logged).toMatch(sanitizedTokens);
     expect(logged).toMatch(sanitizedJira);
     expect(logged).toMatch(sanitizedArtifactory);
+    expect(logged).toMatch(sanitizedCRData);
   });
 });
