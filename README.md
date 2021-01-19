@@ -311,8 +311,8 @@ You can run the docker container by providing the relevant configuration:
 docker run --restart=always \
            -p 8000:8000 \
            -e BROKER_TOKEN=secret-broker-token \
-           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
-           -e CR_AGENT_URL=http://my.container.registry.agent \
+           -e BROKER_CLIENT_URL=https://my.broker.client:8000 \
+           -e CR_AGENT_URL=https://my.container.registry.agent \
            -e CR_CREDENTIALS=base64-encoded-credentials-json \
            -e PORT=8000 \
        snyk/broker:container-registry-agent
@@ -326,8 +326,8 @@ Another option is to build your own docker image and override relevant environme
 FROM snyk/broker:container-registry-agent
 
 ENV BROKER_TOKEN          secret-broker-token
-ENV BROKER_CLIENT_URL     http://my.broker.client:8000
-ENV CR_AGENT_URL          http://my.container.registry.agent
+ENV BROKER_CLIENT_URL     https://my.broker.client:8000
+ENV CR_AGENT_URL          https://my.container.registry.agent
 ENV CR_CREDENTIALS        base64-encoded-credentials-json
 ENV PORT                  8000
 ```
