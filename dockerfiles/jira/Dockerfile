@@ -1,19 +1,35 @@
-FROM node:12-buster-slim
+FROM snyk/ubuntu as base
 
 MAINTAINER Snyk Ltd
 
-RUN npm install --global snyk-broker
+USER root
+
+RUN apt update && apt install -y make python gcc
 
 RUN apt-get update && apt-get install -y ca-certificates
 
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+
+ENV PATH=$PATH:/home/node/.npm-global/bin 
+
+RUN npm install --global snyk-broker 
+
+
+
+FROM snyk/ubuntu
+
+ENV PATH=$PATH:/home/node/.npm-global/bin 
+
+COPY --from=base /home/node/.npm-global /home/node/.npm-global
+
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 # Don't run as root
 WORKDIR /home/node
-USER node
+USER node 
 
 # Generate default accept filter
 RUN broker init jira
-
-
 
 ######################################
 # Custom Broker Client configuration #
