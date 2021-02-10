@@ -188,6 +188,7 @@ To use the Broker client with [Azure](https://azure.microsoft.com/en-us/services
 - `BROKER_TOKEN` - the Snyk Broker token, obtained from your Azure Repos integration settings view (app.snyk.io).
 - `AZURE_REPOS_TOKEN` - an Azure Repos personal access token. [Guide](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) how to get/create the token. Required scopes: ensure Custom defined is selected and under Code select _Read & write_
 - `AZURE_REPOS_ORG` - organization name, which can be found in your Organization Overview page in Azure
+- `AZURE_REPOS_HOST` - the hostname of your Azure Repos Server deployment, such as `your.azure-server.domain.com`.
 - `PORT` - the local port at which the Broker client accepts connections. Default is 7341.
 - `BROKER_CLIENT_URL` - the full URL of the Broker client as it will be accessible by your Azure Repos' webhooks, such as `http://my.broker.client:7341`
 
@@ -201,6 +202,7 @@ docker run --restart=always \
            -e BROKER_TOKEN=secret-broker-token \
            -e AZURE_REPOS_TOKEN=secret-azure-token \
            -e AZURE_REPOS_ORG=org-name \
+           -e AZURE_REPOS_HOST=your.azure-server.domain.com \
            -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
            -e PORT=8000 \
        snyk/broker:azure-repos
@@ -215,7 +217,8 @@ FROM snyk/broker:azure-repos
 
 ENV BROKER_TOKEN        secret-broker-token
 ENV AZURE_REPOS_TOKEN   secret-azure-token
-ENV AZURE_REPOS_ORG      org-name
+ENV AZURE_REPOS_ORG     org-name
+ENV AZURE_REPOS_HOST    your.azure-server.domain.com
 ENV BROKER_CLIENT_URL   http://my.broker.client:8000
 ENV PORT                8000
 ```
