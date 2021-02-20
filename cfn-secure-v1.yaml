@@ -1,0 +1,170 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: My Super Secure Stack - Generate Invoices from RDS and save to S3
+
+Parameters:
+  DBUser:
+    Description: MySQL DB User
+    Type: String
+
+  DBPassword:
+    Description: MySQL DB Password
+    Type: String
+    NoEcho: true
+
+  DBHost:
+    Description: Hostname of the MySQL Server
+    Type: String
+
+  DBPort:
+    Description: Port of the MySQL Server
+    Type: Number
+    Default: 3306
+
+  RDSInstance:
+    Description: The RDS Instance Name
+    Type: String
+
+  SGRDS:
+    Description: A SG on the MySQL RDS Instance
+    Type: AWS::EC2::SecurityGroup::Id
+
+  ClusterName:
+    Description: ECS Cluster Name
+    Type: String
+
+  ClusterSubnetCidr:
+    Description: The IP Range for EC2 instances in the ECS Cluster
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])([/]([0-9]|[1-2][0-9]|3[0-2]))$"
+    ConstraintDescription: Must be a valid IPCDIR eg. 192.168.0.0/24
+
+Mappings:
+  Static:
+    Bucket:
+      Name: customer-invoices-amaysim
+
+Resources:
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ClusterName
+      DesiredCount: 1
+      SchedulingStrategy: REPLICA
+      TaskDefinition: !Ref ECSTask
+
+  ECSTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Image: amaysim/my-secure-app
+          Name: GenerateInvoices
+          Essential: true
+          PortMappings:
+            - ContainerPort: 22
+          Privileged: true
+          Environment:
+            - Name: DB_USER
+              Value: !Ref DBUser
+            - Name: DB_PASSWORD
+              Value: !Ref DBPassword
+            - Name: DB_HOST
+              Value: !Ref DBHost
+            - Name: DB_PORT
+              Value: !Ref DBPort
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
+  PolicyLogs:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CWLogs
+      Roles:
+        - !Ref ECSTaskRole
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "logs:*"
+            Effect: Allow
+            Resource:
+              - "*"
+
+  PolicyS3:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: S3
+      Roles:
+        - !Ref ECSTaskRole
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:*"
+            Effect: Allow
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${bucketName}"
+                - bucketName: !FindInMap [Static, Bucket, Name]
+              - "*"
+              - !Sub
+                - "arn:aws:s3:::${bucketName}/*"
+                - bucketName: !FindInMap [Static, Bucket, Name]
+
+  PolicyRDS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: RDS
+      Roles:
+        - !Ref ECSTaskRole
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "rds:*"
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:rds:::db:${RDSInstance}"
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: BucketOwnerFullControl
+      BucketName: !FindInMap [Static, Bucket, Name]
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject*
+            Effect: Allow
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${bucketName}/*"
+                - bucketName: !FindInMap [Static, Bucket, Name]
+            Principal: "*"
+            Condition:
+              IpAddress:
+                "aws:SourceIp": !Ref ClusterSubnetCidr
+
+  SGIngressRDS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref ClusterSubnetCidr
+      Description: Allow ECS Cluster to connect to RDS
+      FromPort: !Ref DBPort
+      ToPort: !Ref DBPort
+      GroupId: !Ref SGRDS
+      IpProtocol: tcp
