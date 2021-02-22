@@ -161,6 +161,18 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/gradle.properties",
       "origin": "https://${GITLAB}"
     },
@@ -449,6 +461,8 @@
             "**%2Frequirements%2F*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
+            "**/gradle.lockfile",
+            "**%2Fgradle.lockfile",
             "**/build.sbt",
             "**%2Fbuild.sbt",
             "**/.snyk",
@@ -582,6 +596,18 @@
       "//": "used to create manifest file",
       "method": "POST",
       "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
       "origin": "https://${GITLAB}"
     },
     {
@@ -861,6 +887,8 @@
             "**%2F*req*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
+            "**/gradle.lockfile",
+            "**%2Fgradle.lockfile",
             "**/build.sbt",
             "**%2Fbuild.sbt",
             "**/.snyk",
@@ -993,6 +1021,18 @@
       "//": "used to update manifest file",
       "method": "PUT",
       "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
       "origin": "https://${GITLAB}"
     },
     {
@@ -1272,6 +1312,8 @@
             "**%2F*req*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
+            "**/gradle.lockfile",
+            "**%2Fgradle.lockfile",
             "**/build.sbt",
             "**%2Fbuild.sbt",
             "**/.snyk",
