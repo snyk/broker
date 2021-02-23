@@ -104,6 +104,8 @@
             "**%2Frequirements%2F*.txt",
             "**/build.gradle",
             "**%2Fbuild.gradle",
+            "**/gradle.lockfile",
+            "**%2Fgradle.lockfile",
             "**/build.sbt",
             "**%2Fbuild.sbt",
             "**/.snyk",
