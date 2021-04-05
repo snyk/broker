@@ -2,7 +2,7 @@
 # The following image is reachable through the snyk/ubuntu:latest image in DockerHub.
 # Note that there's no need to build it; All broker client Dockerfiles use the snyk/ubuntu:latest.
 
-FROM ubuntu 
+FROM ubuntu:groovy-20210325 
 
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
