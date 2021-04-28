@@ -851,6 +851,18 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to create Dockerfile",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create Dockerfile",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to create ignore rules or patches",
       "method": "POST",
       "path": "/api/v4/projects/:project/repository/files*/.snyk",
@@ -1273,6 +1285,18 @@
       "//": "used to update manifest file",
       "method": "PUT",
       "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update Dockerfile",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update Dockerfile",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
       "origin": "https://${GITLAB}"
     },
     {
