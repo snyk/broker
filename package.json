@@ -54,7 +54,7 @@
     "dotenv": "^6.2.0",
     "ejson": "^2.2.0",
     "engine.io": "^3.4.0",
-    "engine.io-client": "^3.4.0",
+    "engine.io-client": "^5.0.0",
     "express": "^4.17.1",
     "express-prom-bundle": "^5.1.5",
     "js-yaml": "^3.13.1",
