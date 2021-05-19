@@ -1,17 +1,27 @@
 {
   "public": [
   {
-    "//": "image scan callback (v1)",
+    "//": "image scan (discover) callback (v1)",
     "method": "POST",
-      "path": "/api/v1/import/app"
+    "path": "/api/v1/import/app"
   },
   {
-    "//": "image scan callback (v2)",
+    "//": "image scan result callback (v1)",
+    "method": "POST",
+    "path": "/api/v1/import/scan-result"
+  },
+  {
+    "//": "image scan done callback (v1)",
+    "method": "POST",
+    "path": "/api/v1/import/scan-done"
+  },
+  {
+    "//": "image scan done callback (v2)",
     "method": "POST",
     "path": "/api/v2/import/done"
   },
   {
-    "//": "image scan callback (v2)",
+    "//": "image scan result callback (v2)",
     "method": "POST",
     "path": "/api/v2/import/result"
   }
