@@ -106,6 +106,13 @@
           "values": ["valid.accept.header"]
         }
       ]
+    },
+
+    {
+      "//": "used to redirect requests to snyk git client",
+      "method": "any",
+      "path": "/snykgit/*",
+      "origin": "${GIT_CLIENT_URL}"
     }
   ],
   "public": [
