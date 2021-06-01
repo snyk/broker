@@ -56,6 +56,9 @@ ENV PORT 7341
 # This will be used as the webhook payload URL
 ENV BROKER_CLIENT_URL "https://<broker.client.hostname>:$PORT"
 
+# the url of your snyk git client (including scheme and port)
+# ENV GIT_CLIENT_URL https://<snyk-git-client-host>:<snyk-git-client-port>
+
 EXPOSE $PORT
 
 CMD ["broker", "--verbose"]

@@ -54,6 +54,8 @@ ENV GITLAB your.gitlab.server.hostname
 # This will be used as the webhook payload URL coming in from Gitlab
 # ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
 
+# the url of your snyk git client (including scheme and port)
+# ENV GIT_CLIENT_URL https://<snyk-git-client-host>:<snyk-git-client-port>
 
 EXPOSE $PORT
 

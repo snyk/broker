@@ -61,6 +61,9 @@ ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
 # your Bitbucket Server.
 # ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
 
+# the url of your snyk git client (including scheme and port)
+# ENV GIT_CLIENT_URL https://<snyk-git-client-host>:<snyk-git-client-port>
+
 EXPOSE $PORT
 
 CMD ["broker", "--verbose"]
