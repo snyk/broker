@@ -42,13 +42,15 @@ test('proxy requests originating from behind the broker server', (t) => {
   process.env.ORIGIN_PORT = echoServerPort;
   process.env.USERNAME = 'user@email.com';
   process.env.PASSWORD = 'aB}#/:%40*1';
+  process.env.GIT_CLIENT_URL = `http://localhost:${echoServerPort}`;
+  process.env.GIT_CLIENT_CREDENTIALS = `${process.env.USERNAME}:${process.env.PASSWORD}`;
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', (socket) => {
     socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.plan(26);
+      t.plan(30);
 
       t.test('identification', (t) => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -404,6 +406,49 @@ test('proxy requests originating from behind the broker server', (t) => {
             t.end();
           },
         );
+      });
+
+      t.test('successfully broker POST to git client', (t) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-body`;
+        const body = { some: { example: 'json' } };
+        request({ url, method: 'post', json: true, body }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(res.body, body, 'body brokered');
+          t.end();
+        });
+      });
+
+      t.test('successfully broker exact bytes of POST body', (t) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-body`;
+        const body = Buffer.from(
+          JSON.stringify({ some: { example: 'json' } }, null, 5),
+        );
+        const headers = { 'Content-Type': 'application/json' };
+        request({ url, method: 'post', headers, body }, (err, res) => {
+          const responseBody = Buffer.from(res.body);
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(responseBody, body, 'body brokered exactly');
+          t.end();
+        });
+      });
+
+      t.test('successfully broker GET', (t) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-param/xyz`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body, 'xyz', 'body brokered');
+          t.end();
+        });
+      });
+
+      t.test('allow request for valid url with valid query param', (t) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-query`;
+        const qs = { proxyMe: 'please' };
+        request({ url, method: 'get', json: true, qs }, (err, res) => {
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.same(res.body, qs, 'querystring brokered');
+          t.end();
+        });
       });
 
       t.test('clean up', (t) => {

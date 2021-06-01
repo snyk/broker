@@ -33,15 +33,13 @@ test('proxy requests originating from behind the broker client', (t) => {
   process.env.BROKER_TYPE = 'client';
   process.env.BROKER_TOKEN = 'C481349B-4014-43D9-B59D-BA41E1315001'; // uuid.v4
   process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
-  process.env.GIT_CLIENT_URL = `http://localhost:${echoServerPort}`;
-  process.env.GIT_CLIENT_CREDENTIALS = `user:pass`;
   const clientPort = port();
   const client = app.main({ port: clientPort });
 
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', (socket) => {
     socket.once('identify', (clientData) => {
-      t.plan(17);
+      t.plan(14);
 
       t.test('successfully broker POST', (t) => {
         const url = `http://localhost:${clientPort}/echo-body`;
@@ -201,45 +199,6 @@ test('proxy requests originating from behind the broker client', (t) => {
 
       t.test('querystring parameters are brokered', (t) => {
         const url = `http://localhost:${clientPort}/echo-query?shape=square&colour=yellow`;
-        request({ url, method: 'get' }, (err, res) => {
-          const responseBody = JSON.parse(res.body);
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.same(
-            responseBody,
-            { shape: 'square', colour: 'yellow' },
-            'querystring brokered',
-          );
-          t.end();
-        });
-      });
-
-      t.test('successfully broker POST requests to git client', (t) => {
-        const url = `http://localhost:${clientPort}/snykgit/echo-body`;
-        const body = { some: { example: 'json' } };
-        request({ url, method: 'post', json: true, body }, (err, res) => {
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.same(res.body, body, 'body brokered');
-          t.end();
-        });
-      });
-
-      t.test('successfully broker exact bytes of POST body to git client', (t) => {
-        const url = `http://localhost:${clientPort}/snykgit/echo-body`;
-        // stringify the JSON unusually to ensure an unusual exact body
-        const body = Buffer.from(
-          JSON.stringify({ some: { example: 'json' } }, null, 5),
-        );
-        const headers = { 'Content-Type': 'application/json' };
-        request({ url, method: 'post', headers, body }, (err, res) => {
-          const responseBody = Buffer.from(res.body);
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.same(responseBody, body, 'body brokered exactly');
-          t.end();
-        });
-      });
-
-      t.test('querystring parameters are brokered', (t) => {
-        const url = `http://localhost:${clientPort}/snykgit/echo-query?shape=square&colour=yellow`;
         request({ url, method: 'get' }, (err, res) => {
           const responseBody = JSON.parse(res.body);
           t.equal(res.statusCode, 200, '200 statusCode');
