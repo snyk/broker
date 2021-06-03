@@ -29,7 +29,7 @@ describe('body relay', () => {
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_CLIENT_CREDENTIALS: 'user:pass',
+      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
     };
 
     const route = relay(config)(brokerToken);
@@ -71,11 +71,11 @@ describe('body relay', () => {
     
     const url = '/analyze';
     const headers = { 'Content-Type': 'application/json' };
-    const body = JSON.stringify({ url: 'http://scm.scm/owner/repo' });
+    const body = JSON.stringify({ url: '/owner/repo' });
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_CLIENT_CREDENTIALS: 'user:pass',
+      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
     };
 
     const route = relay(config)(brokerToken);
@@ -87,7 +87,7 @@ describe('body relay', () => {
         const arg = requestMock.mock.calls[1][0];
         expect((arg as any).url).toEqual(`${config.GIT_CLIENT_URL}${url}`);
         expect(JSON.parse(arg.body).url).toEqual(
-          `http://${config.GIT_CLIENT_CREDENTIALS}@scm.scm/owner/repo`
+          `${config.GIT_URL_AND_CREDENTIALS}/owner/repo`
         );
         expect(arg.headers).toEqual({
           'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ describe('body relay', () => {
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_CLIENT_CREDENTIALS: 'user:pass',
+      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
     };
 
     const route = relay(config)(brokerToken);

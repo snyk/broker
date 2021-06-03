@@ -15,7 +15,7 @@ describe('log', () => {
     const crAgentUrl = (process.env.CR_AGENT_URL =
       'CONTAINER_REGISTRY_AGENT_URL');
     const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
-    const gitCredentials = (process.env.GIT_CLIENT_CREDENTIALS = 'GIT_CREDS');
+    const gitCredentials = (process.env.GIT_URL_AND_CREDENTIALS = 'GIT_CREDS');
 
     const log = require('../../lib/log');
 
@@ -39,7 +39,7 @@ describe('log', () => {
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
     const sanitizedCRData = '${CR_AGENT_URL},${CR_CREDENTIALS}';
-    const sanitizedGitClient = '${GIT_CLIENT_CREDENTIALS}';
+    const sanitizedGitClient = '${GIT_URL_AND_CREDENTIALS}';
 
     // setup logger output capturing
     const logs: string[] = [];
