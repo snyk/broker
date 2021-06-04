@@ -43,8 +43,9 @@ test('proxy requests originating from behind the broker server', (t) => {
   process.env.USERNAME = 'user@email.com';
   process.env.PASSWORD = 'aB}#/:%40*1';
   process.env.GIT_CLIENT_URL = `http://localhost:${echoServerPort}`;
-  process.env.GIT_URL_AND_CREDENTIALS =
-    `https://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.GITHUB}`;
+  process.env.GIT_URL = process.env.GITHUB;
+  process.env.GIT_USERNAME = process.env.USERNAME;
+  process.env.GIT_PASSWORD = process.env.PASSWORD;
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself

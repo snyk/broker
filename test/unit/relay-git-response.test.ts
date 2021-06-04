@@ -29,7 +29,9 @@ describe('body relay', () => {
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
+      GIT_URL: 'scm.scm',
+      GIT_USERNAME: 'user',
+      GIT_PASSWORD: 'pass',
     };
 
     const route = relay(config)(brokerToken);
@@ -69,13 +71,15 @@ describe('body relay', () => {
       return {} as any;
     });
     
-    const url = '/analyze';
+    const url = '/bundle';
     const headers = { 'Content-Type': 'application/json' };
-    const body = JSON.stringify({ url: '/owner/repo' });
+    const body = JSON.stringify({ key: { gitURI: 'ftp://wrong.url/owner/repo' } });
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
+      GIT_URL: 'scm.scm',
+      GIT_USERNAME: 'user',
+      GIT_PASSWORD: 'pass',
     };
 
     const route = relay(config)(brokerToken);
@@ -86,12 +90,10 @@ describe('body relay', () => {
         expect(requestMock).toHaveBeenCalledTimes(2);
         const arg = requestMock.mock.calls[1][0];
         expect((arg as any).url).toEqual(`${config.GIT_CLIENT_URL}${url}`);
-        expect(JSON.parse(arg.body).url).toEqual(
-          `${config.GIT_URL_AND_CREDENTIALS}/owner/repo`
-        );
-        expect(arg.headers).toEqual({
-          'Content-Type': 'application/json',
-        });
+        expect(JSON.parse(arg.body).key.gitURI).toEqual(`ftp://${config.GIT_URL}/owner/repo`);
+        expect(JSON.parse(arg.body).key.creds.username).toEqual(config.GIT_USERNAME);
+        expect(JSON.parse(arg.body).key.creds.password).toEqual(config.GIT_PASSWORD);
+        expect(arg.headers).toEqual({ 'Content-Type': 'application/json' });
         expect(resStatus).toEqual(responseStatus);
         expect(JSON.parse(resBody)).toEqual(responseBody);
         expect(resHeaders).toEqual(responseHeaders);
@@ -124,7 +126,9 @@ describe('body relay', () => {
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
-      GIT_URL_AND_CREDENTIALS: 'http://user:pass/scm.scm',
+      GIT_URL: 'scm.scm',
+      GIT_USERNAME: 'user',
+      GIT_PASSWORD: 'pass',
     };
 
     const route = relay(config)(brokerToken);
@@ -185,7 +189,7 @@ describe('body relay', () => {
         // no request to git client should be triggered
         expect(requestMock).toHaveBeenCalledTimes(3);
         expect(resStatus).toEqual(500);
-        expect(resBody).toEqual('MISSING_GIT_CLIENT_CREDENTIALS');
+        expect(resBody).toEqual('MISSING_GIT_SERVER_CONFIG');
         done();
       },
     );
