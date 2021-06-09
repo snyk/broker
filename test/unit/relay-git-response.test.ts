@@ -4,6 +4,13 @@ import { mocked } from 'ts-jest/utils';
 import { response as relay } from '../../lib/relay-git';
 
 const requestMock = mocked(request);
+const postponeDone = (expectedCalls: number, done: Function) => {
+  let _numCalls = 0;
+  return () => {
+    _numCalls++;
+    if (_numCalls >= expectedCalls) done();
+  }
+}
 
 describe('body relay', () => {
   it('relay requests to git client clearing headers', (done) => {
@@ -59,7 +66,7 @@ describe('body relay', () => {
     const responseStatus = 200;
     const responseBody = { ok: true };
     const responseHeaders = { 'Content-Type': 'application/json' };
-    requestMock.mockImplementationOnce((_options, fn) => {
+    const mocked = (_options, fn) => {
       fn!(
         null,
         {
@@ -69,11 +76,13 @@ describe('body relay', () => {
         JSON.stringify(responseBody),
       );
       return {} as any;
-    });
+    };
+    requestMock.mockImplementationOnce(mocked).mockImplementationOnce(mocked);
     
     const url = '/bundle';
     const headers = { 'Content-Type': 'application/json' };
-    const body = JSON.stringify({ key: { gitURI: 'ftp://wrong.url/owner/repo' } });
+    const body1 = JSON.stringify({ key: { gitURI: 'ftp://wrong.url/owner/repo' } });
+    const body2 = JSON.stringify({ key: { gitURI: '/owner/repo' } });
     const brokerToken = '';
     const config = {
       GIT_CLIENT_URL: 'http://localhost:8001',
@@ -83,9 +92,9 @@ describe('body relay', () => {
     };
 
     const route = relay(config)(brokerToken);
-
+    const tryDone = postponeDone(2, done);
     route(
-      { url, method: 'POST', body, headers },
+      { url, method: 'POST', body: body1, headers },
       ({ status: resStatus, body: resBody, headers: resHeaders }) => {
         expect(requestMock).toHaveBeenCalledTimes(2);
         const arg = requestMock.mock.calls[1][0];
@@ -97,7 +106,23 @@ describe('body relay', () => {
         expect(resStatus).toEqual(responseStatus);
         expect(JSON.parse(resBody)).toEqual(responseBody);
         expect(resHeaders).toEqual(responseHeaders);
-        done();
+        tryDone();
+      },
+    );
+    route(
+      { url, method: 'POST', body: body2, headers },
+      ({ status: resStatus, body: resBody, headers: resHeaders }) => {
+        expect(requestMock).toHaveBeenCalledTimes(3);
+        const arg = requestMock.mock.calls[2][0];
+        expect((arg as any).url).toEqual(`${config.GIT_CLIENT_URL}${url}`);
+        expect(JSON.parse(arg.body).key.gitURI).toEqual(`https://${config.GIT_URL}/owner/repo`);
+        expect(JSON.parse(arg.body).key.creds.username).toEqual(config.GIT_USERNAME);
+        expect(JSON.parse(arg.body).key.creds.password).toEqual(config.GIT_PASSWORD);
+        expect(arg.headers).toEqual({ 'Content-Type': 'application/json' });
+        expect(resStatus).toEqual(responseStatus);
+        expect(JSON.parse(resBody)).toEqual(responseBody);
+        expect(resHeaders).toEqual(responseHeaders);
+        tryDone();
       },
     );
   });
@@ -136,7 +161,7 @@ describe('body relay', () => {
     route(
       { url, method: 'GET', body, headers },
       ({ status: resStatus, body: resBody, headers: resHeaders }) => {
-        expect(requestMock).toHaveBeenCalledTimes(3);
+        expect(requestMock).toHaveBeenCalledTimes(4);
         expect(resStatus).toEqual(responseStatus);
         expect(JSON.parse(resBody)).toEqual(responseBody);
         expect(resHeaders).toEqual(responseHeaders);
@@ -162,35 +187,36 @@ describe('body relay', () => {
     const testRelay = (_config, _brokerToken) => {
       return relay(_config)(_brokerToken);
     };
+    const tryDone = postponeDone(3, done);
 
     testRelay({}, 'broker')(
       { url, method: 'POST', body, headers },
       ({ status: resStatus, body: resBody }) => {
         // no request to git client should be triggered
-        expect(requestMock).toHaveBeenCalledTimes(3);
+        expect(requestMock).toHaveBeenCalledTimes(4);
         expect(resStatus).toEqual(500);
         expect(resBody).toEqual('NO_GIT_CLIENT_ON_BROKER_SERVER');
-        done();
+        tryDone();
       },
     );
     testRelay({}, undefined)(
       { url, method: 'POST', body, headers },
       ({ status: resStatus, body: resBody }) => {
         // no request to git client should be triggered
-        expect(requestMock).toHaveBeenCalledTimes(3);
+        expect(requestMock).toHaveBeenCalledTimes(4);
         expect(resStatus).toEqual(500);
         expect(resBody).toEqual('MISSING_GIT_CLIENT_URL');
-        done();
+        tryDone();
       },
     );
     testRelay({ GIT_CLIENT_URL: 'something' }, '')(
       { url, method: 'POST', body, headers },
       ({ status: resStatus, body: resBody }) => {
         // no request to git client should be triggered
-        expect(requestMock).toHaveBeenCalledTimes(3);
+        expect(requestMock).toHaveBeenCalledTimes(4);
         expect(resStatus).toEqual(500);
         expect(resBody).toEqual('MISSING_GIT_SERVER_CONFIG');
-        done();
+        tryDone();
       },
     );
   });
