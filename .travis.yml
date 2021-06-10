@@ -9,6 +9,7 @@ node_js:
 script:
   - ./lintVerifier.sh
   - npm test
+  - npm run test:bin
 after_success:
   - npx semantic-release
 branches:

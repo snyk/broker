@@ -28,6 +28,9 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 WORKDIR /home/node
 USER node 
 
+# Prepare image entrypoint
+COPY --chown=node:node ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
+
 # Generate default accept filter
 RUN broker init container-registry-agent
 
@@ -47,13 +50,12 @@ ENV BROKER_CLIENT_URL "https://<broker-client-host>:<broker-client-port>"
 # The URL of your container registry agent
 ENV CR_AGENT_URL <agent-host>:<agent-port>
 
-# Base64-encoded credentials json used to access container registry via agent
-ENV CR_CREDENTIALS <base64-encoded-credentials-json>
-
 # The port used by the broker client to accept internal connections
 # Default value is 7341
 # ENV PORT 7341
 
 EXPOSE $PORT
+
+ENTRYPOINT ["/home/node/docker-entrypoint.sh"]
 
 CMD ["broker", "--verbose"]
