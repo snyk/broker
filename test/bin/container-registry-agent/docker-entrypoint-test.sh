@@ -25,6 +25,18 @@ testEcrCredentialsSetup() {
   assertEquals "$(echo ${CR_CREDENTIALS} | base64 -d)" "$EXPECTED"
 }
 
+testDigitalOceanCredentialsSetup() {
+  CR_TYPE="digitalocean-cr"
+  CR_TOKEN="token"
+  CR_BASE="cr.com/my"
+  unset CR_CREDENTIALS
+
+  . ../../bin/container-registry-agent/docker-entrypoint.sh
+
+  EXPECTED='{"type":"digitalocean-cr", "username":"token", "password":"token", "registryBase":"cr.com/my"}'
+  assertEquals  "$EXPECTED" "$(echo ${CR_CREDENTIALS} | base64 -d)"
+}
+
 testStandardCredentialsSetup() {
   CR_TYPE="DockerHub"
   CR_USERNAME="user"
