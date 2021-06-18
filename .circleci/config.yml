@@ -1,0 +1,80 @@
+version: 2.1
+
+defaults: &defaults
+  docker:
+    - image: circleci/node:12
+  working_directory: ~/broker
+
+commands:
+  install_deps:
+    description: Install dependencies
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-npm-cache-{{ checksum "package.json" }}
+            - v1-npm-cache-
+      - run:
+          name: Install dependencies
+          command: npm i
+      - save_cache:
+          key: v1-npm-cache-{{ checksum "package.json" }}
+          paths:
+            - ~/.npm
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules/
+
+jobs:
+  install_dev:
+    <<: *defaults
+    environment:
+      NODE_ENV: development
+    steps:
+      - install_deps
+  lint_json_samples:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Run tests
+          command: ./lintVerifier.sh
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/broker
+      - run:
+          name: Run tests
+          command: npm test && npm run test:bin
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Release to GitHub
+          command: npx semantic-release
+
+workflows:
+  version: 2
+  test_and_release:
+    jobs:
+      - install_dev:
+          name: Install DEV
+      - lint_json_samples:
+          name: Lint json samples
+      - test:
+          name: Test
+          requires:
+          - Install DEV
+      - release:
+          name: Release to GitHub
+          context: nodejs-app-release
+          requires:
+            - Test
+          filters:
+            branches:
+              only:
+                - master
