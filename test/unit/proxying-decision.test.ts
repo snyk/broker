@@ -2,6 +2,10 @@ import { parse } from 'url';
 
 describe('Proxy decision', () => {
   afterEach(() => {
+    delete process.env.no_proxy;
+    delete process.env.NO_PROXY;
+    delete process.env.https_proxy;
+    delete process.env.HTTPS_PROXY;
     jest.resetModules();
   });
 
@@ -58,6 +62,7 @@ describe('Proxy decision', () => {
 
     expect(shouldProxy(parse('http://symbolics.com/?hello'))).toEqual(false);
   });
+
   it('should not proxy list of URLs set via `NO_PROXY` env var', () => {
     process.env.NO_PROXY = 'symbolics.com,wiki.c2.com';
     process.env.HTTPS_PROXY = 'https://localhost:8888';
