@@ -9,7 +9,7 @@ testCredentialsAreUnchangedIfAlreadySet() {
 
   . ../../bin/container-registry-agent/docker-entrypoint.sh
 
-  assertEquals "${CR_CREDENTIALS}" "already set"
+  assertEquals "already set" "${CR_CREDENTIALS}"
 }
 
 testEcrCredentialsSetup() {
@@ -22,7 +22,19 @@ testEcrCredentialsSetup() {
   . ../../bin/container-registry-agent/docker-entrypoint.sh
 
   EXPECTED='{"type":"ecr","roleArn":"arn:role:...","extra":{"region":"eu-west-3","externalId":"1234567890"}}'
-  assertEquals "$(echo ${CR_CREDENTIALS} | base64 -d)" "$EXPECTED"
+  assertEquals "$EXPECTED" "$(echo ${CR_CREDENTIALS} | base64 -d)"
+}
+
+testDigitalOceanCredentialsSetup() {
+  CR_TYPE="digitalocean-cr"
+  CR_TOKEN="token"
+  CR_BASE="cr.com/my"
+  unset CR_CREDENTIALS
+
+  . ../../bin/container-registry-agent/docker-entrypoint.sh
+
+  EXPECTED='{"type":"digitalocean-cr", "username":"token", "password":"token", "registryBase":"cr.com/my"}'
+  assertEquals "$EXPECTED" "$(echo ${CR_CREDENTIALS} | base64 -d)"
 }
 
 testStandardCredentialsSetup() {
@@ -35,7 +47,7 @@ testStandardCredentialsSetup() {
   . ../../bin/container-registry-agent/docker-entrypoint.sh
 
   EXPECTED='{"type":"DockerHub", "username":"user", "password":"pass", "registryBase":"cr.com/my"}'
-  assertEquals "$(echo ${CR_CREDENTIALS} | base64 -d)" "$EXPECTED"
+  assertEquals "$EXPECTED" "$(echo ${CR_CREDENTIALS} | base64 -d)"
 }
 
 . ./shunit2
