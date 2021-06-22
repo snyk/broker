@@ -53,6 +53,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/broker
       - run:
           name: Release to GitHub
           command: npx semantic-release
@@ -68,7 +70,7 @@ workflows:
       - test:
           name: Test
           requires:
-          - Install DEV
+            - Install DEV
       - release:
           name: Release to GitHub
           context: nodejs-app-release
