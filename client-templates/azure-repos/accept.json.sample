@@ -255,6 +255,12 @@
         "scheme": "basic",
         "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
       }
+    },
+    {
+      "//": "used to redirect requests to snyk git client",
+      "method": "any",
+      "path": "/snykgit/*",
+      "origin": "${GIT_CLIENT_URL}"
     }
   ]
 }

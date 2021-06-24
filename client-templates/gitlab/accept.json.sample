@@ -1454,6 +1454,12 @@
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/commits/:sha",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to redirect requests to snyk git client",
+      "method": "any",
+      "path": "/snykgit/*",
+      "origin": "${GIT_CLIENT_URL}"
     }
   ]
 }

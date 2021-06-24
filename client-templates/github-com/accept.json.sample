@@ -1968,6 +1968,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "used to redirect requests to snyk git client",
+      "method": "any",
+      "path": "/snykgit/*",
+      "origin": "${GIT_CLIENT_URL}"
+    },
+    {
       "//": "query graphql",
       "method": "POST",
       "path": "/graphql",

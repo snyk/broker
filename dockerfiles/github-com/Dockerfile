@@ -10,15 +10,15 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 
-ENV PATH=$PATH:/home/node/.npm-global/bin 
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
-RUN npm install --global snyk-broker 
+RUN npm install --global snyk-broker
 
 
 
 FROM snyk/ubuntu
 
-ENV PATH=$PATH:/home/node/.npm-global/bin 
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
 COPY --from=base /home/node/.npm-global /home/node/.npm-global
 
@@ -26,7 +26,7 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 
 # Don't run as root
 WORKDIR /home/node
-USER node 
+USER node
 
 # Generate default accept filter
 RUN broker init github-com
@@ -50,7 +50,6 @@ ENV GITHUB_TOKEN <github-token>
 # The URL of your broker client (including scheme and port)
 # This will be used as the webhook payload URL coming in from GitHub
 # ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
-
 
 EXPOSE $PORT
 

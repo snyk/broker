@@ -15,6 +15,9 @@ describe('log', () => {
     const crAgentUrl = (process.env.CR_AGENT_URL =
       'CONTAINER_REGISTRY_AGENT_URL');
     const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
+    const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
+    const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
+    const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
 
     const log = require('../../lib/log');
 
@@ -30,6 +33,9 @@ describe('log', () => {
       artifactoryUrl,
       crAgentUrl,
       crCredentials,
+      gitUsername,
+      gitPassword,
+      gitClientUrl,
     ].join();
     const sanitizedTokens =
       '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
@@ -37,6 +43,9 @@ describe('log', () => {
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
     const sanitizedCRData = '${CR_AGENT_URL},${CR_CREDENTIALS}';
+    const sanitizedGitUsername = '${GIT_USERNAME}';
+    const sanitizedGitPassword = '${GIT_PASSWORD}';
+    const sanitizedGitClientUrl = '${GIT_CLIENT_URL}';
 
     // setup logger output capturing
     const logs: string[] = [];
@@ -72,6 +81,9 @@ describe('log', () => {
     expect(logged).not.toMatch(artifactoryUrl);
     expect(logged).not.toMatch(crAgentUrl);
     expect(logged).not.toMatch(crCredentials);
+    expect(logged).not.toMatch(gitUsername);
+    expect(logged).not.toMatch(gitPassword);
+    expect(logged).not.toMatch(gitClientUrl);
 
     // assert sensitive data is masked
     expect(logged).toMatch(sanitizedBitBucket);
@@ -79,5 +91,8 @@ describe('log', () => {
     expect(logged).toMatch(sanitizedJira);
     expect(logged).toMatch(sanitizedArtifactory);
     expect(logged).toMatch(sanitizedCRData);
+    expect(logged).toMatch(sanitizedGitUsername);
+    expect(logged).toMatch(sanitizedGitPassword);
+    expect(logged).toMatch(sanitizedGitClientUrl);
   });
 });
