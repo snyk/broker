@@ -10,17 +10,9 @@ commands:
     description: Install dependencies
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-npm-cache-{{ checksum "package.json" }}
-            - v1-npm-cache-
       - run:
           name: Install dependencies
           command: npm i
-      - save_cache:
-          key: v1-npm-cache-{{ checksum "package.json" }}
-          paths:
-            - ~/.npm
       - persist_to_workspace:
           root: .
           paths:
@@ -73,7 +65,7 @@ workflows:
             - Install DEV
       - release:
           name: Release to GitHub
-          context: nodejs-app-release
+          context: nodejs-lib-release
           requires:
             - Test
           filters:
