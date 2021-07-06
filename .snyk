@@ -9,5 +9,8 @@ ignore:
   'SNYK-JS-PREDEFINE-1054935':
     - primus > fusing > predefine:
         reason: Fixed in https://github.com/snyk/broker/pull/336
+  'SNYK-JS-ENGINEIO-1056749':
+    - engine.io:
+        reason: Fixed in https://github.com/snyk/broker/pull/338
         expires: '2022-07-06T09:47:29.283Z'
 patch: {}
