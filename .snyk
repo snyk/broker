@@ -6,4 +6,8 @@ ignore:
     - primus > setheader > debug:
         reason: Not vulnerable as `primus` doesn't run in debug mode
         expires: '2019-10-10T18:14:53.642Z'
+  'SNYK-JS-PREDEFINE-1054935':
+    - primus > fusing > predefine:
+        reason: Fixed in https://github.com/snyk/broker/pull/336
+        expires: '2022-07-06T09:47:29.283Z'
 patch: {}
