@@ -1,4 +1,4 @@
-[![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io) 
+[![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io)
 
 [![Known Vulnerabilities](https://snyk.io/test/github/snyk/broker/badge.svg?style=flat-square)](https://snyk.io/test/github/snyk/broker)
 
@@ -491,3 +491,4 @@ One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests migh
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
 * [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
 * [Security](https://github.com/snyk/broker/blob/master/SECURITY.md)
+
