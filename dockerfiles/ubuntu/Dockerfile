@@ -2,13 +2,13 @@
 # The following image is reachable through the snyk/ubuntu:latest image in DockerHub.
 # Note that there's no need to build it; All broker client Dockerfiles use the snyk/ubuntu:latest.
 
-FROM ubuntu:20.10 
+FROM ubuntu:20.10
 
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
   && apt update && apt upgrade -y && apt install gpg curl xz-utils -y
 
-ENV NODE_VERSION 12.20.1
+ENV NODE_VERSION 12.22.3
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -35,9 +35,9 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   108F52B48DB57BB0CC439B2997B01419BD92F80A \
   B9E2F5981AA6E0CD28160D9FF13993A75599653C \
   ; do \
-  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
-  gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-  gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
+  gpg --batch --keyserver hkp://keys.openpgp.org --recv-keys "$key" || \
+  gpg --batch --keyserver hkp://pgp.mit.edu --recv-keys "$key" || \
+  gpg --batch --keyserver hkp://keyserver.ubuntu.com --recv-keys "$key" ; \
   done \
   && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
   && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
