@@ -26,7 +26,7 @@ test('broker client systemcheck endpoint', (t) => {
   process.chdir(path.resolve(root, '../fixtures/client'));
   const clientPort = port();
 
-  t.plan(4);
+  t.plan(5);
 
   const clientUrl = `http://localhost:${clientPort}`;
 
@@ -173,6 +173,42 @@ test('broker client systemcheck endpoint', (t) => {
         res.body.brokerClientValidationUrl,
         'https://snyk.io/no-such-url-ever',
         'validation url present',
+      );
+
+      client.close();
+      setTimeout(() => {
+        t.end();
+      }, 100);
+    });
+  });
+
+  t.test('container flow', (t) => {
+    const client = app.main({
+      port: clientPort,
+      config: {
+        brokerType: 'client',
+        brokerToken: '1234567890',
+        brokerServerUrl: 'http://localhost:12345',
+        crCredentials: 'topSecret',
+        crAgentUrl: 'https://httpbin.org/anything',
+      },
+    });
+
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
+      if (err) {
+        return t.threw(err);
+      }
+
+      t.equal(res.statusCode, 200, '200 statusCode');
+      t.equal(res.body.ok, true, '{ ok: true } in body');
+      t.ok(
+        res.body.testResponse.body.headers['User-Agent'],
+        'user-agent header is present in validation request',
+      );
+      t.equal(
+        res.body.testResponse.body.headers['X-Systemcheck-Credentials'],
+        'topSecret',
+        'credentials header is present',
       );
 
       client.close();
