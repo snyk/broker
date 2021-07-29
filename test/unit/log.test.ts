@@ -12,9 +12,15 @@ describe('log', () => {
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
     const artifactoryUrl = (process.env.ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
-    const crAgentUrl = (process.env.CR_AGENT_URL =
-      'CONTAINER_REGISTRY_AGENT_URL');
+    const crAgentUrl = (process.env.CR_AGENT_URL = 'CONTAINER_AGENT_URL');
     const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
+    const crUsername = (process.env.CR_USERNAME = 'CONTAINER_USERNAME');
+    const crPassword = (process.env.CR_PASSWORD = 'CONTAINER_PASSWORD');
+    const crToken = (process.env.CR_TOKEN = 'CONTAINER_TOKEN');
+    const crRoleArn = (process.env.CR_ROLE_ARN = 'CONTAINER_ROLE_ARN');
+    const crExternalId = (process.env.CR_EXTERNAL_ID = 'CONTAINER_EXTERNAL_ID');
+    const crRegion = (process.env.CR_REGION = 'CONTAINER_REGION');
+    const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
     const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
     const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
     const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
@@ -33,6 +39,13 @@ describe('log', () => {
       artifactoryUrl,
       crAgentUrl,
       crCredentials,
+      crUsername,
+      crPassword,
+      crToken,
+      crRoleArn,
+      crExternalId,
+      crRegion,
+      crBase,
       gitUsername,
       gitPassword,
       gitClientUrl,
@@ -42,7 +55,8 @@ describe('log', () => {
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
     const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
-    const sanitizedCRData = '${CR_AGENT_URL},${CR_CREDENTIALS}';
+    const sanitizedCRData =
+      '${CR_AGENT_URL},${CR_CREDENTIALS},${CR_USERNAME},${CR_PASSWORD},${CR_TOKEN},${CR_ROLE_ARN},${CR_EXTERNAL_ID},${CR_REGION},${CR_BASE}';
     const sanitizedGitUsername = '${GIT_USERNAME}';
     const sanitizedGitPassword = '${GIT_PASSWORD}';
     const sanitizedGitClientUrl = '${GIT_CLIENT_URL}';
@@ -81,6 +95,13 @@ describe('log', () => {
     expect(logged).not.toMatch(artifactoryUrl);
     expect(logged).not.toMatch(crAgentUrl);
     expect(logged).not.toMatch(crCredentials);
+    expect(logged).not.toMatch(crUsername);
+    expect(logged).not.toMatch(crPassword);
+    expect(logged).not.toMatch(crToken);
+    expect(logged).not.toMatch(crRoleArn);
+    expect(logged).not.toMatch(crExternalId);
+    expect(logged).not.toMatch(crRegion);
+    expect(logged).not.toMatch(crBase);
     expect(logged).not.toMatch(gitUsername);
     expect(logged).not.toMatch(gitPassword);
     expect(logged).not.toMatch(gitClientUrl);
