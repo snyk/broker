@@ -20,6 +20,9 @@ if [[ -z "$CR_CREDENTIALS" ]]; then
 
   export CR_CREDENTIALS=$(echo $JSON | base64 -w0)
 fi
+if [[ $BROKER_CLIENT_VALIDATION_URL ]]; then
+  export BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER=$CR_CREDENTIALS
+fi
 
 # execute main command
 exec "$@"
