@@ -12,6 +12,7 @@ openssl genrsa \
 # Self-sign your Root Certificate Authority
 # Since this is private, the details can be as bogus as you like
 openssl req \
+  -sha256 \
   -x509 \
   -new \
   -nodes \
@@ -29,6 +30,7 @@ openssl genrsa \
 
 # Create a request from your Device, which your Root CA will sign
 openssl req -new \
+  -sha256 \
   -key server/privkey.pem \
   -out tmp/csr.pem \
   -subj "/C=US/ST=Utah/L=Provo/O=ACME Tech Inc/CN=${FQDN}"
@@ -36,6 +38,7 @@ openssl req -new \
 # Sign the request from Device with your Root CA
 # -CAserial ca/my-root-ca.srl
 openssl x509 \
+  -sha256 \
   -req -in tmp/csr.pem \
   -CA ca/my-root-ca.crt.pem \
   -CAkey ca/my-root-ca.key.pem \
