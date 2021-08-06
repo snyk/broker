@@ -686,3 +686,40 @@ describe('Github big files (optional rules)', () => {
     );
   });
 });
+
+describe('azure repos', () => {
+  const rules = JSON.parse(
+    loadFixture(path.join('accept', 'azure-repos.json')),
+  );
+  const filter = Filters(rules.private);
+
+  it('should allow the get file API for supported files', (done) => {
+    filter(
+      {
+        url:
+          '/some-owner/_apis/git/repositories/some-repo/items?path=package.json',
+        method: 'GET',
+      },
+      (error, res) => {
+        expect(error).toBeNull();
+        expect(res.url).toBeTruthy();
+        done();
+      },
+    );
+  });
+
+  it('should block the get file API for unsupported files', (done) => {
+    filter(
+      {
+        url:
+          '/some-owner/_apis/git/repositories/some-repo/items?path=other.json',
+        method: 'GET',
+      },
+      (error, res) => {
+        expect(error.message).toEqual('blocked');
+        expect(res).toBeUndefined();
+        done();
+      },
+    );
+  });
+});
