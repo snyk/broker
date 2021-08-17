@@ -2,13 +2,13 @@
 # The following image is reachable through the snyk/ubuntu:latest image in DockerHub.
 # Note that there's no need to build it; All broker client Dockerfiles use the snyk/ubuntu:latest.
 
-FROM ubuntu:20.10
+FROM ubuntu:21.04
 
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
   && apt update && apt upgrade -y && apt install gpg curl xz-utils -y
 
-ENV NODE_VERSION 12.22.3
+ENV NODE_VERSION 12.22.5
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
