@@ -50,4 +50,31 @@ testStandardCredentialsSetup() {
   assertEquals "$EXPECTED" "$(echo ${CR_CREDENTIALS} | base64 -d)"
 }
 
+testSystemCheckSetup() {
+  CR_TYPE="DockerHub"
+  CR_USERNAME="user"
+  CR_PASSWORD="pass"
+  CR_BASE="cr.com/my"
+  BROKER_CLIENT_VALIDATION_URL="http://dra.url/systemcheck"
+  unset CR_CREDENTIALS
+
+  . ../../bin/container-registry-agent/docker-entrypoint.sh
+
+  EXPECTED='{"type":"DockerHub", "username":"user", "password":"pass", "registryBase":"cr.com/my"}'
+  assertEquals "$EXPECTED" "$(echo ${BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER} | base64 -d)"
+}
+
+testSystemCheckAuthNotSetIfNoValidationUrl() {
+  CR_TYPE="DockerHub"
+  CR_USERNAME="user"
+  CR_PASSWORD="pass"
+  CR_BASE="cr.com/my"
+  unset CR_CREDENTIALS
+  unset BROKER_CLIENT_VALIDATION_URL
+  unset BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER
+
+  . ../../bin/container-registry-agent/docker-entrypoint.sh
+  assertEquals "" "$(echo ${BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER})"
+}
+
 . ./shunit2
