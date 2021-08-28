@@ -10,15 +10,15 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 
-ENV PATH=$PATH:/home/node/.npm-global/bin 
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
-RUN npm install --global snyk-broker 
+RUN npm install --global snyk-broker
 
 
 
 FROM snyk/ubuntu
 
-ENV PATH=$PATH:/home/node/.npm-global/bin 
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
 COPY --from=base /home/node/.npm-global /home/node/.npm-global
 
@@ -26,7 +26,7 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 
 # Don't run as root
 WORKDIR /home/node
-USER node 
+USER node
 
 # Generate default accept filter
 RUN broker init artifactory
@@ -38,15 +38,15 @@ RUN broker init artifactory
 ######################################
 
 # Your unique Broker identifier
-ENV BROKER_TOKEN <broker-token>
+# ENV BROKER_TOKEN <broker-token>
 
 # Your Artifactory URL to artifactory
 # NOTA BENE: without `/` character in the end of URL
-ENV ARTIFACTORY_URL <yourdomain>.artifactory.com/artifactory
+# ENV ARTIFACTORY_URL <yourdomain>.artifactory.com/artifactory
 
 # Provide RES_BODY_URL_SUB with the URL of the artifactory without credentials and http protocol
 # This URL substitution is required for NPM integration
-ENV RES_BODY_URL_SUB=http://<yourdomain>.artifactory.com/artifactory
+# ENV RES_BODY_URL_SUB=http://<yourdomain>.artifactory.com/artifactory
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341

@@ -38,19 +38,19 @@ RUN broker init github-enterprise
 ######################################
 
 # Your unique broker identifier, copied from snyk.io org settings page
-ENV BROKER_TOKEN <broker-token>
+# ENV BROKER_TOKEN <broker-token>
 
 # Your personal access token to your github.com / GHE account
-ENV GITHUB_TOKEN <github-token>
+# ENV GITHUB_TOKEN <github-token>
 
 # The host where your GitHub Enterprise is running, excluding scheme.
-ENV GITHUB=your.ghe.domain.com
+# ENV GITHUB=your.ghe.domain.com
 
 # Github API endpoint, excluding scheme.
-ENV GITHUB_API your.ghe.domain.com/api/v3
+# ENV GITHUB_API your.ghe.domain.com/api/v3
 
 # Github GraphQL API endpoint, excluding scheme.
-ENV GITHUB_GRAPHQL your.ghe.domain.com/api
+# ENV GITHUB_GRAPHQL your.ghe.domain.com/api
 
 # The port used by the broker client to accept webhooks
 # Default value is 7341
