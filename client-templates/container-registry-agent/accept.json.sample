@@ -6,16 +6,6 @@
     "path": "/api/v1/import/app"
   },
   {
-    "//": "image scan result callback (v1)",
-    "method": "POST",
-    "path": "/api/v1/import/scan-result"
-  },
-  {
-    "//": "image scan done callback (v1)",
-    "method": "POST",
-    "path": "/api/v1/import/scan-done"
-  },
-  {
     "//": "image scan done callback (v2)",
     "method": "POST",
     "path": "/api/v2/import/done"
