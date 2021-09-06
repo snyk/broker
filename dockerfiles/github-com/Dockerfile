@@ -38,10 +38,10 @@ RUN broker init github-com
 ######################################
 
 # Your unique broker identifier, copied from snyk.io org settings page
-ENV BROKER_TOKEN <broker-token>
+# ENV BROKER_TOKEN <broker-token>
 
 # Your personal access token to your github.com / GHE account
-ENV GITHUB_TOKEN <github-token>
+# ENV GITHUB_TOKEN <github-token>
 
 # The port used by the broker client to accept webhooks
 # Default value is 7341

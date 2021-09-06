@@ -38,19 +38,19 @@ RUN broker init bitbucket-server
 ######################################
 
 # Your unique broker identifier
-ENV BROKER_TOKEN <broker-token>
+# ENV BROKER_TOKEN <broker-token>
 
 # Your personal username to your bitbucket server account
-ENV BITBUCKET_USERNAME <username>
+# ENV BITBUCKET_USERNAME <username>
 
 # Your personal password to your bitbucket server account
-ENV BITBUCKET_PASSWORD <password>
+# ENV BITBUCKET_PASSWORD <password>
 
 # Your Bitbucket Server host, excluding scheme
-ENV BITBUCKET your.bitbucket.server.hostname
+# ENV BITBUCKET your.bitbucket.server.hostname
 
 # The Bitbucket server API URL
-ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
+# ENV BITBUCKET_API $BITBUCKET/rest/api/1.0
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341

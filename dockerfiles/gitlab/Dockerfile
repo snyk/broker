@@ -38,13 +38,13 @@ RUN broker init gitlab
 ######################################
 
 # Your unique broker identifier
-ENV BROKER_TOKEN <broker-token>
+# ENV BROKER_TOKEN <broker-token>
 
 # your personal token to your Gitlab server account
-ENV GITLAB_TOKEN <gitlab-token>
+# ENV GITLAB_TOKEN <gitlab-token>
 
 # The Gitlab server API URL
-ENV GITLAB your.gitlab.server.hostname
+# ENV GITLAB your.gitlab.server.hostname
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
