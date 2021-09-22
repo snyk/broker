@@ -53,4 +53,6 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 RUN apt remove gpg curl xz-utils libsqlite3-0 -y && apt autoremove -y --purge
 
+RUN apt install -y libgcrypt20
+
 USER node
