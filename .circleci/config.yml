@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: circleci/node:12-buster
+    - image: cimg/node:14.17.6
   working_directory: ~/broker
 
 commands:
