@@ -46,6 +46,7 @@ test('proxy requests originating from behind the broker server', (t) => {
   process.env.GIT_URL = process.env.GITHUB;
   process.env.GIT_USERNAME = process.env.USERNAME;
   process.env.GIT_PASSWORD = process.env.PASSWORD;
+  process.env.RES_BODY_URL_SUB = `http://private`;
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself
@@ -420,19 +421,22 @@ test('proxy requests originating from behind the broker server', (t) => {
         });
       });
 
-      t.test('successfully redirect exact bytes of POST body to git client', (t) => {
-        const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-body`;
-        const body = Buffer.from(
-          JSON.stringify({ some: { example: 'json' } }, null, 5),
-        );
-        const headers = { 'Content-Type': 'application/json' };
-        request({ url, method: 'post', headers, body }, (err, res) => {
-          const responseBody = Buffer.from(res.body);
-          t.equal(res.statusCode, 200, '200 statusCode');
-          t.same(responseBody, body, 'body brokered exactly');
-          t.end();
-        });
-      });
+      t.test(
+        'successfully redirect exact bytes of POST body to git client',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-body`;
+          const body = Buffer.from(
+            JSON.stringify({ some: { example: 'json' } }, null, 5),
+          );
+          const headers = { 'Content-Type': 'application/json' };
+          request({ url, method: 'post', headers, body }, (err, res) => {
+            const responseBody = Buffer.from(res.body);
+            t.equal(res.statusCode, 200, '200 statusCode');
+            t.same(responseBody, body, 'body brokered exactly');
+            t.end();
+          });
+        },
+      );
 
       t.test('successfully GET from git client', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/snykgit/echo-param/xyz`;
