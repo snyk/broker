@@ -413,13 +413,13 @@
     {
       "//": "used to scan Dockerfile",
       "method": "GET",
-      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {
       "//": "used to scan Dockerfile",
       "method": "GET",
-      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
+      "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {
@@ -853,13 +853,13 @@
     {
       "//": "used to create Dockerfile",
       "method": "POST",
-      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {
       "//": "used to create Dockerfile",
       "method": "POST",
-      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
+      "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {
@@ -1290,13 +1290,13 @@
     {
       "//": "used to update Dockerfile",
       "method": "PUT",
-      "path": "/api/v4/projects/:project/repository/files*/Dockerfile",
+      "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {
       "//": "used to update Dockerfile",
       "method": "PUT",
-      "path": "/api/v4/projects/:project/repository/files*%2FDockerfile",
+      "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
       "origin": "https://${GITLAB}"
     },
     {

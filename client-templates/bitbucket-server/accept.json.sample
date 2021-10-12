@@ -725,7 +725,7 @@
     {
       "//": "used to scan Dockerfile",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*/Dockerfile",
+      "path": "/projects/:project/repos/:repo/browse*/*Dockerfile*",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
@@ -736,7 +736,7 @@
     {
       "//": "used to scan Dockerfile",
       "method": "GET",
-      "path": "/projects/:project/repos/:repo/browse*%2FDockerfile",
+      "path": "/projects/:project/repos/:repo/browse*%2F*Dockerfile*",
       "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
