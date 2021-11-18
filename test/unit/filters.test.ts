@@ -49,8 +49,7 @@ describe('filters', () => {
       it('should block when path includes directory traversal', () => {
         filter(
           {
-            url:
-              '/repos/angular/angular/contents/path/to/docs/../../sensitive/file.js',
+            url: '/repos/angular/angular/contents/path/to/docs/../../sensitive/file.js',
             method: 'GET',
           },
           (error, res) => {
@@ -372,12 +371,55 @@ describe('filters', () => {
       );
     });
 
+    it('permits requests with multiple valid query params', (done) => {
+      filter(
+        {
+          url: '/filtered-on-multiple-queries?filePath=package.json&download=true',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toEqual(
+            '/filtered-on-multiple-queries?filePath=package.json&download=true',
+          );
+          done();
+        },
+      );
+    });
+
+    it('blocks requests with valid query params when at least one query param is invalid', (done) => {
+      filter(
+        {
+          url: '/filtered-on-multiple-queries?filePath=package.json&download=false',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error.message).toEqual('blocked');
+          expect(res).toBeUndefined();
+          done();
+        },
+      );
+    });
+
+    it('blocks requests with valid query params when at least one expected query param is missing', (done) => {
+      filter(
+        {
+          url: '/filtered-on-multiple-queries?filePath=package.json',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error.message).toEqual('blocked');
+          expect(res).toBeUndefined();
+          done();
+        },
+      );
+    });
+
     describe('fragment identifiers validation', () => {
       it('should not allow access to sensitive files by putting the manifest after a fragment', (done) => {
         filter(
           {
-            url:
-              '/filtered-on-query?filePath=/path/to/sensitive/file#package.json',
+            url: '/filtered-on-query?filePath=/path/to/sensitive/file#package.json',
             method: 'GET',
           },
           (error, res) => {
@@ -391,8 +433,7 @@ describe('filters', () => {
       it('should ignore any non-manifest files after the fragment identifier', (done) => {
         filter(
           {
-            url:
-              '/filtered-on-query?filePath=/path/to/package.json#/some-other-file',
+            url: '/filtered-on-query?filePath=/path/to/package.json#/some-other-file',
             method: 'GET',
           },
           (error, res) => {
@@ -493,8 +534,7 @@ describe('filters', () => {
       it('should not allow access to sensitive files by putting the manifest after a fragment', (done) => {
         filter(
           {
-            url:
-              '/filtered-on-query-and-body?filePath=/path/to/sensitive/file.js#package.json',
+            url: '/filtered-on-query-and-body?filePath=/path/to/sensitive/file.js#package.json',
             method: 'POST',
             body: jsonBuffer({
               commits: [],
@@ -511,8 +551,7 @@ describe('filters', () => {
       it('should ignore any non-manifest files after the fragment identifier', (done) => {
         filter(
           {
-            url:
-              '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
+            url: '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
             method: 'POST',
             body: jsonBuffer({
               commits: [],
@@ -681,43 +720,6 @@ describe('Github big files (optional rules)', () => {
       (error, res) => {
         expect(error).toBeNull();
         expect(res.url).toEqual('/graphql');
-        done();
-      },
-    );
-  });
-});
-
-describe('azure repos', () => {
-  const rules = JSON.parse(
-    loadFixture(path.join('accept', 'azure-repos.json')),
-  );
-  const filter = Filters(rules.private);
-
-  it('should allow the get file API for supported files', (done) => {
-    filter(
-      {
-        url:
-          '/some-owner/_apis/git/repositories/some-repo/items?path=package.json',
-        method: 'GET',
-      },
-      (error, res) => {
-        expect(error).toBeNull();
-        expect(res.url).toBeTruthy();
-        done();
-      },
-    );
-  });
-
-  it('should block the get file API for unsupported files', (done) => {
-    filter(
-      {
-        url:
-          '/some-owner/_apis/git/repositories/some-repo/items?path=other.json',
-        method: 'GET',
-      },
-      (error, res) => {
-        expect(error.message).toEqual('blocked');
-        expect(res).toBeUndefined();
         done();
       },
     );

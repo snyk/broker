@@ -33,6 +33,20 @@
     ]
   },
   {
+    "method": "GET",
+    "path": "/filtered-on-multiple-queries",
+    "valid": [
+      {
+        "queryParam": "filePath",
+        "values": ["**/package.json", "**/yarn.lock"]
+      },
+      {
+        "queryParam": "download",
+        "values": ["true"]
+      }
+    ]
+  },
+  {
     "method": "POST",
     "path": "/filtered-on-query-and-body",
     "valid": [
