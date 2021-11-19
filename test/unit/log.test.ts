@@ -23,7 +23,8 @@ describe('log', () => {
     const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
     const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
     const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
-    const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
+    const gitClientUrl = (process.env.GIT_CLIENT_URL =
+      'http://git-client-url.com');
 
     const log = require('../../lib/log');
 
