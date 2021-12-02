@@ -6,7 +6,7 @@
 
 # snyk/broker
 
-Snyk Broker proxies access between snyk.io and your Git repositories, such as GitHub Enterprise, GitHub.com and Bitbucket Server. Snyk Broker can also be used to enable a secure connection with your on-premise Jira deployment.
+Snyk Broker proxies access between snyk.io and your Git repositories, such as GitHub Enterprise, GitHub.com and Bitbucket Data Center. Snyk Broker can also be used to enable a secure connection with your on-premise Jira deployment.
 
 The Broker server and client establish an applicative tunnel, proxying requests from snyk.io to the Git (fetching manifest files from monitored repositories), and vice versa (webhooks posted by the Git).
 
@@ -105,16 +105,16 @@ ENV PORT              8000
 ENV BROKER_CLIENT_URL http://my.broker.client:8000
 ```
 
-### Bitbucket Server
+### Bitbucket Data Center
 
-To use the Broker client with a Bitbucket Server deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
+To use the Broker client with a Bitbucket Data Center deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Server integration settings view (app.snyk.io).
-- `BITBUCKET_USERNAME` - the Bitbucket Server username.
-- `BITBUCKET_PASSWORD` - the Bitbucket Server password.
-- `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
-- `BITBUCKET_API` - the API endpoint of your Bitbucket Server deployment. Should be `$BITBUCKET/rest/api/1.0`.
-- `BROKER_CLIENT_URL` - the full URL of the Broker client as it will be accessible by your Bitbucket Server for webhooks, such as `http://my.broker.client:7341`
+- `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Data Center integration settings view (app.snyk.io).
+- `BITBUCKET_USERNAME` - the Bitbucket Data Center username.
+- `BITBUCKET_PASSWORD` - the Bitbucket Data Center password.
+- `BITBUCKET` - the hostname of your Bitbucket Data Center deployment, such as `your.bitbucket-data-center.domain.com`.
+- `BITBUCKET_API` - the API endpoint of your Bitbucket Data Center deployment. Should be `$BITBUCKET/rest/api/1.0`.
+- `BROKER_CLIENT_URL` - the full URL of the Broker client as it will be accessible by your Bitbucket Data Center for webhooks, such as `http://my.broker.client:7341`
 - `PORT` - the local port at which the Broker client accepts connections. Default is 7341.
 
 #### Command-line arguments
