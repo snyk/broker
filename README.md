@@ -2,7 +2,7 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/snyk/broker/badge.svg?style=flat-square)](https://snyk.io/test/github/snyk/broker)
 
-***
+---
 
 # snyk/broker
 
@@ -148,7 +148,6 @@ ENV BITBUCKET           your.bitbucket-server.domain.com
 ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
-
 
 ### GitLab
 
@@ -304,8 +303,7 @@ ENV PORT                8000
 
 ### Container registry agent
 
-To use the Broker client with a container registry agent deployment, run `docker
-pull snyk/broker:container-registry-agent`. The following environment variables
+To use the Broker client with a container registry agent deployment, run `docker pull snyk/broker:container-registry-agent`. The following environment variables
 are mandatory to configure the Broker client:
 
 - `BROKER_TOKEN` - The Snyk Broker token, obtained from your Container registry integration settings (app.snyk.io).
@@ -359,7 +357,7 @@ ENV PORT                  8000
 
 The Broker exposes an endpoint at `/healthcheck`, which can be used to monitor the health of the running application. This endpoint responds with status code `200 OK` when the internal request is successful, and returns `{ ok: true }` in the response body.
 
-In the case of the Broker client, this endpoint also reports on the status of the Broker websocket connection.  If the websocket connection is not open, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
+In the case of the Broker client, this endpoint also reports on the status of the Broker websocket connection. If the websocket connection is not open, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
 
 To change the location of the healthcheck endpoint, you can specify an alternative path via an environment variable:
 
@@ -371,11 +369,11 @@ ENV BROKER_HEALTHCHECK_PATH /path/to/healthcheck
 
 The Broker client exposes an endpoint at `/systemcheck`, which can be used to validate the brokered service (Git or the like) connectivity and credentials. This endpoint causes the Broker client to make a request to a preconfigured URL, and report on the success of the request. The supported configuration is:
 
-* `BROKER_CLIENT_VALIDATION_URL` - the URL to which the request will be made.
-* `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER` - [optional] the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_BASIC_AUTH`.
-* `BROKER_CLIENT_VALIDATION_BASIC_AUTH` - [optional] the basic auth credentials (`username:password`) to be base64 encoded and placed in the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER`.
-* `BROKER_CLIENT_VALIDATION_METHOD` - [optional] the HTTP method of the request (default is `GET`).
-* `BROKER_CLIENT_VALIDATION_TIMEOUT_MS` - [optional] the request timeout in milliseconds (default is 5000 ms).
+- `BROKER_CLIENT_VALIDATION_URL` - the URL to which the request will be made.
+- `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER` - [optional] the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_BASIC_AUTH`.
+- `BROKER_CLIENT_VALIDATION_BASIC_AUTH` - [optional] the basic auth credentials (`username:password`) to be base64 encoded and placed in the `Authorization` header value of the request. Mutually exclusive with `BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER`.
+- `BROKER_CLIENT_VALIDATION_METHOD` - [optional] the HTTP method of the request (default is `GET`).
+- `BROKER_CLIENT_VALIDATION_TIMEOUT_MS` - [optional] the request timeout in milliseconds (default is 5000 ms).
 
 This endpoint responds with status code `200 OK` when the internal request is successful, and returns `{ ok: true }` in the response body. If the internal request fails, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
 
@@ -389,10 +387,10 @@ ENV BROKER_SYSTEMCHECK_PATH /path/to/systemcheck
 
 By default the log level of the Broker is set to INFO. All SCM responses regardless of HTTP status code will be logged by the Broker client. The following settings can be set in your environment variables to alter the logging behaviour:
 
-| Key  | Default | Notes |
-|---|---|---|
-| LOG_LEVEL | info | Set to "debug" for all logs |
-| LOG_ENABLE_BODY | false | Set to "true" to include the response body in the Client logs |
+| Key             | Default | Notes                                                         |
+| --------------- | ------- | ------------------------------------------------------------- |
+| LOG_LEVEL       | info    | Set to "debug" for all logs                                   |
+| LOG_ENABLE_BODY | false   | Set to "true" to include the response body in the Client logs |
 
 ### Advanced Configuration
 
@@ -459,33 +457,64 @@ docker run --restart=always \
 
 Add a validation block with the following key/values:
 
-| Key | Value | Value Type | Example |
-|-|-|-|-|
-| header | The name of the header you wish to filter on. If this is defined then the named header must explicitly exist on the request otherwise it will be blocked | String | `accept` |
-| values | The header value must match one of the defined strings | Array\<String\> | `["application/vnd.github.v4.sha"]` |
+| Key    | Value                                                                                                                                                    | Value Type      | Example                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------- |
+| header | The name of the header you wish to filter on. If this is defined then the named header must explicitly exist on the request otherwise it will be blocked | String          | `accept`                            |
+| values | The header value must match one of the defined strings                                                                                                   | Array\<String\> | `["application/vnd.github.v4.sha"]` |
 
 For example, to only allow the SHA Media Type accept header for requests to the GitHub Commits API you would add the following:
 
 ```json
 {
-    "method": "GET",
-    "path": "/repos/:name/:repo/commits/:ref",
-    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}",
-    "valid": [
-        {
-            "header": "accept",
-            "values": ["application/vnd.github.v4.sha"]
-        }
-    ]
+  "method": "GET",
+  "path": "/repos/:name/:repo/commits/:ref",
+  "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}",
+  "valid": [
+    {
+      "header": "accept",
+      "values": ["application/vnd.github.v4.sha"]
+    }
+  ]
 }
 ```
 
 ### Mounting Secrets
+
 Sometime it is required to load sensitive configurations (GitHub/Snyk's token) from a file instead from environment variables. Broker is using [dotenv](https://www.npmjs.com/package/dotenv) to load the config, so the process is relatively simple:
-* Create a file named `.env` and put your sensitive config there:
-* Mount this file (for example, using [Kubernetes secret](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#create-a-pod-that-has-access-to-the-secret-data-through-a-volume)). Mount the file to be somewhere like `/broker`.
-* Change the workdir of the docker image to be `/broker`/
-Example of such file is located in your broker container at $HOME/.env
+
+- Create a file named `.env` and put your sensitive config there:
+- Mount this file (for example, using [Kubernetes secret](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#create-a-pod-that-has-access-to-the-secret-data-through-a-volume)). Mount the file to be somewhere like `/broker`.
+- Change the workdir of the docker image to be `/broker`/
+  Example of such file is located in your broker container at $HOME/.env
+
+### Running the Broker as a standalone executable
+
+Using [pkg](https://www.npmjs.com/package/pkg) you can package the Broker as an executable for certain environments. To do this you will need to provide some additional information in the `package.json` so that `pkg` knows where to look for some dependencies e.g.
+
+```
+"pkg": {
+  "scripts": [
+    "node_modules/primus/**/*.js",
+    "dist/lib/index.js"
+  ],
+  "assets": [
+    "node_modules/ejson/**/*",
+    "dist/client-templates/**/*"
+  ],
+  "targets": [
+    "node14-linux-x64"
+  ],
+  "outputPath": "binary-releases"
+}
+```
+
+Once you have added this, run `pkg` from the root directory of the project like so:
+
+```
+npx pkg .
+```
+
+This will generate executables for whichever targets you have included in the `package.json` in the `binary-releases` directory.
 
 ### Troubleshooting
 
@@ -494,18 +523,20 @@ Example of such file is located in your broker container at $HOME/.env
 One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests might be fetching big manifest files (> 1Mb) failure. To address this issue, additional Blob API endpoint should be whitelisted in `accept.json`:
 
 - should be in `private` array
+
 ```json
 {
-    "//": "used to get given manifest file",
-    "method": "GET",
-    "path": "/repos/:owner/:repo/git/blobs/:sha",
-    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  "//": "used to get given manifest file",
+  "method": "GET",
+  "path": "/repos/:owner/:repo/git/blobs/:sha",
+  "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
 }
 ```
+
 **Note** To ensure the maximum possible security, we do not enable this rule by default, as usage of this endpoint means that the Snyk platform can theoretically access all files in this repository, as the path does not include specific allowed file names.
 
 ## Misc
 
-* [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
-* [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
-* [Security](https://github.com/snyk/broker/blob/master/SECURITY.md)
+- [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
+- [Contributing](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md)
+- [Security](https://github.com/snyk/broker/blob/master/SECURITY.md)
