@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 
 # ensure correct exit status in case of error
 set -e
