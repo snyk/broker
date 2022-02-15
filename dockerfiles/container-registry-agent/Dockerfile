@@ -16,7 +16,7 @@ RUN npm install --global snyk-broker
 
 
 
-FROM snyk/ubuntu
+FROM node:16-alpine3.15
 
 ENV PATH=$PATH:/home/node/.npm-global/bin
 
