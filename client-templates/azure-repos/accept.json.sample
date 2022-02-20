@@ -140,8 +140,8 @@
             "**%2Fgo.mod",
             "**/go.sum",
             "**%2Fgo.sum",
-            "**/Dockerfile",
-            "**%2FDockerfile"
+            "**/*Dockerfile*",
+            "**%2F*Dockerfile*"
           ]
         },
         {
