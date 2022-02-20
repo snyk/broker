@@ -47,6 +47,16 @@
     ]
   },
   {
+    "method": "GET",
+    "path": "/filtered-on-query-with-dot",
+    "valid": [
+      {
+        "queryParam": "filePath",
+        "values": ["**/*Dockerfile"]
+      }
+    ]
+  },
+  {
     "method": "POST",
     "path": "/filtered-on-query-and-body",
     "valid": [
