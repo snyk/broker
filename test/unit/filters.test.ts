@@ -343,6 +343,54 @@ describe('filters', () => {
       );
     });
 
+    it('permits requests with path that is a dot file', (done) => {
+      filter(
+        {
+          url: '/filtered-on-query-with-dot?filePath=.Dockerfile',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toEqual(
+            '/filtered-on-query-with-dot?filePath=.Dockerfile',
+          );
+          done();
+        },
+      );
+    });
+
+    it('permits requests with path that contains a dot file', (done) => {
+      filter(
+        {
+          url: '/filtered-on-query-with-dot?filePath=folder/.Dockerfile',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toEqual(
+            '/filtered-on-query-with-dot?filePath=folder/.Dockerfile',
+          );
+          done();
+        },
+      );
+    });
+
+    it('permits requests with path that contains a dot directory', (done) => {
+      filter(
+        {
+          url: '/filtered-on-query-with-dot?filePath=.hidden-folder/Dockerfile',
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toEqual(
+            '/filtered-on-query-with-dot?filePath=.hidden-folder/Dockerfile',
+          );
+          done();
+        },
+      );
+    });
+
     it('blocks requests to files that are not allowed by the rules', (done) => {
       filter(
         {
