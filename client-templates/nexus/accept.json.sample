@@ -1,0 +1,16 @@
+{
+  "public": [
+    {
+      "method": "any",
+      "path": "/*",
+      "stream": true
+    }
+  ],
+  "private": [
+    {
+      "method": "any",
+      "path": "/*",
+      "origin": "${NEXUS_URL}"
+    }
+  ]
+}
