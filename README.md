@@ -437,6 +437,30 @@ docker run --restart=always \
        snyk/broker:bitbucket-server
 ```
 
+#### Infrastructure as Code (IaC)
+
+By default, some file types used by Infrastructure-as-Code (IaC) are not enabled. To grant the Broker access to IaC files in your repository, such as Terraform for example, edit your `accept.json` and add the relevant IaC specific rules.
+
+For example, if you are using GitHub and you would like to give the Broker access to your Terraform files, you should add the following rules to your `accept.json`:
+
+```console
+{
+  "//": "used to enable scanning of Terraform files",
+  "method": "GET",
+  "path": "/repos/:name/:repo/contents/:path*/*.tf",
+  "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+},
+{
+  "//": "used to enable scanning of Terraform files",
+  "method": "GET",
+  "path": "/repos/:name/:repo/contents/:path*%2F*.tf",
+  "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+},
+```
+
+More details can be found here:
+[Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
+
 ### Custom approved-listing filter
 
 The default approved-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the approved-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [Git type]`. The created `accept.json` is the default filter for the chosen Git. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:

@@ -16,7 +16,7 @@ RUN npm install --global snyk-broker
 
 
 
-FROM node:16-alpine3.15
+FROM snyk/ubuntu
 
 ENV PATH=$PATH:/home/node/.npm-global/bin
 
@@ -28,11 +28,8 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 WORKDIR /home/node
 USER node
 
-# Prepare image entrypoint
-COPY --chown=node:node ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
-
 # Generate default accept filter
-RUN broker init container-registry-agent
+RUN broker init nexus
 
 ######################################
 # Custom Broker Client configuration #
@@ -40,22 +37,25 @@ RUN broker init container-registry-agent
 # or provide as runtime args `-e`    #
 ######################################
 
-# Your unique broker identifier, copied from snyk.io org settings page
+# Your unique Broker identifier
 # ENV BROKER_TOKEN <broker-token>
 
-# The URL of your broker client (including scheme and port), used by container
-# registry agent to call back to Snyk through brokered connection
-# ENV BROKER_CLIENT_URL "https://<broker-client-host>:<broker-client-port>"
+# The URL to your Nexus Repository Manager
+# NOTA BENE: without `/` character in the end of URL
+# ENV NEXUS_URL=<username>:<password>@<your.nexus.hostname>/repository
 
-# The URL of your container registry agent
-# ENV CR_AGENT_URL <agent-host>:<agent-port>
+# Provide RES_BODY_URL_SUB with the URL of the nexus without credentials and http protocol
+# This URL substitution is required for NPM integration
+# RES_BODY_URL_SUB=http://<your.nexus.hostname>/repository
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
 # ENV PORT 7341
 
-EXPOSE $PORT
+# The URL of your broker client (including scheme and port)
+# This will be used as the webhook payload URL coming in from Jira
+# ENV BROKER_CLIENT_URL http://<broker.client.hostname>:$PORT
 
-ENTRYPOINT ["/home/node/docker-entrypoint.sh"]
+EXPOSE $PORT
 
 CMD ["broker", "--verbose"]
