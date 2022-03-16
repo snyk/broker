@@ -105,7 +105,7 @@ ENV PORT              8000
 ENV BROKER_CLIENT_URL http://my.broker.client:8000
 ```
 
-### Bitbucket Data Center
+### Bitbucket Data Center[^1]
 
 To use the Broker client with a Bitbucket Data Center deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
 
@@ -148,6 +148,9 @@ ENV BITBUCKET           your.bitbucket-server.domain.com
 ENV BITBUCKET_API       your.bitbucket-server.domain.com/rest/api/1.0
 ENV PORT                8000
 ```
+
+[^1]: The configuration examples in this section also apply to Bitbucket Server.
+  _Atlassian has announced the official [end of support for Bitbucket Server](https://www.atlassian.com/migration/assess/journey-to-cloud) on February 15, 2024._
 
 
 ### GitLab
