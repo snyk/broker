@@ -8,6 +8,11 @@
   ],
   "private": [
     {
+      "method": "HEAD",
+      "path": "/",
+      "origin": "${BASE_NEXUS_URL}"
+    },
+    {
       "method": "GET",
       "path": "/service/rest/v1/status/check",
       "origin": "${BASE_NEXUS_URL}"
