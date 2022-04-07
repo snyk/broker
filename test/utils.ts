@@ -1,3 +1,4 @@
+import * as request from 'request';
 const compression = require('compression');
 const webserver = require('../lib/webserver');
 const express = require('express');
@@ -8,9 +9,8 @@ export function port() {
   return --p;
 }
 
-export function createTestServer() {
+export function createTestServer(echoServerPort = port()) {
   // this is our fake local and private web server
-  const echoServerPort = port();
   const { app: echoServer, server: testServer } = webserver({
     port: echoServerPort,
     httpsKey: process.env.TEST_KEY, // Optional
@@ -41,6 +41,16 @@ export function createTestServer() {
     res.setHeader('test-orig-url', req.originalUrl);
     res.status(500);
     res.send('Test Error');
+  });
+
+  echoServerRoutes.get('/test-blob-param/:param', (req, res) => {
+    const size = parseInt(req.params.param, 10);
+    res.status(200);
+    const buf = Buffer.alloc(size);
+    for (let i = 0; i < size; i++) {
+      buf.writeUInt8(i & 0xff, i);
+    }
+    res.send(buf);
   });
 
   echoServerRoutes.get('/basic-auth', (req, res) => {
@@ -92,4 +102,16 @@ export function createTestServer() {
     echoServerPort,
     testServer,
   };
+}
+
+export function requestAsync(req) {
+  return new Promise((resolve, reject) => {
+    request(req, (error, res, body) => {
+      if (!error) {
+        resolve({ res, body });
+      } else {
+        reject({ error, res, body });
+      }
+    });
+  });
 }

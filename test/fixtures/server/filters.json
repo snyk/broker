@@ -37,6 +37,12 @@
     },
 
     {
+      "path": "/test-blob-param/*",
+      "method": "GET",
+      "origin": "http://localhost:${originPort}"
+    },
+
+    {
       "//": "Block on headers",
       "path": "/echo-param-protected/:param",
       "method": "GET",
@@ -52,6 +58,11 @@
   "public": [
     {
       "path": "/test-blob/*",
+      "method": "GET",
+      "stream": true
+    },
+    {
+      "path": "/test-blob-param/*",
       "method": "GET",
       "stream": true
     },
