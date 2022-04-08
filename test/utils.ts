@@ -43,8 +43,9 @@ export function createTestServer(echoServerPort = port()) {
     res.send('Test Error');
   });
 
-  echoServerRoutes.get('/test-blob-param/:param', (req, res) => {
-    const size = parseInt(req.params.param, 10);
+  echoServerRoutes.get('/test-blob-param/:file/:size', (req, res) => {
+    const reqParamSize = req.params.size ? req.params.size : 500;
+    const size = parseInt(reqParamSize, 10);
     res.status(200);
     const buf = Buffer.alloc(size);
     for (let i = 0; i < size; i++) {

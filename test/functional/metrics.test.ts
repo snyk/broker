@@ -75,12 +75,21 @@ describe('metrics', () => {
     const metricsSpy = jest.spyOn(metrics, 'observeResponseSize');
     const expectedBytes = 256_000; // 250kb
     await requestAsync({
-      url: `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
+      url: `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/file/${expectedBytes}`,
       method: 'get',
     });
     expect(metricsSpy).toHaveBeenCalledWith({
       bytes: expectedBytes,
       isStreaming: true,
     });
+  });
+
+  it('counts how many tgz files are being requested', async () => {
+    const metricsSpy = jest.spyOn(metrics, 'incrementTgzRequestCounter');
+    await requestAsync({
+      url: `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/file.tgz`,
+      method: 'get',
+    });
+    expect(metricsSpy).toHaveBeenCalled();
   });
 });
