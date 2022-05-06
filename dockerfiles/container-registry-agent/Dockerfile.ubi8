@@ -1,0 +1,65 @@
+FROM snyk/ubuntu as base
+
+MAINTAINER Snyk Ltd
+
+USER root
+
+RUN apt update && apt install -y make python gcc
+
+RUN apt-get update && apt-get install -y ca-certificates
+
+ENV NPM_CONFIG_PREFIX=/home/nobody/.npm-global
+
+ENV PATH=$PATH:/home/nobody/.npm-global/bin
+
+RUN npm install --global snyk-broker
+
+
+
+FROM registry.access.redhat.com/ubi8/nodejs-16-minimal
+USER root
+# Create link to /bin/bash (no ash in RHEL8)
+RUN ln -s /bin/bash /bin/ash
+
+ENV PATH=$PATH:/home/nobody/.npm-global/bin
+
+COPY --from=base /home/nobody/.npm-global /home/nobody/.npm-global
+
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+# Don't run as root
+RUN mkdir -p /home/nobody && chown nobody:nobody /home/nobody
+WORKDIR /home/nobody
+USER nobody
+
+# Prepare image entrypoint
+COPY --chown=nobody:nobody ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
+
+# Generate default accept filter
+RUN broker init container-registry-agent
+
+######################################
+# Custom Broker Client configuration #
+# Redefine in derived Dockerfile,    #
+# or provide as runtime args `-e`    #
+######################################
+
+# Your unique broker identifier, copied from snyk.io org settings page
+# ENV BROKER_TOKEN <broker-token>
+
+# The URL of your broker client (including scheme and port), used by container
+# registry agent to call back to Snyk through brokered connection
+# ENV BROKER_CLIENT_URL "https://<broker-client-host>:<broker-client-port>"
+
+# The URL of your container registry agent
+# ENV CR_AGENT_URL <agent-host>:<agent-port>
+
+# The port used by the broker client to accept internal connections
+# Default value is 7341
+# ENV PORT 7341
+
+EXPOSE $PORT
+
+ENTRYPOINT ["/home/nobody/docker-entrypoint.sh"]
+
+CMD ["broker", "--verbose"]
