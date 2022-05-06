@@ -73,6 +73,8 @@
     "qs": "^6.9.1",
     "request": "^2.88.1",
     "snyk-config": "^4.0.0-rc.2",
+    "sockjs": "^0.3.24",
+    "sockjs-client": "^1.6.0",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
     "undefsafe": "^2.0.2",
