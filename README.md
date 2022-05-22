@@ -528,6 +528,36 @@ One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests migh
 ```
 **Note** To ensure the maximum possible security, we do not enable this rule by default, as usage of this endpoint means that the Snyk platform can theoretically access all files in this repository, as the path does not include specific allowed file names.
 
+## Rate Limiting
+If needed, you might need to balance the load across numerous Personal Access Tokens (PAT)/Accounts.
+**The level and breadth of access offered by those PATs must be the same.**
+It will randomly rotate a token from the pool of tokens you provide for each calls the broker makes to your SCM.
+
+## How to balance load between several Personal Access Tokens
+1. Follow the instructions for the corresponding SCM.
+2. For the token environment variable, enter the name of an env var of your choice with the `_POOL` suffix instead of the token value.
+For example:
+`-e GITHUB_TOKEN=GITHUB_TOKEN_POOL`
+3. Add your extra environment variable with the all tokens to use separated by commas
+For example:
+`-e GITHUB_TOKEN_POOL=123,456,789`
+
+Example for GHE:
+
+```
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=GITHUB_TOKEN_POOL \
+           -e GITHUB_TOKEN_POOL=123,456,789 \
+           -e GITHUB=your.ghe.domain.com \
+           -e GITHUB_API=your.ghe.domain.com/api/v3 \
+           -e GITHUB_GRAPHQL=your.ghe.domain.com/api \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+       snyk/broker:github-enterprise
+```
+
 ## Misc
 
 * [License: Apache License, Version 2.0](https://github.com/snyk/broker/blob/master/LICENSE)
