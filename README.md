@@ -20,8 +20,8 @@ The Broker client is published as a set of Docker images, each configured for a 
 
 To use the Broker client with GitHub.com, run `docker pull snyk/broker:github-com`. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the Snyk Broker token, obtained from your Snyk Org settings view (app.snyk.io).
-- `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Snyk Org settings view (app.snyk.io).
+- `GITHUB_TOKEN` - a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with full `repo`, `read:org` and `admin:repo_hook` scopes.
 - `PORT` - the local port at which the Broker client accepts connections. Default is 7341.
 - `BROKER_CLIENT_URL` - the full URL of the Broker client as it will be accessible by GitHub.com webhooks, such as `http://my.broker.client:7341`
 
@@ -64,8 +64,8 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 To use the Broker client with a GitHub Enterprise deployment, run `docker pull snyk/broker:github-enterprise` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the Snyk Broker token, obtained from your Snyk Org settings view (app.snyk.io).
-- `GITHUB_TOKEN` - a personal access token with full `repo`, `read:org` and `admin:repo_hook` scopes.
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Snyk Org settings view (app.snyk.io).
+- `GITHUB_TOKEN` - a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with full `repo`, `read:org` and `admin:repo_hook` scopes.
 - `GITHUB` - the hostname of your GitHub Enterprise deployment, such as `your.ghe.domain.com`.
 - `GITHUB_API` - the API endpoint of your GitHub Enterprise deployment. Should be `your.ghe.domain.com/api/v3`.
 - `GITHUB_GRAPHQL` - the graphql endpoint of your GitHub Enterprise deployment. Should be `your.ghe.domain.com/api`.
@@ -109,7 +109,7 @@ ENV BROKER_CLIENT_URL http://my.broker.client:8000
 
 To use the Broker client with a Bitbucket Server deployment, run `docker pull snyk/broker:bitbucket-server` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the snyk broker token, obtained from your Bitbucket Server integration settings view (app.snyk.io).
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Bitbucket Server integration settings view (app.snyk.io).
 - `BITBUCKET_USERNAME` - the Bitbucket Server username.
 - `BITBUCKET_PASSWORD` - the Bitbucket Server password.
 - `BITBUCKET` - the hostname of your Bitbucket Server deployment, such as `your.bitbucket-server.domain.com`.
@@ -154,7 +154,7 @@ ENV PORT                8000
 
 To use the Broker client with GitLab.com or an on-prem GitLab deployment, run `docker pull snyk/broker:gitlab` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the Snyk Broker token, obtained from your GitLab integration settings view (app.snyk.io).
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your GitLab integration settings view (app.snyk.io).
 - `GITLAB_TOKEN` - a GitLab personal access token with `api` scope
 - `GITLAB` - the hostname of your GitLab deployment, such as `your.gitlab.domain.com` or `GitLab.com`.
 - `PORT` - the local port at which the Broker client accepts connections. Default is 7341.
@@ -193,7 +193,7 @@ ENV PORT                8000
 
 To use the Broker client with [Azure](https://azure.microsoft.com/en-us/services/devops/), run `docker pull snyk/broker:azure-repos` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the Snyk Broker token, obtained from your Azure Repos integration settings view (app.snyk.io).
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Azure Repos integration settings view (app.snyk.io).
 - `AZURE_REPOS_TOKEN` - an Azure Repos personal access token. [Guide](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) how to get/create the token. Required scopes: ensure Custom defined is selected and under Code select _Read & write_
 - `AZURE_REPOS_ORG` - organization name, which can be found in your Organization Overview page in Azure
 - `AZURE_REPOS_HOST` - the hostname of your Azure Repos Server deployment, such as `your.azure-server.domain.com`.
@@ -265,7 +265,7 @@ ENV ARTIFACTORY_URL   <yourdomain>.artifactory.com
 
 To use the Broker client with a Jira deployment, run `docker pull snyk/broker:jira` tag. The following environment variables are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - the Snyk Broker token, obtained from your Jira integration settings view.
+- `BROKER_TOKEN` - the [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Jira integration settings view.
 - `JIRA_USERNAME` - the Jira username.
 - `JIRA_PASSWORD` - the Jira password.
 - `JIRA_HOSTNAME` - the hostname of your Jira deployment, such as `your.jira.domain.com`.
@@ -308,7 +308,7 @@ To use the Broker client with a container registry agent deployment, run `docker
 pull snyk/broker:container-registry-agent`. The following environment variables
 are mandatory to configure the Broker client:
 
-- `BROKER_TOKEN` - The Snyk Broker token, obtained from your Container registry integration settings (app.snyk.io).
+- `BROKER_TOKEN` - The [Snyk Broker token](https://docs.snyk.io/features/snyk-broker/set-up-snyk-broker/prepare-snyk-broker-for-deployment#generate-credentials-in-the-target-application-for-snyk-broker), obtained from your Container registry integration settings (app.snyk.io).
 - `BROKER_CLIENT_URL` - The URL of your broker client (including scheme and - port) used by container registry agent to call back to Snyk.
 - `CR_AGENT_URL` - The URL of your container registry agent (including scheme and - port) to which brokered requests would be forwarded.
 - `CR_TYPE` - The container registry type as listed in supporter registries, for example "DockerHub", "GoogleCR", "ArtifactoryCR".
