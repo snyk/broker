@@ -1,39 +1,61 @@
-FROM snyk/ubuntu as base
+# Global argument
+ARG NODEJS_VERSION=16.15.0
+# --------------------------------------------------------
+# 1) Node JS & broker Installation
+# --------------------------------------------------------
+FROM registry.access.redhat.com/ubi8/ubi:8.6 as base
+ARG NODEJS_VERSION
+ARG NODEJS_MAJOR_VERSION=16
 
-MAINTAINER Snyk Ltd
+# Download and extract Node
+WORKDIR /tmp
+RUN curl -o "/tmp/node-v${NODEJS_VERSION}-linux-x64.tar.gz" "https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}-linux-x64.tar.gz"
+RUN tar xvf "/tmp/node-v${NODEJS_VERSION}-linux-x64.tar.gz"
 
-USER root
+# # Install npm for the snyk-broker installation
+RUN dnf module enable -y nodejs:${NODEJS_MAJOR_VERSION}
+RUN yum install -y npm
 
-RUN apt update && apt install -y make python gcc
+# Install CA certificates
+RUN yum install -y ca-certificates
 
-RUN apt-get update && apt-get install -y ca-certificates
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
-ENV NPM_CONFIG_PREFIX=/home/nobody/.npm-global
-
-ENV PATH=$PATH:/home/nobody/.npm-global/bin
-
+# Globally install snyk-broker
 RUN npm install --global snyk-broker
 
+# --------------------------------------------------------
+# 2) Setting final image with Node and broker binary files
+# --------------------------------------------------------
 
+FROM registry.access.redhat.com/ubi8/ubi:8.6
+ARG NODEJS_VERSION
 
-FROM registry.access.redhat.com/ubi8/nodejs-16-minimal
-USER root
-# Create link to /bin/bash (no ash in RHEL8)
+# # Create link to /bin/bash (no ash in RHEL8)
 RUN ln -s /bin/bash /bin/ash
 
-ENV PATH=$PATH:/home/nobody/.npm-global/bin
+COPY --from=base /home/node/.npm-global /home/node/.npm-global
+COPY --from=base /etc/pki/tls/certs/ca-bundle.crt /etc/pki/tls/certs/ca-bundle.crt
+ENV PATH=$PATH:/home/node/.npm-global/bin
 
-COPY --from=base /home/nobody/.npm-global /home/nobody/.npm-global
+# Copy node binary and set path
+COPY --from=base "/tmp/node-v${NODEJS_VERSION}-linux-x64/bin/node" "/usr/node-v${NODEJS_VERSION}-linux-x64/bin/"
+ENV PATH=/usr/node-v${NODEJS_VERSION}-linux-x64/bin:${PATH}
 
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Adding the node user
+RUN groupadd --gid 1000 node \
+  && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
+
+RUN chown node:node /home/node
+
+WORKDIR /home/node
 
 # Don't run as root
-RUN mkdir -p /home/nobody && chown nobody:nobody /home/nobody
-WORKDIR /home/nobody
-USER nobody
+USER node
 
 # Prepare image entrypoint
-COPY --chown=nobody:nobody ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --chown=node:node ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
 
 # Generate default accept filter
 RUN broker init container-registry-agent
@@ -60,6 +82,6 @@ RUN broker init container-registry-agent
 
 EXPOSE $PORT
 
-ENTRYPOINT ["/home/nobody/docker-entrypoint.sh"]
+ENTRYPOINT ["/home/node/docker-entrypoint.sh"]
 
 CMD ["broker", "--verbose"]
