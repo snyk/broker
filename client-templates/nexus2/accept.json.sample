@@ -14,12 +14,7 @@
     },
     {
       "method": "GET",
-      "path": "/service/rest/v1/status",
-      "origin": "${BASE_NEXUS_URL}"
-    },
-    {
-      "method": "GET",
-      "path": "/service/rest/v1/status/check",
+      "path": "/nexus/service/local/status",
       "origin": "${BASE_NEXUS_URL}"
     },
     {
