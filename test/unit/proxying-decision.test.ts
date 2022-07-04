@@ -11,7 +11,6 @@ describe('Proxy decision', () => {
 
   it('should not proxy when no https proxy is defined', () => {
     // http, not httpS
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.http_proxy = 'localhost:4444';
     // loaded now, for config to be reloaded after env vars
     const {
@@ -21,9 +20,7 @@ describe('Proxy decision', () => {
   });
 
   it('should not proxy URL set via `no_proxy` env var', () => {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.no_proxy = 'symbolics.com';
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.https_proxy = 'https://localhost:8888';
 
     // loaded now, for config to be reloaded after env vars
@@ -36,9 +33,7 @@ describe('Proxy decision', () => {
   });
 
   it('should not proxy URL set via `NO_PROXY` env var', () => {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.NO_PROXY = 'symbolics.com';
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.https_proxy = 'https://localhost:8888';
 
     // loaded now, for config to be reloaded after env vars
@@ -52,7 +47,6 @@ describe('Proxy decision', () => {
 
   it('should not proxy URL set via `NO_PROXY` env var when containing query params', () => {
     process.env.NO_PROXY = 'symbolics.com';
-    // eslint-disable-next-line @typescript-eslint/camelcase
     process.env.https_proxy = 'https://localhost:8888';
 
     // loaded now, for config to be reloaded after env vars
