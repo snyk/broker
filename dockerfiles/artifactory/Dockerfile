@@ -4,8 +4,6 @@ MAINTAINER Snyk Ltd
 
 USER root
 
-RUN apt update && apt install -y make python gcc
-
 RUN apt-get update && apt-get install -y ca-certificates
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
