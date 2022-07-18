@@ -27,7 +27,7 @@ WORKDIR /home/node
 USER node
 
 # Generate default accept filter
-RUN broker init nexus
+RUN broker init nexus2
 
 ######################################
 # Custom Broker Client configuration #
@@ -40,13 +40,13 @@ RUN broker init nexus
 
 # The URL to your Nexus Repository Manager
 # NOTA BENE: without `/` character in the end of URL
-# If using basic auth, use https://<username>:<password>@<your.nexus.hostname>/repository
-# else use https://<your.nexus.hostname>/repository
-# ENV NEXUS_URL=http://<username>:<password>@<your.nexus.hostname>/repository
+# If using basic auth, use https://<username>:<password>@<your.nexus.hostname>/nexus/content
+# else use https://<your.nexus.hostname>/nexus/content
+# ENV NEXUS_URL=<username>:<password>@<your.nexus.hostname>/nexus/content
 
 # Provide RES_BODY_URL_SUB with the URL of the nexus without credentials and http protocol
 # This URL substitution is required for NPM integration
-# RES_BODY_URL_SUB=http://<your.nexus.hostname>/repository
+# RES_BODY_URL_SUB=http://<your.nexus.hostname>/nexus/content
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341
