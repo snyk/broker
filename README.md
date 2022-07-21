@@ -261,6 +261,42 @@ ENV BROKER_TOKEN      secret-broker-token
 ENV ARTIFACTORY_URL   <yourdomain>.artifactory.com
 ```
 
+### Nexus 3
+
+To use the Nexus 3 client with an Nexus 3 deployment, run `docker pull snyk/broker:nexus` tag. The following environment variables are needed to customize the Broker client:
+
+- `BROKER_TOKEN` - the snyk broker token, obtained from your artifactory integration settings view.
+- `BASE_NEXUS_URL` - the URL of your Nexus 3 deployment, such as `https://[<user>:<pass>@]<your.nexus.hostname>`.
+- `BROKER_CLIENT_VALIDATION_URL` - Nexus validation url, checked by broker client systemcheck endpoint. If Nexus user requires auth, use `$BASE_NEXUS_URL/service/rest/v1/status/check` (e.g. `https://<user>:<pass>@<your.nexus.hostname>/service/rest/v1/status/check`) otherwise use `$BASE_NEXUS_URL/service/rest/v1/status` (e.g. `https://<your.nexus.hostname>/service/rest/v1/status`).
+- (Optional) `RES_BODY_URL_SUB` - This URL substitution is required for NPM/Yarn integration and is the same as the URL of the Nexus without credentials appended with `/repository`, e.g. `https://<your.nexus.hostname>/repository`
+
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```console
+docker run --restart=always \
+           -p 7341:7341 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e BASE_NEXUS_URL=https://[<user>:<pass>@]<your.nexus.hostname> \
+           -e BROKER_CLIENT_VALIDATION_URL=https://<your.nexus.hostname>/service/rest/v1/status[/check] \
+           -e RES_BODY_URL_SUB=https://<your.nexus.hostname>/repository \
+       snyk/broker:nexus
+```
+
+#### Derived docker image
+
+Another option is to build your own docker image and override relevant environment variables:
+
+```dockerfile
+FROM snyk/broker:nexus
+
+ENV BROKER_TOKEN                     secret-broker-token
+ENV BASE_NEXUS_URL                   https://[<user>:<pass>@]<your.nexus.hostname>
+ENV BROKER_CLIENT_VALIDATION_URL     https://<your.nexus.hostname>/service/rest/v1/status[/check]
+ENV RES_BODY_URL_SUB                 https://<your.nexus.hostname>/repository
+```
+
 ### Jira
 
 To use the Broker client with a Jira deployment, run `docker pull snyk/broker:jira` tag. The following environment variables are mandatory to configure the Broker client:
