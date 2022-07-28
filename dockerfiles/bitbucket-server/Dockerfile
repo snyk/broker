@@ -26,6 +26,7 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 # group, and with all perms set. This is because the images run with a
 # randomly assigned user id, but part of the root group. See
 # https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-guide-openshift_create-images
+USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u /home/node
 
 # Don't run as root
