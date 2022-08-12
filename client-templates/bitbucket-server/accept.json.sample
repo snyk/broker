@@ -980,6 +980,17 @@
       "method": "any",
       "path": "/snykgit/*",
       "origin": "${GIT_CLIENT_URL}"
+    },
+    {
+      "//": "allow everything",
+      "method": "any",
+      "path": "*",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
     }
   ]
 }
