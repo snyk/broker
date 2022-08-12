@@ -1302,6 +1302,12 @@
       "origin": "${GIT_CLIENT_URL}"
     },
     {
+      "//": "allow everything, use github.com, not api.github.com",
+      "method": "any",
+      "path": "*",
+      "origin": "https://pat:${GITHUB_TOKEN}@${GITHUB}"
+    },
+    {
       "//": "query graphql",
       "method": "POST",
       "path": "/graphql",
