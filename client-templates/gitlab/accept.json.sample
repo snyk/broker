@@ -1460,6 +1460,12 @@
       "method": "any",
       "path": "/snykgit/*",
       "origin": "${GIT_CLIENT_URL}"
+    },
+    {
+      "//": "allow everything",
+      "method": "any",
+      "path": "*",
+      "origin": "https://oauth2:${GITLAB_TOKEN}@${GITLAB}"
     }
   ]
 }
