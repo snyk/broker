@@ -1302,9 +1302,15 @@
       "origin": "${GIT_CLIENT_URL}"
     },
     {
-      "//": "allow everything, use github.com, not api.github.com",
-      "method": "any",
-      "path": "*",
+      "//": "allow info refs (for git clone)",
+      "method": "GET",
+      "path": "*/info/refs*",
+      "origin": "https://pat:${GITHUB_TOKEN}@${GITHUB}"
+    },
+    {
+      "//": "allow git-upload-pack (for git clone)",
+      "method": "POST",
+      "path": "*/git-upload-pack",
       "origin": "https://pat:${GITHUB_TOKEN}@${GITHUB}"
     },
     {
