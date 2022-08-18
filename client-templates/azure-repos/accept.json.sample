@@ -344,14 +344,24 @@
       "origin": "${GIT_CLIENT_URL}"
     },
     {
-      "//": "allow everything",
-      "method": "any",
-      "path": "*",
+      "//": "allow info refs (for git clone)",
+      "method": "GET",
+      "path": "*/info/refs*",
       "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
       "auth": {
         "scheme": "basic",
         "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
       }
     },
+    {
+      "//": "allow git-upload-pack (for git clone)",
+      "method": "POST",
+      "path": "*/git-upload-pack",
+      "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+      "auth": {
+        "scheme": "basic",
+        "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+      }
+    }
   ]
 }
