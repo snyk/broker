@@ -1462,9 +1462,15 @@
       "origin": "${GIT_CLIENT_URL}"
     },
     {
-      "//": "allow everything",
-      "method": "any",
-      "path": "*",
+      "//": "allow info refs (for git clone)",
+      "method": "GET",
+      "path": "*/info/refs*",
+      "origin": "https://oauth2:${GITLAB_TOKEN}@${GITLAB}"
+    },
+    {
+      "//": "allow git-upload-pack (for git clone)",
+      "method": "POST",
+      "path": "*/git-upload-pack",
       "origin": "https://oauth2:${GITLAB_TOKEN}@${GITLAB}"
     }
   ]
