@@ -982,9 +982,20 @@
       "origin": "${GIT_CLIENT_URL}"
     },
     {
-      "//": "allow everything",
-      "method": "any",
-      "path": "*",
+      "//": "allow info refs (for git clone)",
+      "method": "GET",
+      "path": "*/info/refs*",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "allow git-upload-pack (for git clone)",
+      "method": "POST",
+      "path": "*/git-upload-pack",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
