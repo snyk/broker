@@ -497,6 +497,59 @@ For example, if you are using GitHub and you would like to give the Broker acces
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
 
+### Credential Pooling
+Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
+This can be achieved by creating an environment variable ending in `_ARRAY`, separate each credential with a comma, and
+the Broker Client will then, when doing variable replacement, look to see if the variable in use has a variant with an
+`_ARRAY` suffix, and use the next item in that array if so. For example, if you have set the environment variable
+`GITHUB_TOKEN`, but want to provide multiple tokens, you would just do this:
+
+```shell
+GITHUB_TOKEN_ARRAY=token1, token2, token3
+```
+
+And then the Broker Server would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_ARRAY`.
+
+Credentials will be taken in a round-robin fashion, so the first, the second, the third, etc, etc, until it reaches the end
+and then takes the first one again.
+
+Calling the `/systemcheck` endpoint will validate all credentials, in order, and will return an array where the first item
+is the first credential and so on. For example, if you were running the GitHub Client and had this:
+
+```shell
+GITHUB_TOKEN_ARRAY=good_token, bad_token
+```
+
+The `/systemcheck` endpoint would return the following, where the first object is for `good_token` and the second for
+`bad_token`:
+
+```json
+[
+  {
+    "brokerClientValidationUrl": "https://api.github.com/user",
+    "brokerClientValidationMethod": "GET",
+    "brokerClientValidationTimeoutMs": 5000,
+    "ok": true
+  },
+  {
+    "brokerClientValidationUrl": "https://api.github.com/user",
+    "brokerClientValidationMethod": "GET",
+    "brokerClientValidationTimeoutMs": 5000,
+    "ok": false,
+    "error": "401 - {\"message\":\"Bad credentials\",\"documentation_url\":\"https://docs.github.com/rest\"}"
+  }
+]
+```
+The actual credentials are not included to avoid exposing sensitive data accidentally.
+
+#### Limitations
+Credential validity is not checked before using a credential, nor are invalid credentials removed from the pool, so it is
+_strongly_ recommended that credentials be used exclusively by the Broker Client to avoid credentials reaching rate limits
+at different times, and that the `/systemcheck` endpoint be called before use.
+
+Some providers, such as GitHub, do rate-limiting on a per-user basis, not a per-token or per-credential basis, and in those
+cases you will need to create multiple accounts with one credential per account.
+
 ### Custom approved-listing filter
 
 The default approved-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the approved-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [Git type]`. The created `accept.json` is the default filter for the chosen Git. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:

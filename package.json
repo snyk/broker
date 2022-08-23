@@ -73,6 +73,7 @@
     "prom-client": "^11.5.3",
     "qs": "^6.9.1",
     "request": "^2.88.1",
+    "request-promise-native": "^1.0.9",
     "snyk-config": "^4.0.0-rc.2",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",

@@ -26,18 +26,18 @@ test('broker client systemcheck endpoint', (t) => {
   process.chdir(path.resolve(root, '../fixtures/client'));
   const clientPort = port();
 
-  t.plan(4);
+  t.plan(5);
 
   const clientUrl = `http://localhost:${clientPort}`;
 
-  t.test('good validation url, custom endpoint', (t) => {
+  t.test('good validation url, custom endpoint, no authorization', (t) => {
     const client = app.main({
       port: clientPort,
       config: {
         brokerType: 'client',
         brokerToken: '1234567890',
         brokerServerUrl: 'http://localhost:12345',
-        brokerClientValidationUrl: 'https://snyk.io',
+        brokerClientValidationUrl: 'https://httpbin.org/headers',
         brokerSystemcheckPath: '/custom-systemcheck',
       },
     });
@@ -50,12 +50,13 @@ test('broker client systemcheck endpoint', (t) => {
         }
 
         t.equal(res.statusCode, 200, '200 statusCode');
-        t.equal(res.body.ok, true, '{ ok: true } in body');
+        t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
         t.equal(
-          res.body.brokerClientValidationUrl,
-          'https://snyk.io',
+          res.body[0].brokerClientValidationUrl,
+          'https://httpbin.org/headers',
           'validation url present',
         );
+        t.equal(res.body[0].testResponse.body.headers.Authorization, undefined, 'does not have authorization header');
 
         client.close();
         setTimeout(() => {
@@ -84,18 +85,18 @@ test('broker client systemcheck endpoint', (t) => {
       }
 
       t.equal(res.statusCode, 200, '200 statusCode');
-      t.equal(res.body.ok, true, '{ ok: true } in body');
+      t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
       t.equal(
-        res.body.brokerClientValidationUrl,
+        res.body[0].brokerClientValidationUrl,
         'https://httpbin.org/headers',
         'validation url present',
       );
       t.ok(
-        res.body.testResponse.body.headers['User-Agent'],
+        res.body[0].testResponse.body.headers['User-Agent'],
         'user-agent header is present in validation request',
       );
       t.equal(
-        res.body.testResponse.body.headers.Authorization,
+        res.body[0].testResponse.body.headers.Authorization,
         'token my-special-access-token',
         'proper authorization header in validation request',
       );
@@ -125,23 +126,83 @@ test('broker client systemcheck endpoint', (t) => {
       }
 
       t.equal(res.statusCode, 200, '200 statusCode');
-      t.equal(res.body.ok, true, '{ ok: true } in body');
+      t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
       t.equal(
-        res.body.brokerClientValidationUrl,
+        res.body[0].brokerClientValidationUrl,
         'https://httpbin.org/headers',
         'validation url present',
       );
       t.ok(
-        res.body.testResponse.body.headers['User-Agent'],
+        res.body[0].testResponse.body.headers['User-Agent'],
         'user-agent header is present in validation request',
       );
       const expectedAuthHeader = `Basic ${Buffer.from(
         'username:password',
       ).toString('base64')}`;
       t.equal(
-        res.body.testResponse.body.headers.Authorization,
+        res.body[0].testResponse.body.headers.Authorization,
         expectedAuthHeader,
         'proper authorization header in request',
+      );
+
+      client.close();
+      setTimeout(() => {
+        t.end();
+      }, 100);
+    });
+  });
+
+  t.test('good validation url, basic auth, both good', (t) => {
+    const client = app.main({
+      port: clientPort,
+      config: {
+        brokerType: 'client',
+        brokerToken: '1234567890',
+        brokerServerUrl: 'http://localhost:12345',
+        brokerClientValidationUrl: 'https://httpbin.org/headers',
+        brokerClientValidationBasicAuthArray: ['username:password', 'username1:password1'],
+      },
+    });
+
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
+      if (err) {
+        return t.threw(err);
+      }
+
+      t.equal(res.statusCode, 200, '200 statusCode');
+      t.equal(res.body[0].ok, true, '[{ ok: true }, ...] in body');
+      t.equal(res.body[1].ok, true, '[..., { ok: true }] in body');
+      t.equal(
+        res.body[0].brokerClientValidationUrl,
+        'https://httpbin.org/headers',
+        'validation url present [0]',
+      );
+      t.equal(
+        res.body[1].brokerClientValidationUrl,
+        'https://httpbin.org/headers',
+        'validation url present [1]',
+      );
+      t.ok(
+        res.body[0].testResponse.body.headers['User-Agent'],
+        'user-agent header is present in validation request [0]',
+      );
+      t.ok(
+        res.body[1].testResponse.body.headers['User-Agent'],
+        'user-agent header is present in validation request [1]',
+      );
+        t.equal(
+        res.body[0].testResponse.body.headers.Authorization,
+        `Basic ${Buffer.from(
+            'username:password',
+        ).toString('base64')}`,
+        'proper authorization header in request [0]',
+      );
+      t.equal(
+        res.body[1].testResponse.body.headers.Authorization,
+        `Basic ${Buffer.from(
+            'username1:password1',
+        ).toString('base64')}`,
+        'proper authorization header in request [1]',
       );
 
       client.close();
@@ -168,9 +229,9 @@ test('broker client systemcheck endpoint', (t) => {
       }
 
       t.equal(res.statusCode, 500, '500 statusCode');
-      t.equal(res.body.ok, false, '{ ok: false } in body');
+      t.equal(res.body[0].ok, false, '[{ ok: false }] in body');
       t.equal(
-        res.body.brokerClientValidationUrl,
+        res.body[0].brokerClientValidationUrl,
         'https://snyk.io/no-such-url-ever',
         'validation url present',
       );

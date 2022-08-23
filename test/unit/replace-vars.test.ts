@@ -1,4 +1,4 @@
-import { replaceUrlPartialChunk } from '../../lib/replace-vars';
+import {replace, replaceUrlPartialChunk} from '../../lib/replace-vars';
 
 describe('replacePartialChunk', () => {
   const config = {
@@ -54,3 +54,40 @@ describe('replacePartialChunk', () => {
     });
   });
 });
+
+describe('replace - with arrays', () => {
+  const config = {
+    RES_BODY_URL_SUB: 'http://replac.ed',
+    BROKER_SERVER_URL: 'broker.com',
+    BROKER_TOKEN: 'a-tok-en',
+    BITBUCKET_PASSWORD_ARRAY: ['1', '2', '3'],
+    GITHUB_TOKEN_ARRAY: ['1'],
+    githubTokenArray: ['1'],
+  };
+
+  it('Uses an array if configured - upper case', () => {
+    const chunk = 'START ${GITHUB_TOKEN} END';
+    const expected = 'START 1 END';
+
+    expect(replace(chunk, config)).toEqual(expected);
+  });
+
+  it('Uses an array if configured - camel case', () => {
+    const chunk = 'START ${githubToken} END';
+    const expected = 'START 1 END';
+
+    expect(replace(chunk, config)).toEqual(expected);
+  });
+
+  it('Goes back to the start of the array if end reached', () => {
+    const chunk = 'START ${BITBUCKET_PASSWORD} END';
+
+    expect(replace(chunk, config)).toEqual('START 1 END');
+
+    expect(replace(chunk, config)).toEqual('START 2 END');
+
+    expect(replace(chunk, config)).toEqual('START 3 END');
+
+    expect(replace(chunk, config)).toEqual('START 1 END');
+  });
+})
