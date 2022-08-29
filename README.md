@@ -497,6 +497,27 @@ For example, if you are using GitHub and you would like to give the Broker acces
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
 
+#### Changing the Auth Method
+
+Each integration has an auth method set by default. BitBucket Server/Datacenter for example is set to use basic auth with a username and password for example: 
+
+```console
+    "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+    }
+```
+
+The authentication method can be overridden. Valid values for `scheme` are `bearer`, `token`, and `basic`, which set the Authorization header to `Bearer`, `Token`, and `Basic`, respectively. In the case a bearer token is preferred, the `accept.json` can be configured as such: 
+
+```console
+    "auth": {
+        "scheme": "bearer",
+        "token": "${BEARER_TOKEN}"
+    }
+```
+
 ### Custom approved-listing filter
 
 The default approved-listing filter supports the bare minimum to operate on all repositories supported by Snyk. In order to customize the approved-listing filter, create the default one locally by installing `snyk-broker` and running `broker init [Git type]`. The created `accept.json` is the default filter for the chosen Git. Place the file in a separate folder such as `./private/accept.json`, and provide it to the docker container by mounting the folder and using the `ACCEPT` environment variable:
