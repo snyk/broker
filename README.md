@@ -500,9 +500,9 @@ More details can be found here:
 ### Credential Pooling
 Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
 This can be achieved by creating an environment variable ending in `_POOL`, separate each credential with a comma, and
-the Broker Client will then, when doing variable replacement, look to see if the variable in use has a variant with an
-`_POOL` suffix, and use the next item in that array if so. For example, if you have set the environment variable
-`GITHUB_TOKEN`, but want to provide multiple tokens, you would do this:
+the Broker Client will then, when doing variable replacement, look to see if the variable in use has a variant with a
+`_POOL` suffix, and use the next item in that pool if so. For example, if you have set the environment variable
+`GITHUB_TOKEN`, but want to provide multiple tokens, you would do this instead:
 
 ```shell
 GITHUB_TOKEN_POOL=token1, token2, token3
@@ -558,7 +558,7 @@ cases you will need to create multiple accounts with one credential per account.
 #### Credentials Matrix
 Generating a Matrix of credentials is not supported.
 
-A "Matrix" in this case is defined as taking two (or more) `_POOL`s of length `x` and `y`, and producing one final array
+A "Matrix" in this case is defined as taking two (or more) `_POOL`s of length `x` and `y`, and producing one final pool
 of length `x * y`. For example, given an input like:
 
 ```shell
@@ -573,7 +573,7 @@ Matrix support would generate this internally:
 CREDENTIALS_POOL=u1:p1,u1:p2,u1:p3,u2:p1,u2:p2,u2:p3,u3:p1,u3:p2,u3:p3
 ```
 
-Instead, the Broker Client would generate this internally, using only the first array it finds:
+Instead, the Broker Client would generate this internally, using only the first pool it finds:
 
 ```shell
 CREDENTIALS_POOL=u1:$PASSWORD,u2:$PASSWORD,u3:$PASSWORD
