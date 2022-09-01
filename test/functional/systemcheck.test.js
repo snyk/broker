@@ -316,7 +316,7 @@ test('broker client systemcheck endpoint', (t) => {
         brokerToken: '1234567890',
         brokerServerUrl: 'http://localhost:12345',
         brokerClientValidationUrl: 'https://httpbin.org/headers',
-        brokerClientValidationBasicAuthArray: ['username:password', 'username1:password1'],
+        brokerClientValidationBasicAuthPool: ['username:password', 'username1:password1'],
       },
     });
 

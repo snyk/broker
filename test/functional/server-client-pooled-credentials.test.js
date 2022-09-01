@@ -44,7 +44,8 @@ test('proxy requests originating from behind the broker server with pooled crede
   process.env.PASSWORD = 'not-used';
   process.env.PASSWORD1 = 'aB}#/:%40*1';
   process.env.PASSWORD2 = 'aB}#/:%40*2';
-  process.env.PASSWORD_ARRAY = '$PASSWORD1, $PASSWORD2';
+  process.env.PASSWORD_POOL = '$PASSWORD1, $PASSWORD2';
+  process.env.GITHUB_TOKEN_POOL = 'token1, token2';
   const client = app.main({ port: port() });
 
   // wait for the client to successfully connect to the server and identify itself

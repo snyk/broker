@@ -60,9 +60,9 @@ describe('replace - with arrays', () => {
     RES_BODY_URL_SUB: 'http://replac.ed',
     BROKER_SERVER_URL: 'broker.com',
     BROKER_TOKEN: 'a-tok-en',
-    BITBUCKET_PASSWORD_ARRAY: ['1', '2', '3'],
-    GITHUB_TOKEN_ARRAY: ['1'],
-    githubTokenArray: ['1'],
+    BITBUCKET_PASSWORD_POOL: ['1', '2', '3'],
+    GITHUB_TOKEN_POOL: ['1'],
+    githubTokenPool: ['1'],
   };
 
   it('Uses an array if configured - upper case', () => {

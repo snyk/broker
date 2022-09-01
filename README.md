@@ -499,16 +499,16 @@ More details can be found here:
 
 ### Credential Pooling
 Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
-This can be achieved by creating an environment variable ending in `_ARRAY`, separate each credential with a comma, and
+This can be achieved by creating an environment variable ending in `_POOL`, separate each credential with a comma, and
 the Broker Client will then, when doing variable replacement, look to see if the variable in use has a variant with an
-`_ARRAY` suffix, and use the next item in that array if so. For example, if you have set the environment variable
+`_POOL` suffix, and use the next item in that array if so. For example, if you have set the environment variable
 `GITHUB_TOKEN`, but want to provide multiple tokens, you would do this:
 
 ```shell
-GITHUB_TOKEN_ARRAY=token1, token2, token3
+GITHUB_TOKEN_POOL=token1, token2, token3
 ```
 
-And then the Broker Server would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_ARRAY`.
+And then the Broker Server would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_POOL`.
 
 Credentials will be taken in a round-robin fashion, so the first, the second, the third, etc, etc, until it reaches the end
 and then takes the first one again.
@@ -517,7 +517,7 @@ Calling the `/systemcheck` endpoint will validate all credentials, in order, and
 is the first credential and so on. For example, if you were running the GitHub Client and had this:
 
 ```shell
-GITHUB_TOKEN_ARRAY=good_token, bad_token
+GITHUB_TOKEN_POOL=good_token, bad_token
 ```
 
 The `/systemcheck` endpoint would return the following, where the first object is for `good_token` and the second for
@@ -558,25 +558,25 @@ cases you will need to create multiple accounts with one credential per account.
 #### Credentials Matrix
 Generating a Matrix of credentials is not supported.
 
-A "Matrix" in this case is defined as taking two (or more) `_ARRAY`s of length `x` and `y`, and producing one final array
+A "Matrix" in this case is defined as taking two (or more) `_POOL`s of length `x` and `y`, and producing one final array
 of length `x * y`. For example, given an input like:
 
 ```shell
-USERNAME_ARRAY=u1, u2, u3
-PASSWORD_ARRAY=p1, p2, p3
-CREDENTIALS_ARRAY=$USERNAME:$PASSWORD
+USERNAME_POOL=u1, u2, u3
+PASSWORD_POOL=p1, p2, p3
+CREDENTIALS_POOL=$USERNAME:$PASSWORD
 ```
 
 Matrix support would generate this internally:
 
 ```shell
-CREDENTIALS_ARRAY=u1:p1,u1:p2,u1:p3,u2:p1,u2:p2,u2:p3,u3:p1,u3:p2,u3:p3
+CREDENTIALS_POOL=u1:p1,u1:p2,u1:p3,u2:p1,u2:p2,u2:p3,u3:p1,u3:p2,u3:p3
 ```
 
 Instead, the Broker Client would generate this internally, using only the first array it finds:
 
 ```shell
-CREDENTIALS_ARRAY=u1:$PASSWORD,u2:$PASSWORD,u3:$PASSWORD
+CREDENTIALS_POOL=u1:$PASSWORD,u2:$PASSWORD,u3:$PASSWORD
 ```
 
 ### Custom approved-listing filter
