@@ -52,7 +52,7 @@ test('proxy requests originating from behind the broker server with pooled crede
   server.io.on('connection', (socket) => {
     socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.plan(5);
+      t.plan(8);
 
       t.test('identification', (t) => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -119,6 +119,60 @@ test('proxy requests originating from behind the broker server with pooled crede
               encodedAuth,
               `${process.env.USERNAME}:${process.env.PASSWORD1}`,
               'auth header is set correctly [3]',
+            );
+            t.end();
+          });
+        },
+      );
+
+      t.test(
+        'successfully broker on endpoint that forwards requests with token auth in origin, using first credential',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/github-token-in-origin`;
+          request({ url, method: 'post' }, (err, res) => {
+            t.equal(res.statusCode, 200, '200 statusCode [1]');
+
+            const auth = JSON.parse(res.body).authorization;
+            t.equal(
+              auth,
+              'token token1',
+              'auth header is set correctly [1]',
+            );
+            t.end();
+          });
+        },
+      );
+
+      t.test(
+        'successfully broker on endpoint that forwards requests with token auth in origin, using second credential',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/github-token-in-origin`;
+          request({ url, method: 'post' }, (err, res) => {
+            t.equal(res.statusCode, 200, '200 statusCode [2]');
+
+            const auth = JSON.parse(res.body).authorization;
+            t.equal(
+              auth,
+              'token token2',
+              'auth header is set correctly [1]',
+            );
+            t.end();
+          });
+        },
+      );
+
+      t.test(
+        'successfully broker on endpoint that forwards requests with token auth in origin, using first credential again',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/echo-headers/github-token-in-origin`;
+          request({ url, method: 'post' }, (err, res) => {
+            t.equal(res.statusCode, 200, '200 statusCode [3]');
+
+            const auth = JSON.parse(res.body).authorization;
+            t.equal(
+              auth,
+              'token token1',
+              'auth header is set correctly [1]',
             );
             t.end();
           });

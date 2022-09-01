@@ -43,6 +43,12 @@
     },
 
     {
+      "path": "/echo-headers/github-token-in-origin",
+      "method": "POST",
+      "origin": "http://${GITHUB_TOKEN}@localhost:${originPort}"
+    },
+
+    {
       "path": "/echo-headers/bitbucket",
       "method": "POST",
       "origin": "http://bitbucketUser:bitbucketPassword@localhost:${originPort}"
