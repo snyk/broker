@@ -399,7 +399,7 @@ test('broker client systemcheck endpoint', (t) => {
       t.equal(
         res.body[0].brokerClientValidationUrl,
         'https://snyk.io/no-such-url-ever',
-        'masked credentials present',
+        'validation url present',
       );
 
       client.close();
