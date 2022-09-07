@@ -413,7 +413,7 @@ The Broker client exposes an endpoint at `/systemcheck`, which can be used to va
 * `BROKER_CLIENT_VALIDATION_METHOD` - [optional] the HTTP method of the request (default is `GET`).
 * `BROKER_CLIENT_VALIDATION_TIMEOUT_MS` - [optional] the request timeout in milliseconds (default is 5000 ms).
 
-This endpoint responds with status code `200 OK` when the internal request is successful, and returns `{ ok: true }` in the response body. If the internal request fails, this endpoint responds with status code `500 Internal Server Error` and `{ ok: false }` in the response body.
+This endpoint responds with status code `200 OK` when the internal request is successful, and returns `[{ ok: true, ... }]` in the response body (one object in the array per credential, see [Credential Pooling](#credential-pooling)). If the internal request fails, this endpoint responds with status code `500 Internal Server Error` and `[{ ok: false }, ...]` in the response body.
 
 To change the location of the systemcheck endpoint, you can specify an alternative path via an environment variable:
 
@@ -496,6 +496,88 @@ For example, if you are using GitHub and you would like to give the Broker acces
 
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
+
+### Credential Pooling
+Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
+This can be achieved by creating an environment variable ending in `_POOL`, separate each credential with a comma, and
+the Broker Client will then, when doing variable replacement, look to see if the variable in use has a variant with a
+`_POOL` suffix, and use the next item in that pool if so. For example, if you have set the environment variable
+`GITHUB_TOKEN`, but want to provide multiple tokens, you would do this instead:
+
+```shell
+GITHUB_TOKEN_POOL=token1, token2, token3
+```
+
+And then the Broker Server would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_POOL`.
+
+Credentials will be taken in a round-robin fashion, so the first, the second, the third, etc, etc, until it reaches the end
+and then takes the first one again.
+
+Calling the `/systemcheck` endpoint will validate all credentials, in order, and will return an array where the first item
+is the first credential and so on. For example, if you were running the GitHub Client and had this:
+
+```shell
+GITHUB_TOKEN_POOL=good_token, bad_token
+```
+
+The `/systemcheck` endpoint would return the following, where the first object is for `good_token` and the second for
+`bad_token`:
+
+```json
+[
+  {
+    "brokerClientValidationUrl": "https://api.github.com/user",
+    "brokerClientValidationMethod": "GET",
+    "brokerClientValidationTimeoutMs": 5000,
+    "brokerClientValidationUrlStatusCode": 200,
+    "ok": true,
+    "maskedCredentials": "goo***ken"
+  },
+  {
+    "brokerClientValidationUrl": "https://api.github.com/user",
+    "brokerClientValidationMethod": "GET",
+    "brokerClientValidationTimeoutMs": 5000,
+    "ok": false,
+    "error": "401 - {\"message\":\"Bad credentials\",\"documentation_url\":\"https://docs.github.com/rest\"}",
+    "maskedCredentials": "bad***ken"
+  }
+]
+```
+
+The credentials are masked, though note that if your credentials contain 6 or fewer characters, they will be completely
+replaced with the mask.
+
+#### Limitations
+Credential validity is not checked before using a credential, nor are invalid credentials removed from the pool, so it is
+_strongly_ recommended that credentials be used exclusively by the Broker Client to avoid credentials reaching rate limits
+at different times, and that the `/systemcheck` endpoint be called before use.
+
+Some providers, such as GitHub, do rate-limiting on a per-user basis, not a per-token or per-credential basis, and in those
+cases you will need to create multiple accounts with one credential per account.
+
+#### Credentials Matrix
+Generating a Matrix of credentials is not supported.
+
+A "Matrix" in this case is defined as taking two (or more) `_POOL`s of length `x` and `y`, and producing one final pool
+of length `x * y`. For example, given an input like:
+
+```shell
+USERNAME_POOL=u1, u2, u3
+PASSWORD_POOL=p1, p2, p3
+CREDENTIALS_POOL=$USERNAME:$PASSWORD
+```
+
+Matrix support would generate this internally:
+
+```shell
+CREDENTIALS_POOL=u1:p1,u1:p2,u1:p3,u2:p1,u2:p2,u2:p3,u3:p1,u3:p2,u3:p3
+```
+
+Instead, the Broker Client would generate this internally, using only the first pool it finds:
+
+```shell
+CREDENTIALS_POOL=u1:$PASSWORD,u2:$PASSWORD,u3:$PASSWORD
+```
 
 ### Custom approved-listing filter
 
