@@ -11,7 +11,7 @@ RUN groupadd --gid 1000 node \
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u /home/node
 
-ENV NODE_VERSION 16.15.1
+ENV NODE_VERSION 16.17.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
