@@ -508,7 +508,7 @@ the Broker Client will then, when doing variable replacement, look to see if the
 GITHUB_TOKEN_POOL=token1, token2, token3
 ```
 
-And then the Broker Server would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_POOL`.
+And then the Broker Client would, any time it needed `GITHUB_TOKEN`, instead take an item from the `GITHUB_TOKEN_POOL`.
 
 Credentials will be taken in a round-robin fashion, so the first, the second, the third, etc, etc, until it reaches the end
 and then takes the first one again.
