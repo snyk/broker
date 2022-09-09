@@ -28,6 +28,10 @@ USER node
 
 # Generate default accept filter
 RUN broker init nexus
+# Support for OpenShift - have to run after init to get accept.json and .env
+USER root
+RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
+USER node
 
 ######################################
 # Custom Broker Client configuration #
