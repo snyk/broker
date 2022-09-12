@@ -53,7 +53,7 @@ test('proxy requests originating from behind the broker server', (t) => {
   server.io.on('connection', (socket) => {
     socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.plan(30);
+      t.plan(31);
 
       t.test('identification', (t) => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -443,6 +443,15 @@ test('proxy requests originating from behind the broker server', (t) => {
         request({ url, method: 'get' }, (err, res) => {
           t.equal(res.statusCode, 200, '200 statusCode');
           t.equal(res.body, 'xyz', 'body brokered');
+          t.end();
+        });
+      });
+
+      t.test('reject responses that are too large', (t) => {
+        const url = `http://localhost:${serverPort}/broker/${token}/huge-file`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.equal(res.statusCode, 500, '500 statusCode');
+          t.equal(res.body, '{"message":"body size of 20971532 is greater than max allowed of 20971520 bytes"}', 'error returned');
           t.end();
         });
       });
