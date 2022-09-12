@@ -8,9 +8,6 @@ RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
   && apt update && apt upgrade -y && apt install gpg curl xz-utils -y
 
-USER root
-RUN chgrp -R 0 /home/node && chmod -R g=u /home/node
-
 ENV NODE_VERSION 16.17.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
