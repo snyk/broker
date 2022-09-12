@@ -497,6 +497,80 @@ For example, if you are using GitHub and you would like to give the Broker acces
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
 
+#### Changing the Auth Method
+
+Each integration has an auth method set by default, with the exact method varying by service.
+
+BitBucket Server/Datacenter, for example, uses Basic Auth with a username and password for example:
+
+`accept.json`:
+```json
+{
+  "private": [
+    {
+      ...,
+      "auth": {
+         "scheme": "basic",
+         "username": "${BITBUCKET_USERNAME}",
+         "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    ...
+  ]
+}
+```
+
+For Artifactory, it's configured in the `.env` file by default:
+
+`.env`:
+```shell
+# The URL to your artifactory
+# If not using basic auth this will only be "<yourdomain.artifactory.com>/artifactory"
+ARTIFACTORY_URL=<username>:<password>@<yourdomain.artifactory.com>/artifactory
+```
+
+
+For GitHub, it's part of the `origin` field:
+
+`accept.json`:
+```json
+{
+  "private": [
+    {
+      ...,
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    ...
+  ]
+}
+```
+
+The authentication method can be overridden. Valid values for `scheme` are `bearer`, `token`, and `basic`, which set the Authorization header to `Bearer`, `Token`, and `Basic`, respectively. In the case a bearer token is preferred, the `accept.json` can be configured as such:
+
+`accept.json`:
+```json
+{
+  "private": [
+    {
+      ...,
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BEARER_TOKEN}"
+      }
+    },
+    ...
+  ]
+}
+```
+
+Note that you must set this for every individual object in the `private` array.
+
+If `scheme` is `bearer` or `token`, you must provide a `token`, and if it's `basic`, you must provide a `username` and
+`password`.
+
+This will override any other configured authentication method (e.g., setting the token in the `origin` field, or in the `.env` file).
+
+
 ### Credential Pooling
 Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
 This can be achieved by creating an environment variable ending in `_POOL`, separate each credential with a comma, and
