@@ -450,7 +450,7 @@ test('proxy requests originating from behind the broker server', (t) => {
       t.test('reject responses that are too large', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/huge-file`;
         request({ url, method: 'get' }, (err, res) => {
-          t.equal(res.statusCode, 500, '500 statusCode');
+          t.equal(res.statusCode, 502, '502 statusCode');
           t.equal(res.body, '{"message":"body size of 20971532 is greater than max allowed of 20971520 bytes"}', 'error returned');
           t.end();
         });
