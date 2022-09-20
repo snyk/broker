@@ -980,6 +980,28 @@
       "method": "any",
       "path": "/snykgit/*",
       "origin": "${GIT_CLIENT_URL}"
+    },
+    {
+      "//": "used to fetch a given repo from API",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get default reviewers for a pull request",
+      "method": "GET",
+      "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
     }
   ]
 }
