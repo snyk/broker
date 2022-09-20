@@ -709,7 +709,7 @@ Example of such file is located in your broker container at $HOME/.env
 
 One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests might be fetching big manifest files (> 1Mb) failure. To address this issue, additional Blob API endpoint should be whitelisted in `accept.json`:
 
-- should be in `private` array
+- Should be in `private` array
 ```json
 {
     "//": "used to get given manifest file",
