@@ -45,6 +45,7 @@ Proxy configuration, see [Configure Docker to use a proxy server](https://docs.d
            -e HTTP_PROXY=http://my.proxy.address:8080
            -e HTTPS_PROXY=http://my.proxy.address:8080
            -e NO_PROXY=*.test.example.com,.example2.com,127.0.0.0/8
+           -e PROXY_AUTH=username:password
 ```
 
 #### Derived docker image
