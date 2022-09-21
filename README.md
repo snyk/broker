@@ -664,7 +664,7 @@ docker run --restart=always \
            -e GITHUB_TOKEN=secret-github-token \
            -e PORT=8000 \
            -e BROKER_CLIENT_URL=https://my.broker.client:8000 \
-           -e ACCEPT=/private/accept.json
+           -e ACCEPT=/private/accept.json \
            -v /local/path/to/private:/private \
        snyk/broker:github-com
 ```
