@@ -67,6 +67,28 @@
       }
     },
     {
+      "//": "used to get createmeta for a jira project & issueType version 9 and above",
+      "method": "GET",
+      "path": "/rest/api/2/issue/createmeta/:project/issuetypes/:issue",
+      "origin": "https://${JIRA_HOSTNAME}",
+      "auth": {
+         "scheme": "basic",
+         "username": "${JIRA_USERNAME}",
+         "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to get issue type information for version 9 or above",
+      "method": "GET",
+      "path": "/rest/api/2/issuetype/:issuetype",
+      "origin": "https://${JIRA_HOSTNAME}",
+      "auth": {
+         "scheme": "basic",
+         "username": "${JIRA_USERNAME}",
+         "password": "${JIRA_PASSWORD}"
+      }
+    },
+    {
       "//": "used to get jira issue",
       "method": "GET",
       "path": "/rest/api/2/issue/:issue",
