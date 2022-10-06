@@ -47,6 +47,12 @@ Proxy configuration, see [Configure Docker to use a proxy server](https://docs.d
            -e NO_PROXY=*.test.example.com,.example2.com,127.0.0.0/8
 ```
 
+If your proxy requires username and password authentication, add the following additional environment variable:
+
+```Proxy
+           -e PROXY_AUTH=userID:userPass
+```
+
 #### Derived docker image
 
 Another option is to build your own docker image and override relevant environment variables:
