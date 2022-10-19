@@ -1,4 +1,4 @@
-import {replace, replaceUrlPartialChunk} from '../../lib/replace-vars';
+import { replace, replaceUrlPartialChunk } from '../../lib/replace-vars';
 
 describe('replacePartialChunk', () => {
   const config = {
@@ -90,4 +90,4 @@ describe('replace - with arrays', () => {
 
     expect(replace(chunk, config)).toEqual('START 1 END');
   });
-})
+});

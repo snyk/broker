@@ -4,7 +4,7 @@ const request = require('request');
 const app = require('../../lib');
 const root = __dirname;
 
-const {port, createTestServer} = require('../utils');
+const { port, createTestServer } = require('../utils');
 
 test('broker client systemcheck endpoint', (t) => {
   /**
@@ -15,7 +15,7 @@ test('broker client systemcheck endpoint', (t) => {
    * 5. restart client with same token, make sure it's not in "disconnected"
    */
 
-  const {testServer} = createTestServer();
+  const { testServer } = createTestServer();
 
   t.teardown(() => {
     testServer.close();
@@ -43,7 +43,7 @@ test('broker client systemcheck endpoint', (t) => {
     });
 
     request(
-      {url: `${clientUrl}/custom-systemcheck`, json: true},
+      { url: `${clientUrl}/custom-systemcheck`, json: true },
       (err, res) => {
         if (err) {
           return t.threw(err);
@@ -51,13 +51,21 @@ test('broker client systemcheck endpoint', (t) => {
 
         t.equal(res.statusCode, 200, '200 statusCode');
         t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-        t.equal(res.body[0].maskedCredentials, null, '[{ maskedCredentials: null }] in body');
+        t.equal(
+          res.body[0].maskedCredentials,
+          null,
+          '[{ maskedCredentials: null }] in body',
+        );
         t.equal(
           res.body[0].brokerClientValidationUrl,
           'https://httpbin.org/headers',
           'validation url present',
         );
-        t.equal(res.body[0].testResponse.body.headers.Authorization, undefined, 'does not have authorization header');
+        t.equal(
+          res.body[0].testResponse.body.headers.Authorization,
+          undefined,
+          'does not have authorization header',
+        );
 
         client.close();
         setTimeout(() => {
@@ -80,7 +88,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -121,7 +129,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -170,7 +178,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -216,7 +224,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -258,7 +266,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -289,7 +297,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -316,11 +324,14 @@ test('broker client systemcheck endpoint', (t) => {
         brokerToken: '1234567890',
         brokerServerUrl: 'http://localhost:12345',
         brokerClientValidationUrl: 'https://httpbin.org/headers',
-        brokerClientValidationBasicAuthPool: ['username:password', 'username1:password1'],
+        brokerClientValidationBasicAuthPool: [
+          'username:password',
+          'username1:password1',
+        ],
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
@@ -358,16 +369,12 @@ test('broker client systemcheck endpoint', (t) => {
       );
       t.equal(
         res.body[0].testResponse.body.headers.Authorization,
-        `Basic ${Buffer.from(
-          'username:password',
-        ).toString('base64')}`,
+        `Basic ${Buffer.from('username:password').toString('base64')}`,
         'proper authorization header in request [0]',
       );
       t.equal(
         res.body[1].testResponse.body.headers.Authorization,
-        `Basic ${Buffer.from(
-          'username1:password1',
-        ).toString('base64')}`,
+        `Basic ${Buffer.from('username1:password1').toString('base64')}`,
         'proper authorization header in request [1]',
       );
 
@@ -389,7 +396,7 @@ test('broker client systemcheck endpoint', (t) => {
       },
     });
 
-    request({url: `${clientUrl}/systemcheck`, json: true}, (err, res) => {
+    request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
       if (err) {
         return t.threw(err);
       }
