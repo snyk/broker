@@ -36,11 +36,22 @@ test('proxy requests originating from behind the broker client', (t) => {
   const clientPort = port();
   const client = app.main({ port: clientPort });
 
+  t.plan(15);
+
+  client.io.once('identify', (serverData) => {
+    t.test('server identifies self to client', (t) => {
+      t.same(
+        serverData,
+        { capabilities: ['receive-post-streams'] },
+        'server advertises capabilities',
+      );
+      t.end();
+    });
+  });
+
   // wait for the client to successfully connect to the server and identify itself
   server.io.once('connection', (socket) => {
     socket.once('identify', (clientData) => {
-      t.plan(14);
-
       t.test('successfully broker POST', (t) => {
         const url = `http://localhost:${clientPort}/echo-body`;
         const body = { some: { example: 'json' } };

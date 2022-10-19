@@ -125,7 +125,11 @@
         }
       ]
     },
-
+    {
+      "path": "/client-not-capable",
+      "method": "GET",
+      "origin": "${GIT_CLIENT_URL}"
+    },
     {
       "//": "used to redirect requests to snyk git client",
       "method": "any",

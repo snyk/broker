@@ -49,11 +49,23 @@ test('proxy requests originating from behind the broker server', (t) => {
   process.env.RES_BODY_URL_SUB = `http://private`;
   const client = app.main({ port: port() });
 
+  t.plan(33);
+
+  client.io.once('identify', (serverData) => {
+    t.test('server identifies self to client', (t) => {
+      t.same(
+        serverData,
+        { capabilities: ['receive-post-streams'] },
+        'server advertises capabilities',
+      );
+      t.end();
+    });
+  });
+
   // wait for the client to successfully connect to the server and identify itself
   server.io.on('connection', (socket) => {
     socket.on('identify', (clientData) => {
       const token = clientData.token;
-      t.plan(31);
 
       t.test('identification', (t) => {
         const filters = require(`${clientRootPath}/${ACCEPT}`);
@@ -63,6 +75,7 @@ test('proxy requests originating from behind the broker server', (t) => {
           {
             version,
             filters,
+            capabilities: ['post-streams'],
           },
           'correct metadata',
         );
@@ -259,6 +272,23 @@ test('proxy requests originating from behind the broker server', (t) => {
         });
       });
 
+      t.test(
+        'block request for url where client does not support required capability',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/client-not-capable`;
+          request({ url, method: 'get', json: true }, (err, res) => {
+            t.equal(res.statusCode, 401, '401 statusCode');
+            t.equal(res.body.message, 'blocked', 'Block message');
+            t.equal(
+              res.body.reason,
+              'Request does not match any accept rule, blocking HTTP request',
+              'Reason',
+            );
+            t.end();
+          });
+        },
+      );
+
       t.test('approved URLs are brokered when escaped as expected', (t) => {
         const url =
           `http://localhost:${serverPort}/broker/${token}/` +
@@ -447,11 +477,11 @@ test('proxy requests originating from behind the broker server', (t) => {
         });
       });
 
-      t.test('reject responses that are too large', (t) => {
+      t.test('accept large responses', (t) => {
         const url = `http://localhost:${serverPort}/broker/${token}/huge-file`;
         request({ url, method: 'get' }, (err, res) => {
-          t.equal(res.statusCode, 502, '502 statusCode');
-          t.equal(res.body, '{"message":"body size of 20971532 is greater than max allowed of 20971520 bytes"}', 'error returned');
+          t.equal(res.statusCode, 200, '200 statusCode');
+          t.equal(res.body.length, 20971533, 'body is 20971533 bytes in size');
           t.end();
         });
       });

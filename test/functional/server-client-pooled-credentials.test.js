@@ -62,6 +62,7 @@ test('proxy requests originating from behind the broker server with pooled crede
           {
             version,
             filters,
+            capabilities: ['post-streams'],
           },
           'correct metadata',
         );
@@ -133,11 +134,7 @@ test('proxy requests originating from behind the broker server with pooled crede
             t.equal(res.statusCode, 200, '200 statusCode [1]');
 
             const auth = JSON.parse(res.body).authorization;
-            t.equal(
-              auth,
-              'token token1',
-              'auth header is set correctly [1]',
-            );
+            t.equal(auth, 'token token1', 'auth header is set correctly [1]');
             t.end();
           });
         },
@@ -151,11 +148,7 @@ test('proxy requests originating from behind the broker server with pooled crede
             t.equal(res.statusCode, 200, '200 statusCode [2]');
 
             const auth = JSON.parse(res.body).authorization;
-            t.equal(
-              auth,
-              'token token2',
-              'auth header is set correctly [1]',
-            );
+            t.equal(auth, 'token token2', 'auth header is set correctly [1]');
             t.end();
           });
         },
@@ -169,11 +162,7 @@ test('proxy requests originating from behind the broker server with pooled crede
             t.equal(res.statusCode, 200, '200 statusCode [3]');
 
             const auth = JSON.parse(res.body).authorization;
-            t.equal(
-              auth,
-              'token token1',
-              'auth header is set correctly [1]',
-            );
+            t.equal(auth, 'token token1', 'auth header is set correctly [1]');
             t.end();
           });
         },

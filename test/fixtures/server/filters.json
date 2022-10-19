@@ -67,10 +67,14 @@
       "stream": true
     },
     {
+      "path": "/client-not-capable",
+      "method": "GET",
+      "requiredCapabilities": ["no-such-capability"]
+    },
+    {
       "path": "/*",
       "method": "GET"
     },
-
     {
       "path": "/*",
       "method": "POST"
