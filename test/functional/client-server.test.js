@@ -36,7 +36,7 @@ test('proxy requests originating from behind the broker client', (t) => {
   const clientPort = port();
   const client = app.main({ port: clientPort });
 
-  t.plan(15);
+  t.plan(17);
 
   client.io.once('identify', (serverData) => {
     t.test('server identifies self to client', (t) => {
@@ -148,6 +148,24 @@ test('proxy requests originating from behind the broker client', (t) => {
       // the filtering happens in the broker client
       t.test('block request for valid url with missing query param', (t) => {
         const url = `http://localhost:${clientPort}/echo-query/filtered`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker server
+      t.test('block request for valid URL which is not allowed on server', (t) => {
+        const url = `http://localhost:${clientPort}/server-side-blocked`;
+        request({ url, method: 'get' }, (err, res) => {
+          t.equal(res.statusCode, 401, '401 statusCode');
+          t.end();
+        });
+      });
+
+      // the filtering happens in the broker server - this indicates a very badly misconfigured client
+      t.test('block request for valid URL which is not allowed on server with streaming response', (t) => {
+        const url = `http://localhost:${clientPort}/server-side-blocked-streaming`;
         request({ url, method: 'get' }, (err, res) => {
           t.equal(res.statusCode, 401, '401 statusCode');
           t.end();
