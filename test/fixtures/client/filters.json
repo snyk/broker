@@ -199,6 +199,17 @@
           "values": ["valid.accept.header"]
         }
       ]
+    },
+    {
+      "method": "any",
+      "path": "/server-side-blocked",
+      "origin": "${GIT_CLIENT_URL}"
+    },
+    {
+      "method": "any",
+      "path": "/server-side-blocked-streaming",
+      "origin": "${GIT_CLIENT_URL}",
+      "stream": true
     }
   ]
 }
