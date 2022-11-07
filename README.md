@@ -513,7 +513,7 @@ More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
 
 #### Snyk Code
-By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to performa a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
+By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to perform a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
 
 Example:
 
