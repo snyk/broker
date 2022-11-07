@@ -155,22 +155,28 @@ test('proxy requests originating from behind the broker client', (t) => {
       });
 
       // the filtering happens in the broker server
-      t.test('block request for valid URL which is not allowed on server', (t) => {
-        const url = `http://localhost:${clientPort}/server-side-blocked`;
-        request({ url, method: 'get' }, (err, res) => {
-          t.equal(res.statusCode, 401, '401 statusCode');
-          t.end();
-        });
-      });
+      t.test(
+        'block request for valid URL which is not allowed on server',
+        (t) => {
+          const url = `http://localhost:${clientPort}/server-side-blocked`;
+          request({ url, method: 'get' }, (err, res) => {
+            t.equal(res.statusCode, 401, '401 statusCode');
+            t.end();
+          });
+        },
+      );
 
       // the filtering happens in the broker server - this indicates a very badly misconfigured client
-      t.test('block request for valid URL which is not allowed on server with streaming response', (t) => {
-        const url = `http://localhost:${clientPort}/server-side-blocked-streaming`;
-        request({ url, method: 'get' }, (err, res) => {
-          t.equal(res.statusCode, 401, '401 statusCode');
-          t.end();
-        });
-      });
+      t.test(
+        'block request for valid URL which is not allowed on server with streaming response',
+        (t) => {
+          const url = `http://localhost:${clientPort}/server-side-blocked-streaming`;
+          request({ url, method: 'get' }, (err, res) => {
+            t.equal(res.statusCode, 401, '401 statusCode');
+            t.end();
+          });
+        },
+      );
 
       t.test('allow request for valid url with valid accept header', (t) => {
         const url = `http://localhost:${clientPort}/echo-param-protected/xyz`;

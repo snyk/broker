@@ -475,7 +475,22 @@ docker run --restart=always \
 
 #### Infrastructure as Code (IaC)
 
-By default, some file types used by Infrastructure-as-Code (IaC) are not enabled. To grant the Broker access to IaC files in your repository, such as Terraform for example, edit your `accept.json` and add the relevant IaC specific rules.
+By default, some file types used by Infrastructure-as-Code (IaC) are not enabled. To grant the Broker access to IaC files in your repository, such as Terraform for example, you can simply add an environment variable ACCEPT_IAC with any combination of tf,yaml,yml,json,tpl
+
+Example:
+
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e ACCEPT_IAC=tf,yaml,yml,json,tpl
+       snyk/broker:github-com
+```
+
+You can otherwise edit your `accept.json`, add the relevant IaC specific rules and load the customized accept file into the container. Note that if a custom accept file is used (using ACCEPT environment variable), the ACCEPT_IAC mechanism is then disabled.
 
 For example, if you are using GitHub and you would like to give the Broker access to your Terraform files, you should add the following rules to your `accept.json`:
 
@@ -496,6 +511,22 @@ For example, if you are using GitHub and you would like to give the Broker acces
 
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
+
+#### Snyk Code
+By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to performa a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
+
+Example:
+
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e ACCEPT_CODE=true
+       snyk/broker:github-com
+```
 
 #### Changing the Auth Method
 
