@@ -4,9 +4,10 @@
 
 FROM ubuntu:20.04
 
+# Have to use apt-get for git, otherwise apt autoremove removes it!
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
-  && apt update && apt upgrade -y && apt install git gpg curl xz-utils -y
+  && apt update && apt upgrade -y && apt install gpg curl xz-utils -y
 
 ENV NODE_VERSION 16.17.0
 
@@ -50,6 +51,7 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && node --version \
   && npm --version
 
-RUN apt remove gpg curl xz-utils libsqlite3-0 -y && apt autoremove -y --purge
+# Have to install Git here otherwise it gets removed by apt autoremove, despite being marked as manually installed!
+RUN apt remove gpg curl xz-utils libsqlite3-0 -y && apt autoremove -y --purge && apt install -y git
 
 USER node
