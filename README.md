@@ -490,7 +490,7 @@ docker run --restart=always \
        snyk/broker:github-com
 ```
 
-You can otherwise edit your `accept.json`, add the relevant IaC specific rules and load the customized accept file into the container. Note that if a custom accept file is used (using ACCEPT environment variable), the ACCEPT_IAC mechanism is then disabled.
+You can otherwise edit your `accept.json`, add the relevant IaC specific rules and load the customized accept file into the container. Note that if a custom accept file (from a separate folder) is used (using ACCEPT environment variable), the ACCEPT_IAC mechanism cannot be used.
 
 For example, if you are using GitHub and you would like to give the Broker access to your Terraform files, you should add the following rules to your `accept.json`:
 
@@ -527,6 +527,7 @@ docker run --restart=always \
            -e ACCEPT_CODE=true
        snyk/broker:github-com
 ```
+Note that if a custom accept file (from a separate folder) is used (using ACCEPT environment variable), the ACCEPT_CODE mechanism cannot be used.
 
 #### Changing the Auth Method
 
