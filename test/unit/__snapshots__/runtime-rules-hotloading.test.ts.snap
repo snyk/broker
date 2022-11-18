@@ -375,6 +375,16 @@ Object {
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "*/git-upload-pack",
     },
+    Object {
+      "//": "needed to load code snippets",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/items",
+    },
   ],
   "public": Array [
     Object {
@@ -1406,6 +1416,17 @@ Object {
       "method": "POST",
       "origin": "https://\${BITBUCKET}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/:file",
     },
   ],
   "public": Array [
@@ -3162,6 +3183,12 @@ Object {
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
       "path": "*/git-upload-pack",
     },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/contents/:path",
+    },
   ],
   "public": Array [
     Object {
@@ -4504,6 +4531,12 @@ Object {
       "method": "POST",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/contents/:path",
     },
   ],
   "public": Array [
@@ -6242,6 +6275,12 @@ Object {
       "origin": "https://oauth2:\${GITLAB_TOKEN}@\${GITLAB}",
       "path": "*/git-upload-pack",
     },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files/:path",
+    },
   ],
   "public": Array [
     Object {
@@ -6631,6 +6670,16 @@ Object {
       "method": "POST",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/items",
     },
   ],
   "public": Array [
@@ -7685,6 +7734,17 @@ Object {
       "method": "POST",
       "origin": "https://\${BITBUCKET}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/:file",
     },
   ],
   "public": Array [
@@ -9453,6 +9513,12 @@ Object {
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
       "path": "*/git-upload-pack",
     },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/contents/:path",
+    },
   ],
   "public": Array [
     Object {
@@ -10807,6 +10873,12 @@ Object {
       "method": "POST",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/contents/:path",
     },
   ],
   "public": Array [
@@ -12556,6 +12628,12 @@ Object {
       "method": "POST",
       "origin": "https://oauth2:\${GITLAB_TOKEN}@\${GITLAB}",
       "path": "*/git-upload-pack",
+    },
+    Object {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files/:path",
     },
   ],
   "public": Array [
