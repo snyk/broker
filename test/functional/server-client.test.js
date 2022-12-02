@@ -243,6 +243,7 @@ test('proxy requests originating from behind the broker server', (t) => {
             'x-forwarded-proto': 'https',
             'x-forwarded-for': '127.0.0.1',
             'x-forwarded-port': '8080',
+            'X-Forwarded-Port': '8080',
             'x-forwarded-host': 'banana',
             'forwarded': 'by=broker;for=127.0.0.1;host=banana;port=8080;proto=https',
           } }, (err, res) => {
@@ -251,27 +252,32 @@ test('proxy requests originating from behind the broker server', (t) => {
             t.equal(
               responseBody['x-forwarded-proto'],
               undefined,
-              'x-forwarded-proto header included',
+              'x-forwarded-proto header not included',
             );
             t.equal(
               responseBody['x-forwarded-for'],
               undefined,
-              'x-forwarded-for header included',
+              'x-forwarded-for header not included',
             );
             t.equal(
               responseBody['x-forwarded-port'],
               undefined,
-              'x-forwarded-port header included',
+              'x-forwarded-port header not included',
+            );
+            t.equal(
+              responseBody['X-Forwarded-Port'],
+              undefined,
+              'X-Forwarded-Port header not included',
             );
             t.equal(
               responseBody['x-forwarded-host'],
               undefined,
-              'x-forwarded-host header included',
+              'x-forwarded-host header not included',
             );
             t.equal(
               responseBody['forwarded'],
               undefined,
-              'forwarded header included',
+              'forwarded header not included',
             );
             t.end();
           });
