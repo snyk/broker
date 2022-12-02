@@ -47,9 +47,10 @@ test('proxy requests originating from behind the broker server', (t) => {
   process.env.GIT_USERNAME = process.env.USERNAME;
   process.env.GIT_PASSWORD = process.env.PASSWORD;
   process.env.RES_BODY_URL_SUB = `http://private`;
+  process.env.REMOVE_X_FORWARDED_HEADERS = 'true';
   const client = app.main({ port: port() });
 
-  t.plan(33);
+  t.plan(34);
 
   client.io.once('identify', (serverData) => {
     t.test('server identifies self to client', (t) => {
@@ -227,6 +228,50 @@ test('proxy requests originating from behind the broker server', (t) => {
               responseBody['x-broker-token'],
               undefined,
               'X-Broker-Token header not sent',
+            );
+            t.end();
+          });
+        },
+      );
+
+      // don't leak broker tokens to systems on the client side
+      t.test(
+        'x-forwarded-* headers are stripped from the request before being forwarded',
+        (t) => {
+          const url = `http://localhost:${serverPort}/broker/${token}/echo-headers`;
+          request({ url, method: 'post', headers: {
+            'x-forwarded-proto': 'https',
+            'x-forwarded-for': '127.0.0.1',
+            'x-forwarded-port': '8080',
+            'x-forwarded-host': 'banana',
+            'forwarded': 'by=broker;for=127.0.0.1;host=banana;port=8080;proto=https',
+          } }, (err, res) => {
+            const responseBody = JSON.parse(res.body);
+            t.equal(res.statusCode, 200, '200 statusCode');
+            t.equal(
+              responseBody['x-forwarded-proto'],
+              undefined,
+              'x-forwarded-proto header included',
+            );
+            t.equal(
+              responseBody['x-forwarded-for'],
+              undefined,
+              'x-forwarded-for header included',
+            );
+            t.equal(
+              responseBody['x-forwarded-port'],
+              undefined,
+              'x-forwarded-port header included',
+            );
+            t.equal(
+              responseBody['x-forwarded-host'],
+              undefined,
+              'x-forwarded-host header included',
+            );
+            t.equal(
+              responseBody['forwarded'],
+              undefined,
+              'forwarded header included',
             );
             t.end();
           });
