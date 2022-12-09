@@ -39,6 +39,7 @@ describe('body relay', () => {
       {
         url: '/',
         method: 'POST',
+        // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
       },
