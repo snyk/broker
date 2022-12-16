@@ -4,11 +4,15 @@ describe('log', () => {
   it('sanitizes log data', () => {
     const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
     const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
+    // @ts-ignore
+    const githubTkPool = (process.env.GITHUB_TOKEN_POOL = ['GITHUB_456']);
     const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
     const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
     const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
     const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
     const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
+    // @ts-ignore
+    const jiraPassPool = (process.env.JIRA_PASSWORD_POOL = ['JRA_POOL_PASS']);
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
     const artifactoryUrl = (process.env.ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
@@ -31,12 +35,14 @@ describe('log', () => {
     const sensitiveInfo = [
       brokerTk,
       githubTk,
+      githubTkPool[0],
       gitlabTk,
       azureReposToken,
       bbUser,
       bbPass,
       jiraUser,
       jiraPass,
+      jiraPassPool,
       artifactoryUrl,
       crAgentUrl,
       crCredentials,
@@ -52,9 +58,9 @@ describe('log', () => {
       gitClientUrl,
     ].join();
     const sanitizedTokens =
-      '${BROKER_TOKEN},${GITHUB_TOKEN},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
+      '${BROKER_TOKEN},${GITHUB_TOKEN},${GITHUB_TOKEN_POOL},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
-    const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD}';
+    const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD},${JIRA_PASSWORD_POOL}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
     const sanitizedCRData =
       '${CR_AGENT_URL},${CR_CREDENTIALS},${CR_USERNAME},${CR_PASSWORD},${CR_TOKEN},${CR_ROLE_ARN},${CR_EXTERNAL_ID},${CR_REGION},${CR_BASE}';
@@ -87,11 +93,13 @@ describe('log', () => {
     // assert no sensitive data is logged
     expect(logged).not.toMatch(brokerTk);
     expect(logged).not.toMatch(githubTk);
+    expect(logged).not.toMatch(githubTkPool[0]);
     expect(logged).not.toMatch(gitlabTk);
     expect(logged).not.toMatch(bbUser);
     expect(logged).not.toMatch(bbPass);
     expect(logged).not.toMatch(jiraUser);
     expect(logged).not.toMatch(jiraPass);
+    expect(logged).not.toMatch(jiraPassPool[0]);
     expect(logged).not.toMatch(azureReposToken);
     expect(logged).not.toMatch(artifactoryUrl);
     expect(logged).not.toMatch(crAgentUrl);
