@@ -4,7 +4,7 @@ import { HAConfiguration } from './config';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 
-const defaultBrokerDispatcherBaseUrl = 'https://api.snyk.io';
+export const defaultBrokerDispatcherBaseUrl = 'https://api.snyk.io';
 
 export function highAvailabilityModeEnabled(config: any): boolean {
   const haConfig = getHAConfig(config);
