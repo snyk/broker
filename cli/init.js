@@ -21,7 +21,8 @@ module.exports = async (templateName) => {
   // check if any of the files exist on disk already, and if so, abort.
   const filesWithAccessData = await Promise.all(
     templateFiles.map(async (file) => {
-      file = file.replace(/\.sample$/, '');
+      // file = file.replace(/\.sample$/, '');
+      console.log(file)
 
       try {
         await fsp.access(file);
