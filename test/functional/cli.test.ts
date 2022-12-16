@@ -39,18 +39,30 @@ describe('CLI', () => {
   });
 
   describe('"exec" command', () => {
-    it('throws when missing broker id', () => {
-      expect(() => {
-        exec({ _: ['client'] });
-      }).toThrow();
+    it('throws when missing broker id', async () => {
+      try {
+        await exec({ _: ['client'] });
+      } catch (err) {
+        expect(err).toEqual(
+          new ReferenceError(
+            'BROKER_TOKEN is required to successfully identify itself to the server',
+          ),
+        );
+      }
     });
 
-    it('cli throws when missing broker server', () => {
+    it('cli throws when missing broker server', async () => {
       process.env.BROKER_TOKEN = '1';
 
-      expect(() => {
-        exec({ _: ['client'] });
-      }).toThrow();
+      try {
+        await exec({ _: ['client'] });
+      } catch (err) {
+        expect(err).toEqual(
+          new ReferenceError(
+            'BROKER_TOKEN is required to successfully identify itself to the server',
+          ),
+        );
+      }
     });
   });
 });
