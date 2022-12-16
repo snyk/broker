@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: cimg/node:14.17.6
+    - image: cimg/node:16.18.0
   working_directory: ~/broker
 
 commands:
@@ -41,6 +41,18 @@ jobs:
       - run:
           name: Run tests
           command: npm test && npm run test:bin
+  pkg:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/broker
+      - run:
+          name: Package
+          command: "npm run prepare && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli"
+      - store_artifacts:
+          path: binary-releases/snyk-broker-x64
+          destination: artifact-snyk-broker
   release:
     <<: *defaults
     steps:
@@ -63,6 +75,10 @@ workflows:
           name: Test
           requires:
             - Install DEV
+      - pkg:
+          name: Package
+          requires:
+            - Test
       - release:
           name: Release to GitHub
           context: nodejs-lib-release
