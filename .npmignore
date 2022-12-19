@@ -1,0 +1,12 @@
+.env
+.nyc_output
+.vscode
+.idea
+coverage
+/test/fixtures/certs/tmp
+accept.json
+package-lock.json
+.eslintcache
+
+# Test coverage reports
+reports/
