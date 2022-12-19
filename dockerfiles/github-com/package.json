@@ -1,0 +1,10 @@
+{
+  "name": "@snyk/snyk-broker-client-dev",
+  "description": "Snyk client-side broker, dev branch",
+  "main": "lib/index.js",
+  "private": true,
+  "license": "private",
+  "dependencies": {
+    "snyk-broker": "https://github.com/snyk/broker.git#dev"
+  }
+}

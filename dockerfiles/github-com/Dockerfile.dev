@@ -4,34 +4,32 @@ MAINTAINER Snyk Ltd
 
 USER root
 
-# RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates git
 
-# ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+USER node
+WORKDIR /home/node
 
-# ENV PATH=$PATH:/home/node/.npm-global/bin
+ENV PATH=$PATH:/home/node/node_modules/.bin
 
-RUN npm install --global typescript
+ADD package.json ./
 
-# RUN npm install --global "https://github.com/snyk/broker.git#dev"
+RUN npm install
 
+FROM snyk/ubuntu
 
-# FROM snyk/ubuntu
+ENV PATH=$PATH:/home/node/node_modules/.bin
 
-# ENV PATH=$PATH:/home/node/.npm-global/bin
+COPY --from=base /home/node/node_modules /home/node/node_modules
 
-# COPY --from=base /home/node/.npm-global /home/node/.npm-global
-
-# COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Don't run as root
-# WORKDIR /home/node
-WORKDIR /root
-# USER node
-COPY . .
-RUN npm i -g
-RUN ls -l /root/dist/client-templates/github-com
+WORKDIR /home/node
+USER node
+
 # Generate default accept filter
 RUN broker init github-com
+
 # Support for OpenShift - have to run after init to get accept.json and .env
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
