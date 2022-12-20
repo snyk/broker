@@ -11,9 +11,9 @@ WORKDIR /home/node
 
 ENV PATH=$PATH:/home/node/node_modules/.bin
 
-ADD package.json ./
-ADD debug.sh ./
-ADD install.sh ./
+ADD dockerfiles/github-com/package.json ./
+ADD dockerfiles/github-com/debug.sh ./
+ADD dockerfiles/github-com/install.sh ./
 
 RUN ./install.sh
 
