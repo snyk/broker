@@ -12,8 +12,10 @@ WORKDIR /home/node
 ENV PATH=$PATH:/home/node/node_modules/.bin
 
 ADD package.json ./
+ADD debug.sh ./
+ADD install.sh ./
 
-RUN npm install
+RUN ./install.sh
 
 FROM snyk/ubuntu
 
