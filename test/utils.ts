@@ -9,7 +9,12 @@ export function port() {
   return --p;
 }
 
-export function createTestServer(echoServerPort = port()) {
+export type Servers = {
+  echoServerPort: number;
+  httpServer: any;
+};
+
+export function createTestServer(echoServerPort = port()): Servers {
   // this is our fake local and private web server
   const { app: echoServer, server: testServer } = webserver({
     port: echoServerPort,
@@ -103,8 +108,8 @@ export function createTestServer(echoServerPort = port()) {
   echoServer.use(['/snykgit', '/'], echoServerRoutes);
 
   return {
-    echoServerPort,
-    testServer,
+    echoServerPort: echoServerPort,
+    httpServer: testServer,
   };
 }
 
@@ -114,7 +119,7 @@ export function requestAsync(req) {
       if (!error) {
         resolve({ res, body });
       } else {
-        reject({ error, res, body });
+        reject({ res, body, error });
       }
     });
   });

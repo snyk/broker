@@ -20,8 +20,8 @@ describe('metrics', () => {
   let brokerToken;
 
   beforeAll((done) => {
-    const { testServer } = createTestServer(originPort);
-    utilServer = testServer;
+    const { httpServer } = createTestServer(originPort);
+    utilServer = httpServer;
     serverPort = port();
     server = app.main({
       port: serverPort,
