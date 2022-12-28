@@ -20,35 +20,47 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
     params: CreateConnectionRequestParams,
     data: CreateConnectionRequestData,
   ): Promise<ServerId> {
-    const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
+    try {
+      const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
 
-    const response = await axiosInstance.post<CreateConnectionResponse>(
-      path,
-      {
-        data: {
-          attributes: {
-            deployment_location: data.deployment_location,
+      const response = await axiosInstance.post<CreateConnectionResponse>(
+        path,
+        {
+          data: {
+            attributes: {
+              deployment_location: data.deployment_location,
+            },
           },
         },
-      },
-      {
-        baseURL: this.baseUrl,
-        headers: {
-          'Content-type': 'application/vnd.api+json',
+        {
+          baseURL: this.baseUrl,
+          headers: {
+            'Content-type': 'application/vnd.api+json',
+          },
+          params: { version: this.version },
+          validateStatus: () => true,
         },
-        params: { version: this.version },
-        validateStatus: () => true,
-      },
-    );
+      );
 
-    const apiResponse = response?.data?.data;
-    const snykRequestId = response.headers['snyk-request-id'] || '';
-    logger.trace(
-      { snykRequestId, apiResponse },
-      'createConnection API response',
-    );
+      const apiResponse = response.data.data;
+      if (!apiResponse?.attributes) {
+        logger.trace(
+          { apiResponse },
+          'Unexpected Connection Allocation Server response',
+        );
+        throw new Error('Unexpected connection cllocation server response');
+      }
+      const snykRequestId = response.headers['snyk-request-id'] || '';
+      logger.trace(
+        { snykRequestId, apiResponse },
+        'createConnection API response',
+      );
 
-    const serverId = response?.data?.data?.attributes?.server_id || '-1';
-    return response.status === 201 ? serverId : '-1';
+      const serverId = apiResponse.attributes.server_id;
+      return serverId;
+    } catch (err) {
+      logger.trace({ err }, 'Error getting connection allocation.');
+      throw new Error('Error getting connection allocation.');
+    }
   }
 }
