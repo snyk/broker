@@ -44,10 +44,10 @@ describe('Broker Dispatcher API client', () => {
         ctx.body = {
           data: {
             attributes: {
-              server_id: 'server-id-from-dispatcher'
-            }
-          }
-        }
+              server_id: 'server-id-from-dispatcher',
+            },
+          },
+        };
       });
 
     const client = new HttpDispatcherServiceClient(dispatcherServerBaseUrl);

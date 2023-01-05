@@ -1,4 +1,5 @@
 import * as request from 'request';
+
 const compression = require('compression');
 const webserver = require('../lib/webserver');
 const express = require('express');
@@ -9,13 +10,17 @@ export function port() {
   return --p;
 }
 
-export type Servers = {
+/**
+ * Our fake local and private web server.
+ */
+export type UtilServer = {
   echoServerPort: number;
   httpServer: any;
 };
 
-export function createTestServer(echoServerPort = port()): Servers {
-  // this is our fake local and private web server
+export async function createUtilServer(
+  echoServerPort = port(),
+): Promise<UtilServer> {
   const { app: echoServer, server: testServer } = webserver({
     port: echoServerPort,
     httpsKey: process.env.TEST_KEY, // Optional
