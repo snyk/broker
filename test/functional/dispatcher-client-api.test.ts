@@ -16,7 +16,7 @@ describe('Broker Dispatcher API client', () => {
     dispatcherServerBaseUrl = server.getURL().toString();
   });
 
-  it('should return -1 for 404', async () => {
+  it('should return undefined when no allocation found', async () => {
     server
       .post(`/hidden/broker/${hashedToken}/connections/1`)
       .mockImplementationOnce((ctx) => {
@@ -25,15 +25,17 @@ describe('Broker Dispatcher API client', () => {
 
     const client = new HttpDispatcherServiceClient(dispatcherServerBaseUrl);
 
-    const serverId = await client.createConnection(
-      {
-        hashedBrokerToken: hashedToken,
-        brokerClientId: '1',
-      },
-      { deployment_location: 'test' },
-    );
-
-    expect(serverId).toEqual('-1');
+    try {
+      await client.createConnection(
+        {
+          hashedBrokerToken: hashedToken,
+          brokerClientId: '1',
+        },
+        { deployment_location: 'test' },
+      );
+    } catch (err) {
+      expect(err).toEqual(Error('Error getting connection allocation.'));
+    }
   });
 
   it('should return server_id for 201', async () => {
