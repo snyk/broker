@@ -1,70 +1,80 @@
-// awkward require from '../utils' on '../../lib/config'
-// means we have to assign a port and set env here *before* importing
-const originPort = 9877;
-process.env.ORIGIN_PORT = `${originPort}`;
-
 import * as path from 'path';
 import * as app from '../../lib';
 import * as metrics from '../../lib/metrics';
-import { createTestServer, requestAsync, port } from '../utils';
+import { createUtilServer, UtilServer } from '../utils';
+import axios from 'axios';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
 const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('metrics', () => {
-  let client;
-  let server;
-  let serverPort;
-  let utilServer;
+  let client, server, serverPort;
+  let utilServer: UtilServer;
   let brokerToken;
 
-  beforeAll((done) => {
-    const { httpServer } = createTestServer(originPort);
-    utilServer = httpServer;
-    serverPort = port();
-    server = app.main({
+  beforeAll(async () => {
+    utilServer = await createUtilServer(9875);
+
+    serverPort = 9874;
+    server = await app.main({
       port: serverPort,
       client: undefined,
       config: {
         accept: serverAccept,
       },
     });
-    client = app.main({
-      port: port(),
+
+    client = await app.main({
+      port: 9873,
       client: 'artifactory',
       config: {
         accept: clientAccept,
         brokerServerUrl: `http://localhost:${serverPort}`,
         brokerToken: '98f04768-50d3-46fa-817a-9ee6631e9970',
-        artifactoryUrl: `http://localhost:${originPort}`,
+        artifactoryUrl: `http://localhost:9875`,
       },
     });
 
-    // wait for server <> client connection
-    server.io.on('connection', (socket) => {
-      socket.on('identify', ({ token }) => {
-        brokerToken = token;
-        done();
+    await new Promise((resolve) => {
+      server.io.on('connection', (socket) => {
+        socket.on('identify', (clientData) => {
+          brokerToken = clientData.token;
+          resolve(brokerToken);
+        });
       });
     });
   });
 
-  afterAll(() => {
-    utilServer.close();
-    client.close();
-    server.close();
+  beforeEach(() => {
+    jest.resetModules();
   });
 
-  afterEach(() => jest.resetAllMocks());
+  afterAll(async () => {
+    await utilServer.httpServer.close();
+    await client.close();
+    setTimeout(async () => {
+      await server.close();
+    }, 100);
+
+    await new Promise<void>((resolve) => {
+      server.io.on('close', () => {
+        resolve();
+      });
+    });
+  });
 
   it('observes response size when streaming', async () => {
     const metricsSpy = jest.spyOn(metrics, 'observeResponseSize');
     const expectedBytes = 256_000; // 250kb
-    await requestAsync({
-      url: `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
-      method: 'get',
-    });
+
+    await axios.get(
+      `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
+      {
+        validateStatus: () => true,
+      },
+    );
+
     expect(metricsSpy).toHaveBeenCalledWith({
       bytes: expectedBytes,
       isStreaming: true,
