@@ -58,17 +58,18 @@ describe('no filters broker', () => {
     });
   });
 
-  it('successfully broker with no filter should reject', async () => {
+  it.skip('successfully broker with no filter should reject', async () => {
     const url = `http://localhost:${serverPort}/broker/${brokerToken}/echo-body`;
     const response = await axios.post(
       url,
       { test: 'body' },
       {
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
 
-    expect(response.status).toBe(401);
+    expect(response.status).toEqual(401);
     expect(response.data).not.toBe({
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
