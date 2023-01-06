@@ -101,5 +101,20 @@
     "url": "https://github.com/snyk/broker/issues"
   },
   "homepage": "https://github.com/snyk/broker#readme",
-  "snyk": true
+  "snyk": true,
+  "pkg": {
+    "scripts": [
+      "node_modules/primus/**/*.js",
+      "dist/lib/index.js"
+    ],
+    "assets": [
+      "node_modules/ejson/**/*",
+      "dist/client-templates/**/*"
+    ],
+    "targets": [
+      "node16-linux-x64",
+      "node16-linux-arm64"
+    ],
+    "outputPath": "binary-releases"
+  }
 }

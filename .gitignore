@@ -9,6 +9,7 @@ accept.json
 package-lock.json
 /dist
 .eslintcache
+binary-releases
 
 
 # Test coverage reports
