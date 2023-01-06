@@ -1,0 +1,37 @@
+{
+  "//": "Cut down example accept.json for GitHub to test filter logic",
+  "public": [],
+  "private":
+  [
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/package.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to whitelist a folder",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/docs/*",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "get the details of the commit to determine its SHA",
+      "method": "GET",
+      "path": "/repos/:name/:repo/commits/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}",
+      "valid": [
+        {
+          "header": "accept",
+          "values": ["application/vnd.github.v4.sha"]
+        }
+      ]
+    },
+    {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    }
+  ]
+}

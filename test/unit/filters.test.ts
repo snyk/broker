@@ -653,7 +653,9 @@ describe('filters', () => {
   });
 
   describe('for GitHub', () => {
-    const rules = JSON.parse(loadFixture(path.join('accept', 'github.json')));
+    const rules = JSON.parse(
+      loadFixture(path.join('accept', 'github-with-snippets.json')),
+    );
     const filter = Filters(rules.private);
 
     it('should allow the sha media type header when requesting a branch SHA to prevent patch information being returned', (done) => {
@@ -687,6 +689,22 @@ describe('filters', () => {
         (error, res) => {
           expect(error.message).toEqual('blocked');
           expect(res).toBeUndefined();
+          done();
+        },
+      );
+    });
+
+    it('should allow code snippets', (done) => {
+      const url =
+        '/repos/aarlaud-playground/python-flask-sample-app/contents/minitwit/minitwit.py?ref=ba1cd682e5a2ffaebcada391d13f423b9279b247';
+      filter(
+        {
+          url,
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toMatch(url);
           done();
         },
       );
