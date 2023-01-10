@@ -26,6 +26,12 @@
           "values": ["application/vnd.github.v4.sha"]
         }
       ]
+    },
+    {
+      "//": "needed to load code snippets",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*",
+      "origin": "https://pat:${GITHUB_TOKEN}@${GITHUB_API}"
     }
   ]
 }

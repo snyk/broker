@@ -7,9 +7,7 @@ const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 
 function loadFixture(name: string) {
   const fixturePath = path.join(__dirname, '..', 'fixtures', name);
-  const fixture = readFileSync(fixturePath, { encoding: 'utf-8' });
-
-  return fixture;
+  return readFileSync(fixturePath, { encoding: 'utf-8' });
 }
 
 describe('filters', () => {
@@ -33,15 +31,15 @@ describe('filters', () => {
         );
       });
 
-      it('should block when manifest appears after fragment identifier', () => {
+      it('should remove any fragments identifier', () => {
         filter(
           {
             url: '/repos/angular/angular/contents/test-main.js#/package.json',
             method: 'GET',
           },
           (error, res) => {
-            expect(error.message).toEqual('blocked');
-            expect(res).toBeUndefined();
+            expect(error).toBeNull();
+            expect(res.url).not.toContain('#');
           },
         );
       });
@@ -688,6 +686,38 @@ describe('filters', () => {
           expect(error.message).toEqual('blocked');
           expect(res).toBeUndefined();
           done();
+        },
+      );
+    });
+
+    it('should allow the get file in the root directory for code snippets', async () => {
+      const url =
+        '/repos/owner/repo-name/contents/main.js?ref=e5d896304278f15be39e5b13ab7f0f2add9f8e3e';
+
+      filter(
+        {
+          url,
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toMatch(url);
+        },
+      );
+    });
+
+    it('should allow the get file in the nested directory for code snippets', async () => {
+      const url =
+        '/repos/owner/repo-name/contents/nested-folder/main.js?ref=e5d896304278f15be39e5b13ab7f0f2add9f8e3e';
+
+      filter(
+        {
+          url,
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toMatch(url);
         },
       );
     });

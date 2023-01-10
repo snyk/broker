@@ -3187,7 +3187,7 @@ Object {
       "//": "needed to load code snippets",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/repos/:name/:repo/contents/:path",
+      "path": "/repos/:name/:repo/contents/:path*",
     },
   ],
   "public": Array [
@@ -4536,7 +4536,7 @@ Object {
       "//": "needed to load code snippets",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/repos/:name/:repo/contents/:path",
+      "path": "/repos/:name/:repo/contents/:path*",
     },
   ],
   "public": Array [
@@ -9517,7 +9517,7 @@ Object {
       "//": "needed to load code snippets",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/repos/:name/:repo/contents/:path",
+      "path": "/repos/:name/:repo/contents/:path*",
     },
   ],
   "public": Array [
@@ -10878,7 +10878,7 @@ Object {
       "//": "needed to load code snippets",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/repos/:name/:repo/contents/:path",
+      "path": "/repos/:name/:repo/contents/:path*",
     },
   ],
   "public": Array [
