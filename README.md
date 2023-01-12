@@ -609,7 +609,7 @@ Europe: `https://broker.eu.snyk.io`<br>
 Australia: `https://broker.au.snyk.io`<br>
 
 ```
--e BROKER_SERVER_URL=<BROKER_SERVER_URL>`
+-e BROKER_SERVER_URL=<BROKER_SERVER_URL>
 ```
 
 ### Credential Pooling
