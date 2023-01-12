@@ -602,6 +602,15 @@ If `scheme` is `bearer` or `token`, you must provide a `token`, and if it's `bas
 
 This will override any other configured authentication method (e.g., setting the token in the `origin` field, or in the `.env` file).
 
+#### Multi-tenant
+To use Broker with different multi-tenant environments, set `BROKER_SERVER_URL` to be one of the following URLs depending which environment you are using:
+
+Europe: `https://broker.eu.snyk.io`<br>
+Australia: `https://broker.au.snyk.io`<br>
+
+```
+-e BROKER_SERVER_URL=<BROKER_SERVER_URL>`
+```
 
 ### Credential Pooling
 Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues.
