@@ -2,7 +2,7 @@
   "name": "snyk-broker",
   "description": "Broker for private communication between internal systems and outside public systems",
   "main": "dist/lib/index.js",
-  "version": "0.0.1-dev",
+  "version": "4.138.4-dev",
   "bin": {
     "snyk-broker": "./dist/cli/index.js",
     "broker": "./dist/cli/index.js"
