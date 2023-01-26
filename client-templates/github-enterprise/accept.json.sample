@@ -60,6 +60,22 @@
         },
         {
           "path": "commits.*.added.*",
+          "value": "pyproject.toml"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "pyproject.toml"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "poetry.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "poetry.lock"
+        },
+        {
+          "path": "commits.*.added.*",
           "value": "pom.xml"
         },
         {
@@ -462,6 +478,30 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/pyproject.toml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpyproject.toml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/poetry.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpoetry.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/yarn.lock",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
@@ -853,6 +893,30 @@
       "//": "used to update manifest or lock",
       "method": "PUT",
       "path": "/repos/:name/:repo/contents/:path*%2F*req*.txt",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*/pyproject.toml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpyproject.toml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*/poetry.lock",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpoetry.lock",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
