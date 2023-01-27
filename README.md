@@ -515,6 +515,8 @@ More details can be found here:
 #### Snyk Code
 By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to perform a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
 
+NOTE: This feature is currently under closed beta. Please speak with your Snyk account management team to find out more.
+
 Example:
 
 ```console
