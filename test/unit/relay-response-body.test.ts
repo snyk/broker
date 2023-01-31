@@ -39,6 +39,8 @@ describe('body relay', () => {
       {
         url: '/',
         method: 'POST',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
       },

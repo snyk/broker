@@ -1,2 +1,2 @@
-* @snyk/comet
-**/container-registry-agent/* @snyk/magma
+* @snyk/team-broker
+**/container-registry-agent/* @snyk/container-integration

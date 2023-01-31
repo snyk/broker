@@ -1,14 +1,9 @@
-import * as path from 'path';
-import * as app from '../../lib';
-import * as metrics from '../../lib/metrics';
-import { createUtilServer, UtilServer } from '../utils';
 import axios from 'axios';
 
-const fixtures = path.resolve(__dirname, '..', 'fixtures');
-const serverAccept = path.join(fixtures, 'server', 'filters.json');
-const clientAccept = path.join(fixtures, 'client', 'filters.json');
+const app = require('../../lib');
+import { createUtilServer, UtilServer } from '../utils';
 
-describe('metrics', () => {
+describe('no filters broker', () => {
   let client, server, serverPort;
   let utilServer: UtilServer;
   let brokerToken;
@@ -21,18 +16,17 @@ describe('metrics', () => {
       port: serverPort,
       client: undefined,
       config: {
-        accept: serverAccept,
+        accept: '',
       },
     });
 
     client = await app.main({
       port: 9873,
-      client: 'artifactory',
+      client: 'client',
       config: {
-        accept: clientAccept,
         brokerServerUrl: `http://localhost:${serverPort}`,
-        brokerToken: '98f04768-50d3-46fa-817a-9ee6631e9970',
-        artifactoryUrl: `http://localhost:9875`,
+        brokerToken: '12345',
+        accept: '',
       },
     });
 
@@ -64,20 +58,22 @@ describe('metrics', () => {
     });
   });
 
-  it('observes response size when streaming', async () => {
-    const metricsSpy = jest.spyOn(metrics, 'observeResponseSize');
-    const expectedBytes = 256_000; // 250kb
-
-    await axios.get(
-      `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
+  it.skip('successfully broker with no filter should reject', async () => {
+    const url = `http://localhost:${serverPort}/broker/${brokerToken}/echo-body`;
+    const response = await axios.post(
+      url,
+      { test: 'body' },
       {
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
 
-    expect(metricsSpy).toHaveBeenCalledWith({
-      bytes: expectedBytes,
-      isStreaming: true,
+    expect(response.status).toEqual(401);
+    expect(response.data).not.toBe({
+      message: 'blocked',
+      reason: 'Request does not match any accept rule, blocking HTTP request',
+      url: '/echo-server',
     });
   });
 });

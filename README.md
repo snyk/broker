@@ -592,7 +592,22 @@ docker run --restart=always \
 
 #### Infrastructure as Code (IaC)
 
-By default, some file types used by Infrastructure-as-Code (IaC) are not enabled. To grant the Broker access to IaC files in your repository, such as Terraform, edit your `accept.json` and add the relevant IaC specific rules.
+By default, some file types used by Infrastructure-as-Code (IaC) are not enabled. To grant the Broker access to IaC files in your repository, such as Terraform for example, you can simply add an environment variable ACCEPT_IAC with any combination of tf,yaml,yml,json,tpl
+
+Example:
+
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e ACCEPT_IAC=tf,yaml,yml,json,tpl
+       snyk/broker:github-com
+```
+
+You can otherwise edit your `accept.json`, add the relevant IaC specific rules and load the customized accept file into the container. Note that if a custom accept file (from a separate folder) is used (using ACCEPT environment variable), the ACCEPT_IAC mechanism cannot be used.
 
 For example, if you are using GitHub and you would like to give the Broker access to your Terraform files, you should add the following rules to your `accept.json`:
 
@@ -613,6 +628,25 @@ For example, if you are using GitHub and you would like to give the Broker acces
 
 More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
+
+#### Snyk Code
+By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to perform a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
+
+NOTE: This feature is currently under closed beta. Please speak with your Snyk account management team to find out more.
+
+Example:
+
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e ACCEPT_CODE=true
+       snyk/broker:github-com
+```
+Note that if a custom accept file (from a separate folder) is used (using ACCEPT environment variable), the ACCEPT_CODE mechanism cannot be used.
 
 #### Changing the Auth Method
 
@@ -686,6 +720,15 @@ If `scheme` is `bearer` or `token`, you must provide a `token`, and if it's `bas
 
 This will override any other configured authentication method (e.g., setting the token in the `origin` field, or in the `.env` file).
 
+#### Multi-tenant
+To use Broker with different multi-tenant environments, set `BROKER_SERVER_URL` to be one of the following URLs depending which environment you are using:
+
+Europe: `https://broker.eu.snyk.io`<br>
+Australia: `https://broker.au.snyk.io`<br>
+
+```
+-e BROKER_SERVER_URL=<BROKER_SERVER_URL>
+```
 
 ### Credential Pooling
 Under some circumstances it can be desirable to create a "pool" of credentials, e.g., to work around rate-limiting issues. This can be achieved by creating an environment variable ending in `_POOL`, separate each credential with a comma, and the Broker Client will then, when performing variable replacement, look to see if the variable in use has a variant with a `_POOL` suffix, and use the next item in that pool if so. For example, if you have set the environment variable `GITHUB_TOKEN`, but want to provide multiple tokens, you would do this instead:

@@ -1,4 +1,5 @@
 import * as request from 'request';
+
 const compression = require('compression');
 const webserver = require('../lib/webserver');
 const express = require('express');
@@ -9,8 +10,17 @@ export function port() {
   return --p;
 }
 
-export function createTestServer(echoServerPort = port()) {
-  // this is our fake local and private web server
+/**
+ * Our fake local and private web server.
+ */
+export type UtilServer = {
+  echoServerPort: number;
+  httpServer: any;
+};
+
+export async function createUtilServer(
+  echoServerPort = port(),
+): Promise<UtilServer> {
   const { app: echoServer, server: testServer } = webserver({
     port: echoServerPort,
     httpsKey: process.env.TEST_KEY, // Optional
@@ -92,12 +102,9 @@ export function createTestServer(echoServerPort = port()) {
     },
   );
 
-  echoServerRoutes.get(
-    '/huge-file',
-    (req, res) => {
-      res.json({ data: "a".repeat(20971521) });
-    },
-  );
+  echoServerRoutes.get('/huge-file', (req, res) => {
+    res.json({ data: 'a '.repeat(10485761) });
+  });
 
   echoServerRoutes.all('*', (req, res) => {
     res.send(false);
@@ -106,8 +113,8 @@ export function createTestServer(echoServerPort = port()) {
   echoServer.use(['/snykgit', '/'], echoServerRoutes);
 
   return {
-    echoServerPort,
-    testServer,
+    echoServerPort: echoServerPort,
+    httpServer: testServer,
   };
 }
 
@@ -117,7 +124,7 @@ export function requestAsync(req) {
       if (!error) {
         resolve({ res, body });
       } else {
-        reject({ error, res, body });
+        reject({ res, body, error });
       }
     });
   });

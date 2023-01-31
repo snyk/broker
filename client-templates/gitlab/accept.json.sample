@@ -137,6 +137,30 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
       "origin": "https://${GITLAB}"
     },
@@ -459,6 +483,10 @@
             "**%2F*req*.txt",
             "**/requirements/*.txt",
             "**%2Frequirements%2F*.txt",
+            "**/pyproject.toml",
+            "**%2Fpyproject.toml",
+            "**/poetry.lock",
+            "**%2Fpoetry.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -572,6 +600,30 @@
       "//": "used to create manifest file",
       "method": "POST",
       "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to create manifest file",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
       "origin": "https://${GITLAB}"
     },
     {
@@ -897,6 +949,10 @@
             "**%2Fpom.xml",
             "**/*req*.txt",
             "**%2F*req*.txt",
+            "**/pyproject.toml",
+            "**%2Fpyproject.toml",
+            "**/poetry.lock",
+            "**%2Fpoetry.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -1009,6 +1065,30 @@
       "//": "used to update manifest file",
       "method": "PUT",
       "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "used to update manifest file",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
       "origin": "https://${GITLAB}"
     },
     {
@@ -1334,6 +1414,10 @@
             "**%2Fpom.xml",
             "**/*req*.txt",
             "**%2F*req*.txt",
+            "**/pyproject.toml",
+            "**%2Fpyproject.toml",
+            "**/poetry.lock",
+            "**%2Fpoetry.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
