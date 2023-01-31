@@ -297,6 +297,10 @@ ENV BROKER_CLIENT_VALIDATION_URL     https://<your.nexus.hostname>/service/rest/
 ENV RES_BODY_URL_SUB                 https://<your.nexus.hostname>/repository
 ```
 
+> Note: By default for Nexus 3, the X-Forwarded-For headers are stripped off by the broker client so Nexus returns the npm tarball uri to the nexus registry instead of the broker server.
+Include the environment variable `REMOVE_X_FORWARDED_HEADERS=false` to disable this behavior.
+
+
 ### Jira
 
 To use the Broker client with a Jira deployment, run `docker pull snyk/broker:jira` tag. The following environment variables are mandatory to configure the Broker client:
