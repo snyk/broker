@@ -1,0 +1,136 @@
+{
+  "public": [
+    {
+      "method": "any",
+      "path": "/*"
+    }
+  ],
+  "private": [
+    {
+      "method": "GET",
+      "path": "/api/v1/pods*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/networking.k8s.io/v1/ingresses*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/networking.k8s.io/v1/namespaces*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/apps/v1/replicasets*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/apps/v1/namespaces*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/batch/v1/namespaces*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/namespaces*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/services*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/apps/v1/deployments*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/configmaps*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/autoscaling/v1/horizontalpodautoscalers*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/autoscaling/v1/namespaces*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/apis/metrics.k8s.io/v1beta1/namespaces/*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/namespaces/*",
+      "origin": "${CLUSTER_ENDPOINT}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${K8S_SERVICE_ACCOUNT_TOKEN}"
+      }
+    }
+  ]
+}
