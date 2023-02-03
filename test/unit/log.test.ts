@@ -60,7 +60,8 @@ describe('log', () => {
     const sanitizedTokens =
       '${BROKER_TOKEN},${GITHUB_TOKEN},${GITHUB_TOKEN_POOL},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
     const sanitizedBitBucket = '${BITBUCKET_USERNAME},${BITBUCKET_PASSWORD}';
-    const sanitizedJira = '${JIRA_USERNAME},${JIRA_PASSWORD},${JIRA_PASSWORD_POOL}';
+    const sanitizedJira =
+      '${JIRA_USERNAME},${JIRA_PASSWORD},${JIRA_PASSWORD_POOL}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
     const sanitizedCRData =
       '${CR_AGENT_URL},${CR_CREDENTIALS},${CR_USERNAME},${CR_PASSWORD},${CR_TOKEN},${CR_ROLE_ARN},${CR_EXTERNAL_ID},${CR_REGION},${CR_BASE}';
