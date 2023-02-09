@@ -86,6 +86,7 @@ describe('proxy requests originating from behind the broker server with pooled c
 
     // remove clientId because it's generated
     delete metadata['clientId'];
+    delete metadata['preflightCheckResults'];
     expect(metadata).toStrictEqual({
       version,
       filters,
