@@ -22,7 +22,9 @@ export class HttpCheckService implements CheckService {
           'User-Agent': `broker client/${version} (http check service)`,
         },
         timeout: check.timeoutMs,
+        validateStatus: () => true,
       });
+      logger.trace({ response: response.data }, 'http check raw response');
 
       const checkResult = convertResponseToCheckResult(
         check,
@@ -31,6 +33,10 @@ export class HttpCheckService implements CheckService {
         JSON.stringify(response.data),
       );
 
+      logger.debug(
+        { checkId, status: checkResult.status },
+        `completed http check execution`,
+      );
       return Promise.resolve(checkResult);
     } catch (error) {
       const errorMessage = `Error executing check with checkId ${checkId}`;
