@@ -8,6 +8,8 @@ export const retry = async <T>(
   try {
     return await fn();
   } catch (error) {
+    logger.debug({ attempt, operation, error }, 'failed to execute retry');
+
     if (retries <= 0) {
       throw error;
     }

@@ -1,12 +1,14 @@
 import logger = require('../../log');
 import { Config } from '../config';
+import { CheckStore } from './check-store';
+import { CheckResult } from './types';
+import { HttpCheckService } from './http/http-check-service';
 import { PreflightCheckStore } from './prefilght-check-store';
 import {
   createBrokerServerHealthcheck,
   createRestApiHealthcheck,
 } from './http/http-checks';
-import { HttpCheckService } from './http/http-check-service';
-import { CheckStore } from './check-store';
+import { retry } from '../retry/exponential-backoff';
 
 export function preflightChecksEnabled(config: any): boolean {
   // preflight checks are enabled per default
@@ -28,6 +30,25 @@ export function preflightChecksEnabled(config: any): boolean {
   return preflightChecksEnabled;
 }
 
+export async function executePreflightChecks(
+  config: any,
+): Promise<CheckResult[]> {
+  const preflightCheckResults: CheckResult[] = [];
+  const { preflightCheckStore, httpCheckService } = await checksConfig(config);
+  const checks = await preflightCheckStore.getAll();
+  for (const check of checks) {
+    const checkResult: CheckResult = await retry<CheckResult>(
+      () => httpCheckService.run(check.checkId),
+      {
+        retries: 30,
+        operation: `http check ${check.checkId}`,
+      },
+    );
+    preflightCheckResults.push(checkResult);
+  }
+  return Promise.resolve(preflightCheckResults);
+}
+
 const configurePreflightCheckStore = async (
   config: Config,
 ): Promise<PreflightCheckStore> => {
@@ -47,7 +68,8 @@ const configureHttpCheckService = async (
   return Promise.resolve(httpCheckService);
 };
 
-export const checkConfig = async (config: any) => {
+// wire all dependencies (services and stores) here
+const checksConfig = async (config: any) => {
   const preflightCheckStore = await configurePreflightCheckStore(
     config as Config,
   );
