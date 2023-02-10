@@ -69,7 +69,7 @@ const configureHttpCheckService = async (
 };
 
 // wire all dependencies (services and stores) here
-const checksConfig = async (config: any) => {
+export const checksConfig = async (config: any) => {
   const preflightCheckStore = await configurePreflightCheckStore(
     config as Config,
   );
