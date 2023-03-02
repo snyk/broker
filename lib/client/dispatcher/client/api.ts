@@ -1,4 +1,4 @@
-import { axiosInstance } from './axios';
+import { axiosInstance } from '../../../axios';
 import logger = require('../../../log');
 import {
   CreateConnectionRequestData,
