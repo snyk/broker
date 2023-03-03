@@ -711,6 +711,21 @@ describe('filters', () => {
         },
       );
     });
+
+    it('should allow getting PR files', () => {
+      const url =
+        '/repos/a-repo-owner/a-repo-name/pulls/54321/files?page=123';
+      filter(
+        {
+          url,
+          method: 'GET',
+        },
+        (error, res) => {
+          expect(error).toBeNull();
+          expect(res.url).toMatch(url);
+        },
+      );
+    });
   });
 });
 

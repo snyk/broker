@@ -3249,6 +3249,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -4660,6 +4666,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
@@ -9879,6 +9891,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -11302,6 +11320,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
@@ -18066,6 +18090,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -20241,6 +20271,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -21658,6 +21694,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
@@ -23113,6 +23155,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
@@ -29864,6 +29912,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -31257,6 +31311,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
@@ -36351,6 +36411,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pull_number",
     },
     Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
+    },
+    Object {
       "//": "create branches for new commits",
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -37744,6 +37810,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pull_number",
+    },
+    Object {
+      "//": "get pull request file names",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pull_number/files",
     },
     Object {
       "//": "add commit data for new PR",
