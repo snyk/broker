@@ -26,9 +26,17 @@ export function highAvailabilityModeEnabled(config: any): boolean {
 
 export async function getServerId(
   config: any,
-  brokerToken: string,
   brokerClientId: string,
 ): Promise<ServerId | null> {
+  if (!config.BROKER_TOKEN) {
+    logger.error({ token: config.BROKER_TOKEN }, 'missing client token');
+    const error = new Error(
+      'BROKER_TOKEN is required to successfully identify itself to the server',
+    );
+    error.name = 'MISSING_BROKER_TOKEN';
+    throw error;
+  }
+
   const haConfig = getHAConfig(config);
   const baseUrl =
     haConfig.BROKER_DISPATCHER_BASE_URL || defaultBrokerDispatcherBaseUrl;
