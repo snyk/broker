@@ -7,21 +7,36 @@ import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 export const defaultBrokerDispatcherBaseUrl = 'https://api.snyk.io';
 
 export function highAvailabilityModeEnabled(config: any): boolean {
-  const haConfig = getHAConfig(config);
+  // high availability mode is disabled per default
+  let highAvailabilityModeEnabled = false;
 
-  logger.info(
-    { enabled: haConfig.BROKER_HA_MODE_ENABLED },
-    'checking for HA mode',
-  );
+  const highAvailabilityModeEnabledValue = (config as HAConfiguration)
+    .BROKER_HA_MODE_ENABLED;
 
-  return haConfig.BROKER_HA_MODE_ENABLED;
+  if (typeof highAvailabilityModeEnabledValue !== 'undefined') {
+    highAvailabilityModeEnabled =
+      highAvailabilityModeEnabledValue.toLowerCase() === 'true' ||
+      highAvailabilityModeEnabledValue.toLowerCase() === 'yes';
+  }
+
+  logger.info({ enabled: highAvailabilityModeEnabled }, 'checking for HA mode');
+
+  return highAvailabilityModeEnabled;
 }
 
 export async function getServerId(
   config: any,
-  brokerToken: string,
   brokerClientId: string,
 ): Promise<ServerId | null> {
+  if (!config.BROKER_TOKEN) {
+    logger.error({ token: config.BROKER_TOKEN }, 'missing client token');
+    const error = new Error(
+      'BROKER_TOKEN is required to successfully identify itself to the server',
+    );
+    error.name = 'MISSING_BROKER_TOKEN';
+    throw error;
+  }
+
   const haConfig = getHAConfig(config);
   const baseUrl =
     haConfig.BROKER_DISPATCHER_BASE_URL || defaultBrokerDispatcherBaseUrl;

@@ -3,5 +3,5 @@
  */
 export type HAConfiguration = {
   BROKER_DISPATCHER_BASE_URL: string;
-  BROKER_HA_MODE_ENABLED: boolean;
+  BROKER_HA_MODE_ENABLED: string;
 };
