@@ -713,8 +713,7 @@ describe('filters', () => {
     });
 
     it('should allow getting PR files', () => {
-      const url =
-        '/repos/a-repo-owner/a-repo-name/pulls/54321/files?page=123';
+      const url = '/repos/a-repo-owner/a-repo-name/pulls/54321/files?page=123';
       filter(
         {
           url,
