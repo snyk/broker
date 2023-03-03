@@ -19,7 +19,9 @@
     "test": "jest --detectOpenHandles",
     "test:bin": "(cd test/bin; ./container-registry-agent/docker-entrypoint-test.sh)",
     "test:bin:docker": "docker run --rm -it -v $PWD:/home/broker -w /home/broker/test/bin/ snyk/ubuntu ./container-registry-agent/docker-entrypoint-test.sh",
-    "lint": "prettier --check '{lib,test,cli}/**/*.{js,ts}' && eslint --color --cache '{cli,lib,test}/**/*.{js,ts}'"
+    "lint": "npm run lint:check && npm run lint:code",
+    "lint:check": "prettier --check '{lib,test,cli}/**/*.{js,ts}'",
+    "lint:code": "eslint --color --cache '{cli,lib,test}/**/*.{js,ts}'"
   },
   "keywords": [],
   "author": "Snyk.io",
