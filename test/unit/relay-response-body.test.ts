@@ -7,7 +7,9 @@ const requestMock = jest.fn((req, fn) => {
   fn!(null, { statusCode: 200 } as any, {});
 });
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 requestDefaultsMock.mockImplementation((_options) => {
   return requestMock;
 });

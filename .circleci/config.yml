@@ -25,6 +25,15 @@ jobs:
       NODE_ENV: development
     steps:
       - install_deps
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/broker
+      - run:
+          name: Lint
+          command: npm run lint
   lint_json_samples:
     <<: *defaults
     steps:
@@ -75,10 +84,15 @@ workflows:
           name: Test
           requires:
             - Install DEV
+      - lint:
+          name: Lint
+          requires:
+            - Install DEV
       - pkg:
           name: Package
           requires:
             - Test
+            - Lint
       - release:
           name: Release to GitHub
           context: nodejs-lib-release
