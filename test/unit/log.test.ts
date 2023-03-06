@@ -4,15 +4,13 @@ describe('log', () => {
   it('sanitizes log data', () => {
     const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
     const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
-    // @ts-ignore
-    const githubTkPool = (process.env.GITHUB_TOKEN_POOL = ['GITHUB_456']);
+    const githubTkPool = [(process.env.GITHUB_TOKEN_POOL = 'GITHUB_456')];
     const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
     const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
     const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
     const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
     const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
-    // @ts-ignore
-    const jiraPassPool = (process.env.JIRA_PASSWORD_POOL = ['JRA_POOL_PASS']);
+    const jiraPassPool = [(process.env.JIRA_PASSWORD_POOL = 'JRA_POOL_PASS')];
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
     const artifactoryUrl = (process.env.ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
