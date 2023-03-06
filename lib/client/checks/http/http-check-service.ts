@@ -1,6 +1,6 @@
 import logger = require('../../../log');
 import version = require('../../../version');
-import { axiosInstance } from '../../axios/axios';
+import { axiosInstance } from '../../../axios';
 import { Check, CheckId, CheckResult, CheckStatus } from '../types';
 import { CheckService } from '../check-service';
 import { CheckStore } from '../check-store';
