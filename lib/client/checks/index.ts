@@ -3,7 +3,7 @@ import { Config } from '../config';
 import { CheckStore } from './check-store';
 import { CheckResult } from './types';
 import { HttpCheckService } from './http/http-check-service';
-import { PreflightCheckStore } from './prefilght-check-store';
+import { PreflightCheckStore } from './preflight-check-store';
 import {
   createBrokerServerHealthcheck,
   createRestApiHealthcheck,

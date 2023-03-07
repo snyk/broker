@@ -1,5 +1,5 @@
 import { Check } from '../../../../lib/client/checks/types';
-import { PreflightCheckStore } from '../../../../lib/client/checks/prefilght-check-store';
+import { PreflightCheckStore } from '../../../../lib/client/checks/preflight-check-store';
 
 let preflightCheckStore: PreflightCheckStore;
 
