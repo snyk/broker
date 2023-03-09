@@ -84,12 +84,12 @@ describe('proxy requests originating from behind the broker server with pooled c
 
     const filters = require(clientAccept);
 
-    // remove clientId because it's generated
-    delete metadata['clientId'];
-    expect(metadata).toStrictEqual({
-      version,
-      filters,
+    expect(metadata).toMatchObject({
       capabilities: ['post-streams'],
+      clientId: expect.any(String),
+      filters: filters,
+      preflightChecks: expect.any(Array),
+      version,
     });
   });
 
