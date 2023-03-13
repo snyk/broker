@@ -40,7 +40,7 @@ export async function executePreflightChecks(
     const checkResult: CheckResult = await retry<CheckResult>(
       () => httpCheckService.run(check.checkId),
       {
-        retries: 30,
+        retries: 3,
         operation: `http check ${check.checkId}`,
       },
     );
