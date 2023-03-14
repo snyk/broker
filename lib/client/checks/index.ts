@@ -46,6 +46,9 @@ export async function executePreflightChecks(
     );
     preflightCheckResults.push(checkResult);
   }
+
+  logPreflightCheckResults(preflightCheckResults);
+
   return Promise.resolve(preflightCheckResults);
 }
 
@@ -80,4 +83,19 @@ export const checksConfig = async (config: any) => {
     preflightCheckStore,
     httpCheckService,
   };
+};
+
+const logPreflightCheckResults = (results: CheckResult[]) => {
+  console.log('##############################################################');
+  console.log('### PREFLIGHT CHECKS RESULTS');
+  console.log('###');
+  console.log('### Preflight checks help to catch errors early, upon broker');
+  console.log('### client startup. Note, that broker client will start');
+  console.log('### whether the checks were successful or not.');
+  console.log('##############################################################');
+
+  const checks = results.map((check) => {
+    return { id: check.id, status: check.status };
+  });
+  console.table(checks);
 };
