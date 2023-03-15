@@ -1,6 +1,6 @@
 import crypto = require('crypto');
 import logger = require('../../log');
-import { HAConfiguration } from './config';
+import { Config } from '../config';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 
@@ -10,7 +10,7 @@ export function highAvailabilityModeEnabled(config: any): boolean {
   // high availability mode is disabled per default
   let highAvailabilityModeEnabled = false;
 
-  const highAvailabilityModeEnabledValue = (config as HAConfiguration)
+  const highAvailabilityModeEnabledValue = (config as Config)
     .BROKER_HA_MODE_ENABLED;
 
   if (typeof highAvailabilityModeEnabledValue !== 'undefined') {
@@ -63,8 +63,8 @@ export async function getServerId(
   return null;
 }
 
-function getHAConfig(config: any): HAConfiguration {
-  return config as HAConfiguration;
+function getHAConfig(config: any): Config {
+  return config as Config;
 }
 
 function hash(token: string): string {
