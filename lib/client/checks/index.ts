@@ -92,6 +92,8 @@ const logPreflightCheckResults = (results: CheckResult[]) => {
   console.log('### Preflight checks help to catch errors early, upon broker');
   console.log('### client startup. Note, that broker client will start');
   console.log('### whether the checks were successful or not.');
+  console.log('###');
+  console.log('### See more: https://github.com/snyk/broker#preflight-checks');
   console.log('##############################################################');
 
   const checks = results.map((check) => {
