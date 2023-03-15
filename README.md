@@ -750,6 +750,18 @@ Sometime it is required to load sensitive configurations (GitHub/Snyk's token) f
 * Change the workdir of the docker image to be `/broker`/
 Example of such file is located in your broker container at $HOME/.env
 
+### Preflight Checks
+The main objective of preflight checks is to catch errors and misconfigurations early, upon broker client startup rather than later when usage is occurring.
+Regardless of whether the checks were successful, the Broker client will be started. There are following checks available:
+
+| Check ID               | Description                                                                                                                                                                                                                                                | Configuration Defaults                                          |
+|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| `broker-server-status` | **Broker Server Healthcheck** validates the connectivity to the Broker Server. It performs a GET request to `{BROKER_SERVER_URL}/healthcheck`                                                                                                              | If not specified, `BROKER_SERVER_URL` is https://broker.snyk.io |
+| `rest-api-status`      | **REST API Healthcheck** validates the connectivity to the [Snyk REST API](https://apidocs.snyk.io). It performs a GET request to `{API_BASE_URL}/rest/openapi`. This check is conditional and will be executed only if high availability mode is enabled. | If not specified, `API_BASE_URL` is https://api.snyk.io         |
+
+
+
+
 ### Troubleshooting
 
 #### Support of big manifest files (> 1Mb) for GitHub / GitHub Enterprise
