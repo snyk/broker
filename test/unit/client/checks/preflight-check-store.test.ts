@@ -1,5 +1,5 @@
-import { Check } from '../../../../lib/client/checks/types';
 import { PreflightCheckStore } from '../../../../lib/client/checks/preflight-check-store';
+import { aCheck } from '../../../helpers/test-factories';
 
 let preflightCheckStore: PreflightCheckStore;
 
@@ -9,19 +9,9 @@ describe('preflight-check-store', () => {
   });
 
   it('returns all preflight checks', async () => {
-    const checkOne: Check = {
-      checkId: 'check-one',
-      checkName: 'check one',
-      url: 'https://some-url',
-      timeoutMs: 10,
-    };
+    const checkOne = aCheck({ checkId: 'check-one', checkName: 'check-one' });
+    const checkTwo = aCheck({ checkId: 'check-two', checkName: 'check-two' });
     await preflightCheckStore.add(checkOne);
-    const checkTwo: Check = {
-      checkId: 'check-two',
-      checkName: 'check two',
-      url: 'https://some-url',
-      timeoutMs: 10,
-    };
     await preflightCheckStore.add(checkTwo);
 
     const foundChecks = await preflightCheckStore.getAll();
@@ -31,13 +21,23 @@ describe('preflight-check-store', () => {
     expect(foundChecks[1]).toStrictEqual(checkTwo);
   });
 
+  it('returns only active preflight checks', async () => {
+    const checkActive = aCheck({ checkId: 'check-active' });
+    const checkNotActive = aCheck({
+      checkId: 'check-not-active',
+      active: false,
+    });
+    await preflightCheckStore.add(checkActive);
+    await preflightCheckStore.add(checkNotActive);
+
+    const foundChecks = await preflightCheckStore.getAll();
+
+    expect(foundChecks.length).toEqual(1);
+    expect(foundChecks[0]).toStrictEqual(checkActive);
+  });
+
   it('returns the preflight check by checkId', async () => {
-    const check: Check = {
-      checkId: 'check-one',
-      checkName: 'check one',
-      url: 'https://some-url',
-      timeoutMs: 1_000,
-    };
+    const check = aCheck({ checkId: 'check-one', checkName: 'check-one' });
     await preflightCheckStore.add(check);
 
     const foundCheck = await preflightCheckStore.get('check-one');
@@ -46,13 +46,23 @@ describe('preflight-check-store', () => {
     expect(foundCheck?.checkId).toBe('check-one');
   });
 
+  it('returns null for inactive check by checkId', async () => {
+    const checkNotActive = aCheck({
+      checkId: 'check-not-active',
+      active: false,
+    });
+    await preflightCheckStore.add(checkNotActive);
+
+    const foundCheck = await preflightCheckStore.get('check-not-active');
+
+    expect(foundCheck).toBeNull();
+  });
+
   it('returns null if no check found', async () => {
-    const check: Check = {
+    const check = aCheck({
       checkId: 'check-random',
-      checkName: 'check random',
-      url: 'https://some-random-url',
-      timeoutMs: 10,
-    };
+      checkName: 'check-random',
+    });
     await preflightCheckStore.add(check);
 
     const foundCheck = await preflightCheckStore.get('non-existing-checkId');
@@ -61,12 +71,10 @@ describe('preflight-check-store', () => {
   });
 
   it('adds only unique preflight checks', async () => {
-    const check: Check = {
+    const check = aCheck({
       checkId: 'unique-check',
       checkName: 'unique-check',
-      url: 'https://some-unique-url',
-      timeoutMs: 100,
-    };
+    });
     await preflightCheckStore.add(check);
     await preflightCheckStore.add(check);
 

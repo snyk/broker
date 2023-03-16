@@ -12,10 +12,11 @@ export class PreflightCheckStore implements CheckStore {
 
   async get(checkId: CheckId): Promise<Check | null> {
     const entry = this.preflightChecks.find((c) => c.checkId === checkId);
-    return Promise.resolve(entry !== undefined ? entry : null);
+    return Promise.resolve(entry !== undefined && entry.active ? entry : null);
   }
 
   async getAll(): Promise<Check[]> {
-    return [...this.preflightChecks];
+    const activeChecks = this.preflightChecks.filter((entry) => entry.active);
+    return [...activeChecks];
   }
 }
