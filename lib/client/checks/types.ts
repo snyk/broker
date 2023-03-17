@@ -6,6 +6,7 @@ export interface Check {
   checkName: string;
   checkStatus?: CheckStatus;
 
+  active: boolean;
   output?: string;
   timeoutMs: number;
   url: string;
