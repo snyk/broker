@@ -1,8 +1,4 @@
-module.exports = {
-  maskToken,
-};
-
-function maskToken(token) {
+export function maskToken(token) {
   if (!token || token === '') {
     return '';
   }
