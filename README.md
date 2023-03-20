@@ -759,7 +759,7 @@ Regardless of whether the checks were successful, the Broker client will be star
 | `broker-server-status` | **Broker Server Healthcheck** validates the connectivity to the Broker Server. It performs a GET request to `{BROKER_SERVER_URL}/healthcheck`                                                                                                              | If not specified, `BROKER_SERVER_URL` is https://broker.snyk.io |
 | `rest-api-status`      | **REST API Healthcheck** validates the connectivity to the [Snyk REST API](https://apidocs.snyk.io). It performs a GET request to `{API_BASE_URL}/rest/openapi`. This check is conditional and will be executed only if high availability mode is enabled. | If not specified, `API_BASE_URL` is https://api.snyk.io         |
 
-
+> **Note**: `PREFLIGHT_CHECKS_ENABLED=false` environment variable can be used to disable Preflight Checks feature, so no checks will be executed when starting Broker client.
 
 
 ### Troubleshooting
