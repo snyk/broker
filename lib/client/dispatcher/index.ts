@@ -1,6 +1,6 @@
-import crypto = require('crypto');
 import logger = require('../../log');
 import { Config } from '../config';
+import { hashToken } from '../../token';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 
@@ -41,14 +41,14 @@ export async function getServerId(
   const baseUrl =
     haConfig.BROKER_DISPATCHER_BASE_URL || defaultBrokerDispatcherBaseUrl;
   const client = new HttpDispatcherServiceClient(baseUrl);
-  const token = hash(config.BROKER_TOKEN);
+  const hashedToken = hashToken(config.BROKER_TOKEN);
 
   const maxRetries = 30;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await getServerIdFromDispatcher(client, {
         brokerClientId: brokerClientId,
-        hashedBrokerToken: token,
+        hashedBrokerToken: hashedToken,
       });
     } catch (err) {
       const timeout = 2 ** attempt * 100;
@@ -65,10 +65,4 @@ export async function getServerId(
 
 function getHAConfig(config: any): Config {
   return config as Config;
-}
-
-function hash(token: string): string {
-  const shasum = crypto.createHash('sha256');
-  shasum.update(token);
-  return shasum.digest('hex');
 }
