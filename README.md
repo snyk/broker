@@ -457,9 +457,9 @@ docker run --restart=always \
 
 Note that `BROKER_CLIENT_URL` now has the HTTPS scheme.
 
-#### Git with an internal certificate
+#### Backend requests with an internal certificate
 
-By default, the Broker client establishes HTTPS connections to the Git. If your Git is serving an internal certificate (signed by your own CA), you can provide the CA certificate to the Broker client.
+By default, the Broker client establishes HTTPS connections to the backend system (e.g., GitHub, BitBucket, JIRA, etc). If your backend system is serving an internal certificate (signed by your own CA), you can provide the CA certificate to the Broker client.
 
 For example, if your CA certificate is at `./private/ca.cert.pem`, provide it to the docker container by mounting the folder and using the `CA_CERT` environment variable:
 
@@ -475,6 +475,29 @@ docker run --restart=always \
            -e CA_CERT=/private/ca.cert.pem \
            -v /local/path/to/private:/private \
        snyk/broker:bitbucket-server
+```
+
+Note that this will completely replace the default CA Certificate List for any requests made to
+your backend system, so this must be the complete chain required by the certificate used by the backend system.
+
+It must be `PEM`-formatted, `DER` is not supported. Supported certificate types are:
+
+* `TRUSTED CERTIFICATE`
+* `X509 CERTIFICATE`
+* `CERTIFICATE`
+
+For example:
+
+```
+-----BEGIN CERTIFICATE-----
+<base64-encoded certificate>
+-----END CERTIFICATE----
+-----BEGIN CERTIFICATE-----
+<base64-encoded certificate>
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+<base64-encoded certificate>
+-----END CERTIFICATE-----
 ```
 
 #### Infrastructure as Code (IaC)
@@ -768,7 +791,7 @@ Regardless of whether the checks were successful, the Broker client will be star
 
 One of the reason for failing of open Fix/Upgrade PRs or PR/recurring tests might be fetching big manifest files (> 1Mb) failure. To address this issue, additional Blob API endpoint should be whitelisted in `accept.json`:
 
-- Should be in `private` array
+- Should be in the `private` array
 ```json
 {
     "//": "used to get given manifest file",
