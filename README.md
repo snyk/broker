@@ -263,12 +263,14 @@ ENV ARTIFACTORY_URL   <yourdomain>.artifactory.com
 
 ### Nexus 3
 
-To use the Nexus 3 client with an Nexus 3 deployment, run `docker pull snyk/broker:nexus` tag. The following environment variables are needed to customize the Broker client:
+To use the Broker client with a Nexus 3 deployment, run `docker pull snyk/broker:nexus` tag. The following environment variables are needed to customize the Broker client:
 
-- `BROKER_TOKEN` - the snyk broker token, obtained from your artifactory integration settings view.
+- `BROKER_TOKEN` - the snyk broker token, obtained from your Nexus integration settings view.
 - `BASE_NEXUS_URL` - the URL of your Nexus 3 deployment, such as `https://[<user>:<pass>@]<your.nexus.hostname>`.
 - `BROKER_CLIENT_VALIDATION_URL` - Nexus validation url, checked by broker client systemcheck endpoint. If Nexus user requires auth, use `$BASE_NEXUS_URL/service/rest/v1/status/check` (e.g. `https://<user>:<pass>@<your.nexus.hostname>/service/rest/v1/status/check`) otherwise use `$BASE_NEXUS_URL/service/rest/v1/status` (e.g. `https://<your.nexus.hostname>/service/rest/v1/status`).
 - (Optional) `RES_BODY_URL_SUB` - This URL substitution is required for NPM/Yarn integration and is the same as the URL of the Nexus without credentials appended with `/repository`, e.g. `https://<your.nexus.hostname>/repository`
+- Ensure that `BASE_NEXUS_URL` and `RES_BODY_URL_SUB` do not end with a forward slash
+- The Nexus user needs the following privileges (either as part of a Role or added individually): **nx-metrics-all** (for the system status check endpoint) and **nx-repository-view-{ecosystem-repo-name}-read**, and **nx-repository-view-{ecosystem-repo-name}-browse**.
 
 #### Command-line arguments
 
@@ -300,6 +302,50 @@ ENV RES_BODY_URL_SUB                 https://<your.nexus.hostname>/repository
 > Note: By default for Nexus 3, the X-Forwarded-For headers are stripped off by the broker client so Nexus returns the npm tarball uri to the nexus registry instead of the broker server.
 Include the environment variable `REMOVE_X_FORWARDED_HEADERS=false` to disable this behavior.
 
+<br />
+
+### Nexus 2
+
+To use the Broker client with a Nexus 2 deployment (2.15 and above), run `docker pull snyk/broker:nexus2` tag. The following environment variables are needed to customize the Broker client:
+
+- `BROKER_TOKEN` - the snyk broker token, obtained from your Nexus integration settings view.
+- `BASE_NEXUS_URL` - the URL of your Nexus 2 deployment, such as `https://[<user>:<pass>@]<your.nexus.hostname>`. 
+- `BROKER_CLIENT_VALIDATION_URL` - Nexus validation url, checked by broker client systemcheck endpoint. If Nexus user requires auth, use `$BASE_NEXUS_URL:<port>/systemcheck` (e.g. `https://<user>:<pass>@<your.nexus.hostname>:<port>/systemcheck`) otherwise use `$BASE_NEXUS_URL:,port>/systemcheck` (e.g. `https://<your.nexus.hostname>:<port>/systemcheck`).
+- (Optional) `RES_BODY_URL_SUB` - This URL substitution is required for NPM/Yarn integration and is the same as the URL of the Nexus without credentials appended with `/nexus/content`, e.g. `https://<your.nexus.hostname>/nexus/content`
+- Ensure that `BASE_NEXUS_URL` and `RES_BODY_URL_SUB` do not end with a forward slash
+- The Nexus user needs the following privileges (either as part of a Role or added individually): **Status - (read)** and **All Repositories - (read) or {ecosystem} - (read)** and **All Repositories - (view) or {repoName} - (view)**
+
+#### Command-line arguments
+
+You can run the docker container by providing the relevant configuration:
+
+```console
+docker run --restart=always \
+           -p 7341:7341 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e BASE_NEXUS_URL=https://[<user>:<pass>@]<your.nexus.hostname> \
+           -e BROKER_CLIENT_VALIDATION_URL=https://<your.nexus.hostname>:<port>/systemcheck \
+           -e RES_BODY_URL_SUB=https://<your.nexus.hostname>/nexus/content/(groups|repositories) \
+       snyk/broker:nexus2
+```
+
+#### Derived docker image
+
+Another option is to build your own docker image and override relevant environment variables:
+
+```dockerfile
+FROM snyk/broker:nexus2
+
+ENV BROKER_TOKEN                     secret-broker-token
+ENV BASE_NEXUS_URL                   https://[<user>:<pass>@]<your.nexus.hostname>
+ENV BROKER_CLIENT_VALIDATION_URL     https://<your.nexus.hostname>:<port>/systemcheck 
+ENV RES_BODY_URL_SUB                 https://<your.nexus.hostname>/nexus/content/(groups|repositories)
+```
+
+> Note: By default for Nexus 2, the X-Forwarded-For headers are stripped off by the broker client so Nexus returns the npm tarball uri to the nexus registry instead of the broker server.
+Include the environment variable `REMOVE_X_FORWARDED_HEADERS=false` to disable this behavior.
+
+<br />
 
 ### Jira
 
