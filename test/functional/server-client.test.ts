@@ -7,8 +7,87 @@
 //
 // const { port, createTestServer } = require('../utils');
 
+import * as app from '../../lib';
+import * as path from 'path';
+import { createUtilServer, UtilServer } from '../utils';
+
+const version = require('../../lib/version');
+
+const fixtures = path.resolve(__dirname, '..', 'fixtures');
+const serverAccept = path.join(fixtures, 'server', 'filters.json');
+const clientAccept = path.join(fixtures, 'client', 'filters.json');
+
 describe('proxy requests originating from behind the broker server', () => {
-  it.skip('server identifies self to client', async () => {});
+  let client, server, serverPort;
+  let utilServer: UtilServer;
+  let brokerToken;
+  let clientMetadata;
+
+  beforeAll(async () => {
+    utilServer = await createUtilServer(9875);
+
+    serverPort = 9874;
+    server = await app.main({
+      port: serverPort,
+      client: undefined,
+      config: {
+        accept: serverAccept,
+      },
+    });
+
+    client = await app.main({
+      port: 9873,
+      client: 'artifactory',
+      config: {
+        BROKER_HA_MODE_ENABLED: 'false',
+        PREFLIGHT_CHECKS_ENABLED: 'false',
+        accept: clientAccept,
+        brokerServerUrl: `http://localhost:${serverPort}`,
+        BROKER_TOKEN: 'broker-token-12345',
+        brokerToken: 'broker-token-12345',
+        artifactoryUrl: `http://localhost:9875`,
+      },
+    });
+
+    await new Promise((resolve) => {
+      server.io.on('connection', (socket) => {
+        socket.on('identify', (clientData) => {
+          brokerToken = clientData.token;
+          clientMetadata = clientData.metadata;
+          resolve({ brokerToken, clientMetadata });
+        });
+      });
+    });
+  });
+
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  afterAll(async () => {
+    await utilServer.httpServer.close();
+    await client.close();
+    setTimeout(async () => {
+      await server.close();
+    }, 200);
+
+    await new Promise<void>((resolve) => {
+      server.io.on('close', () => {
+        resolve();
+      });
+    });
+  });
+
+  it('server identifies self to client', async () => {
+    expect(brokerToken).toEqual('broker-token-12345');
+    expect(clientMetadata).toStrictEqual({
+      capabilities: ['post-streams'],
+      filters: expect.any(Object),
+      clientId: expect.any(String),
+      preflightChecks: expect.any(Array),
+      version: version,
+    });
+  });
 });
 
 // test('proxy requests originating from behind the broker server', (t) => {
