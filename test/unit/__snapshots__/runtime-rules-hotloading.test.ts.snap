@@ -1310,6 +1310,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
     },
     Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
+    },
+    Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -7928,6 +7939,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
+    },
+    Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
     },
     Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
@@ -14976,6 +14998,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
     },
     Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
+    },
+    Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -16138,6 +16171,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
+    },
+    Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
     },
     Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
@@ -28006,6 +28050,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
     },
     Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
+    },
+    Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34503,6 +34558,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
+    },
+    Object {
+      "//": "Used to get a branch specified by query string",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
     },
     Object {
       "//": "get a specific commit identified by the commit hash or name of a branch",
