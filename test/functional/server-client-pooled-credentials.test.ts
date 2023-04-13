@@ -67,9 +67,9 @@ describe('proxy requests originating from behind the broker server with pooled c
 
   afterAll(async () => {
     await utilServer.httpServer.close();
-    await client.close();
+    await client?.close();
     setTimeout(async () => {
-      await server.close();
+      await server?.close();
     }, 100);
 
     await new Promise<void>((resolve) => {
