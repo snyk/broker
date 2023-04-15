@@ -20,7 +20,10 @@ interface CreateTestWebServerOptions {
  * for unit or functional tests. The purpose of this
  * server is to simulate 3rd party (SCM, etc) systems.
  */
-export type TestWebServer = http.Server | https.Server;
+export type TestWebServer = {
+  port: number;
+  server: http.Server | https.Server;
+};
 
 export const createTestWebServer = async (
   params?: CreateTestWebServerOptions,
@@ -31,10 +34,10 @@ export const createTestWebServer = async (
 
   const port = await choosePort(params?.port);
   let isHttps = false;
-  let testWebServer: TestWebServer;
+  let server: http.Server | https.Server;
   if (params?.sslCertificatePath && params?.sslCertificateKeyPath) {
     isHttps = true;
-    testWebServer = https
+    server = https
       .createServer(
         {
           key: fs.readFileSync(params.sslCertificateKeyPath),
@@ -44,7 +47,7 @@ export const createTestWebServer = async (
       )
       .listen(port);
   } else {
-    testWebServer = http.createServer(app).listen(port);
+    server = http.createServer(app).listen(port);
   }
   LOG.debug(
     { port, is_https: isHttps },
@@ -52,11 +55,14 @@ export const createTestWebServer = async (
   );
 
   // log close event
-  testWebServer.addListener('close', () => {
+  server.addListener('close', () => {
     LOG.debug({ port, is_https: isHttps }, 'TestWebServer has been shut down');
   });
 
-  return Promise.resolve(testWebServer);
+  return Promise.resolve({
+    port,
+    server,
+  });
 };
 
 const applyMiddlewares = (app: Express) => {
