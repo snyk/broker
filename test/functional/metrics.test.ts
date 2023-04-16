@@ -1,43 +1,35 @@
+// noinspection DuplicatedCode
+
 import * as path from 'path';
-import * as app from '../../lib';
 import * as metrics from '../../lib/metrics';
-import { createUtilServer, UtilServer } from '../utils';
 import axios from 'axios';
+import { BrokerClient, createBrokerClient } from '../setup/broker-client';
+import { BrokerServer, createBrokerServer } from '../setup/broker-server';
+import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
 const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('metrics', () => {
-  let client, server, serverPort;
-  let utilServer: UtilServer;
-  let brokerToken;
+  let tws: TestWebServer;
+  let bs: BrokerServer;
+  let bc: BrokerClient;
+  let brokerToken: string;
 
   beforeAll(async () => {
-    utilServer = await createUtilServer(9875);
+    tws = await createTestWebServer();
 
-    serverPort = 9874;
-    server = await app.main({
-      port: serverPort,
-      client: undefined,
-      config: {
-        accept: serverAccept,
-      },
-    });
+    bs = await createBrokerServer({ filters: serverAccept });
 
-    client = await app.main({
-      port: 9873,
-      client: 'artifactory',
-      config: {
-        accept: clientAccept,
-        brokerServerUrl: `http://localhost:${serverPort}`,
-        brokerToken: '98f04768-50d3-46fa-817a-9ee6631e9970',
-        artifactoryUrl: `http://localhost:9875`,
-      },
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: '12345',
+      filters: clientAccept,
     });
 
     await new Promise((resolve) => {
-      server.io.on('connection', (socket) => {
+      bs.server.io.on('connection', (socket) => {
         socket.on('identify', (clientData) => {
           brokerToken = clientData.token;
           resolve(brokerToken);
@@ -46,19 +38,22 @@ describe('metrics', () => {
     });
   });
 
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   afterAll(async () => {
-    await utilServer.httpServer.close();
-    await client?.close();
+    await tws.server.close();
     setTimeout(async () => {
-      await server?.close();
+      await bc.client.close();
     }, 100);
-
     await new Promise<void>((resolve) => {
-      server.io.on('close', () => {
+      bc.client.io.on('close', () => {
+        resolve();
+      });
+    });
+
+    setTimeout(async () => {
+      await bs.server.close();
+    }, 100);
+    await new Promise<void>((resolve) => {
+      bs.server.io.on('close', () => {
         resolve();
       });
     });
@@ -69,7 +64,7 @@ describe('metrics', () => {
     const expectedBytes = 256_000; // 250kb
 
     await axios.get(
-      `http://localhost:${serverPort}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
+      `http://localhost:${bs.port}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
       {
         validateStatus: () => true,
       },
