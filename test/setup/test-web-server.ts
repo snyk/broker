@@ -5,6 +5,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { choosePort } from './detect-port';
 import { createTestLogger } from '../helpers/logger';
+import { DEFAULT_TEST_WEB_SERVER_PORT } from './constants';
 import { Express } from 'express';
 
 const LOG = createTestLogger();
@@ -32,7 +33,9 @@ export const createTestWebServer = async (
   applyMiddlewares(app);
   applyEchoRoutes(app);
 
-  const port = await choosePort(params?.port);
+  const port = params?.port
+    ? await choosePort(params?.port)
+    : DEFAULT_TEST_WEB_SERVER_PORT;
   let isHttps = false;
   let server: http.Server | https.Server;
   if (params?.sslCertificatePath && params?.sslCertificateKeyPath) {
