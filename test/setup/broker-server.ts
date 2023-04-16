@@ -20,7 +20,7 @@ export const createBrokerServer = async (
 ): Promise<BrokerServer> => {
   const port = params?.port
     ? await choosePort(params?.port)
-    : DEFAULT_BROKER_SERVER_PORT;
+    : await choosePort(DEFAULT_BROKER_SERVER_PORT);
 
   const opts = {
     port: port,
