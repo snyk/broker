@@ -11,6 +11,7 @@ interface CreateBrokerClientOptions {
   enablePreflightChecks?: string;
   enableHighAvailabilityMode?: string;
   filters?: string;
+  passwordPool?: Array<string>;
   port?: number;
 }
 
@@ -40,6 +41,9 @@ export const createBrokerClient = async (
       PREFLIGHT_CHECKS_ENABLED: params.enablePreflightChecks
         ? params.enablePreflightChecks
         : 'false',
+      PASSWORD_POOL: params.passwordPool
+        ? params.passwordPool.join(',')
+        : undefined,
     },
   };
 
