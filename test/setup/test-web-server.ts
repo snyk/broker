@@ -209,6 +209,5 @@ const applyEchoRoutes = (app: Express) => {
     resp.send(false);
   });
 
-  app.use('/', echoRouter);
-  app.use('/snykgit', echoRouter);
+  app.use(['/snykgit', '/'], echoRouter);
 };

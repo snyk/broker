@@ -3,11 +3,11 @@
     {
       "path": "/basic-auth",
       "method": "GET",
-      "origin": "http://localhost:${originPort}",
+      "origin": "http://localhost:9000",
       "auth": {
         "scheme": "basic",
-        "username": "${username}",
-        "password": "${password}"
+        "username": "user",
+        "password": "pass"
       }
     },
 
@@ -45,7 +45,7 @@
     {
       "path": "/echo-headers/github-token-in-origin",
       "method": "POST",
-      "origin": "http://${GITHUB_TOKEN}@localhost:9000"
+      "origin": "http://githubToken1@localhost:9000"
     },
 
     {
@@ -128,13 +128,13 @@
     {
       "path": "/client-not-capable",
       "method": "GET",
-      "origin": "${GIT_CLIENT_URL}"
+      "origin": "http://localhost:9000"
     },
     {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "path": "/snykgit/*",
-      "origin": "${GIT_CLIENT_URL}"
+      "origin": "http://localhost:9000"
     }
   ],
   "public": [
@@ -203,12 +203,12 @@
     {
       "method": "any",
       "path": "/server-side-blocked",
-      "origin": "${GIT_CLIENT_URL}"
+      "origin": "http://localhost:9000"
     },
     {
       "method": "any",
       "path": "/server-side-blocked-streaming",
-      "origin": "${GIT_CLIENT_URL}",
+      "origin": "http://localhost:9000",
       "stream": true
     }
   ]

@@ -46,6 +46,7 @@ export const createBrokerClient = async (
         ? params.passwordPool.join(',')
         : undefined,
       BROKER_TYPE: params.type ? params.type : undefined,
+      removeXForwardedHeaders: 'true',
     },
   };
 
