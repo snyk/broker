@@ -9,7 +9,7 @@
     {
       "path": "/echo-body",
       "method": "POST",
-      "origin": "https://localhost:${originPort}"
+      "origin": "https://localhost:9000"
     },
 
     {

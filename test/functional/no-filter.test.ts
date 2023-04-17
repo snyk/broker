@@ -1,9 +1,13 @@
 // noinspection DuplicatedCode
 
+import * as path from 'path';
 import axios from 'axios';
 import { BrokerClient, createBrokerClient } from '../setup/broker-client';
 import { BrokerServer, createBrokerServer } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+
+const fixtures = path.resolve(__dirname, '..', 'fixtures');
+const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('no filters broker', () => {
   let tws: TestWebServer;
@@ -19,6 +23,7 @@ describe('no filters broker', () => {
     bc = await createBrokerClient({
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: '12345',
+      filters: clientAccept,
     });
 
     await new Promise((resolve) => {

@@ -113,6 +113,6 @@
     "outputPath": "binary-releases"
   },
   "volta": {
-    "node": "16.20.0"
+    "node": "18.16.0"
   }
 }
