@@ -1,8 +1,7 @@
 jest.mock('request');
 import * as request from 'request';
-import { mocked } from 'ts-jest/utils';
 
-const requestDefaultsMock = mocked(request.defaults, true);
+const requestDefaultsMock = jest.mocked(request.defaults, true);
 const requestMock = jest.fn((req, fn) => {
   fn!(null, { statusCode: 200 } as any, {});
 });
