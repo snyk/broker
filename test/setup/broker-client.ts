@@ -13,6 +13,7 @@ interface CreateBrokerClientOptions {
   filters?: string;
   passwordPool?: Array<string>;
   port?: number;
+  type?: string;
 }
 
 export type BrokerClient = {
@@ -44,6 +45,7 @@ export const createBrokerClient = async (
       PASSWORD_POOL: params.passwordPool
         ? params.passwordPool.join(',')
         : undefined,
+      BROKER_TYPE: params.type ? params.type : undefined,
     },
   };
 

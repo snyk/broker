@@ -178,6 +178,13 @@ const applyEchoRoutes = (app: Express) => {
   );
 
   echoRouter.get(
+    '/echo-query/:param?',
+    (req: express.Request, resp: express.Response) => {
+      resp.json(req.query);
+    },
+  );
+
+  echoRouter.get(
     '/long/nested/*',
     (req: express.Request, resp: express.Response) => {
       resp.send(req.originalUrl);
