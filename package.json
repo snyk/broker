@@ -44,6 +44,7 @@
     "jest-circus": "^26.1.0",
     "jest-junit": "^11.0.1",
     "jest-mock-server": "^0.1.0",
+    "nock": "^13.3.0",
     "prettier": "^2.0.5",
     "tap": "^14.10.7",
     "tap-only": "0.0.5",
