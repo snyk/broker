@@ -69,8 +69,10 @@ describe('no filters broker', () => {
     );
 
     expect(response.status).toEqual(401);
-    expect(response.data).not.toStrictEqual({
-      test: 'body',
+    expect(response.data).toStrictEqual({
+      message: 'blocked',
+      reason: 'Request does not match any accept rule, blocking HTTP request',
+      url: '/echo-body',
     });
   });
 });
