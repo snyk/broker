@@ -107,7 +107,7 @@ describe('proxy requests originating from behind the broker server', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.data.length).toEqual(body.length);
+    expect(Buffer.from(response.data)).toEqual(body);
   });
 
   it('successfully broker GET', async () => {
