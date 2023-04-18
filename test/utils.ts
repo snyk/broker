@@ -1,5 +1,4 @@
 import * as request from 'request';
-import { MockServer } from 'jest-mock-server';
 
 const compression = require('compression');
 const webserver = require('../lib/webserver');
@@ -9,22 +8,6 @@ let p = 9876;
 
 export function port() {
   return --p;
-}
-
-export function setupMockServerForTests() {
-  const server = new MockServer();
-
-  beforeAll(async () => {
-    await server.start();
-  });
-  afterAll(async () => {
-    await server.stop();
-  });
-  beforeEach(() => {
-    server.reset();
-  });
-
-  return server;
 }
 
 /**

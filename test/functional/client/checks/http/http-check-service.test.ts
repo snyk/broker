@@ -1,16 +1,19 @@
 import { CheckStore } from '../../../../../lib/client/checks/check-store';
 import { HttpCheckService } from '../../../../../lib/client/checks/http/http-check-service';
+import { MockServer } from 'jest-mock-server';
 import { aCheck } from '../../../../helpers/test-factories';
 import { createInMemoryCheckStore } from '../../../../helpers/in-memory-check-store';
-import { setupMockServerForTests } from '../../../../utils';
 
 describe('Broker client HTTP check service', () => {
-  const server = setupMockServerForTests();
+  const server = new MockServer();
 
   let checkStore: CheckStore;
   let mockServerBaseUrl: string;
 
+  beforeAll(() => server.start());
+  afterAll(() => server.stop());
   beforeEach(() => {
+    server.reset();
     const url = server.getURL().toString();
     mockServerBaseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
 

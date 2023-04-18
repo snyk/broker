@@ -1,114 +1,154 @@
-// const t = require('tap');
-// const path = require('path');
-// const app = require('../../lib');
-// const { createTestServer, port, requestAsync } = require('../utils');
-// const root = __dirname;
+// noinspection DuplicatedCode
+
+import axios from 'axios';
+import * as path from 'path';
+import { BrokerClient, createBrokerClient } from '../setup/broker-client';
+import { BrokerServer, createBrokerServer } from '../setup/broker-server';
+import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+
+const fixtures = path.resolve(__dirname, '..', 'fixtures');
+const serverAccept = path.join(fixtures, 'server', 'filters.json');
+const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () => {
-  it.skip('successfully broker POST with 1st connected client', async () => {});
-});
+  let tws: TestWebServer;
+  let bs: BrokerServer;
+  let bcFirst: BrokerClient;
+  let bcSecond: BrokerClient;
+  let brokerToken: string;
 
-// t.test(
-//   'correctly handle pool of multiple clients with same BROKER_TOKEN',
-//   async (t) => {
-//     /**
-//      * 1. start broker in server mode
-//      * 2. start broker in client mode and join
-//      * 3. run local http server that replicates "private server"
-//      * 4. send request to the server
-//      * 5. start a 2nd broker in client mode and join (2nd client becomes primary)
-//      * 6. send request to the server
-//      * 7. disconnect 1st client
-//      * 8. connection through server should still work through 2nd client
-//      *
-//      */
-//
-//     const { echoServerPort, testServer } = createTestServer();
-//
-//     t.teardown(async () => {
-//       testServer.close();
-//     });
-//
-//     process.env.ACCEPT = 'filters.json';
-//
-//     process.chdir(path.resolve(root, '../fixtures/server'));
-//     process.env.BROKER_TYPE = 'server';
-//     const serverPort = port();
-//     const server = await app.main({ port: serverPort });
-//
-//     process.chdir(path.resolve(root, '../fixtures/client'));
-//     process.env.BROKER_TYPE = 'client';
-//     process.env.BROKER_TOKEN = '12345';
-//     process.env.BROKER_SERVER_URL = `http://localhost:${serverPort}`;
-//     process.env.ORIGIN_PORT = echoServerPort;
-//     const client = await app.main({ port: port() });
-//
-//     //let secondClient = {};
-//
-//     // wait for the client to successfully connect to the server and identify itself
-//     const promise = new Promise((resolve) => {
-//       server.io.once('connection', async (socket) => {
-//         socket.on('identify', async (clientData) => {
-//           const token = clientData.token;
-//
-//           await t.test(
-//             'successfully broker POST with 1st connected client',
-//             async (t) => {
-//               const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
-//               const { res } = await requestAsync({
-//                 url,
-//                 method: 'post',
-//                 json: true,
-//               });
-//               t.equal(res.statusCode, 200, '200 statusCode');
-//             },
-//           );
-//
-//           // t.test('launch a 2nd client', (t) => {
-//           //   server.io.on('connection', (socket) => {
-//           //     socket.once('identify', () => {
-//           //       t.ok('2nd client connected');
-//           //       t.end();
-//           //     });
-//           //   });
-//           //
-//           //   secondClient = app.main({ port: port() - 1 }); // Run it on a different port
-//           // });
-//           //
-//           // t.test('successfully broker POST with 2nd client', (t) => {
-//           //   const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
-//           //   request({ url, method: 'post', json: true }, (err, res) => {
-//           //     t.equal(res.statusCode, 200, '200 statusCode');
-//           //     t.end();
-//           //   });
-//           // });
-//           //
-//
-//           await t.test('close 1st client', async (t) => {
-//             client.close();
-//             t.ok('1st client closed');
-//           });
-//           //
-//           // t.test('successfully broker POST with 2nd client', (t) => {
-//           //   const url = `http://localhost:${serverPort}/broker/${token}/echo-body`;
-//           //   request({ url, method: 'post', json: true }, (err, res) => {
-//           //     t.equal(res.statusCode, 200, '200 statusCode');
-//           //     t.end();
-//           //   });
-//           // });
-//
-//           t.test('clean up', async (t) => {
-//             //secondClient.close();
-//             setTimeout(() => {
-//               server.close();
-//               t.ok('sockets closed');
-//               t.end();
-//               resolve();
-//             }, 100);
-//           });
-//         });
-//       });
-//     });
-//     await promise;
-//   },
-// );
+  beforeAll(async () => {
+    tws = await createTestWebServer();
+
+    bs = await createBrokerServer({ filters: serverAccept });
+  });
+  afterAll(async () => {
+    await tws.server.close();
+
+    setTimeout(async () => {
+      await bs.server.close();
+    }, 100);
+    await new Promise<void>((resolve) => {
+      bs.server.io.on('close', () => {
+        resolve();
+      });
+    });
+  });
+
+  describe('1st client', () => {
+    beforeAll(async () => {
+      bcFirst = await createBrokerClient({
+        brokerServerUrl: `http://localhost:${bs.port}`,
+        brokerToken: '12345',
+        filters: clientAccept,
+      });
+      await new Promise((resolve) => {
+        bs.server.io.on('connection', (socket) => {
+          socket.on('identify', (clientData) => {
+            brokerToken = clientData.token;
+            resolve(brokerToken);
+          });
+        });
+      });
+    });
+    afterAll(async () => {
+      setTimeout(async () => {
+        await bcFirst.client?.close();
+      }, 100);
+      await new Promise<void>((resolve) => {
+        bcFirst.client?.io.on('close', () => {
+          resolve();
+        });
+      });
+    });
+
+    it('successfully broker POST with 1st connected client', async () => {
+      const response = await axios.post(
+        `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
+        { echo: 'body' },
+        {
+          timeout: 1000,
+          validateStatus: () => true,
+        },
+      );
+
+      expect(response.status).toEqual(200);
+    });
+  });
+
+  describe('2nd client', () => {
+    beforeAll(async () => {
+      bcFirst = await createBrokerClient({
+        brokerServerUrl: `http://localhost:${bs.port}`,
+        brokerToken: '12345',
+        filters: clientAccept,
+      });
+      bcSecond = await createBrokerClient({
+        brokerServerUrl: `http://localhost:${bs.port}`,
+        brokerToken: '12345',
+        filters: clientAccept,
+      });
+      await new Promise((resolve) => {
+        bs.server.io.on('connection', (socket) => {
+          socket.on('identify', (clientData) => {
+            brokerToken = clientData.token;
+            resolve(brokerToken);
+          });
+        });
+      });
+    });
+    afterAll(async () => {
+      setTimeout(async () => {
+        await bcFirst.client?.close();
+      }, 100);
+      await new Promise<void>((resolve) => {
+        bcFirst.client?.io.on('close', () => {
+          resolve();
+        });
+      });
+      setTimeout(async () => {
+        await bcSecond.client?.close();
+      }, 100);
+      await new Promise<void>((resolve) => {
+        bcSecond.client?.io.on('close', () => {
+          resolve();
+        });
+      });
+    });
+
+    it.skip('successfully broker POST with 2nd client', async () => {
+      const response = await axios.post(
+        `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
+        { echo: 'body' },
+        {
+          timeout: 1000,
+          validateStatus: () => true,
+        },
+      );
+
+      expect(response.status).toEqual(200);
+    });
+
+    it.skip('successfully broker POST with 2nd client when 1st client was closed', async () => {
+      setTimeout(async () => {
+        await bcFirst.client?.close();
+      }, 100);
+      await new Promise<void>((resolve) => {
+        bcFirst.client?.io.on('close', () => {
+          resolve();
+        });
+      });
+
+      const response = await axios.post(
+        `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
+        { echo: 'body' },
+        {
+          timeout: 1000,
+          validateStatus: () => true,
+        },
+      );
+
+      expect(response.status).toEqual(200);
+    });
+  });
+});

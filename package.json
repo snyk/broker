@@ -18,7 +18,7 @@
     "dev:client": "tsc-watch --project tsconfig.json --onSuccess 'node dist/cli/index.js client' | ./node_modules/.bin/bunyan",
     "test": "npm run test:unit && npm run test:functional",
     "test:unit": "jest --detectOpenHandles unit",
-    "test:functional": "jest --detectOpenHandles functional",
+    "test:functional": "jest --detectOpenHandles --runInBand functional",
     "test:bin": "(cd test/bin; ./container-registry-agent/docker-entrypoint-test.sh)",
     "test:bin:docker": "docker run --rm -it -v $PWD:/home/broker -w /home/broker/test/bin/ snyk/ubuntu ./container-registry-agent/docker-entrypoint-test.sh",
     "lint": "npm run lint:check && npm run lint:code",
@@ -32,24 +32,23 @@
     "test": "test"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.5",
+    "@types/bunyan": "^1.8.8",
+    "@types/jest": "^27.5.1",
     "@types/node": "^12.12.47",
     "@types/prettier": "2.6.0",
     "@typescript-eslint/eslint-plugin": "^5.30.4",
     "@typescript-eslint/parser": "^5.30.4",
     "compression": "^1.7.4",
+    "detect-port": "^1.5.1",
     "eslint": "^7.2.0",
     "eslint-config-prettier": "^6.11.0",
-    "jest": "^26.1.0",
-    "jest-circus": "^26.1.0",
+    "jest": "^27.5.1",
     "jest-junit": "^11.0.1",
     "jest-mock-server": "^0.1.0",
     "nock": "^13.3.0",
     "prettier": "^2.0.5",
-    "tap": "^14.10.7",
-    "tap-only": "0.0.5",
     "tmp-promise": "^3.0.2",
-    "ts-jest": "^26.1.3",
+    "ts-jest": "^27.1.4",
     "ts-node": "^10.9.1",
     "tsc-watch": "^4.2.3",
     "typescript": "^4.9.3"
@@ -112,5 +111,8 @@
       "node18-linux-arm64"
     ],
     "outputPath": "binary-releases"
+  },
+  "volta": {
+    "node": "18.16.0"
   }
 }

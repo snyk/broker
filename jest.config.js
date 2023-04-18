@@ -1,6 +1,5 @@
 module.exports = {
   preset: 'ts-jest',
-  testRunner: 'jest-circus/runner',
   testEnvironment: 'node',
   globals: {
     'ts-jest': {

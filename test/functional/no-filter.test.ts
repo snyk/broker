@@ -1,37 +1,33 @@
-import axios from 'axios';
+// noinspection DuplicatedCode
 
-const app = require('../../lib');
-import { createUtilServer, UtilServer } from '../utils';
+import * as path from 'path';
+import axios from 'axios';
+import { BrokerClient, createBrokerClient } from '../setup/broker-client';
+import { BrokerServer, createBrokerServer } from '../setup/broker-server';
+import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+
+const fixtures = path.resolve(__dirname, '..', 'fixtures');
+const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('no filters broker', () => {
-  let client, server, serverPort;
-  let utilServer: UtilServer;
-  let brokerToken;
+  let tws: TestWebServer;
+  let bs: BrokerServer;
+  let bc: BrokerClient;
+  let brokerToken: string;
 
   beforeAll(async () => {
-    utilServer = await createUtilServer(9875);
+    tws = await createTestWebServer();
 
-    serverPort = 9874;
-    server = await app.main({
-      port: serverPort,
-      client: undefined,
-      config: {
-        accept: '',
-      },
-    });
+    bs = await createBrokerServer({});
 
-    client = await app.main({
-      port: 9873,
-      client: 'client',
-      config: {
-        brokerServerUrl: `http://localhost:${serverPort}`,
-        brokerToken: '12345',
-        accept: '',
-      },
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: '12345',
+      filters: clientAccept,
     });
 
     await new Promise((resolve) => {
-      server.io.on('connection', (socket) => {
+      bs.server.io.on('connection', (socket) => {
         socket.on('identify', (clientData) => {
           brokerToken = clientData.token;
           resolve(brokerToken);
@@ -40,26 +36,29 @@ describe('no filters broker', () => {
     });
   });
 
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   afterAll(async () => {
-    await utilServer.httpServer.close();
-    await client.close();
+    await tws.server.close();
     setTimeout(async () => {
-      await server.close();
+      await bc.client.close();
     }, 100);
-
     await new Promise<void>((resolve) => {
-      server.io.on('close', () => {
+      bc.client.io.on('close', () => {
+        resolve();
+      });
+    });
+
+    setTimeout(async () => {
+      await bs.server.close();
+    }, 100);
+    await new Promise<void>((resolve) => {
+      bs.server.io.on('close', () => {
         resolve();
       });
     });
   });
 
-  it.skip('successfully broker with no filter should reject', async () => {
-    const url = `http://localhost:${serverPort}/broker/${brokerToken}/echo-body`;
+  it('successfully broker with no filter should reject', async () => {
+    const url = `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`;
     const response = await axios.post(
       url,
       { test: 'body' },
@@ -70,10 +69,10 @@ describe('no filters broker', () => {
     );
 
     expect(response.status).toEqual(401);
-    expect(response.data).not.toBe({
+    expect(response.data).toStrictEqual({
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
-      url: '/echo-server',
+      url: '/echo-body',
     });
   });
 });
