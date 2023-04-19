@@ -3,50 +3,50 @@
     {
       "path": "/echo-param/:param",
       "method": "GET",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/echo-body/:param?",
       "method": "POST",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/echo-headers/:param?",
       "method": "POST",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/echo-query",
       "method": "GET",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/echo-query/:param?",
       "method": "GET",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/test-blob/*",
       "method": "GET",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "path": "/test-blob-param/*",
       "method": "GET",
-      "origin": "http://localhost:${originPort}"
+      "origin": "http://localhost:9000"
     },
 
     {
       "//": "Block on headers",
       "path": "/echo-param-protected/:param",
       "method": "GET",
-      "origin": "http://localhost:${originPort}",
+      "origin": "http://localhost:9000",
       "valid": [
         {
           "header": "accept",
