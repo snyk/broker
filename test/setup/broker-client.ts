@@ -2,12 +2,18 @@ import * as app from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
 import { DEFAULT_BROKER_CLIENT_PORT } from './constants';
+import { setTimeout } from 'timers/promises';
 
 const LOG = createTestLogger();
 
 interface CreateBrokerClientOptions {
+  brokerClientValidationUrl?: string;
+  brokerClientValidationBasicAuth?: string;
+  brokerClientValidationBasicAuthPool?: Array<string>;
+  brokerClientValidationAuthorizationHeader?: string;
   brokerToken: string;
   brokerServerUrl: string;
+  brokerSystemcheckPath?: string;
   enablePreflightChecks?: string;
   enableHighAvailabilityMode?: string;
   filters?: string;
@@ -35,6 +41,23 @@ export const createBrokerClient = async (
       accept: params.filters ? params.filters : undefined,
       brokerServerUrl: params.brokerServerUrl,
       brokerToken: params.brokerToken,
+      brokerClientValidationUrl: params.brokerClientValidationUrl
+        ? params.brokerClientValidationUrl
+        : undefined,
+      brokerClientValidationBasicAuth: params.brokerClientValidationBasicAuth
+        ? params.brokerClientValidationBasicAuth
+        : undefined,
+      brokerClientValidationBasicAuthPool:
+        params.brokerClientValidationBasicAuthPool
+          ? params.brokerClientValidationBasicAuthPool
+          : undefined,
+      brokerClientValidationAuthorizationHeader:
+        params.brokerClientValidationAuthorizationHeader
+          ? params.brokerClientValidationAuthorizationHeader
+          : undefined,
+      brokerSystemcheckPath: params.brokerSystemcheckPath
+        ? params.brokerSystemcheckPath
+        : undefined,
       BROKER_TOKEN: params.brokerToken,
       BROKER_HA_MODE_ENABLED: params.enableHighAvailabilityMode
         ? params.enableHighAvailabilityMode
@@ -58,4 +81,11 @@ export const createBrokerClient = async (
     port: port,
     client: client,
   });
+};
+
+export const closeBrokerClient = async (
+  brokerClient: BrokerClient,
+): Promise<void> => {
+  await brokerClient.client?.close();
+  await setTimeout(100, 'wait 100ms after closing client');
 };

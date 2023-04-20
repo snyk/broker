@@ -39,3 +39,39 @@ export const createBrokerServer = async (
     server: server,
   });
 };
+
+export const waitForBrokerClientConnection = async (
+  brokerServer: BrokerServer,
+): Promise<{
+  brokerToken: string;
+  metadata: unknown;
+}> => {
+  let brokerToken = 'unknown';
+  let metadata: unknown;
+
+  await new Promise<{ brokerToken: string; metadata: unknown }>((resolve) => {
+    brokerServer.server.io.on('connection', (spark) => {
+      LOG.debug(
+        {
+          spark_id: spark.id,
+          spark_headers: spark.headers,
+          spark_address: spark.address,
+        },
+        'on connection event for broker server',
+      );
+
+      spark.on('identify', (clientData) => {
+        LOG.debug({ clientData }, 'on identify event for broker server');
+
+        brokerToken = clientData?.token;
+        metadata = clientData?.metadata;
+        resolve({
+          brokerToken,
+          metadata,
+        });
+      });
+    });
+  });
+
+  return { brokerToken, metadata };
+};

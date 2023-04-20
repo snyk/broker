@@ -1,422 +1,389 @@
-// const test = require('tap-only');
-// const path = require('path');
-// const request = require('request');
-// const app = require('../../lib');
-// const root = __dirname;
-//
-// const { port, createTestServer } = require('../utils');
+// noinspection DuplicatedCode
+
+import * as path from 'path';
+import axios from 'axios';
+import {
+  BrokerClient,
+  closeBrokerClient,
+  createBrokerClient,
+} from '../setup/broker-client';
+import {
+  BrokerServer,
+  createBrokerServer,
+  waitForBrokerClientConnection,
+} from '../setup/broker-server';
+import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+
+const fixtures = path.resolve(__dirname, '..', 'fixtures');
+const serverAccept = path.join(fixtures, 'server', 'filters.json');
 
 describe('broker client systemcheck endpoint', () => {
-  it.skip('good validation url, custom endpoint, no authorization', async () => {});
-});
+  let tws: TestWebServer;
+  let bs: BrokerServer;
+  let bc: BrokerClient;
 
-// test('broker client systemcheck endpoint', (t) => {
-//   /**
-//    * 1. start broker in server mode
-//    * 2. start broker in client mode and join (1)
-//    * 3. check /healthcheck on client and server
-//    * 4. stop client and check it's on "disconnected" in the server
-//    * 5. restart client with same token, make sure it's not in "disconnected"
-//    */
-//
-//   const { testServer } = createTestServer();
-//
-//   t.teardown(() => {
-//     testServer.close();
-//   });
-//
-//   process.env.ACCEPT = 'filters.json';
-//
-//   process.chdir(path.resolve(root, '../fixtures/client'));
-//   const clientPort = port();
-//
-//   t.plan(9);
-//
-//   const clientUrl = `http://localhost:${clientPort}`;
-//
-//   t.test('good validation url, custom endpoint, no authorization', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerSystemcheckPath: '/custom-systemcheck',
-//       },
-//     });
-//
-//     request(
-//       { url: `${clientUrl}/custom-systemcheck`, json: true },
-//       (err, res) => {
-//         if (err) {
-//           return t.threw(err);
-//         }
-//
-//         t.equal(res.statusCode, 200, '200 statusCode');
-//         t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-//         t.equal(
-//           res.body[0].maskedCredentials,
-//           null,
-//           '[{ maskedCredentials: null }] in body',
-//         );
-//         t.equal(
-//           res.body[0].brokerClientValidationUrl,
-//           'https://httpbin.org/headers',
-//           'validation url present',
-//         );
-//         t.equal(
-//           res.body[0].testResponse.body.headers.Authorization,
-//           undefined,
-//           'does not have authorization header',
-//         );
-//
-//         client.close();
-//         setTimeout(() => {
-//           t.end();
-//         }, 100);
-//       },
-//     );
-//   });
-//
-//   t.test('good validation url, authorization header', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationAuthorizationHeader:
-//           'token my-special-access-token',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present',
-//       );
-//       t.ok(
-//         res.body[0].testResponse.body.headers['User-Agent'],
-//         'user-agent header is present in validation request',
-//       );
-//       t.equal(
-//         res.body[0].testResponse.body.headers.Authorization,
-//         'token my-special-access-token',
-//         'proper authorization header in validation request',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, basic auth', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationBasicAuth: 'username:password',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present',
-//       );
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         'use***ord',
-//         'masked credentials present',
-//       );
-//       t.ok(
-//         res.body[0].testResponse.body.headers['User-Agent'],
-//         'user-agent header is present in validation request',
-//       );
-//       const expectedAuthHeader = `Basic ${Buffer.from(
-//         'username:password',
-//       ).toString('base64')}`;
-//       t.equal(
-//         res.body[0].testResponse.body.headers.Authorization,
-//         expectedAuthHeader,
-//         'proper authorization header in request',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, header auth', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationAuthorizationHeader: 'token magical_header_123',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present',
-//       );
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         'mag***123',
-//         'masked credentials present',
-//       );
-//       t.ok(
-//         res.body[0].testResponse.body.headers['User-Agent'],
-//         'user-agent header is present in validation request',
-//       );
-//       t.equal(
-//         res.body[0].testResponse.body.headers.Authorization,
-//         'token magical_header_123',
-//         'proper authorization header in request',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, header auth lacking spaces', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationAuthorizationHeader: 'tokenmagical_header_123',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(res.body[0].ok, true, '[{ ok: true }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present',
-//       );
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         'tok***123',
-//         'masked credentials present',
-//       );
-//       t.equal(
-//         res.body[0].testResponse.body.headers.Authorization,
-//         'tokenmagical_header_123',
-//         'proper authorization header in request',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, basic auth, short creds', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationBasicAuth: 'use:pw',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         '***',
-//         'masked credentials present',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, basic auth, 7 char creds', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationBasicAuth: 'use:pwd',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         'use***pwd',
-//         'masked credentials present',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('good validation url, basic auth, both good', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://httpbin.org/headers',
-//         brokerClientValidationBasicAuthPool: [
-//           'username:password',
-//           'username1:password1',
-//         ],
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 200, '200 statusCode');
-//       t.equal(res.body[0].ok, true, '[{ ok: true }, ...] in body');
-//       t.equal(res.body[1].ok, true, '[..., { ok: true }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present [0]',
-//       );
-//       t.equal(
-//         res.body[1].brokerClientValidationUrl,
-//         'https://httpbin.org/headers',
-//         'validation url present [1]',
-//       );
-//       t.ok(
-//         res.body[0].testResponse.body.headers['User-Agent'],
-//         'user-agent header is present in validation request [0]',
-//       );
-//       t.ok(
-//         res.body[1].testResponse.body.headers['User-Agent'],
-//         'user-agent header is present in validation request [1]',
-//       );
-//       t.equal(
-//         res.body[0].maskedCredentials,
-//         'use***ord',
-//         'masked credentials present in validation request [0]',
-//       );
-//       t.equal(
-//         res.body[1].maskedCredentials,
-//         'use***rd1',
-//         'masked credentials present in validation request [1]',
-//       );
-//       t.equal(
-//         res.body[0].testResponse.body.headers.Authorization,
-//         `Basic ${Buffer.from('username:password').toString('base64')}`,
-//         'proper authorization header in request [0]',
-//       );
-//       t.equal(
-//         res.body[1].testResponse.body.headers.Authorization,
-//         `Basic ${Buffer.from('username1:password1').toString('base64')}`,
-//         'proper authorization header in request [1]',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-//
-//   t.test('bad validation url', (t) => {
-//     const client = app.main({
-//       port: clientPort,
-//       config: {
-//         brokerType: 'client',
-//         brokerToken: '1234567890',
-//         brokerServerUrl: 'http://localhost:12345',
-//         brokerClientValidationUrl: 'https://snyk.io/no-such-url-ever',
-//       },
-//     });
-//
-//     request({ url: `${clientUrl}/systemcheck`, json: true }, (err, res) => {
-//       if (err) {
-//         return t.threw(err);
-//       }
-//
-//       t.equal(res.statusCode, 500, '500 statusCode');
-//       t.equal(res.body[0].ok, false, '[{ ok: false }] in body');
-//       t.equal(
-//         res.body[0].brokerClientValidationUrl,
-//         'https://snyk.io/no-such-url-ever',
-//         'validation url present',
-//       );
-//
-//       client.close();
-//       setTimeout(() => {
-//         t.end();
-//       }, 100);
-//     });
-//   });
-// });
+  beforeAll(async () => {
+    tws = await createTestWebServer();
+
+    bs = await createBrokerServer({ filters: serverAccept });
+  });
+
+  afterAll(async () => {
+    await tws.server.close();
+
+    setTimeout(async () => {
+      await bs.server.close();
+    }, 100);
+    await new Promise<void>((resolve) => {
+      bs.server.io.on('close', () => {
+        resolve();
+      });
+    });
+  });
+
+  afterEach(async () => {
+    await closeBrokerClient(bc);
+  });
+
+  it('good validation url, custom endpoint, no authorization', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerSystemcheckPath: '/custom-systemcheck',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/custom-systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: null,
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(
+      systemCheckBody.testResponse.body.headers.Authorization,
+    ).not.toBeTruthy();
+  });
+
+  it('good validation url, authorization header', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationAuthorizationHeader:
+        'token my-special-access-token',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+    const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: expect.any(String),
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
+    expect(systemCheckHeaders.Authorization).toEqual(
+      'token my-special-access-token',
+    );
+  });
+
+  it('good validation url, basic auth', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationBasicAuth: 'username:password',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+    const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'use***ord',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
+    expect(systemCheckHeaders.Authorization).toEqual(
+      `Basic ${Buffer.from('username:password').toString('base64')}`,
+    );
+  });
+
+  it('good validation url, header auth', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationAuthorizationHeader: 'token magical_header_123',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+    const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'mag***123',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
+    expect(systemCheckHeaders.Authorization).toEqual(
+      'token magical_header_123',
+    );
+  });
+
+  it('good validation url, header auth lacking spaces', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationAuthorizationHeader: 'tokenmagical_header_123',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+    const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'tok***123',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
+    expect(systemCheckHeaders.Authorization).toEqual('tokenmagical_header_123');
+  });
+
+  it('good validation url, basic auth, short creds', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationBasicAuth: 'use:pw',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: '***',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+  });
+
+  it('good validation url, basic auth, 7 char creds', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationBasicAuth: 'use:pwd',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'use***pwd',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+  });
+
+  it('good validation url, basic auth, both good', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationBasicAuthPool: [
+        'username:password',
+        'username1:password1',
+      ],
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.data).toBeInstanceOf(Array);
+
+    // first check
+    const systemCheckBodyFirst = response.data[0];
+    const systemCheckHeadersFirst =
+      systemCheckBodyFirst.testResponse.body.headers;
+    expect(systemCheckBodyFirst).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'use***ord',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeadersFirst['User-Agent']).toBeTruthy();
+    expect(systemCheckHeadersFirst.Authorization).toEqual(
+      `Basic ${Buffer.from('username:password').toString('base64')}`,
+    );
+    // second check
+    const systemCheckBodySecond = response.data[1];
+    const systemCheckHeadersSecond =
+      systemCheckBodySecond.testResponse.body.headers;
+    expect(systemCheckBodySecond).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: 'use***rd1',
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckHeadersSecond['User-Agent']).toBeTruthy();
+    expect(systemCheckHeadersSecond.Authorization).toEqual(
+      `Basic ${Buffer.from('username1:password1').toString('base64')}`,
+    );
+  });
+
+  it('bad validation url', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: 'https://snyk.io/no-such-url-ever',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axios.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      {
+        timeout: 10_000,
+        validateStatus: () => true,
+      },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+
+    expect(response.status).toEqual(500);
+    expect(systemCheckBody).toMatchObject({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationUrl: 'https://snyk.io/no-such-url-ever',
+      ok: false,
+      error: expect.any(String),
+    });
+  });
+});
