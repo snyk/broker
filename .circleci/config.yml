@@ -50,18 +50,6 @@ jobs:
       - run:
           name: Run tests
           command: npm test && npm run test:bin
-  pkg:
-    <<: *defaults
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/broker
-      - run:
-          name: Package
-          command: "npm run prepare && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli"
-      - store_artifacts:
-          path: binary-releases/snyk-broker-x64
-          destination: artifact-snyk-broker
   release:
     <<: *defaults
     steps:
@@ -88,11 +76,6 @@ workflows:
           name: Lint
           requires:
             - Install DEV
-      - pkg:
-          name: Package
-          requires:
-            - Test
-            - Lint
       - release:
           name: Release to GitHub
           context: nodejs-lib-release
