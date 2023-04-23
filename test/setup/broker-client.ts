@@ -11,9 +11,10 @@ interface CreateBrokerClientOptions {
   brokerClientValidationBasicAuth?: string;
   brokerClientValidationBasicAuthPool?: Array<string>;
   brokerClientValidationAuthorizationHeader?: string;
-  brokerToken: string;
+  brokerHealthcheckPath?: string;
   brokerServerUrl: string;
   brokerSystemcheckPath?: string;
+  brokerToken: string;
   enablePreflightChecks?: string;
   enableHighAvailabilityMode?: string;
   filters?: string;
@@ -55,6 +56,9 @@ export const createBrokerClient = async (
         params.brokerClientValidationAuthorizationHeader
           ? params.brokerClientValidationAuthorizationHeader
           : undefined,
+      brokerHealthcheckPath: params.brokerHealthcheckPath
+        ? params.brokerHealthcheckPath
+        : undefined,
       brokerSystemcheckPath: params.brokerSystemcheckPath
         ? params.brokerSystemcheckPath
         : undefined,
