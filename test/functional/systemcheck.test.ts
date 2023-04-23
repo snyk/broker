@@ -50,7 +50,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerSystemcheckPath: '/custom-systemcheck',
     });
     await waitForBrokerClientConnection(bs);
@@ -58,7 +58,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/custom-systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -70,7 +70,7 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: null,
       ok: true,
@@ -86,7 +86,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader:
         'token my-special-access-token',
     });
@@ -95,7 +95,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -108,14 +108,14 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: expect.any(String),
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
-    expect(systemCheckHeaders.Authorization).toEqual(
+    expect(systemCheckHeaders['user-agent']).toBeTruthy();
+    expect(systemCheckHeaders.authorization).toEqual(
       'token my-special-access-token',
     );
   });
@@ -125,7 +125,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'username:password',
     });
     await waitForBrokerClientConnection(bs);
@@ -133,7 +133,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -146,14 +146,14 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'use***ord',
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
-    expect(systemCheckHeaders.Authorization).toEqual(
+    expect(systemCheckHeaders['user-agent']).toBeTruthy();
+    expect(systemCheckHeaders.authorization).toEqual(
       `Basic ${Buffer.from('username:password').toString('base64')}`,
     );
   });
@@ -163,7 +163,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader: 'token magical_header_123',
     });
     await waitForBrokerClientConnection(bs);
@@ -171,7 +171,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -180,18 +180,20 @@ describe('broker client systemcheck endpoint', () => {
     const systemCheckBody = response.data[0];
     const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
 
+    console.log(systemCheckHeaders);
+
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'mag***123',
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
-    expect(systemCheckHeaders.Authorization).toEqual(
+    expect(systemCheckHeaders['user-agent']).toBeTruthy();
+    expect(systemCheckHeaders.authorization).toEqual(
       'token magical_header_123',
     );
   });
@@ -201,7 +203,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader: 'tokenmagical_header_123',
     });
     await waitForBrokerClientConnection(bs);
@@ -209,7 +211,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -222,14 +224,14 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'tok***123',
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeaders['User-Agent']).toBeTruthy();
-    expect(systemCheckHeaders.Authorization).toEqual('tokenmagical_header_123');
+    expect(systemCheckHeaders['user-agent']).toBeTruthy();
+    expect(systemCheckHeaders.authorization).toEqual('tokenmagical_header_123');
   });
 
   it('good validation url, basic auth, short creds', async () => {
@@ -237,7 +239,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'use:pw',
     });
     await waitForBrokerClientConnection(bs);
@@ -245,7 +247,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -257,7 +259,7 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: '***',
       ok: true,
@@ -270,7 +272,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'use:pwd',
     });
     await waitForBrokerClientConnection(bs);
@@ -278,7 +280,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -290,7 +292,7 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'use***pwd',
       ok: true,
@@ -303,7 +305,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerServerUrl: `http://localhost:${bs.port}`,
       brokerToken: 'broker-token-12345',
       type: 'client',
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuthPool: [
         'username:password',
         'username1:password1',
@@ -314,7 +316,7 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axios.get(
       `http://localhost:${bc.port}/systemcheck`,
       {
-        timeout: 10_000,
+        timeout: 1000,
         validateStatus: () => true,
       },
     );
@@ -329,14 +331,14 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBodyFirst).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'use***ord',
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeadersFirst['User-Agent']).toBeTruthy();
-    expect(systemCheckHeadersFirst.Authorization).toEqual(
+    expect(systemCheckHeadersFirst['user-agent']).toBeTruthy();
+    expect(systemCheckHeadersFirst.authorization).toEqual(
       `Basic ${Buffer.from('username:password').toString('base64')}`,
     );
     // second check
@@ -346,14 +348,14 @@ describe('broker client systemcheck endpoint', () => {
     expect(systemCheckBodySecond).toStrictEqual({
       brokerClientValidationMethod: 'GET',
       brokerClientValidationTimeoutMs: expect.any(Number),
-      brokerClientValidationUrl: 'https://httpbin.org/headers',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationUrlStatusCode: 200,
       maskedCredentials: 'use***rd1',
       ok: true,
       testResponse: expect.any(Object),
     });
-    expect(systemCheckHeadersSecond['User-Agent']).toBeTruthy();
-    expect(systemCheckHeadersSecond.Authorization).toEqual(
+    expect(systemCheckHeadersSecond['user-agent']).toBeTruthy();
+    expect(systemCheckHeadersSecond.authorization).toEqual(
       `Basic ${Buffer.from('username1:password1').toString('base64')}`,
     );
   });
