@@ -9,6 +9,7 @@ import {
 } from '../setup/broker-client';
 import {
   BrokerServer,
+  closeBrokerServer,
   createBrokerServer,
   waitForBrokerClientConnection,
 } from '../setup/broker-server';
@@ -24,21 +25,12 @@ describe('broker client systemcheck endpoint', () => {
 
   beforeAll(async () => {
     tws = await createTestWebServer();
-
     bs = await createBrokerServer({ filters: serverAccept });
   });
 
   afterAll(async () => {
     await tws.server.close();
-
-    setTimeout(async () => {
-      await bs.server.close();
-    }, 100);
-    await new Promise<void>((resolve) => {
-      bs.server.io.on('close', () => {
-        resolve();
-      });
-    });
+    await closeBrokerServer(bs);
   });
 
   afterEach(async () => {
