@@ -1,0 +1,64 @@
+{
+  "prepare": [
+    "@semantic-release/npm",
+    {
+      "//": "adds a file to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "echo '' > dist/STANDALONE"
+    },
+    {
+      "//": "build the linux, macos, and windows binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "npm run prepare && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli -t node18-linux-x64,node18-macos-x64,node18-win-x64"
+    },
+    {
+      "//": "shasum all binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "shasum -a 256 snyk-broker-linux > snyk-broker-linux.sha256 && shasum -a 256 snyk-broker-macos > snyk-broker-macos.sha256 && shasum -a 256 snyk-broker-win.exe > snyk-broker-win.exe.sha256"
+    },
+    {
+      "//": "removes the file we use to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "rm dist/STANDALONE"
+    }
+  ],
+  "publish": [
+    "@semantic-release/npm",
+    {
+      "path": "@semantic-release/github",
+      "assets": [
+        {
+          "path": "./snyk-broker-linux",
+          "name": "snyk-broker-linux",
+          "label": "snyk-broker-linux"
+        },
+        {
+          "path": "./snyk-broker-linux.sha256",
+          "name": "snyk-broker-linux.sha256",
+          "label": "snyk-broker-linux.sha256"
+        },
+        {
+          "path": "./snyk-broker-macos",
+          "name": "snyk-broker-macos",
+          "label": "snyk-broker-macos"
+        },
+        {
+          "path": "./snyk-broker-macos.sha256",
+          "name": "snyk-broker-macos.sha256",
+          "label": "snyk-broker-macos.sha256"
+        },
+        {
+          "path": "./snyk-broker-win.exe",
+          "name": "snyk-broker-win.exe",
+          "label": "snyk-broker-win.exe"
+        },
+        {
+          "path": "./snyk-broker-win.exe.sha256",
+          "name": "snyk-broker-win.exe.sha256",
+          "label": "snyk-broker-win.exe.sha256"
+        }
+      ]
+    }
+  ],
+  "branches": ["master"]
+}
