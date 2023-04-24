@@ -172,8 +172,6 @@ describe('broker client systemcheck endpoint', () => {
     const systemCheckBody = response.data[0];
     const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
 
-    console.log(systemCheckHeaders);
-
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',
