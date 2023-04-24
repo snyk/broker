@@ -9,7 +9,7 @@
     {
       "//": "shasum all binaries",
       "path": "@semantic-release/exec",
-      "cmd": "shasum -a 256 snyk-broker-linux > snyk-broker-linux.sha256 && shasum -a 256 snyk-broker-macos > snyk-broker-macos.sha256 && shasum -a 256 snyk-broker-win.exe > snyk-broker-win.exe.sha256"
+      "cmd": "cat snyk-broker-linux | npx hasha-cli -a sha256 > snyk-broker-linux.sha256 && cat snyk-broker-macos | npx hasha-cli -a sha256 > snyk-broker-macos.sha256 && cat snyk-broker-win.exe | npx hasha-cli -a sha256 > snyk-broker-win.exe.sha256"
     }
   ],
   "publish": [
