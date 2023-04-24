@@ -58,7 +58,7 @@ jobs:
           at: ~/broker
       - run:
           name: Release to GitHub
-          command: npx semantic-release@19.0.5
+          command: npm i @semantic-release/exec pkg --save-dev && npx semantic-release@19.0.5
 
 workflows:
   version: 2
