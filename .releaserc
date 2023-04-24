@@ -7,9 +7,19 @@
       "cmd": "npm run prepare && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli -t node18-linux-x64,node18-macos-x64,node18-win-x64"
     },
     {
-      "//": "shasum all binaries",
+      "//": "shasum linux binaries",
       "path": "@semantic-release/exec",
-      "cmd": "cat snyk-broker-linux | npx hasha-cli -a sha256 > snyk-broker-linux.sha256 && cat snyk-broker-macos | npx hasha-cli -a sha256 > snyk-broker-macos.sha256 && cat snyk-broker-win.exe | npx hasha-cli -a sha256 > snyk-broker-win.exe.sha256"
+      "cmd": "cat binary-releases/snyk-broker-linux | npx hasha-cli -a sha256 > binary-releases/snyk-broker-linux.sha256"
+    },
+    {
+      "//": "shasum macos binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "cat binary-releases/snyk-broker-macos | npx hasha-cli -a sha256 > binary-releases/snyk-broker-macos.sha256"
+    },
+    {
+      "//": "shasum windows binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "cat binary-releases/snyk-broker-win.exe | npx hasha-cli -a sha256 > binary-releases/snyk-broker-win.exe.sha256"
     }
   ],
   "publish": [
@@ -18,32 +28,32 @@
       "path": "@semantic-release/github",
       "assets": [
         {
-          "path": "./snyk-broker-linux",
+          "path": "binary-releases/snyk-broker-linux",
           "name": "snyk-broker-linux",
           "label": "snyk-broker-linux"
         },
         {
-          "path": "./snyk-broker-linux.sha256",
+          "path": "binary-releases/snyk-broker-linux.sha256",
           "name": "snyk-broker-linux.sha256",
           "label": "snyk-broker-linux.sha256"
         },
         {
-          "path": "./snyk-broker-macos",
+          "path": "binary-releases/snyk-broker-macos",
           "name": "snyk-broker-macos",
           "label": "snyk-broker-macos"
         },
         {
-          "path": "./snyk-broker-macos.sha256",
+          "path": "binary-releases/snyk-broker-macos.sha256",
           "name": "snyk-broker-macos.sha256",
           "label": "snyk-broker-macos.sha256"
         },
         {
-          "path": "./snyk-broker-win.exe",
+          "path": "binary-releases/snyk-broker-win.exe",
           "name": "snyk-broker-win.exe",
           "label": "snyk-broker-win.exe"
         },
         {
-          "path": "./snyk-broker-win.exe.sha256",
+          "path": "binary-releases/snyk-broker-win.exe.sha256",
           "name": "snyk-broker-win.exe.sha256",
           "label": "snyk-broker-win.exe.sha256"
         }
