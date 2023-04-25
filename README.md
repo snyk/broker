@@ -586,9 +586,9 @@ More details can be found here:
 [Detecting infrastructure as code files using a broker](https://docs.snyk.io/products/snyk-infrastructure-as-code/detecting-infrastructure-as-code-files-using-a-broker)
 
 #### Snyk Code
-By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to perform a git clone of your repo, you can simply add an environment variable ACCEPT_CODE=true
+By default, git clone capabilities required by Snyk Code are disabled. To grant the Broker access to perform a git clone of your repo add the environment variable `ACCEPT_CODE=true`.
 
-NOTE: This feature is currently under closed beta. Please speak with your Snyk account management team to find out more.
+NOTE: This feature is currently under closed beta. Speak with your Snyk account management team to find out more.
 
 Example:
 
@@ -602,7 +602,23 @@ docker run --restart=always \
            -e ACCEPT_CODE=true
        snyk/broker:github-com
 ```
-Note that if a custom accept file (from a separate folder) is used (using ACCEPT environment variable), the ACCEPT_CODE mechanism cannot be used.
+This will add the necessary `accept` rules for your choice of Git server.  These rules can be found [here](https://github.com/snyk/broker/tree/master/client-templates).
+
+If custom `accept` rules are required, a custom `accept.json` can be provided.   
+
+Example:
+```console
+docker run --restart=always \
+           -p 8000:8000 \
+           -e BROKER_TOKEN=secret-broker-token \
+           -e GITHUB_TOKEN=secret-github-token \
+           -e PORT=8000 \
+           -e BROKER_CLIENT_URL=http://my.broker.client:8000 \
+           -e ACCEPT=/myFolder/accept.json
+       snyk/broker:github-com
+```
+
+Note that if a custom `accept.json` file is used the `ACCEPT_CODE=true` mechanism cannot be used.
 
 #### Changing the Auth Method
 
