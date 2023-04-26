@@ -7,6 +7,7 @@ const config: Config = {
       tsconfig: '<rootDir>/test/tsconfig.json',
     },
   },
+  maxConcurrency: 1,
   maxWorkers: 1,
   modulePathIgnorePatterns: ['<rootDir>/dist'],
   preset: 'ts-jest',
