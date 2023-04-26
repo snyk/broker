@@ -1,7 +1,5 @@
-// noinspection DuplicatedCode
-
 import * as path from 'path';
-import axios from 'axios';
+import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,
   closeBrokerClient,
@@ -47,12 +45,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/custom-systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -84,12 +78,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -122,12 +112,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -160,12 +146,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -198,12 +180,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -234,12 +212,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -267,12 +241,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
@@ -303,12 +273,8 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -359,12 +325,9 @@ describe('broker client systemcheck endpoint', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      {
-        timeout: 10_000,
-        validateStatus: () => true,
-      },
+      { timeout: 10_000 },
     );
 
     expect(response.data).toBeInstanceOf(Array);

@@ -87,6 +87,23 @@ export const createBrokerClient = async (
   });
 };
 
+export const waitForBrokerServerConnection = async (
+  brokerClient: BrokerClient,
+): Promise<unknown> => {
+  let serverMetadata: unknown;
+
+  await new Promise((resolve) => {
+    brokerClient.client.io.on('identify', (serverData) => {
+      LOG.debug({ serverData }, 'on identify event for broker client');
+
+      serverMetadata = serverData;
+      resolve(serverData);
+    });
+  });
+
+  return Promise.resolve(serverMetadata);
+};
+
 export const closeBrokerClient = async (
   brokerClient: BrokerClient,
 ): Promise<void> => {

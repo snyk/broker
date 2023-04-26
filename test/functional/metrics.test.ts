@@ -1,10 +1,17 @@
-// noinspection DuplicatedCode
-
 import * as path from 'path';
 import * as metrics from '../../lib/metrics';
-import axios from 'axios';
-import { BrokerClient, createBrokerClient } from '../setup/broker-client';
-import { BrokerServer, createBrokerServer } from '../setup/broker-server';
+import { axiosClient } from '../setup/axios-client';
+import {
+  BrokerClient,
+  closeBrokerClient,
+  createBrokerClient,
+} from '../setup/broker-client';
+import {
+  BrokerServer,
+  closeBrokerServer,
+  createBrokerServer,
+  waitForBrokerClientConnection,
+} from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -27,47 +34,22 @@ describe('metrics', () => {
       brokerToken: '12345',
       filters: clientAccept,
     });
-
-    await new Promise((resolve) => {
-      bs.server.io.on('connection', (socket) => {
-        socket.on('identify', (clientData) => {
-          brokerToken = clientData.token;
-          resolve(brokerToken);
-        });
-      });
-    });
+    ({ brokerToken } = await waitForBrokerClientConnection(bs));
   });
 
   afterAll(async () => {
     await tws.server.close();
-    setTimeout(async () => {
-      await bc.client.close();
-    }, 100);
-    await new Promise<void>((resolve) => {
-      bc.client.io.on('close', () => {
-        resolve();
-      });
-    });
-
-    setTimeout(async () => {
-      await bs.server.close();
-    }, 100);
-    await new Promise<void>((resolve) => {
-      bs.server.io.on('close', () => {
-        resolve();
-      });
-    });
+    await closeBrokerClient(bc);
+    await closeBrokerServer(bs);
   });
 
   it('observes response size when streaming', async () => {
     const metricsSpy = jest.spyOn(metrics, 'observeResponseSize');
     const expectedBytes = 256_000; // 250kb
 
-    await axios.get(
+    await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/test-blob-param/${expectedBytes}`,
-      {
-        validateStatus: () => true,
-      },
+      { timeout: 10_000 },
     );
 
     expect(metricsSpy).toHaveBeenCalledWith({
