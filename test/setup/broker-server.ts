@@ -25,7 +25,7 @@ export const createBrokerServer = async (
 
   const opts = {
     port: port,
-    client: undefined,
+    client: null,
     config: {
       accept: params?.filters ? params.filters : undefined,
     },
