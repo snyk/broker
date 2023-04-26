@@ -48,12 +48,12 @@ describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () 
     });
 
     it('successfully broker POST with 1st connected client', async () => {
-      const { status } = await axiosClient.post(
+      const response = await axiosClient.post(
         `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
         { echo: 'body' },
       );
 
-      expect(status).toEqual(200);
+      expect(response.status).toEqual(200);
     });
   });
 
@@ -77,12 +77,12 @@ describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () 
     });
 
     it('successfully broker POST with 2nd client', async () => {
-      const { status } = await axiosClient.post(
+      const response = await axiosClient.post(
         `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
         { echo: 'body' },
       );
 
-      expect(status).toEqual(200);
+      expect(response.status).toEqual(200);
     });
 
     it('successfully broker POST with 2nd client when 1st client was closed', async () => {
