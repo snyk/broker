@@ -1,8 +1,6 @@
-// noinspection DuplicatedCode
-
 import * as path from 'path';
 import * as version from '../../lib/version';
-import axios from 'axios';
+import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,
   closeBrokerClient,
@@ -47,12 +45,8 @@ describe('proxy requests originating from behind the broker client', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/healthcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -67,12 +61,8 @@ describe('proxy requests originating from behind the broker client', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/healthcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -92,12 +82,8 @@ describe('proxy requests originating from behind the broker client', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/connection-status/12345`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
     const expectedFilters = require(clientAccept);
 
@@ -123,12 +109,8 @@ describe('proxy requests originating from behind the broker client', () => {
     await waitForBrokerClientConnection(bs);
     await closeBrokerClient(bc);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/connection-status/12345`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(404);
@@ -140,12 +122,8 @@ describe('proxy requests originating from behind the broker client', () => {
       brokerToken: '12345',
     });
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/healthcheck`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(500);
@@ -167,12 +145,8 @@ describe('proxy requests originating from behind the broker client', () => {
     });
     await waitForBrokerClientConnection(bs);
 
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bc.port}/custom/healthcheck/endpoint`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);

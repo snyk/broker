@@ -1,10 +1,17 @@
-// noinspection DuplicatedCode
-
 import * as path from 'path';
 import * as version from '../../lib/version';
-import axios from 'axios';
-import { BrokerClient, createBrokerClient } from '../setup/broker-client';
-import { BrokerServer, createBrokerServer } from '../setup/broker-server';
+import { axiosClient } from '../setup/axios-client';
+import {
+  BrokerClient,
+  closeBrokerClient,
+  createBrokerClient,
+} from '../setup/broker-client';
+import {
+  BrokerServer,
+  closeBrokerServer,
+  createBrokerServer,
+  waitForBrokerClientConnection,
+} from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -15,7 +22,8 @@ describe('proxy requests originating from behind the broker server', () => {
   let tws: TestWebServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
-  let brokerToken, metadata: string;
+  let brokerToken: string;
+  let metadata: unknown;
 
   beforeAll(async () => {
     tws = await createTestWebServer();
@@ -28,37 +36,13 @@ describe('proxy requests originating from behind the broker server', () => {
       filters: clientAccept,
       type: 'client',
     });
-
-    await new Promise((resolve) => {
-      bs.server.io.on('connection', (socket) => {
-        socket.on('identify', (clientData) => {
-          brokerToken = clientData.token;
-          metadata = clientData.metadata;
-          resolve(brokerToken);
-        });
-      });
-    });
+    ({ brokerToken, metadata } = await waitForBrokerClientConnection(bs));
   });
 
   afterAll(async () => {
     await tws.server.close();
-    setTimeout(async () => {
-      await bc.client.close();
-    }, 100);
-    await new Promise<void>((resolve) => {
-      bc.client.io.on('close', () => {
-        resolve();
-      });
-    });
-
-    setTimeout(async () => {
-      await bs.server.close();
-    }, 100);
-    await new Promise<void>((resolve) => {
-      bs.server.io.on('close', () => {
-        resolve();
-      });
-    });
+    await closeBrokerClient(bc);
+    await closeBrokerServer(bs);
   });
 
   it('server identifies self to client', async () => {
@@ -73,13 +57,9 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully broker POST', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
       { some: { example: 'json' } },
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -93,16 +73,15 @@ describe('proxy requests originating from behind the broker server', () => {
     const body = Buffer.from(
       JSON.stringify({ some: { example: 'json' } }, null, 5),
     );
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
       body,
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
+
         transformResponse: (r) => r,
-        validateStatus: () => true,
       },
     );
 
@@ -111,12 +90,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully broker GET', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/xyz`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -124,7 +99,7 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('variable substitution', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
       {
         BROKER_VAR_SUB: ['swap.me'],
@@ -134,8 +109,6 @@ describe('proxy requests originating from behind the broker server', () => {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -147,15 +120,13 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('block request for non-whitelisted url', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/not-allowed`,
       {},
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -169,15 +140,13 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('allow request for valid url with valid body', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body/filtered`,
       { proxy: { me: 'please' } },
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -188,15 +157,13 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('block request for valid url with invalid body', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body/filtered`,
       { proxy: { me: 'now!' } },
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -210,12 +177,10 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('allow request for valid url with valid query param', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-query/filtered`,
       {
         params: { proxyMe: 'please' },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -224,12 +189,10 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('block request for valid url with invalid query param', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-query/filtered`,
       {
         params: { proxyMe: 'now!' },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -243,12 +206,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('block request for valid url with missing query param', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-query/filtered`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(401);
@@ -261,26 +220,18 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('bad broker id', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}XXX/echo-body`,
       {},
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(404);
   });
 
   it('broker token is not included in headers from client to private', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
       {},
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -288,7 +239,7 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('x-forwarded-* headers are stripped from the request before being forwarded', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
       {},
       {
@@ -301,8 +252,6 @@ describe('proxy requests originating from behind the broker server', () => {
           forwarded:
             'by=broker;for=127.0.0.1;host=banana;port=8080;proto=https',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -316,7 +265,7 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('querystring parameters are brokered', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-query`,
       {
         params: {
@@ -325,8 +274,6 @@ describe('proxy requests originating from behind the broker server', () => {
           url_as_param: 'https://clojars.org/search?q=btc',
           one_more_top_level_param: 'true',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -340,12 +287,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('approved URLs are blocked when escaped', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/long/nested%2Fpath%2Fto%2Ffile.ext`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(401);
@@ -358,12 +301,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('block request for url where client does not support required capability', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/client-not-capable`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(401);
@@ -375,12 +314,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('approved URLs are brokered when escaped as expected', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -390,14 +325,12 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('content-length is not set when using chunked http', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
       {
         headers: {
           'Transfer-Encoding': 'chunked',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -405,28 +338,22 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('content-length is set without chunked http', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
       {},
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.headers).toHaveProperty('content-length');
   });
 
   it('auth header is replaced when url contains token', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers/github`,
       {},
       {
         headers: {
           Authorization: 'broker auth',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -436,13 +363,9 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('auth header is is replaced when url contains basic auth', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers/bitbucket`,
       {},
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
     const auth = response.data.authorization?.replace('Basic ', '');
     const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
@@ -453,12 +376,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully broker on endpoint that forwards requests with basic auth', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/basic-auth`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
     const auth = response.data.replace('Basic ', '');
     const encodedAuth = Buffer.from(auth, 'base64').toString('utf-8');
@@ -469,14 +388,12 @@ describe('proxy requests originating from behind the broker server', () => {
 
   it('ignores accept-encoding (gzip)', async () => {
     const paramRequiringCompression = 'hello-'.repeat(200);
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/${paramRequiringCompression}`,
       {
         headers: {
           'Accept-Encoding': 'gzip',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -486,14 +403,12 @@ describe('proxy requests originating from behind the broker server', () => {
 
   it('ignores accept-encoding (deflate)', async () => {
     const paramRequiringCompression = 'hello-'.repeat(200);
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/${paramRequiringCompression}`,
       {
         headers: {
           'Accept-Encoding': 'deflate',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -502,12 +417,10 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully stream data', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/test-blob/1`,
       {
         headers: {},
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
     const buf = Buffer.alloc(500);
@@ -522,15 +435,13 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully redirect POST request to git client', async () => {
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/snykgit/echo-body`,
       { some: { example: 'json' } },
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
@@ -544,16 +455,15 @@ describe('proxy requests originating from behind the broker server', () => {
     const body = Buffer.from(
       JSON.stringify({ some: { example: 'json' } }, null, 5),
     );
-    const response = await axios.post(
+    const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/snykgit/echo-body`,
       body,
       {
         headers: {
           'content-type': 'application/json',
         },
-        timeout: 1000,
+
         transformResponse: (r) => r,
-        validateStatus: () => true,
       },
     );
 
@@ -562,12 +472,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('successfully redirect exact bytes of POST body to git client', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/snykgit/echo-param/xyz`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -575,12 +481,8 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('accept large responses', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/huge-file`,
-      {
-        timeout: 1000,
-        validateStatus: () => true,
-      },
     );
 
     expect(response.status).toEqual(200);
@@ -588,14 +490,12 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   it('allow request to git client with valid param', async () => {
-    const response = await axios.get(
+    const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/snykgit/echo-query`,
       {
         params: {
           proxyMe: 'please',
         },
-        timeout: 1000,
-        validateStatus: () => true,
       },
     );
 
