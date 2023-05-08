@@ -12,7 +12,7 @@ const pgpPrivateKey = Fixtures.get('pgp-private-key.pem', pgpFixturesRoot);
 describe('client/scm/pgp/sign.ts', () => {
   const passphrase = 'test-broker-passphrase';
 
-  describe('sign()', () => {
+  describe('createSignature()', () => {
     it('should throw an error on misformed armored key', async () => {
       const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
 
@@ -50,7 +50,7 @@ invalid-openpgp-format-text
     });
   });
 
-  describe('validate()', () => {
+  describe('validatePrivateKey()', () => {
     it('should not throw an error for armored key with begin and end block', async () => {
       const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nabcdef-----END PGP PRIVATE KEY BLOCK-----`;
       expect(() => validatePrivateKey({ armoredKey })).not.toThrowError();

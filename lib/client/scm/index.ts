@@ -4,8 +4,10 @@ import {
   isGitHubCreateCommitEndpoint,
   stringifyGitHubCommitPayload,
 } from './github/commit';
-import type { Config } from '../config';
 import { createSignature } from './pgp/sign';
+import { getCommitSigningGitHubFilterRules } from './github/commit-signing-filter-rules';
+import type { Config } from '../config';
+import type { FilterRule } from './types';
 
 export function githubCommitSigningEnabled(
   config: any,
@@ -57,6 +59,10 @@ export const commitSigningEnabled = (config: Config): boolean => {
     gitCommitterEmailConfigured
   );
 };
+
+export function commitSigningFilterRules(): FilterRule[] {
+  return getCommitSigningGitHubFilterRules();
+}
 
 /**
  * Sign GitHub commit with PGP private key and set `signature` property
