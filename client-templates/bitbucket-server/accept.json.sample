@@ -987,9 +987,9 @@
       }
     },
     {
-      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project. we're using atlassian's SDK api. Because atlassian's BB server rest api currently doesn't support such functionality",
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project.",
       "method": "GET",
-      "path": "/plugins/servlet/applinks/whoami",
+      "path": "/rest/api/1.0/application-properties",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
