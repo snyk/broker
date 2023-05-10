@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`client/scm/github/commit-signing-filter-rules.ts getCommitSigningGitHubFilterRules() should load commit signing rules correctly 1`] = `
+Array [
+  Object {
+    "//": "create tree",
+    "method": "POST",
+    "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+    "path": "/repos/:name/:repo/git/trees",
+  },
+  Object {
+    "//": "create tree refs",
+    "method": "POST",
+    "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+    "path": "/repos/:name/:repo/git/trees/:ref",
+  },
+  Object {
+    "//": "create commit",
+    "method": "POST",
+    "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+    "path": "/repos/:name/:repo/git/commits",
+  },
+  Object {
+    "//": "update pull request",
+    "method": "PATCH",
+    "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+    "path": "/repos/:name/:repo/pulls/:pull_number",
+  },
+  Object {
+    "//": "delete ref head",
+    "method": "DELETE",
+    "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+    "path": "/repos/:name/:repo/git/refs/heads/:branch_name",
+  },
+]
+`;

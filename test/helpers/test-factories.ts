@@ -23,6 +23,10 @@ export const aConfig = (fields: Partial<Config>): Config => {
     BROKER_HA_MODE_ENABLED: 'false',
     BROKER_SERVER_URL: 'http://broker-server:8080',
     PREFLIGHT_CHECKS_ENABLED: 'false',
+    GIT_COMMITTER_NAME: '',
+    GIT_COMMITTER_EMAIL: '',
+    GPG_PASSPHRASE: '',
+    GPG_PRIVATE_KEY: '',
     ...fields,
   };
 };

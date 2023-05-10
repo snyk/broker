@@ -18,7 +18,15 @@ interface HighAvailabilityMode {
   BROKER_HA_MODE_ENABLED: string;
 }
 
+interface CommitSigning {
+  GIT_COMMITTER_NAME: string;
+  GIT_COMMITTER_EMAIL: string;
+  GPG_PASSPHRASE: string;
+  GPG_PRIVATE_KEY: string;
+}
+
 export type Config = BackendAPI &
   BrokerClient &
   BrokerServer &
+  CommitSigning &
   HighAvailabilityMode;
