@@ -1398,6 +1398,17 @@ Object {
       "path": "/rest/api/1.0/application-properties",
     },
     Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
+    },
+    Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -8027,6 +8038,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/application-properties",
+    },
+    Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
     },
     Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
@@ -15086,6 +15108,17 @@ Object {
       "path": "/rest/api/1.0/application-properties",
     },
     Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
+    },
+    Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -16259,6 +16292,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/application-properties",
+    },
+    Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
     },
     Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
@@ -28138,6 +28182,17 @@ Object {
       "path": "/rest/api/1.0/application-properties",
     },
     Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
+    },
+    Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34646,6 +34701,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/application-properties",
+    },
+    Object {
+      "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/plugins/servlet/applinks/whoami",
     },
     Object {
       "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
