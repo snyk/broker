@@ -14,6 +14,10 @@ export class Fixtures {
     });
   }
 
+  static getPathToFixtures(directory: string): string {
+    return path.resolve(DEFAULT_FIXTURES_ROOT, directory);
+  }
+
   static getPathToClientFixtures(): string {
     return path.resolve(DEFAULT_FIXTURES_ROOT, 'client');
   }
