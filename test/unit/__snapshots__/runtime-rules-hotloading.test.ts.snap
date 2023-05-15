@@ -1277,6 +1277,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
     Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
       "//": "used to create a pull request for fix PRs",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -7915,6 +7926,17 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "PUT",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
@@ -14987,6 +15009,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
     Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
       "//": "used to create a pull request for fix PRs",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -16169,6 +16202,17 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "PUT",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
@@ -28061,6 +28105,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
     Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
       "//": "used to create a pull request for fix PRs",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34578,6 +34633,17 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "PUT",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    },
+    Object {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
     },
