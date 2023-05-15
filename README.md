@@ -846,6 +846,31 @@ Regardless of whether the checks were successful, the Broker client will be star
 
 > **Note**: `PREFLIGHT_CHECKS_ENABLED=false` environment variable can be used to disable Preflight Checks feature, so no checks will be executed when starting Broker client.
 
+### Broker Client Commit Signing
+
+As of version v4.151.0 Broker Client supports commit signing for GitHub integration.
+It means with the brokered setup you can sign GitHub commits for fix PRs with your GPG key
+and a dedicated user you configured.
+
+#### Requirements
+
+* Broker Client version v4.151.0 or higher
+* a GitHub account configured to sign commits with a GPG key properly configured under “Access->SSH and GPG keys” section
+
+#### Configuration
+
+1. In order to use commit signing, you have to provide following environment variables for the Broker Client:
+   - `GPG_PRIVATE_KEY`: GPG private key exported as an ASCII armored version. Please note that the value must start with `-----BEGIN PGP PRIVATE KEY BLOCK-----` and end with `-----END PGP PRIVATE KEY BLOCK-----`.
+   - `GPG_PASSPHRASE`: Passphrase of the GPG private key.
+   - `GIT_COMMITTER_NAME`: will be used to set a committer name.
+   - `GIT_COMMITTER_EMAIL`: will be used to set a committer email.
+2. Enable “Broker Client Commit Signing” in Snyk Preview settings.
+
+If commits are shown as `Unverified` in GitHub:
+
+- Verify that the GPG public key is imported to the correct GitHub user and the email address is the same in GitHub as in the environment variables.
+- To ensure that the commit signing feature has been activated for the Broker Client in our organization you can check the logs and verify that the following message is shown when the Broker Client starts up: `loading commit signing rules (enabled=true, rulesCount=5)`
+
 
 ### Troubleshooting
 
