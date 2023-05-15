@@ -877,6 +877,17 @@
       }
     },
     {
+      "//": "used to get files with special characters which are not accessible via atlassian's SDK api",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to create a pull request for fix PRs",
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
