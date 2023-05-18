@@ -72,7 +72,8 @@ export async function signGitHubCommit(
   config: any,
   body: unknown,
 ): Promise<string> {
-  const commit = convertBodyToGitHubCommitPayload(body, {
+  const bodyAsString = convertBodyToStringIfNeeded(body);
+  const commit = convertBodyToGitHubCommitPayload(bodyAsString, {
     committerName: (config as Config).GIT_COMMITTER_NAME,
     committerEmail: (config as Config).GIT_COMMITTER_EMAIL,
   });
@@ -93,3 +94,17 @@ export async function signGitHubCommit(
 
   return Promise.resolve(JSON.stringify(commit));
 }
+
+const convertBodyToStringIfNeeded = (body: unknown): string => {
+  if (isUint8Array(body)) {
+    return Buffer.from(body).toString();
+  } else if (typeof body === 'string' || body instanceof String) {
+    return body as string;
+  } else {
+    throw new Error('body must be string or Uint8Array');
+  }
+};
+
+const isUint8Array = (data: unknown): data is Uint8Array => {
+  return !!(data && data instanceof Uint8Array);
+};

@@ -11,16 +11,14 @@ export function isGitHubCreateCommitEndpoint(options: {
 }
 
 export function convertBodyToGitHubCommitPayload(
-  body: unknown,
+  body: string,
   options: {
     committerName: string;
     committerEmail: string;
   },
 ): GitHubCommitPayload {
-  const bodyAsString = convertBodyToStringIfNeeded(body);
-
   try {
-    const bodyAsJson = JSON.parse(bodyAsString);
+    const bodyAsJson = JSON.parse(body);
     return {
       message: bodyAsJson.message,
       tree: bodyAsJson.tree,
@@ -43,20 +41,6 @@ export function convertBodyToGitHubCommitPayload(
     );
   }
 }
-
-const convertBodyToStringIfNeeded = (body: unknown): string => {
-  if (isUint8Array(body)) {
-    return Buffer.from(body).toString();
-  } else if (typeof body === 'string' || body instanceof String) {
-    return body as string;
-  } else {
-    throw new Error('body must be string or Uint8Array');
-  }
-};
-
-const isUint8Array = (data: unknown): data is Uint8Array => {
-  return !!(data && data instanceof Uint8Array);
-};
 
 const convertToDate = (input: unknown): Date => {
   if (input && typeof input === 'string') {
