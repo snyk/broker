@@ -89,6 +89,23 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Injection of valid CODE GH rules - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_LARGE_MANIFESTS = 'true';
+      process.env.ACCEPT = 'accept.json';
+
+      const loadedRules = loadFilterRules(
+        'accept.json.sample',
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_LARGE_MANIFESTS;
+      delete process.env.ACCEPT;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid CODE rules and IAC extensions (yaml only) - Testing %s',
     (folder) => {
       process.env.ACCEPT_CODE = 'true';
