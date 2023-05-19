@@ -1,5 +1,8 @@
 import { aConfig } from '../../../helpers/test-factories';
-import { commitSigningEnabled } from '../../../../lib/client/scm';
+import {
+  commitSigningEnabled,
+  signGitHubCommit,
+} from '../../../../lib/client/scm';
 
 describe('client/scm', () => {
   describe('commitSigningEnabled()', () => {
@@ -100,6 +103,20 @@ describe('client/scm', () => {
       });
 
       expect(commitSigningEnabled(config)).toEqual(false);
+    });
+  });
+
+  describe('signGitHubCommit()', () => {
+    it('should throw an error when body is null', async () => {
+      await expect(signGitHubCommit({}, null)).rejects.toThrowError(
+        'body must be string or Uint8Array',
+      );
+    });
+
+    it('should throw an error when body is not string', async () => {
+      await expect(signGitHubCommit({}, 123456)).rejects.toThrowError(
+        'body must be string or Uint8Array',
+      );
     });
   });
 });

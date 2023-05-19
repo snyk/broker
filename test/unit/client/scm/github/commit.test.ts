@@ -46,27 +46,8 @@ describe('client/scm/github/commit.ts', () => {
   });
 
   describe('convertBodyToGitHubCommitPayload()', () => {
-    it('should throw an error when body is null', async () => {
-      expect(() =>
-        convertBodyToGitHubCommitPayload(null, {
-          committerName: '',
-          committerEmail: '',
-        }),
-      ).toThrowError('body must be string or Uint8Array');
-    });
-
-    it('should throw an error when body is not string', async () => {
-      expect(() =>
-        convertBodyToGitHubCommitPayload(123456, {
-          committerName: '',
-          committerEmail: '',
-        }),
-      ).toThrowError('body must be string or Uint8Array');
-    });
-
     it('should convert to github commit payload when body is correct', async () => {
-      const body = Uint8Array.from(
-        Buffer.from(`{
+      const body = `{
 "message": "fix: package.json & package-lock.json",
 "tree": "1111111111111111111111111111111111111111",
 "parents": [
@@ -82,8 +63,7 @@ describe('client/scm/github/commit.ts', () => {
   "email": "broker-test-user@example.com",
   "date": "2023-05-06T08:08:08.888Z"
 }
-}`),
-      );
+}`;
       const commitPayload = convertBodyToGitHubCommitPayload(body, {
         committerName: 'broker-test-user',
         committerEmail: 'broker-test-user@example.com',

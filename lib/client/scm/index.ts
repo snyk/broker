@@ -4,18 +4,36 @@ import {
   isGitHubCreateCommitEndpoint,
   stringifyGitHubCommitPayload,
 } from './github/commit';
+import {
+  convertBodyToGitHubTreePayload,
+  isGitHubCreateTreeEndpoint,
+  validateForSymlinksInCreateTree,
+} from './github/tree';
 import { createSignature } from './pgp/sign';
 import { getCommitSigningGitHubFilterRules } from './github/commit-signing-filter-rules';
 import type { Config } from '../config';
 import type { FilterRule } from './types';
 
-export function githubCommitSigningEnabled(
+export function gitHubCommitSigningEnabled(
   config: any,
   options: { method: string; url: string },
 ): boolean {
   return (
     commitSigningEnabled(config as Config) &&
     isGitHubCreateCommitEndpoint(options)
+  );
+}
+
+export function gitHubTreeCheckNeeded(
+  config: any,
+  options: {
+    method: string;
+    url: string;
+  },
+): boolean {
+  return (
+    commitSigningEnabled(config as Config) &&
+    isGitHubCreateTreeEndpoint(options)
   );
 }
 
@@ -72,7 +90,8 @@ export async function signGitHubCommit(
   config: any,
   body: unknown,
 ): Promise<string> {
-  const commit = convertBodyToGitHubCommitPayload(body, {
+  const bodyAsString = convertBodyToStringIfNeeded(body);
+  const commit = convertBodyToGitHubCommitPayload(bodyAsString, {
     committerName: (config as Config).GIT_COMMITTER_NAME,
     committerEmail: (config as Config).GIT_COMMITTER_EMAIL,
   });
@@ -93,3 +112,28 @@ export async function signGitHubCommit(
 
   return Promise.resolve(JSON.stringify(commit));
 }
+
+/**
+ * Validates GitHub tree object and throw an error if the payload contains symlinks.
+ */
+export function validateGitHubTreePayload(body: unknown): void {
+  const bodyAsString = convertBodyToStringIfNeeded(body);
+  const tree = convertBodyToGitHubTreePayload(bodyAsString);
+  logger.debug({ tree }, 'github tree payload');
+
+  validateForSymlinksInCreateTree(tree);
+}
+
+const convertBodyToStringIfNeeded = (body: unknown): string => {
+  if (isUint8Array(body)) {
+    return Buffer.from(body).toString();
+  } else if (typeof body === 'string' || body instanceof String) {
+    return body as string;
+  } else {
+    throw new Error('body must be string or Uint8Array');
+  }
+};
+
+const isUint8Array = (data: unknown): data is Uint8Array => {
+  return !!(data && data instanceof Uint8Array);
+};
