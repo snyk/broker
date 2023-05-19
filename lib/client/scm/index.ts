@@ -4,18 +4,36 @@ import {
   isGitHubCreateCommitEndpoint,
   stringifyGitHubCommitPayload,
 } from './github/commit';
+import {
+  convertBodyToGitHubTreePayload,
+  isGitHubCreateTreeEndpoint,
+  validateForSymlinksInCreateTree,
+} from './github/tree';
 import { createSignature } from './pgp/sign';
 import { getCommitSigningGitHubFilterRules } from './github/commit-signing-filter-rules';
 import type { Config } from '../config';
 import type { FilterRule } from './types';
 
-export function githubCommitSigningEnabled(
+export function gitHubCommitSigningEnabled(
   config: any,
   options: { method: string; url: string },
 ): boolean {
   return (
     commitSigningEnabled(config as Config) &&
     isGitHubCreateCommitEndpoint(options)
+  );
+}
+
+export function gitHubTreeCheckNeeded(
+  config: any,
+  options: {
+    method: string;
+    url: string;
+  },
+): boolean {
+  return (
+    commitSigningEnabled(config as Config) &&
+    isGitHubCreateTreeEndpoint(options)
   );
 }
 
@@ -93,6 +111,17 @@ export async function signGitHubCommit(
   commit.signature = signature;
 
   return Promise.resolve(JSON.stringify(commit));
+}
+
+/**
+ * Validates GitHub tree object and throw an error if the payload contains symlinks.
+ */
+export function validateGitHubTreePayload(body: unknown): void {
+  const bodyAsString = convertBodyToStringIfNeeded(body);
+  const tree = convertBodyToGitHubTreePayload(bodyAsString);
+  logger.debug({ tree }, 'github tree payload');
+
+  validateForSymlinksInCreateTree(tree);
 }
 
 const convertBodyToStringIfNeeded = (body: unknown): string => {
