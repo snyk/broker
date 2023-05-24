@@ -9,7 +9,7 @@ import {
   isGitHubCreateTreeEndpoint,
   validateForSymlinksInCreateTree,
 } from './github/tree';
-import { createSignature } from './pgp/sign';
+import { createSignature, normalizeArmoredKeyIfNeeded } from './pgp/sign';
 import { getCommitSigningGitHubFilterRules } from './github/commit-signing-filter-rules';
 import type { Config } from '../config';
 import type { FilterRule } from './types';
@@ -99,10 +99,14 @@ export async function signGitHubCommit(
 
   const messageRaw = stringifyGitHubCommitPayload(commit);
   logger.debug({ messageRaw }, 'raw message before creating pgp signature');
+
+  const armoredKey = normalizeArmoredKeyIfNeeded(
+    (config as Config).GPG_PRIVATE_KEY,
+  );
   const signature = await createSignature({
     messageRaw: messageRaw,
     privateKey: {
-      armoredKey: (config as Config).GPG_PRIVATE_KEY,
+      armoredKey,
       passphrase: (config as Config).GPG_PASSPHRASE,
     },
   });

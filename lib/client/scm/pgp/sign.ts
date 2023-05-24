@@ -39,3 +39,10 @@ export function validatePrivateKey(pgpPrivateKey: PgpPrivateKey): void {
     throw new PgpPrivateKeyValidationError('missing END PGP PRIVATE KEY BLOCK');
   }
 }
+
+export function normalizeArmoredKeyIfNeeded(armoredKey: string): string {
+  // passing env vars for Docker containers appends additional backslash
+  // for already escaped values (e.g. will be \n -> \\n), this leads to
+  // "misformed armor key" error from openpgp library
+  return armoredKey.replace(/\\n/g, '\n');
+}
