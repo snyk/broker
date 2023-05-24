@@ -1,6 +1,7 @@
 import * as path from 'path';
 import {
   createSignature,
+  normalizeArmoredKeyIfNeeded,
   validatePrivateKey,
 } from '../../../../../lib/client/scm/pgp/sign';
 import { Fixtures } from '../../../../helpers/fixtures';
@@ -67,6 +68,28 @@ invalid-openpgp-format-text
       const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nabcdef`;
       expect(() => validatePrivateKey({ armoredKey })).toThrowError(
         new PgpPrivateKeyValidationError('missing END PGP PRIVATE KEY BLOCK'),
+      );
+    });
+  });
+
+  describe('normalizeArmoredKeyIfNeeded()', () => {
+    it('should replace double backslashes with single backslashes for line endings', async () => {
+      const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----\\n\nabcdef`;
+
+      const normalizedArmorKey = normalizeArmoredKeyIfNeeded(armoredKey);
+
+      expect(normalizedArmorKey).toStrictEqual(
+        `-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nabcdef`,
+      );
+    });
+
+    it('should replace all occurrences of double backslashes for line endings', async () => {
+      const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----\\n\\na\\nb`;
+
+      const normalizedArmorKey = normalizeArmoredKeyIfNeeded(armoredKey);
+
+      expect(normalizedArmorKey).toStrictEqual(
+        `-----BEGIN PGP PRIVATE KEY BLOCK-----\n\na\nb`,
       );
     });
   });
