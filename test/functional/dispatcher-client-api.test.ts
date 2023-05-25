@@ -31,7 +31,7 @@ describe('Broker Dispatcher API client', () => {
           hashedBrokerToken: hashedToken,
           brokerClientId: '1',
         },
-        { deployment_location: 'test' },
+        { deployment_location: 'test', broker_token_first_char: 'a' },
       );
     } catch (err) {
       expect(err).toEqual(Error('Error getting connection allocation.'));
@@ -59,7 +59,7 @@ describe('Broker Dispatcher API client', () => {
         hashedBrokerToken: hashedToken,
         brokerClientId: '1',
       },
-      { deployment_location: 'test' },
+      { deployment_location: 'test', broker_token_first_char: 'a' },
     );
 
     expect(serverId).toEqual('server-id-from-dispatcher');

@@ -46,10 +46,19 @@ export async function getServerId(
   const maxRetries = 30;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await getServerIdFromDispatcher(client, {
-        brokerClientId: brokerClientId,
-        hashedBrokerToken: hashedToken,
-      });
+      return await getServerIdFromDispatcher(
+        client,
+        {
+          brokerClientId: brokerClientId,
+          hashedBrokerToken: hashedToken,
+        },
+        {
+          deployment_location: `${
+            config.BROKER_CLIENT_LOCATION || 'snyk-broker-client'
+          }`,
+          broker_token_first_char: `${config.BROKER_TOKEN[0]}`,
+        },
+      );
     } catch (err) {
       const timeout = 2 ** attempt * 100;
       logger.warn(
