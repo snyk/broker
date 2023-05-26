@@ -14,6 +14,8 @@ describe('log', () => {
     const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
     const artifactoryUrl = (process.env.ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
+    const nexusUrl = (process.env.BASE_NEXUS_URL =
+      'http://basic:auth@nexus.com');
     const crAgentUrl = (process.env.CR_AGENT_URL = 'CONTAINER_AGENT_URL');
     const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
     const crUsername = (process.env.CR_USERNAME = 'CONTAINER_USERNAME');
@@ -42,6 +44,7 @@ describe('log', () => {
       jiraPass,
       jiraPassPool,
       artifactoryUrl,
+      nexusUrl,
       crAgentUrl,
       crCredentials,
       crUsername,
@@ -61,6 +64,7 @@ describe('log', () => {
     const sanitizedJira =
       '${JIRA_USERNAME},${JIRA_PASSWORD},${JIRA_PASSWORD_POOL}';
     const sanitizedArtifactory = '${ARTIFACTORY_URL}';
+    const sanitizedNexus = '${BASE_NEXUS_URL}';
     const sanitizedCRData =
       '${CR_AGENT_URL},${CR_CREDENTIALS},${CR_USERNAME},${CR_PASSWORD},${CR_TOKEN},${CR_ROLE_ARN},${CR_EXTERNAL_ID},${CR_REGION},${CR_BASE}';
     const sanitizedGitUsername = '${GIT_USERNAME}';
@@ -119,6 +123,7 @@ describe('log', () => {
     expect(logged).toMatch(sanitizedTokens);
     expect(logged).toMatch(sanitizedJira);
     expect(logged).toMatch(sanitizedArtifactory);
+    expect(logged).toMatch(sanitizedNexus);
     expect(logged).toMatch(sanitizedCRData);
     expect(logged).toMatch(sanitizedGitUsername);
     expect(logged).toMatch(sanitizedGitPassword);
