@@ -1,5 +1,6 @@
 export type CreateConnectionRequestData = {
   deployment_location: string;
+  broker_token_first_char: string;
 };
 
 export type CreateConnectionRequestParams = {
@@ -23,8 +24,7 @@ export interface DispatcherServiceClient {
 export async function getServerIdFromDispatcher(
   client: DispatcherServiceClient,
   params: CreateConnectionRequestParams,
+  data: CreateConnectionRequestData,
 ): Promise<ServerId> {
-  return await client.createConnection(params, {
-    deployment_location: 'snyk-broker-client',
-  });
+  return await client.createConnection(params, data);
 }

@@ -29,6 +29,7 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
           data: {
             attributes: {
               deployment_location: data.deployment_location,
+              broker_token_first_char: data.broker_token_first_char,
             },
           },
         },
