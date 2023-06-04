@@ -1,21 +1,38 @@
-export type CheckId = string;
-export type CheckStatus = 'passing' | 'warning' | 'error' | undefined;
+import type { Config } from '../config';
 
+/**
+ * Represents an abstract check with common functionality and properties.
+ * All other custom checks must extend this interface.
+ */
 export interface Check {
-  checkId: CheckId;
-  checkName: string;
-  checkStatus?: CheckStatus;
+  id: CheckId;
+  name: string;
+  enabled: boolean;
 
-  active: boolean;
-  output?: string;
-  timeoutMs: number;
+  check: CheckFn;
+}
+
+/**
+ * HttpCheck is used to make an HTTP request to determine the health of a given check.
+ */
+export interface HttpCheck extends Check {
   url: string;
+  method: 'GET' | 'POST';
+  timeoutMs: number;
 }
 
 /** CheckResult is used to render check in JSON format. */
 export interface CheckResult {
-  id: string;
-  name: string;
-  status: CheckStatus;
-  output: string;
+  readonly id: CheckId;
+  readonly name: string;
+  readonly status: CheckStatus;
+  readonly output: string;
 }
+
+export type CheckId = string;
+export type CheckStatus = 'passing' | 'warning' | 'error';
+
+/**
+ * A check function needed to implement by individual checks.
+ */
+export type CheckFn = (config?: Config) => Promise<CheckResult> | CheckResult;
