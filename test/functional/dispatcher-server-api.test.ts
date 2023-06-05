@@ -65,9 +65,11 @@ describe('Broker Server Dispatcher API interaction', () => {
   });
 
   it('should fire off clientPinged call successfully with server response', async () => {
+    const time = Date.now();
+    const fakeLatency = 1;
     nock(`${serverUrl}`)
       .post(
-        `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-pinged&version=${apiVersion}`,
+        `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-pinged&latency=${fakeLatency}&version=${apiVersion}`,
       )
       .reply((uri, requestBody) => {
         spyFn(JSON.parse(requestBody));
@@ -79,7 +81,12 @@ describe('Broker Server Dispatcher API interaction', () => {
       process.env.hostname = '0';
       const dispatcher = require('../../lib/dispatcher');
       await expect(
-        dispatcher.clientPinged(token, clientId, clientVersion),
+        dispatcher.clientPinged(
+          token,
+          clientId,
+          clientVersion,
+          time - fakeLatency,
+        ),
       ).resolves.not.toThrowError();
       expect(spyLogWarn).toHaveBeenCalledTimes(0);
       expect(spyFn).toBeCalledWith({
