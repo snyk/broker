@@ -3,15 +3,16 @@ const logger = require('./log');
 import axiosRetry from 'axios-retry';
 
 const axiosInstance = axios.create({
-  timeout: 5000,
+  timeout: 2500,
 });
 
 axiosRetry(axiosInstance, {
   retries: 3,
   retryCondition: () => true, // retry no matter what
+  shouldResetTimeout: true,
   retryDelay: axiosRetry.exponentialDelay,
   onRetry: (retryCount, error, requestConfig) => {
-    if (error) {
+    if (retryCount > 2) {
       logger.warn(
         {
           retryCount,
@@ -20,7 +21,7 @@ axiosRetry(axiosInstance, {
           requestId:
             requestConfig.headers && requestConfig.headers['Snyk-Request-Id'],
         },
-        'retrying request',
+        `retrying request x ${retryCount} `,
       );
     }
   },

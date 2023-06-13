@@ -120,14 +120,13 @@ describe('Broker Server Dispatcher API interaction', () => {
       await expect(
         dispatcher.clientConnected(token, clientId, clientVersion),
       ).resolves.not.toThrowError();
-      expect(spyLogWarn).toHaveBeenCalledTimes(3);
-      for (let i = 0; i < 3; i++) {
-        const output = spyLogWarn.mock.calls[i][0] as Object;
-        expect(output['errorMessage']).toEqual(
-          'Request failed with status code 500',
-        );
-        expect(output['retryCount']).toEqual(i + 1);
-      }
+      expect(spyLogWarn).toHaveBeenCalledTimes(1);
+
+      const output = spyLogWarn.mock.calls[0][0] as Object;
+      expect(output['errorMessage']).toEqual(
+        'Request failed with status code 500',
+      );
+      expect(output['retryCount']).toEqual(3);
 
       expect(spyLogError).toBeCalledTimes(1);
       const errorOutput = spyLogError.mock.calls[0][0] as Object;
