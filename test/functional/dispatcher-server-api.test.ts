@@ -76,30 +76,26 @@ describe('Broker Server Dispatcher API interaction', () => {
         return [200, 'OK'];
       });
 
-    try {
-      process.env.DISPATCHER_URL = `${serverUrl}`;
-      process.env.hostname = '0';
-      const dispatcher = require('../../lib/dispatcher');
-      await expect(
-        dispatcher.clientPinged(
-          token,
-          clientId,
-          clientVersion,
-          time - fakeLatency,
-        ),
-      ).resolves.not.toThrowError();
-      expect(spyLogWarn).toHaveBeenCalledTimes(0);
-      expect(spyFn).toBeCalledWith({
-        data: {
-          attributes: {
-            broker_client_version: '4.144.1',
-            health_check_link: 'http://0/healthcheck',
-          },
+    process.env.DISPATCHER_URL = `${serverUrl}`;
+    process.env.hostname = '0';
+    const dispatcher = require('../../lib/dispatcher');
+    await expect(
+      dispatcher.clientPinged(
+        token,
+        clientId,
+        clientVersion,
+        time - fakeLatency,
+      ),
+    ).resolves.not.toThrowError();
+    expect(spyLogWarn).toHaveBeenCalledTimes(0);
+    expect(spyFn).toBeCalledWith({
+      data: {
+        attributes: {
+          broker_client_version: '4.144.1',
+          health_check_link: 'http://0/healthcheck',
         },
-      });
-    } catch (err) {
-      expect(err).toBeNull();
-    }
+      },
+    });
   });
 
   it('should fire off clientConnected call successfully with warnings', async () => {
