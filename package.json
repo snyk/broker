@@ -83,7 +83,7 @@
     "qs": "^6.9.1",
     "request": "^2.88.1",
     "request-promise-native": "^1.0.9",
-    "snyk-config": "^4.0.0-rc.2",
+    "snyk-config": "^4.0.0",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
     "undefsafe": "^2.0.2",
