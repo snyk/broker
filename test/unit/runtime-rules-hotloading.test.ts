@@ -89,6 +89,22 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Injection of valid Git rules - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_GIT = 'true';
+      process.env.ACCEPT = 'accept.json';
+      const loadedRules = loadFilterRules(
+        'accept.json.sample',
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_GIT;
+      delete process.env.ACCEPT;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid CODE GH rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
