@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  prodsec: snyk/prodsec-orb@1.0
+
 defaults: &defaults
   docker:
     - image: cimg/node:18.16.0
@@ -76,12 +79,20 @@ workflows:
           name: Lint
           requires:
             - Install DEV
+      - prodsec/secrets-scan:
+          name: Scan repository for secrets
+          context:
+            - snyk-bot-slack
+          requires:
+            - Install DEV
+          channel: broker-alerts
       - release:
           name: Release to GitHub
           context: nodejs-lib-release
           requires:
             - Test
             - Lint
+            - Scan repository for secrets
           filters:
             branches:
               only:
