@@ -16,6 +16,7 @@ commands:
       - run:
           name: Install dependencies
           command: npm i
+      - run: rm -rf node_modules/setheader/node_modules/debug
       - persist_to_workspace:
           root: .
           paths:
