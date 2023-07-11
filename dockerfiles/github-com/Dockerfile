@@ -24,6 +24,8 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 
 # Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
 RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
+# Removing tough-cookie@2.5.0 (request and request-native-promise transitive) to satisfy some scanners still reporting this false positive
+RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/tough-cookie
 
 # Don't run as root
 WORKDIR /home/node
