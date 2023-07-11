@@ -1,14 +1,23 @@
-import { Check } from '../../lib/client/checks/types';
+import { CheckResult, HttpCheck } from '../../lib/client/checks/types';
 import { Config } from '../../lib/client/config';
+import { executeHttpRequest } from '../../lib/client/checks/http/http-executor';
 
-export const aCheck = (fields: Partial<Check>): Check => {
+export const aHttpCheck = (fields: Partial<HttpCheck>): HttpCheck => {
   const id = `check_${Date.now()}`;
   return {
-    checkId: id,
-    checkName: id,
-    url: 'http://localhost:8080/check-url',
-    active: true,
-    timeoutMs: 500,
+    id: id,
+    name: id,
+    enabled: true,
+
+    url: 'http://broker-server:8080',
+    method: 'GET',
+    timeoutMs: 100,
+    check: async function (): Promise<CheckResult> {
+      return await executeHttpRequest(
+        { id: this.id, name: this.name },
+        { url: this.url, method: this.method, timeoutMs: this.timeoutMs },
+      );
+    },
     ...fields,
   };
 };

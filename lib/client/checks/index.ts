@@ -1,14 +1,7 @@
 import logger = require('../../log');
-import { Config } from '../config';
-import { CheckStore } from './check-store';
-import { CheckResult } from './types';
-import { HttpCheckService } from './http/http-check-service';
-import { PreflightCheckStore } from './preflight-check-store';
-import {
-  createBrokerServerHealthcheck,
-  createRestApiHealthcheck,
-} from './http/http-checks';
-import { retry } from '../retry/exponential-backoff';
+import { getHttpChecks } from './http';
+import type { Config } from '../config';
+import type { Check, CheckResult } from './types';
 
 export function preflightChecksEnabled(config: any): boolean {
   // preflight checks are enabled per default
@@ -33,57 +26,29 @@ export function preflightChecksEnabled(config: any): boolean {
 export async function executePreflightChecks(
   config: any,
 ): Promise<CheckResult[]> {
+  const preflightChecks: Check[] = [];
+  const httpChecks = getHttpChecks(config as Config).filter((c) => c.enabled);
+  preflightChecks.push(...httpChecks);
+
   const preflightCheckResults: CheckResult[] = [];
-  const { preflightCheckStore, httpCheckService } = await checksConfig(config);
-  const checks = await preflightCheckStore.getAll();
-  for (const check of checks) {
-    const checkResult: CheckResult = await retry<CheckResult>(
-      () => httpCheckService.run(check.checkId),
-      {
-        retries: 3,
-        operation: `http check ${check.checkId}`,
-      },
-    );
-    preflightCheckResults.push(checkResult);
-  }
+  const results = await Promise.allSettled(
+    preflightChecks.map(async (c) => c.check(config)),
+  );
+  results.forEach((r) => {
+    if (r.status === 'fulfilled') {
+      preflightCheckResults.push(r.value);
+    } else {
+      logger.error(
+        { error: r.reason },
+        'Unexpected error when executing checks',
+      );
+    }
+  });
 
   logPreflightCheckResults(preflightCheckResults);
 
   return Promise.resolve(preflightCheckResults);
 }
-
-const configurePreflightCheckStore = async (
-  config: Config,
-): Promise<PreflightCheckStore> => {
-  const preflightCheckStore = new PreflightCheckStore();
-
-  await preflightCheckStore.add(createBrokerServerHealthcheck(config));
-  await preflightCheckStore.add(createRestApiHealthcheck(config));
-
-  return Promise.resolve(preflightCheckStore);
-};
-
-const configureHttpCheckService = async (
-  checkStore: CheckStore,
-): Promise<HttpCheckService> => {
-  const httpCheckService = new HttpCheckService(checkStore);
-
-  return Promise.resolve(httpCheckService);
-};
-
-// wire all dependencies (services and stores) here
-export const checksConfig = async (config: any) => {
-  const preflightCheckStore = await configurePreflightCheckStore(
-    config as Config,
-  );
-
-  const httpCheckService = await configureHttpCheckService(preflightCheckStore);
-
-  return {
-    preflightCheckStore,
-    httpCheckService,
-  };
-};
 
 const logPreflightCheckResults = (results: CheckResult[]) => {
   console.log('##############################################################');
