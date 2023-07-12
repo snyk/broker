@@ -25,6 +25,8 @@ export async function executeHttpRequest(
           method: httpOptions.method,
           url: httpOptions.url,
           headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
             'User-Agent': `broker client/${version} (http check service)`,
           },
           timeout: httpOptions.timeoutMs,

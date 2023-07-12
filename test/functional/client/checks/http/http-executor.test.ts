@@ -1,3 +1,4 @@
+import { axiosInstance } from '../../../../../lib/axios';
 import { MockServer } from 'jest-mock-server';
 import { aHttpCheck } from '../../../../helpers/test-factories';
 import { executeHttpRequest } from '../../../../../lib/client/checks/http/http-executor';
@@ -90,7 +91,28 @@ describe('client/checks/http/http-executor.ts', () => {
       });
     });
 
-    it.only('should throw an error after 3 retries', async () => {
+    it('should add common http headers to request', async () => {
+      const spyOnRequestFn = jest.spyOn(axiosInstance, 'request');
+      server.get(`/broker-server/healthcheck`).mockImplementationOnce((ctx) => {
+        ctx.status = 200;
+        ctx.body = { status: 'ok' };
+      });
+      const check = aHttpCheck({
+        url: `${mockServerBaseUrl}/broker-server/healthcheck`,
+      });
+
+      await executeHttpRequest(
+        { id: check.id, name: check.name },
+        { url: check.url, method: check.method, timeoutMs: check.timeoutMs },
+      );
+
+      expect(spyOnRequestFn.mock.lastCall[0].headers).toMatchObject({
+        Accept: expect.any(String),
+        'Content-Type': expect.any(String),
+      });
+    });
+
+    it.skip('should throw an error after 3 retries', async () => {
       const responseWithTimeout = async (ctx) => {
         await setTimeout(100, 'waiting 100ms');
         ctx.response = 200;

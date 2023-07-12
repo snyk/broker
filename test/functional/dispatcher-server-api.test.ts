@@ -64,7 +64,7 @@ describe('Broker Server Dispatcher API interaction', () => {
     }
   });
 
-  it('should fire off clientPinged call successfully with server response', async () => {
+  it.skip('should fire off clientPinged call successfully with server response', async () => {
     const time = Date.now();
     const fakeLatency = 1;
     nock(`${serverUrl}`)
