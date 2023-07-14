@@ -12,6 +12,8 @@ ENV PATH=$PATH:/home/node/.npm-global/bin
 
 RUN npm install --global snyk-broker
 
+# Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
+RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
 
 
 FROM snyk/ubuntu

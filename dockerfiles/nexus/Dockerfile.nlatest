@@ -22,6 +22,10 @@ COPY --from=base /home/node/.npm-global /home/node/.npm-global
 
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
+USER root
+# Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
+RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
+
 # Don't run as root
 WORKDIR /home/node
 USER node
