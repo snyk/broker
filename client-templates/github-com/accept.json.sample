@@ -76,6 +76,22 @@
         },
         {
           "path": "commits.*.added.*",
+          "value": "Pipfile"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile"
+        },
+        {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock"
+        },
+        {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock"
+        },
+        {
+          "path": "commits.*.added.*",
           "value": "pom.xml"
         },
         {

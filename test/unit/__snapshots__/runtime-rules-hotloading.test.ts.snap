@@ -106,6 +106,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -201,6 +205,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -638,7 +646,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -3395,6 +3447,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -4802,6 +4870,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -5163,6 +5247,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -6672,6 +6780,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -6767,6 +6879,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -7234,7 +7350,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -10036,6 +10196,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -11455,6 +11631,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -11816,6 +12008,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -13343,6 +13559,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -13440,6 +13660,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -13909,7 +14133,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -16745,6 +17013,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -18176,6 +18460,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -18537,6 +18837,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -20076,6 +20400,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -20171,6 +20499,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -20638,7 +20970,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -23440,6 +23816,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -24859,6 +25251,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -25220,6 +25628,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -26747,6 +27179,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -26852,6 +27288,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -27151,6 +27591,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -27250,6 +27694,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -27691,7 +28139,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -28888,7 +29380,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -31743,6 +32279,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -33894,6 +34446,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -35355,6 +35923,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -36780,6 +37364,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -37141,6 +37741,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -38761,6 +39385,30 @@ Object {
       "//": "used to determine the full dependency tree",
       "method": "GET",
       "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
     },
     Object {
@@ -40289,6 +40937,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -40384,6 +41036,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -40821,7 +41477,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -43572,6 +44272,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -44973,6 +45689,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -45334,6 +46066,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -46843,6 +47599,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -46938,6 +47698,10 @@ Object {
             "**%2Fpyproject.toml",
             "**/poetry.lock",
             "**%2Fpoetry.lock",
+            "**/Pipfile",
+            "**%2FPipfile",
+            "**/Pipfile.lock",
+            "**%2FPipfile.lock",
             "**/build.gradle",
             "**%2Fbuild.gradle",
             "**/gradle.lockfile",
@@ -47375,7 +48139,51 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/browse*%poetry.lock",
+      "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -50126,6 +50934,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -51527,6 +52351,22 @@ Object {
         },
         Object {
           "path": "commits.*.added.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile",
+        },
+        Object {
+          "path": "commits.*.added.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.modified.*",
+          "value": "Pipfile.lock",
+        },
+        Object {
+          "path": "commits.*.added.*",
           "value": "pom.xml",
         },
         Object {
@@ -51888,6 +52728,30 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+    },
+    Object {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
     },
     Object {
       "//": "used to determine the full dependency tree",
