@@ -1,35 +1,55 @@
+process.env.SNYK_BROKER_BOOT_MODE = 'universal';
+process.env.SERVICE_ENV = 'universal';
+process.env.SNYK_BROKER_TYPES = 'testtype';
+process.env.SNYK_SOURCE_TYPES__testtype__publicId =
+  '9a3e5d90-b782-468a-a042-9a2073736f00';
+
 import { Writable } from 'stream';
 
 describe('log', () => {
   it('sanitizes log data', () => {
-    const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
-    const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
+    const brokerTk = (process.env.SNYK_BROKER_TOKEN = 'BROKER_123');
+    const githubTk = (process.env.SNYK_GITHUB__GITHUB_TOKEN = 'GITHUB_123');
     const githubTkPool = [
-      (process.env.GITHUB_TOKEN_POOL = 'GITHUB_456,GITHUB_789'),
+      (process.env.SNYK_GITHUB__GITHUB_TOKEN_POOL = 'GITHUB_456,GITHUB_789'),
     ];
-    const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
-    const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
-    const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
-    const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
-    const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
-    const jiraPassPool = [(process.env.JIRA_PASSWORD_POOL = 'JRA_POOL_PASS')];
-    const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
-    const artifactoryUrl = (process.env.ARTIFACTORY_URL =
+    const gitlabTk = (process.env.SNYK_GITLAB__GITLAB_TOKEN = 'GITLAB_123');
+    const bbUser = (process.env['SNYK_BITBUCKET-SERVER__BITBUCKET_USERNAME'] =
+      'BB_USER');
+    const bbPass = (process.env['SNYK_BITBUCKET-SERVER__BITBUCKET_PASSWORD'] =
+      'BB_PASS');
+    const jiraUser = (process.env.SNYK_JIRA__JIRA_USERNAME = 'JRA_USER');
+    const jiraPass = (process.env.SNYK_JIRA__JIRA_PASSWORD = 'JRA_PASS');
+    const jiraPassPool = [
+      (process.env.SNYK_JIRA__JIRA_PASSWORD_POOL = 'JRA_POOL_PASS'),
+    ];
+    const azureReposToken = (process.env[
+      'SNYK_AZURE-REPOS__AZURE_REPOS_TOKEN'
+    ] = 'AZURE_TOKEN');
+    const artifactoryUrl = (process.env.SNYK_ARTIFACTORY__ARTIFACTORY_URL =
       'http://basic:auth@artifactory.com');
-    const nexusUrl = (process.env.BASE_NEXUS_URL =
+    const nexusUrl = (process.env.SNYK_NEXUS__BASE_NEXUS_URL =
       'http://basic:auth@nexus.com');
-    const crAgentUrl = (process.env.CR_AGENT_URL = 'CONTAINER_AGENT_URL');
-    const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
-    const crUsername = (process.env.CR_USERNAME = 'CONTAINER_USERNAME');
-    const crPassword = (process.env.CR_PASSWORD = 'CONTAINER_PASSWORD');
-    const crToken = (process.env.CR_TOKEN = 'CONTAINER_TOKEN');
-    const crRoleArn = (process.env.CR_ROLE_ARN = 'CONTAINER_ROLE_ARN');
-    const crExternalId = (process.env.CR_EXTERNAL_ID = 'CONTAINER_EXTERNAL_ID');
-    const crRegion = (process.env.CR_REGION = 'CONTAINER_REGION');
-    const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
-    const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
-    const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
-    const gitClientUrl = (process.env.GIT_CLIENT_URL =
+    const crAgentUrl = (process.env['SNYK_CR-AGENT__CR_AGENT_URL'] =
+      'CONTAINER_AGENT_URL');
+    const crCredentials = (process.env['SNYK_CR-AGENT__CR_CREDENTIALS'] =
+      'CR_CREDS');
+    const crUsername = (process.env['SNYK_CR-AGENT__CR_USERNAME'] =
+      'CONTAINER_USERNAME');
+    const crPassword = (process.env['SNYK_CR-AGENT__CR_PASSWORD'] =
+      'CONTAINER_PASSWORD');
+    const crToken = (process.env['SNYK_CR-AGENT__CR_TOKEN'] =
+      'CONTAINER_TOKEN');
+    const crRoleArn = (process.env['SNYK_CR-AGENT__CR_ROLE_ARN'] =
+      'CONTAINER_ROLE_ARN');
+    const crExternalId = (process.env['SNYK_CR-AGENT__CR_EXTERNAL_ID'] =
+      'CONTAINER_EXTERNAL_ID');
+    const crRegion = (process.env['SNYK_CR-AGENT__CR_REGION'] =
+      'CONTAINER_REGION');
+    const crBase = (process.env['SNYK_CR-AGENT__CR_BASE'] = 'CONTAINER_BASE');
+    const gitUsername = (process.env.SNYK_GIT_USERNAME = 'G_USER');
+    const gitPassword = (process.env.SNYK_GIT_PASSWORD = 'G_PASS');
+    const gitClientUrl = (process.env.SNYK_GIT_CLIENT_URL =
       'http://git-client-url.com');
 
     const log = require('../../lib/log');
