@@ -26,10 +26,12 @@ const findTypeByPublicId = (
 
 export const getRequestTypeFromTypeId = (
   config,
-  typeId: string,
+  typeId: string | null,
 ): string | null => {
-  const result = findTypeByPublicId(config['SOURCE_TYPES'], typeId);
-  return result || null;
+  const result = typeId
+    ? findTypeByPublicId(config['SOURCE_TYPES'], typeId)
+    : null;
+  return result;
 };
 
 export const concatAllPublicFiltersIntoArray = (allFilters: Object): Object => {
