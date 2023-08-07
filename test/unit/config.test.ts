@@ -10,6 +10,7 @@ describe('config', () => {
     process.env.GITHUB_USERNAME = 'git';
     process.env.GITHUB_PASSWORD_POOL = '9012, 3456';
     process.env.GITHUB_AUTH = 'Basic $GITHUB_USERNAME:$GITHUB_PASSWORD';
+
     const complexToken = (process.env.COMPLEX_TOKEN = '1234$$%#@!$!$@$$$');
 
     const config = require('../../lib/config');
@@ -27,5 +28,6 @@ describe('config', () => {
       'Basic git:9012',
       'Basic git:3456',
     ]);
+    expect(config.BROKER_DOWNSTREAM_TIMEOUT).toEqual('60000');
   });
 });
