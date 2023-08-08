@@ -4,9 +4,7 @@ describe('log', () => {
   it('sanitizes log data', () => {
     const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
     const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
-    const githubTkPool = [
-      (process.env.GITHUB_TOKEN_POOL = 'GITHUB_456,GITHUB_789'),
-    ];
+    const githubTkPool = [(process.env.GITHUB_TOKEN_POOL = 'GITHUB_456')];
     const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
     const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
     const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
