@@ -11,6 +11,11 @@
       "path": "/api/v2/import/done"
     },
     {
+      "//": "image scan (discover) callback (v1)",
+      "method": "POST",
+      "path": "/api/v1/recurring-tests/dependencies"
+    },
+    {
       "//": "image scan result callback (v2)",
       "method": "POST",
       "path": "/api/v2/import/result"
