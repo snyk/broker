@@ -1,62 +1,62 @@
 {
   "public": [
-  {
-    "//": "image scan (discover) callback (v1)",
-    "method": "POST",
-    "path": "/api/v1/import/app"
-  },
-  {
-    "//": "image scan done callback (v2)",
-    "method": "POST",
-    "path": "/api/v2/import/done"
-  },
-  {
-    "//": "image scan result callback (v2)",
-    "method": "POST",
-    "path": "/api/v2/import/result"
-  }
+    {
+      "//": "image scan (discover) callback (v1)",
+      "method": "POST",
+      "path": "/api/v1/import/app"
+    },
+    {
+      "//": "image scan done callback (v2)",
+      "method": "POST",
+      "path": "/api/v2/import/done"
+    },
+    {
+      "//": "image scan result callback (v2)",
+      "method": "POST",
+      "path": "/api/v2/import/result"
+    }
   ],
   "private": [
-  {
-    "method": "GET",
-    "path": "/healthcheck",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "validates credentials with connection to container registry",
-    "method": "GET",
-    "path": "/validate-credentials",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "returns image state id used in recurring or re-tests",
-    "method": "GET",
-    "path": "/get-state-identifier",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "lists repositories in container registry",
-    "method": "GET",
-    "path": "/list",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "lists tags/images in a repository",
-    "method": "GET",
-    "path": "/list/*",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "accepts image scan requests (v1)",
-    "method": "POST",
-    "path": "/discover",
-    "origin": "${CR_AGENT_URL}"
-  },
-  {
-    "//": "accepts image scan requests (v2)",
-    "method": "POST",
-    "path": "/scan",
-    "origin": "${CR_AGENT_URL}"
-  }
+    {
+      "method": "GET",
+      "path": "/healthcheck",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "validates credentials with connection to container registry",
+      "method": "GET",
+      "path": "/validate-credentials",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "returns image state id used in recurring or re-tests",
+      "method": "GET",
+      "path": "/get-state-identifier",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "lists repositories in container registry",
+      "method": "GET",
+      "path": "/list",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "lists tags/images in a repository",
+      "method": "GET",
+      "path": "/list/*",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "accepts image scan requests (v1)",
+      "method": "POST",
+      "path": "/discover",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
+      "//": "accepts image scan requests (v2)",
+      "method": "POST",
+      "path": "/scan",
+      "origin": "${CR_AGENT_URL}"
+    }
   ]
 }
