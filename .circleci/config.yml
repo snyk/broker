@@ -5,29 +5,37 @@ orbs:
 
 defaults: &defaults
   docker:
-    - image: cimg/node:18.16.0
+    - image: cimg/node:18.17
   working_directory: ~/broker
 
 commands:
-  install_deps:
-    description: Install dependencies
+  dockerhub-login:
     steps:
-      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
-          name: Install dependencies
-          command: npm i
-      - persist_to_workspace:
-          root: .
-          paths:
-            - node_modules/
+          name: Log in to a Docker registry
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+  dockerhub-logout:
+    steps:
+      - run:
+          name: Logout from a Docker registry
+          command: docker logout
 
 jobs:
-  install_dev:
+  install-npm-packages:
     <<: *defaults
     environment:
       NODE_ENV: development
     steps:
-      - install_deps
+      - checkout
+      - run:
+          name: Install NPM packages
+          command: npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules/
   lint:
     <<: *defaults
     steps:
@@ -37,12 +45,12 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
-  lint_json_samples:
+  lint-json-samples:
     <<: *defaults
     steps:
       - checkout
       - run:
-          name: Run tests
+          name: Lint JSON templates
           command: ./lintVerifier.sh
   test:
     <<: *defaults
@@ -53,6 +61,32 @@ jobs:
       - run:
           name: Run tests
           command: npm test && npm run test:bin
+  build-and-push-docker-image:
+    <<: *defaults
+    environment:
+      BUILDKIT_PROGRESS: plain
+      DOCKER_BUILDKIT: 1
+    parameters:
+      docker_image_name:
+        type: string
+      docker_image_tag:
+        type: string
+      docker_file:
+        type: string
+    steps:
+      - checkout
+      - dockerhub-login
+      - run:
+          name: Build and push Docker image
+          command: |
+            IMAGE_NAME=<< parameters.docker_image_name >>
+            IMAGE_TAG=${CIRCLE_TAG/v/''}-<< parameters.docker_image_tag >>
+            [[ "$IMAGE_NAME" == "snyk/ubuntu" ]] && export IMAGE_TAG=<< parameters.docker_image_tag >>
+            echo "Building Broker image $IMAGE_NAME:$IMAGE_TAG..."
+            docker build --tag $IMAGE_NAME:$IMAGE_TAG --file << parameters.docker_file >> .
+            echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG..."
+            docker push $IMAGE_NAME:$IMAGE_TAG
+      - dockerhub-logout
   release:
     <<: *defaults
     steps:
@@ -64,36 +98,109 @@ jobs:
           command: npm i @semantic-release/exec pkg --save-dev && npx semantic-release@19.0.5
 
 workflows:
-  version: 2
-  test_and_release:
+  CICD:
     jobs:
-      - install_dev:
-          name: Install DEV
-      - lint_json_samples:
-          name: Lint json samples
-      - test:
-          name: Test
-          requires:
-            - Install DEV
-      - lint:
-          name: Lint
-          requires:
-            - Install DEV
       - prodsec/secrets-scan:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          requires:
-            - Install DEV
           channel: broker-alerts
+
+      - install-npm-packages:
+          name: Install NPM packages
+          requires:
+            - Scan repository for secrets
+
+      - lint-json-samples:
+          name: Lint JSON samples
+          requires:
+            - Install NPM packages
+
+      - lint:
+          name: Lint
+          requires:
+            - Install NPM packages
+
+      - test:
+          name: Test
+          requires:
+            - Install NPM packages
+
       - release:
-          name: Release to GitHub
+          name: Release to GitHub and NPM
           context: nodejs-lib-release
           requires:
             - Test
-            - Lint
-            - Scan repository for secrets
           filters:
             branches:
               only:
                 - master
+
+  Release Docker images:
+    jobs:
+      - prodsec/secrets-scan:
+          name: Scan repository for secrets
+          context:
+            - snyk-bot-slack
+          channel: broker-alerts
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
+
+      - build-and-push-docker-image:
+          name: Build snyk/ubuntu image
+          context: team-broker-docker-hub
+          requires:
+            - Scan repository for secrets
+          docker_image_name: snyk/ubuntu
+          docker_image_tag: latest
+          docker_file: dockerfiles/ubuntu/Dockerfile
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
+
+      - build-and-push-docker-image:
+          name: Build snyk/ubuntu image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Scan repository for secrets
+          docker_image_name: snyk/ubuntu
+          docker_image_tag: nlatest
+          docker_file: dockerfiles/ubuntu/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
+
+      - build-and-push-docker-image:
+          name: Build artifactory image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: artifactory-nlatest
+          docker_file: dockerfiles/artifactory/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
+
+      - build-and-push-docker-image:
+          name: Build jira image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: jira-nlatest
+          docker_file: dockerfiles/jira/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
