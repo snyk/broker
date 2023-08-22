@@ -147,7 +147,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
 
       - build-and-push-docker-image:
           name: Build snyk/ubuntu image
@@ -161,7 +161,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
 
       - build-and-push-docker-image:
           name: Build snyk/ubuntu image (nlatest)
@@ -175,7 +175,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
 
       - build-and-push-docker-image:
           name: Build artifactory image (nlatest)
@@ -189,7 +189,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
 
       - build-and-push-docker-image:
           name: Build jira image (nlatest)
@@ -203,4 +203,4 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
