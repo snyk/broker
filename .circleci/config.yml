@@ -192,6 +192,76 @@ workflows:
               ignore: /.*/
 
       - build-and-push-docker-image:
+          name: Build azure-repos image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: azure-repos-nlatest
+          docker_file: dockerfiles/azure-repos/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build bitbucket-server image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: bitbucket-server-nlatest
+          docker_file: dockerfiles/bitbucket-server/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build github-com image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: github-com-nlatest
+          docker_file: dockerfiles/github-com/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build github-enterprise image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: github-enterprise-nlatest
+          docker_file: dockerfiles/github-enterprise/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build gitlab image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: gitlab-nlatest
+          docker_file: dockerfiles/gitlab/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
           name: Build jira image (nlatest)
           context: team-broker-docker-hub
           requires:
@@ -199,6 +269,34 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: jira-nlatest
           docker_file: dockerfiles/jira/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build nexus image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: nexus-nlatest
+          docker_file: dockerfiles/nexus/Dockerfile.nlatest
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - build-and-push-docker-image:
+          name: Build nexus2 image (nlatest)
+          context: team-broker-docker-hub
+          requires:
+            - Build snyk/ubuntu image (nlatest)
+          docker_image_name: snyk/broker
+          docker_image_tag: nexus2-nlatest
+          docker_file: dockerfiles/nexus2/Dockerfile.nlatest
           filters:
             tags:
               only: /^v.*/
