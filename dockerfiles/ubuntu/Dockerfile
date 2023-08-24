@@ -8,7 +8,7 @@ RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
   && apt update && apt upgrade -y && apt install gpg curl xz-utils -y
 
-ENV NODE_VERSION 18.16.1
+ENV NODE_VERSION 18.17.1
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
