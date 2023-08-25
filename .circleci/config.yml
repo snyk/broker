@@ -13,6 +13,10 @@ filter-tags-only: &filter-tags-only
       only: /^v.*/
     branches:
       ignore: /.*/
+filter-dev-branch-only: &filter-dev-branch-only
+  filters:
+    branches:
+      only: /dev\/.*/
 
 commands:
   dockerhub-login:
@@ -27,6 +31,12 @@ commands:
       - run:
           name: Logout from a Docker registry
           command: docker logout
+  prepare-dev-package-metadata:
+    steps:
+      - run:
+          name: Prepare package.json and metadata.json for dev images
+          command: |
+            cd dockerfiles/.scripts && source prepare.sh
 
 jobs:
   install-npm-packages:
@@ -90,7 +100,6 @@ jobs:
             IMAGE_TAG_LATEST=<< parameters.docker_image_tag >>
             [[ "$IMAGE_NAME" == "snyk/ubuntu" ]] && export IMAGE_TAG=<< parameters.docker_image_tag >>
             [[ "$IMAGE_NAME" == "snyk/ubuntu" ]] && export IMAGE_TAG_LATEST=<< parameters.docker_image_tag >>
-            [[ "$IMAGE_TAG" =~ "dev" ]] && export IMAGE_TAG=<< parameters.docker_image_tag >>
 
             echo "Building Broker image $IMAGE_NAME:$IMAGE_TAG..."
             docker build --tag $IMAGE_NAME:$IMAGE_TAG --file << parameters.docker_file >> .
@@ -101,6 +110,30 @@ jobs:
             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$IMAGE_TAG_LATEST
             echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG_LATEST..."
             docker push $IMAGE_NAME:$IMAGE_TAG_LATEST
+      - dockerhub-logout
+  build-and-push-dev-docker-image:
+    <<: *defaults
+    environment:
+      BUILDKIT_PROGRESS: plain
+      DOCKER_BUILDKIT: 1
+    parameters:
+      docker_image_name:
+        type: string
+      docker_image_tag:
+        type: string
+      docker_file:
+        type: string
+    steps:
+      - checkout
+      - dockerhub-login
+      - prepare-dev-package-metadata
+      - run:
+          name: Build and push Docker dev image
+          command: |
+            echo "Building Broker image << parameters.docker_image_name >>:<< parameters.docker_image_tag >>..."
+            docker build --tag << parameters.docker_image_name >>:<< parameters.docker_image_tag >> --file << parameters.docker_file >> .
+            echo "Pushing Broker image << parameters.docker_image_name >>:<< parameters.docker_image_tag >>..."
+            docker push << parameters.docker_image_name >>:<< parameters.docker_image_tag >>
       - dockerhub-logout
   release:
     <<: *defaults
@@ -158,7 +191,11 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts
-          <<: *filter-tags-only
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /dev\/.*/
 
       - build-and-push-docker-image:
           name: Build snyk/ubuntu image
@@ -359,3 +396,37 @@ workflows:
           docker_image_tag: nexus2-nlatest
           docker_file: dockerfiles/nexus2/Dockerfile.nlatest
           <<: *filter-tags-only
+
+      - approve-build-github-com-dev:
+          name: github-com-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+
+      - build-and-push-dev-docker-image:
+          name: Build github-com image (dev)
+          context: team-broker-docker-hub
+          requires:
+            - github-com-dev image
+          docker_image_name: snyk/broker
+          docker_image_tag: github-com-dev
+          docker_file: dockerfiles/github-com/Dockerfile.dev
+          <<: *filter-dev-branch-only
+
+      - approve-build-gitlab-dev:
+          name: gitlab-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+
+      - build-and-push-dev-docker-image:
+          name: Build gitlab image (dev)
+          context: team-broker-docker-hub
+          requires:
+            - gitlab-dev image
+          docker_image_name: snyk/broker
+          docker_image_tag: gitlab-dev
+          docker_file: dockerfiles/gitlab/Dockerfile.dev
+          <<: *filter-dev-branch-only
