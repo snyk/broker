@@ -1,6 +1,6 @@
 FROM snyk/ubuntu as base
 
-MAINTAINER Snyk Ltd
+LABEL maintainer="Snyk Ltd"
 
 USER root
 
