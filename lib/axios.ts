@@ -1,6 +1,6 @@
 import axios from 'axios';
 const logger = require('./log');
-import axiosRetry from 'axios-retry';
+import * as axiosRetry from 'axios-retry';
 
 const axiosInstance = axios.create({
   timeout: 2500,
