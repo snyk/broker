@@ -1,16 +1,51 @@
-/node_modules/
-.env
-.nyc_output
-.vscode
-.idea
-coverage
-/test/fixtures/certs/tmp
-accept.json
-package-lock.json
-/dist
-.eslintcache
-binary-releases
+#################################
+# Compiled source               #
+#################################
+build/
+binary-releases/
+dist/
 
-
-# Test coverage reports
+#################################
+# Node.js and NPM files         #
+#################################
+coverage/
+node_modules/
 reports/
+*.tsbuildinfo
+.eslintcache
+.nyc_output
+package-lock.json
+
+#################################
+# Broker related files          #
+#################################
+/dockerfiles/**/metadata.json
+/dockerfiles/**/package.json
+/test/fixtures/certs/tmp
+.env
+accept.json
+
+#################################
+# IDE generated files           #
+#################################
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+#################################
+# Logs and temp files           #
+#################################
+*.log
+*.tmp
+*~
+
+#################################
+# OS generated files            #
+#################################
+Thumbs.db
+.directory
+.DS_Store
