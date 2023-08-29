@@ -397,11 +397,18 @@ workflows:
           docker_file: dockerfiles/nexus2/Dockerfile.nlatest
           <<: *filter-tags-only
 
+      - approve-from-team-broker:
+          name: team-broker-approval
+          type: approval
+          context: team-broker-approval-only
+          requires:
+            - Scan repository for secrets
+
       - approve-build-github-com-dev:
           name: github-com-dev image
           type: approval
           requires:
-            - Scan repository for secrets
+            - team-broker-approval
           <<: *filter-dev-branch-only
 
       - build-and-push-dev-docker-image:
@@ -418,7 +425,7 @@ workflows:
           name: gitlab-dev image
           type: approval
           requires:
-            - Scan repository for secrets
+            - team-broker-approval
           <<: *filter-dev-branch-only
 
       - build-and-push-dev-docker-image:
