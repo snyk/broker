@@ -1,4 +1,4 @@
-import * as app from '../../lib';
+import app from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
 import { DEFAULT_BROKER_CLIENT_PORT } from './constants';

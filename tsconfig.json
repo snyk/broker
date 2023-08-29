@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
     "target": "es2019",
-    "module": "commonjs",
+    "module": "NodeNext",
     "allowJs": true,
     "sourceMap": true,
     "outDir": "./dist",
     "incremental": true,
     "pretty": true,
     "resolveJsonModule": true,
-
     "strict": true,
     "noImplicitAny": false,
     "alwaysStrict": false,
-
+    "esModuleInterop": true,
     "noUnusedLocals": true,
   },
   "include": ["./lib/**/*", "./cli/**/*"],

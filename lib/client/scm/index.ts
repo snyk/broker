@@ -1,4 +1,4 @@
-import * as logger from '../../log';
+import logger from '../../log';
 import {
   convertBodyToGitHubCommitPayload,
   isGitHubCreateCommitEndpoint,

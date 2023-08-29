@@ -1,8 +1,8 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import * as fs from 'fs';
-import * as http from 'http';
-import * as https from 'https';
+import bodyParser from 'body-parser';
+import express from 'express';
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import { choosePort } from './detect-port';
 import { createTestLogger } from '../helpers/logger';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from './constants';

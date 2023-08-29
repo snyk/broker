@@ -1,7 +1,7 @@
 import { promises as fsp, readFileSync } from 'fs';
 import { dir, setGracefulCleanup } from 'tmp-promise';
-import * as exec from '../../cli/exec';
-import * as init from '../../cli/init';
+import exec from '../../cli/exec';
+import init from '../../cli/init';
 
 describe('CLI', () => {
   describe('"init" command', () => {

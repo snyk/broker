@@ -1,4 +1,4 @@
-import * as detectPort from 'detect-port';
+import detectPort from 'detect-port';
 
 const DEFAULT_PORT = 20000;
 
