@@ -145,17 +145,31 @@ jobs:
         type: string
       docker_file:
         type: string
+      snyk_organization:
+        type: string
+        default: ""
+      snyk_severity_threshold:
+        type: string
+        default: "high"
     steps:
       - checkout
       - dockerhub-login
+      - snyk/install
       - prepare-dev-package-metadata
       - run:
-          name: Build and push Docker dev image
+          name: Build Docker dev image
           command: |
-            echo "Building Broker image << parameters.docker_image_name >>:<< parameters.docker_image_tag >>..."
-            docker build --tag << parameters.docker_image_name >>:<< parameters.docker_image_tag >> --file << parameters.docker_file >> .
-            echo "Pushing Broker image << parameters.docker_image_name >>:<< parameters.docker_image_tag >>..."
-            docker push << parameters.docker_image_name >>:<< parameters.docker_image_tag >>
+            echo "Building Broker image <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>..."
+            docker build --tag <<parameters.docker_image_name>>:<<parameters.docker_image_tag>> --file <<parameters.docker_file>> .
+      - run:
+          name: Run Snyk CLI
+          command: |
+            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=<<parameters.snyk_organization>> || true
+      - run:
+          name: Push Docker dev image
+          command: |
+            echo "Pushing Broker image <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>..."
+            docker push <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>
       - dockerhub-logout
   release:
     <<: *defaults
@@ -221,202 +235,262 @@ workflows:
 
       - build-and-push-docker-image:
           name: Build snyk/ubuntu image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Scan repository for secrets
           docker_image_name: snyk/ubuntu
           docker_image_tag: latest
           docker_file: dockerfiles/ubuntu/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build snyk/ubuntu image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Scan repository for secrets
           docker_image_name: snyk/ubuntu
           docker_image_tag: nlatest
           docker_file: dockerfiles/ubuntu/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build artifactory image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: artifactory
           docker_file: dockerfiles/artifactory/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build azure-repos image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: azure-repos
           docker_file: dockerfiles/azure-repos/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build bitbucket-server image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: bitbucket-server
           docker_file: dockerfiles/bitbucket-server/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build github-com image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: github-com
           docker_file: dockerfiles/github-com/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build github-enterprise image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: github-enterprise
           docker_file: dockerfiles/github-enterprise/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build gitlab image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: gitlab
           docker_file: dockerfiles/gitlab/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build jira image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: jira
           docker_file: dockerfiles/jira/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build nexus image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: nexus
           docker_file: dockerfiles/nexus/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build nexus2 image
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image
           docker_image_name: snyk/broker
           docker_image_tag: nexus2
           docker_file: dockerfiles/nexus2/Dockerfile
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build artifactory image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: artifactory-nlatest
           docker_file: dockerfiles/artifactory/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build azure-repos image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: azure-repos-nlatest
           docker_file: dockerfiles/azure-repos/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build bitbucket-server image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: bitbucket-server-nlatest
           docker_file: dockerfiles/bitbucket-server/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build github-com image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: github-com-nlatest
           docker_file: dockerfiles/github-com/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build github-enterprise image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: github-enterprise-nlatest
           docker_file: dockerfiles/github-enterprise/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build gitlab image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: gitlab-nlatest
           docker_file: dockerfiles/gitlab/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build jira image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: jira-nlatest
           docker_file: dockerfiles/jira/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build nexus image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: nexus-nlatest
           docker_file: dockerfiles/nexus/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
           name: Build nexus2 image (nlatest)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - Build snyk/ubuntu image (nlatest)
           docker_image_name: snyk/broker
           docker_image_tag: nexus2-nlatest
           docker_file: dockerfiles/nexus2/Dockerfile.nlatest
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - approve-from-team-broker:
@@ -435,12 +509,15 @@ workflows:
 
       - build-and-push-dev-docker-image:
           name: Build github-com image (dev)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - github-com-dev image
           docker_image_name: snyk/broker
           docker_image_tag: github-com-dev
           docker_file: dockerfiles/github-com/Dockerfile.dev
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-dev-branch-only
 
       - approve-build-gitlab-dev:
@@ -452,10 +529,13 @@ workflows:
 
       - build-and-push-dev-docker-image:
           name: Build gitlab image (dev)
-          context: team-broker-docker-hub
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
           requires:
             - gitlab-dev image
           docker_image_name: snyk/broker
           docker_image_tag: gitlab-dev
           docker_file: dockerfiles/gitlab/Dockerfile.dev
+          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-dev-branch-only
