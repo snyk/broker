@@ -1,11 +1,13 @@
 let request = require('request');
-const logger = require('./log');
+import { log as logger } from './log';
 const stream = require('stream');
 const { replaceUrlPartialChunk } = require('./replace-vars');
 const version = require('./version');
 
 request = request.defaults({
-  timeout: parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT) || 60000,
+  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
+    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
+    : 60000,
   agentOptions: {
     keepAlive: true,
     keepAliveMsecs: 60000,
@@ -239,6 +241,4 @@ function isJson(responseHeaders) {
   return responseHeaders['content-type']?.includes('json') || false;
 }
 
-module.exports = {
-  BrokerServerPostResponseHandler,
-};
+export { BrokerServerPostResponseHandler };

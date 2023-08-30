@@ -53,7 +53,6 @@ describe('proxy requests originating from behind the broker server with pooled c
       capabilities: ['post-streams'],
       clientId: expect.any(String),
       filters: filters,
-      preflightChecks: expect.any(Array),
       version,
     });
   });

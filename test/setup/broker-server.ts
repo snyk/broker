@@ -1,4 +1,4 @@
-import app from '../../lib';
+import { app } from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
 import { DEFAULT_BROKER_SERVER_PORT } from './constants';
@@ -25,13 +25,13 @@ export const createBrokerServer = async (
 
   const opts = {
     port: port,
-    client: null,
+    client: undefined,
     config: {
       accept: params?.filters ? params.filters : undefined,
     },
   };
 
-  const server = await app.main(opts);
+  const server = await app(opts);
 
   LOG.debug({ port }, `Broker Server is listening on port ${port}...`);
 

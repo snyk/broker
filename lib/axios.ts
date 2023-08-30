@@ -1,5 +1,5 @@
 import axios from 'axios';
-const logger = require('./log');
+import { log as logger } from './log';
 import axiosRetry from 'axios-retry';
 
 const axiosInstance = axios.create({

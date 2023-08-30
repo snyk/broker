@@ -1,4 +1,4 @@
-const help = `
+export const help = `
 Usage:
 
 $ broker <command> [flags]
@@ -36,5 +36,3 @@ $ broker client --port 8000
 
 For more details on configuration see http://github.com/snyk/broker
 `;
-
-module.exports = { help };

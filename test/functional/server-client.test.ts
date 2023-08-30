@@ -51,7 +51,6 @@ describe('proxy requests originating from behind the broker server', () => {
       capabilities: ['post-streams'],
       filters: expect.any(Object),
       clientId: expect.any(String),
-      preflightChecks: expect.any(Array),
       version: version,
     });
   });

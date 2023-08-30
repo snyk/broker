@@ -1,14 +1,14 @@
-const Primus = require('primus');
+import Primus from 'primus';
 const Emitter = require('primus-emitter');
-const logger = require('../log');
-const relay = require('../relay');
+import { log as logger } from '../log';
+import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
 const { maskToken, hashToken } = require('../token');
 const {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
 } = require('../metrics');
 
-module.exports = ({ server, filters, config }) => {
+export default ({ server, filters, config }) => {
   // Requires are done recursively, so this is here to avoid contaminating the Client
   const dispatcher = require('../dispatcher');
   const ioConfig = {
@@ -31,8 +31,8 @@ module.exports = ({ server, filters, config }) => {
   logger.info(ioConfig, 'using io config');
 
   const connections = new Map();
-  const response = relay.response(filters, config, io);
-  const streamingResponse = relay.streamingResponse;
+  const response = forwardWebSocketRequest(filters, config, io);
+  const streamingResponse = streamResponseHandler;
 
   io.on('error', (error) =>
     logger.error({ error }, 'Primus/engine.io server error'),

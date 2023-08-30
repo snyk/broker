@@ -1,5 +1,5 @@
 import path from 'path';
-import metrics from '../../lib/metrics';
+import * as metrics from '../../lib/metrics';
 import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,

@@ -1,3 +1,2 @@
 const { version } = require('../package.json');
-
-module.exports = version || 'local';
+export default version || 'local';

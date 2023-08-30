@@ -29,4 +29,5 @@ export type Config = BackendAPI &
   BrokerClient &
   BrokerServer &
   CommitSigning &
-  HighAvailabilityMode;
+  HighAvailabilityMode &
+  Record<string, any>;

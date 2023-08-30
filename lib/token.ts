@@ -1,4 +1,4 @@
-import crypto = require('crypto');
+import crypto from 'crypto';
 
 export function hashToken(token: string): string {
   const shasum = crypto.createHash('sha256');

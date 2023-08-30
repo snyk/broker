@@ -1,9 +1,4 @@
-module.exports = {
-  replace,
-  replaceUrlPartialChunk,
-};
-
-function replace(input, source) {
+export function replace(input, source) {
   return (input || '').replace(/(\${.*?})/g, (_, match) => {
     const key = match.slice(2, -1); // ditch the wrappers
     let poolName;
@@ -30,7 +25,7 @@ function replace(input, source) {
   });
 }
 
-function replaceUrlPartialChunk(chunk, prevPartial, config) {
+export function replaceUrlPartialChunk(chunk, prevPartial, config) {
   // 1/ make sure no protocol is present
   const protocolFreeURI = config.RES_BODY_URL_SUB.replace(/(^\w+:|^)\/\//, '');
 

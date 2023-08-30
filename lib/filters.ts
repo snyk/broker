@@ -1,12 +1,49 @@
-const minimatch = require('minimatch');
-const pathRegexp = require('path-to-regexp');
-const qs = require('qs');
-const path = require('path');
-const undefsafe = require('undefsafe');
-const { replace } = require('./replace-vars');
-const authHeader = require('./auth-header');
-const tryJSONParse = require('./try-json-parse');
-const logger = require('./log');
+import minimatch from 'minimatch';
+import pathRegexp from 'path-to-regexp';
+import qs from 'qs';
+import path from 'path';
+import undefsafe from 'undefsafe';
+import { replace } from './replace-vars';
+import authHeader from './auth-header';
+import tryJSONParse from './try-json-parse';
+import { log as logger } from './log';
+import { RequestPayload } from './relay';
+import { config } from './config';
+
+interface AuthObject {
+  scheme: string;
+  username?: string;
+  password?: string;
+  token?: string;
+}
+interface ValidEntryObject {
+  path?: string;
+  value?: string;
+  queryParam?: string;
+  values?: Array<string>;
+  regex?: string;
+  header?: string;
+}
+interface Rule {
+  method: string;
+  origin: string;
+  path: string;
+  valid?: ValidEntryObject[];
+  requiredCapabilities?: Array<string>;
+  stream?: boolean;
+  auth?: AuthObject;
+}
+
+export interface FiltersType {
+  private: Rule[];
+  public: Rule[];
+}
+
+interface TestResult {
+  url: any;
+  auth: any;
+  stream: boolean | undefined;
+}
 
 const validateHeaders = (headerFilters, requestHeaders = []) => {
   for (const filter of headerFilters) {
@@ -25,9 +62,8 @@ const validateHeaders = (headerFilters, requestHeaders = []) => {
 };
 
 // reads config that defines
-module.exports = (ruleSource) => {
-  let rules = [];
-  const config = require('./config');
+export default (ruleSource) => {
+  let rules: Array<Rule> = [];
 
   // polymorphic support
   if (Array.isArray(ruleSource)) {
@@ -53,23 +89,25 @@ module.exports = (ruleSource) => {
 
   // array of entries with
   const tests = rules.map((entry) => {
-    const keys = [];
+    const keys: pathRegexp.Key[] = [];
+
     let {
       method,
-      origin,
+      origin, // eslint-disable-line prefer-const
       path: entryPath,
-      valid,
-      requiredCapabilities,
+      valid, // eslint-disable-line prefer-const
+      requiredCapabilities, // eslint-disable-line prefer-const
     } = entry;
     const baseOrigin = origin;
     const { stream } = entry;
     method = (method || 'get').toLowerCase();
-    valid = valid || [];
 
-    const bodyFilters = valid.filter((v) => !!v.path && !v.regex);
-    const bodyRegexFilters = valid.filter((v) => !!v.path && !!v.regex);
-    const queryFilters = valid.filter((v) => !!v.queryParam);
-    const headerFilters = valid.filter((v) => !!v.header);
+    const bodyFilters = valid ? valid.filter((v) => !!v.path && !v.regex) : [];
+    const bodyRegexFilters = valid
+      ? valid.filter((v) => !!v.path && !!v.regex)
+      : [];
+    const queryFilters = valid ? valid.filter((v) => !!v.queryParam) : [];
+    const headerFilters = valid ? valid.filter((v) => !!v.header) : [];
 
     // now track if there's any values that we need to interpolate later
     const fromConfig = {};
@@ -143,7 +181,7 @@ module.exports = (ruleSource) => {
           // validate against the body by regex
           isValid = bodyRegexFilters.some(({ path: filterPath, regex }) => {
             try {
-              const re = new RegExp(regex);
+              const re = new RegExp(regex!); //paths without regexes got filtered out earlier, hence the !
               return re.test(undefsafe(parsedBody, filterPath));
             } catch (error) {
               logger.error(
@@ -161,8 +199,10 @@ module.exports = (ruleSource) => {
 
           // validate against the querystring
           isValid = queryFilters.every(({ queryParam, values }) => {
-            return values.some((value) =>
-              minimatch(parsedQuerystring[queryParam] || '', value, {
+            // ! because the value is not undefined, queryFilters length to be non zero and array filtered earlier
+            return values!.some((value) =>
+              // ! because the queryParam is not undefined, queryFilters length to be non zero and array filtered earlier
+              minimatch(parsedQuerystring[queryParam!] || '', value, {
                 dot: true,
               }),
             );
@@ -210,6 +250,7 @@ module.exports = (ruleSource) => {
       );
 
       querystring = querystring ? `?${querystring}` : '';
+
       return {
         url: origin + url + querystring,
         auth: entry.auth && authHeader(entry.auth),
@@ -218,8 +259,8 @@ module.exports = (ruleSource) => {
     };
   });
 
-  return (payload, callback) => {
-    let res = false;
+  return (payload: RequestPayload, callback) => {
+    let res: boolean | TestResult = false;
     logger.debug({ rulesCount: tests.length }, 'looking for a rule match');
 
     try {
@@ -229,7 +270,7 @@ module.exports = (ruleSource) => {
           break;
         }
       }
-    } catch (e) {
+    } catch (e: unknown) {
       logger.warn({ error: e }, 'caught error checking request against rules');
       res = false;
     }

@@ -1,9 +1,9 @@
-const { promises: fsp, createReadStream, createWriteStream } = require('fs');
-const path = require('path');
+import { promises as fsp, createReadStream, createWriteStream } from 'fs';
+import path from 'path';
 const root = path.resolve(__dirname, '../client-templates/');
-const logger = require('../lib/log');
+import { log as logger } from '../lib/log';
 
-module.exports = async (templateName) => {
+export default async (templateName) => {
   if (!templateName) {
     throw new Error('init requires a template name');
   }

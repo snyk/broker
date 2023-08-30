@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const exec = require('./exec');
-const init = require('./init');
-const minimist = require('minimist');
-const { help } = require('./help');
+import exec from './exec';
+import init from './init';
+import minimist from 'minimist';
+import { help } from './help';
 
 const args = minimist(process.argv.slice(2), {
   boolean: ['help'],

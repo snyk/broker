@@ -1,4 +1,4 @@
-import logger from '../../../log';
+import { log as logger } from '../../../log';
 import version from '../../../version';
 import { axiosInstance } from '../../../axios';
 import { retry } from '../../retry/exponential-backoff';

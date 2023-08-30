@@ -1,6 +1,8 @@
+import { app } from '../lib/index';
+
 const commands = ['server', 'client'];
 
-module.exports = async (args) => {
+export default async (args) => {
   const command = args._[0] || 'client';
   if (!commands.includes(command)) {
     throw new Error(`unknown command "${command}"`);
@@ -8,5 +10,5 @@ module.exports = async (args) => {
 
   args.client = command === 'client';
 
-  await require(`${__dirname}/../lib/index`).main(args);
+  await app(args);
 };

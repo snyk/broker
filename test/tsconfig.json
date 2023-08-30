@@ -1,4 +1,4 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "unit/client/scm/github/commit.test.ts", "functional/systemcheck.test.ts"]
 }
