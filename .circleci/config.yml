@@ -90,9 +90,6 @@ jobs:
         type: string
       docker_file:
         type: string
-      snyk_organization:
-        type: string
-        default: ""
       snyk_severity_threshold:
         type: string
         default: "high"
@@ -120,11 +117,11 @@ jobs:
       - run:
           name: Run Snyk CLI
           command: |
-            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=<<parameters.snyk_organization>>
+            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker
       - run:
           name: Run Snyk CLI monitor for continuous monitoring on snyk.io
           command: |
-            snyk container monitor --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=<<parameters.snyk_organization>>
+            snyk container monitor --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker
       - run:
           name: Push Docker image
           command: |
@@ -145,9 +142,6 @@ jobs:
         type: string
       docker_file:
         type: string
-      snyk_organization:
-        type: string
-        default: ""
       snyk_severity_threshold:
         type: string
         default: "high"
@@ -164,7 +158,7 @@ jobs:
       - run:
           name: Run Snyk CLI
           command: |
-            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=<<parameters.snyk_organization>> || true
+            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker || true
       - run:
           name: Push Docker dev image
           command: |
@@ -243,7 +237,6 @@ workflows:
           docker_image_name: snyk/ubuntu
           docker_image_tag: latest
           docker_file: dockerfiles/ubuntu/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -256,7 +249,6 @@ workflows:
           docker_image_name: snyk/ubuntu
           docker_image_tag: nlatest
           docker_file: dockerfiles/ubuntu/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -269,7 +261,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: artifactory
           docker_file: dockerfiles/artifactory/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -282,7 +273,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: azure-repos
           docker_file: dockerfiles/azure-repos/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -295,7 +285,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: bitbucket-server
           docker_file: dockerfiles/bitbucket-server/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -308,7 +297,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: github-com
           docker_file: dockerfiles/github-com/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -321,7 +309,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: github-enterprise
           docker_file: dockerfiles/github-enterprise/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -334,7 +321,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: gitlab
           docker_file: dockerfiles/gitlab/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -347,7 +333,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: jira
           docker_file: dockerfiles/jira/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -360,7 +345,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: nexus
           docker_file: dockerfiles/nexus/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -373,7 +357,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: nexus2
           docker_file: dockerfiles/nexus2/Dockerfile
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -386,7 +369,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: artifactory-nlatest
           docker_file: dockerfiles/artifactory/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -399,7 +381,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: azure-repos-nlatest
           docker_file: dockerfiles/azure-repos/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -412,7 +393,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: bitbucket-server-nlatest
           docker_file: dockerfiles/bitbucket-server/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -425,7 +405,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: github-com-nlatest
           docker_file: dockerfiles/github-com/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -438,7 +417,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: github-enterprise-nlatest
           docker_file: dockerfiles/github-enterprise/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -451,7 +429,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: gitlab-nlatest
           docker_file: dockerfiles/gitlab/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -464,7 +441,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: jira-nlatest
           docker_file: dockerfiles/jira/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -477,7 +453,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: nexus-nlatest
           docker_file: dockerfiles/nexus/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
@@ -490,7 +465,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: nexus2-nlatest
           docker_file: dockerfiles/nexus2/Dockerfile.nlatest
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-tags-only
 
       - approve-from-team-broker:
@@ -517,7 +491,6 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: github-com-dev
           docker_file: dockerfiles/github-com/Dockerfile.dev
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-dev-branch-only
 
       - approve-build-gitlab-dev:
@@ -537,5 +510,4 @@ workflows:
           docker_image_name: snyk/broker
           docker_image_tag: gitlab-dev
           docker_file: dockerfiles/gitlab/Dockerfile.dev
-          snyk_organization: ${SNYK_ORGANIZATION}
           <<: *filter-dev-branch-only
