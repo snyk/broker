@@ -34,18 +34,16 @@ export const app = async ({ port = 7341, client = false, config }) => {
     string,
     any
   >;
-
-  logger.debug({ accept: localConfig?.accept }, 'loading rules');
   const filters = filterRulesLoader(localConfig?.accept);
   if (method == 'client') {
     // if the localConfig has the broker server, then we must assume it's a client
     return await (
       await import('./client')
-    ).main({ config: localConfig, port, filters });
+    ).main({ config: localConfig, port: localConfig.port || port, filters });
   } else {
     return await (
       await import('./server')
-    ).main({ config: localConfig, port, filters });
+    ).main({ config: localConfig, port: localConfig.port || port, filters });
   }
 };
 
