@@ -53,7 +53,6 @@ class BrokerServerPostResponseHandler {
     if (this.#serverId) {
       url.searchParams.append('server_id', this.#serverId);
     }
-
     const brokerServerPostRequestUrl = url.toString();
 
     const brokerServerPostRequest = request({
