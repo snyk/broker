@@ -27,7 +27,7 @@ export const main = async (clientOpts: ClientOpts) => {
   if (!clientOpts.config.BROKER_CLIENT_URL) {
     const proto =
       !clientOpts.config.key && !clientOpts.config.cert ? 'http' : 'https';
-    clientOpts.config.BROKER_CLIENT_URL = `${proto}://localhost:${clientOpts.config.port}`;
+    clientOpts.config.BROKER_CLIENT_URL = `${proto}://localhost:${clientOpts.port}`;
   }
 
   const brokerClientId = uuidv4();
