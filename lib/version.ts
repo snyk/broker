@@ -1,2 +1,2 @@
-const { version } = require('../package.json');
-export default version || 'local';
+import packageJson from '../package.json';
+export default packageJson['version'] || 'local';
