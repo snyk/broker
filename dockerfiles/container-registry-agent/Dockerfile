@@ -18,7 +18,7 @@ RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/toug
 RUN npm i -g tough-cookie@4.1.3
 RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules
 
-FROM node:16-alpine3.16
+FROM node:18-alpine3.17
 
 ENV PATH=$PATH:/home/node/.npm-global/bin
 
