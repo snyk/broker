@@ -288,6 +288,18 @@ workflows:
           <<: *filter-tags-only
 
       - build-and-push-docker-image:
+          name: Build container-registry-agent image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build snyk/ubuntu image
+          docker_image_name: snyk/broker
+          docker_image_tag: container-registry-agent
+          docker_file: dockerfiles/container-registry-agent/Dockerfile
+          <<: *filter-tags-only
+
+      - build-and-push-docker-image:
           name: Build github-com image
           context:
             - team-broker-docker-hub
