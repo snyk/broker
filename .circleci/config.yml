@@ -486,6 +486,44 @@ workflows:
           requires:
             - Scan repository for secrets
 
+      - approve-build-artifactory-dev:
+          name: artifactory-dev image
+          type: approval
+          requires:
+            - team-broker-approval
+          <<: *filter-dev-branch-only
+
+      - build-and-push-dev-docker-image:
+          name: Build artifactory image (dev)
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - artifactory-dev image
+          docker_image_name: snyk/broker
+          docker_image_tag: artifactory-dev
+          docker_file: dockerfiles/artifactory/Dockerfile.dev
+          <<: *filter-dev-branch-only
+
+      - approve-build-container-registry-agent-dev:
+          name: container-registry-agent-dev image
+          type: approval
+          requires:
+            - team-broker-approval
+          <<: *filter-dev-branch-only
+
+      - build-and-push-dev-docker-image:
+          name: Build container-registry-agent image (dev)
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - container-registry-agent-dev image
+          docker_image_name: snyk/broker
+          docker_image_tag: container-registry-agent-dev
+          docker_file: dockerfiles/container-registry-agent/Dockerfile.dev
+          <<: *filter-dev-branch-only
+
       - approve-build-github-com-dev:
           name: github-com-dev image
           type: approval
