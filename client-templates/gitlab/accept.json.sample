@@ -1540,6 +1540,12 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "path": "/snykgit/*",
