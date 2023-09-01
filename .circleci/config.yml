@@ -511,3 +511,22 @@ workflows:
           docker_image_tag: gitlab-dev
           docker_file: dockerfiles/gitlab/Dockerfile.dev
           <<: *filter-dev-branch-only
+
+      - approve-build-nexus-dev:
+          name: nexus-dev image
+          type: approval
+          requires:
+            - team-broker-approval
+          <<: *filter-dev-branch-only
+
+      - build-and-push-dev-docker-image:
+          name: Build nexus image (dev)
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - nexus-dev image
+          docker_image_name: snyk/broker
+          docker_image_tag: nexus-dev
+          docker_file: dockerfiles/nexus/Dockerfile.dev
+          <<: *filter-dev-branch-only
