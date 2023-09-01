@@ -298,6 +298,16 @@ Object {
       "path": "/:owner/_apis/git/repositories/:repo/commits",
     },
     Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
+    },
+    Object {
       "//": "update status of given commit",
       "auth": Object {
         "scheme": "basic",
@@ -1300,6 +1310,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -3194,6 +3215,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -6517,6 +6544,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -6829,6 +6862,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -7863,6 +7906,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -9790,6 +9844,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -13137,6 +13197,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -13471,6 +13537,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -14505,6 +14581,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -16454,6 +16541,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -19825,6 +19918,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -20167,6 +20266,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -21201,6 +21310,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -23128,6 +23248,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -26475,6 +26601,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -26825,6 +26957,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -27207,6 +27349,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -28211,6 +28363,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -29397,6 +29560,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -31335,6 +31509,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -33516,6 +33696,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -38336,6 +38522,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -39945,6 +40137,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -40281,6 +40479,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -41285,6 +41493,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -43179,6 +43398,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -46490,6 +46715,12 @@ Object {
       "path": "/api/v4/projects/:project/repository/commits/:sha",
     },
     Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
+    },
+    Object {
       "//": "used to redirect requests to snyk git client",
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
@@ -46802,6 +47033,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get merge base of two commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/commits/:commitId/mergebases",
     },
     Object {
       "//": "update status of given commit",
@@ -47806,6 +48047,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    },
+    Object {
+      "//": "get page of commits between two commits",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -49700,6 +49952,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -53009,6 +53267,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/repository/commits/:sha",
+    },
+    Object {
+      "//": "get merge base of two commits for given project.",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/merge_base",
     },
     Object {
       "//": "used to redirect requests to snyk git client",
