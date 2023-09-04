@@ -1,8 +1,9 @@
-require('../patch-https-request-for-proxying');
+import '../patch-https-request-for-proxying';
 
-const Primus = require('primus');
+import Primus from 'primus';
 import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
 import { log as logger } from '../log';
+import primusEmitter from 'primus-emitter';
 
 function createWebSocket(
   token,
@@ -16,7 +17,7 @@ function createWebSocket(
     transformer: 'engine.io',
     parser: 'EJSON',
     plugin: {
-      emitter: require('primus-emitter'),
+      emitter: primusEmitter,
     },
     pathname: `/primus/${token}`,
   });

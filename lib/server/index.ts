@@ -3,11 +3,12 @@ import { log as logger } from '../log';
 import socket from './socket';
 import { forwardHttpRequest, StreamResponseHandler } from '../relay';
 import version from '../version';
-const { maskToken, hashToken } = require('../token');
-const metrics = require('../metrics');
-const { applyPrometheusMiddleware } = require('./prometheus-middleware');
-const { validateBrokerTypeMiddleware } = require('./broker-middleware');
+import { maskToken, hashToken } from '../token';
+import { incrementHttpRequestsTotal } from '../metrics';
+import { applyPrometheusMiddleware } from './prometheus-middleware';
+import { validateBrokerTypeMiddleware } from './broker-middleware';
 import { webserver } from '../webserver';
+import { serverStarting, serverStopping } from '../dispatcher';
 interface ServerOpts {
   port: number;
   config: Record<string, any>;
@@ -20,16 +21,16 @@ export const main = async (serverOpts: ServerOpts) => {
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
   // Requires are done recursively, so this is here to avoid contaminating the Client
-  const dispatcher = require('../dispatcher');
+
   const onSignal = async () => {
     logger.debug('received exit signal, closing server');
-    await dispatcher.serverStopping(() => {
+    await serverStopping(() => {
       process.exit(0);
     });
   };
   process.once('SIGINT', onSignal);
   process.once('SIGTERM', onSignal);
-  await dispatcher.serverStarting();
+  await serverStarting();
 
   // bind the socket server to the web server
   const { io, connections } = socket({
@@ -67,7 +68,7 @@ export const main = async (serverOpts: ServerOpts) => {
 
       // check if we have this broker in the connections
       if (!connections.has(token)) {
-        metrics.incrementHttpRequestsTotal(false);
+        incrementHttpRequestsTotal(false);
         logger.warn(
           { maskedToken, hashedToken },
           'no matching connection found',
@@ -95,7 +96,7 @@ export const main = async (serverOpts: ServerOpts) => {
   );
 
   app.post('/response-data/:brokerToken/:streamingId', (req, res) => {
-    metrics.incrementHttpRequestsTotal(false);
+    incrementHttpRequestsTotal(false);
     const token = req.params.brokerToken;
     const streamingID = req.params.streamingId;
     const maskedToken = maskToken(token);

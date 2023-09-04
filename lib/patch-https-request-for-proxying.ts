@@ -5,9 +5,10 @@
  * broker server is in the no_proxy list.
  * Start from the "Entry point" below.
  */
-const url = require('url');
-const tunnel = require('tunnel');
-// const { brokerServerUrl, httpsProxy, noProxy, proxyAuth } = require('./config');
+import url from 'url';
+import tunnel from 'tunnel';
+import https from 'https';
+
 import { config } from './config';
 const brokerServer = url.parse(config.brokerServerUrl || '');
 brokerServer.port =
@@ -92,7 +93,6 @@ if (brokerServer.host && config.httpsProxy && shouldProxy(brokerServer)) {
 
   // actual monkey patching: BEWARE!
   // we're only patching HTTPS requests to the broker server
-  const https = require('https');
   const oldhttpsreq = https.request;
   https.request = function (options, callback) {
     if (options.host === brokerServer.host) {

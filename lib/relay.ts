@@ -1,28 +1,43 @@
-let request = require('request');
-const undefsafe = require('undefsafe');
-const parse = require('url').parse;
-const format = require('url').format;
-const { v4: uuid } = require('uuid');
+import request from 'request';
+import undefsafe from 'undefsafe';
+import { parse } from 'url';
+import { format } from 'url';
+import { v4 as uuid } from 'uuid';
 import Filters from './filters';
-const { replace, replaceUrlPartialChunk } = require('./replace-vars');
+import { replace, replaceUrlPartialChunk } from './replace-vars';
 import tryJSONParse from './try-json-parse';
 import { log as logger } from './log';
 import version from './version';
-const { maskToken, hashToken } = require('./token');
-const stream = require('stream');
-const NodeCache = require('node-cache');
-const metrics = require('./metrics');
+import { maskToken, hashToken } from './token';
+import stream from 'stream';
+import NodeCache from 'node-cache';
+import {
+  incrementHttpRequestsTotal,
+  incrementUnableToSizeResponse,
+  observeResponseSize,
+  incrementWebSocketRequestsTotal,
+} from './metrics';
 import { config } from './config';
-const { BrokerServerPostResponseHandler } = require('./stream-posts');
-const {
+import { BrokerServerPostResponseHandler } from './stream-posts';
+import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} = require('./client/scm');
+} from './client/scm';
+import {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 
-const RequestClass = request.Request;
-request = request.defaults({
+interface StreamResponse {
+  streamBuffer: stream.PassThrough;
+  response: ExpressResponse;
+  streamSize?: number;
+}
+
+let relayRequest = request;
+relayRequest = request.defaults({
   ca: config.caCert,
   timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
     ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
@@ -35,49 +50,55 @@ request = request.defaults({
 });
 
 export class StreamResponseHandler {
-  streamingID;
-  streamBuffer;
-  response;
-  streamSize = 0;
+  streamingID: string;
+  streamResponse: StreamResponse;
+  // streamBuffer;
+  // response;
+  // streamSize = 0;
 
   static create(streamingID) {
     const stream = streams.get(streamingID);
     if (!stream) {
       return null;
     }
-    const { streamBuffer, response } = stream;
+    const streamResponse = stream as StreamResponse;
 
-    return new StreamResponseHandler(streamingID, streamBuffer, response);
+    return new StreamResponseHandler(
+      streamingID,
+      streamResponse.streamBuffer,
+      streamResponse.response,
+    );
   }
 
   constructor(streamingID, streamBuffer, response) {
     this.streamingID = streamingID;
-    this.streamBuffer = streamBuffer;
-    this.response = response;
+    this.streamResponse = { streamBuffer, response, streamSize: 0 };
   }
 
   writeStatusAndHeaders = (statusAndHeaders) => {
-    this.response.status(statusAndHeaders.status).set(statusAndHeaders.headers);
+    this.streamResponse.response
+      .status(statusAndHeaders.status)
+      .set(statusAndHeaders.headers);
   };
 
   writeChunk = (chunk, waitForDrainCb) => {
-    this.streamSize += chunk.length;
-    if (!this.streamBuffer.write(chunk) && waitForDrainCb) {
-      waitForDrainCb(this.streamBuffer);
+    this.streamResponse.streamSize += chunk.length;
+    if (!this.streamResponse.streamBuffer.write(chunk) && waitForDrainCb) {
+      waitForDrainCb(this.streamResponse.streamBuffer);
     }
   };
 
   finished = () => {
-    this.streamBuffer.end();
+    this.streamResponse.streamBuffer.end();
     streams.del(this.streamingID);
-    metrics.observeResponseSize({
-      bytes: this.streamSize,
+    observeResponseSize({
+      bytes: this.streamResponse.streamSize,
       isStreaming: true,
     });
   };
 
   destroy = (error) => {
-    this.streamBuffer.destroy(error);
+    this.streamResponse.streamBuffer.destroy(error);
     streams.del(this.streamingID);
   };
 }
@@ -92,7 +113,7 @@ const streams = new NodeCache({
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */
 export const streamResponseHandler = (token) => {
   return (streamingID, chunk, finished, ioResponse) => {
-    const streamFromId = streams.get(streamingID);
+    const streamFromId = streams.get(streamingID) as StreamResponse;
 
     if (streamFromId) {
       const { streamBuffer, response } = streamFromId;
@@ -110,7 +131,7 @@ export const streamResponseHandler = (token) => {
         if (finished) {
           streamBuffer.end();
           streams.del(streamingID);
-          metrics.observeResponseSize({
+          observeResponseSize({
             bytes: streamSize,
             isStreaming: true,
           });
@@ -135,7 +156,7 @@ export const streamResponseHandler = (token) => {
 export const forwardHttpRequest = (filterRules) => {
   const filters = Filters(filterRules);
 
-  return (req, res) => {
+  return (req: ExpressRequest, res: ExpressResponse) => {
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
     // If this is the client, we will have to generate one
     req.headers['snyk-request-id'] ||= uuid();
@@ -143,15 +164,19 @@ export const forwardHttpRequest = (filterRules) => {
       url: req.url,
       requestMethod: req.method,
       requestHeaders: req.headers,
-      requestId: req.headers['snyk-request-id'],
-      maskedToken: req.maskedToken,
-      hashedToken: req.hashedToken,
+      requestId:
+        req.headers['snyk-request-id'] &&
+        Array.isArray(req.headers['snyk-request-id'])
+          ? req.headers['snyk-request-id'].join(',')
+          : req.headers['snyk-request-id'] || '',
+      maskedToken: req['maskedToken'],
+      hashedToken: req['hashedToken'],
     };
 
     logger.info(logContext, 'received request over HTTP connection');
     filters(req, (error, result) => {
       if (error) {
-        metrics.incrementHttpRequestsTotal(true);
+        incrementHttpRequestsTotal(true);
         const reason =
           'Request does not match any accept rule, blocking HTTP request';
         error.reason = reason;
@@ -162,7 +187,7 @@ export const forwardHttpRequest = (filterRules) => {
           .status(401)
           .send({ message: error.message, reason, url: req.url });
       }
-      metrics.incrementHttpRequestsTotal(false);
+      incrementHttpRequestsTotal(false);
 
       req.url = result.url;
       logContext.ioUrl = result.url;
@@ -241,14 +266,14 @@ export const forwardHttpRequest = (filterRules) => {
                 responseBodyString,
                 'utf-8',
               );
-              metrics.observeResponseSize({
+              observeResponseSize({
                 bytes: responseBodyBytes,
                 isStreaming: false,
               });
             } else {
               // fallback metric to let us know if we're recording all response sizes
               // we expect to remove this should it report 0
-              metrics.incrementUnableToSizeResponse();
+              incrementUnableToSizeResponse();
             }
           } else {
             logContext.ioErrorType = ioResponse.errorType;
@@ -399,7 +424,7 @@ export const forwardWebSocketRequest = (
     }
 
     const realEmit = emit;
-    emit = (responseData) => {
+    emit = (responseData, isResponseFromRequestModule = false) => {
       // This only works client -> server, it's not possible to post data server -> client
       logContext.requestMethod = '';
       logContext.requestHeaders = {};
@@ -412,7 +437,7 @@ export const forwardWebSocketRequest = (
           serverId,
           requestId,
         );
-        if (responseData instanceof RequestClass) {
+        if (isResponseFromRequestModule) {
           logger.trace(
             logContext,
             'posting streaming response back to Broker Server',
@@ -424,7 +449,7 @@ export const forwardWebSocketRequest = (
         }
       } else {
         if (payload.streamingID) {
-          if (responseData instanceof RequestClass) {
+          if (isResponseFromRequestModule) {
             legacyStreaming(
               logContext,
               responseData,
@@ -458,7 +483,7 @@ export const forwardWebSocketRequest = (
 
     filters(payload, async (filterError, result) => {
       if (filterError) {
-        metrics.incrementWebSocketRequestsTotal(true);
+        incrementWebSocketRequestsTotal(true);
         const reason =
           'Response does not match any accept rule, blocking websocket request';
         logContext.error = filterError;
@@ -473,7 +498,7 @@ export const forwardWebSocketRequest = (
           },
         });
       }
-      metrics.incrementWebSocketRequestsTotal(false);
+      incrementWebSocketRequestsTotal(false);
 
       if (result.url.startsWith('http') === false) {
         result.url = 'https://' + result.url;
@@ -505,7 +530,7 @@ export const forwardWebSocketRequest = (
           else {
             payload.headers['authorization'] = `token ${parsed.auth}`;
             // then strip from the url
-            delete parsed.auth;
+            parsed.auth = null;
             result.url = format(parsed);
           }
 
@@ -639,7 +664,7 @@ export const forwardWebSocketRequest = (
         logger.debug(logContext, 'serving stream request');
 
         try {
-          emit(request(req));
+          emit(relayRequest(req), true);
         } catch (e) {
           logger.error(
             {
@@ -653,7 +678,7 @@ export const forwardWebSocketRequest = (
         return;
       }
 
-      request(req, (error, response, responseBody) => {
+      relayRequest(req, (error, response, responseBody) => {
         if (error) {
           logError(logContext, error);
           return emit({

@@ -1,10 +1,11 @@
-let request = require('request');
+import request from 'request';
 import { log as logger } from './log';
-const stream = require('stream');
-const { replaceUrlPartialChunk } = require('./replace-vars');
-const version = require('./version');
+import stream from 'stream';
+import { replaceUrlPartialChunk } from './replace-vars';
+import version from './version';
 
-request = request.defaults({
+let streamPostRequestHandler = request;
+streamPostRequestHandler = request.defaults({
   timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
     ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
     : 60000,
@@ -55,7 +56,7 @@ class BrokerServerPostResponseHandler {
     }
     const brokerServerPostRequestUrl = url.toString();
 
-    const brokerServerPostRequest = request({
+    const brokerServerPostRequest = streamPostRequestHandler({
       url: brokerServerPostRequestUrl,
       method: 'post',
       headers: {

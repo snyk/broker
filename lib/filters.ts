@@ -62,24 +62,14 @@ const validateHeaders = (headerFilters, requestHeaders = []) => {
 };
 
 // reads config that defines
-export default (ruleSource) => {
+export default (ruleSource: Rule[]) => {
   let rules: Array<Rule> = [];
 
   // polymorphic support
   if (Array.isArray(ruleSource)) {
     rules = ruleSource;
   } else if (ruleSource) {
-    try {
-      rules = require(ruleSource);
-    } catch (error) {
-      logger.warn(
-        { ruleSource, error },
-        'Unable to parse rule source, ignoring',
-      );
-    }
-  }
-
-  if (!Array.isArray(rules)) {
+    logger.error({ ruleSource }, 'Unable to parse rule source, ignoring');
     throw new Error(
       `Expected array of filter rules, got '${typeof rules}' instead.`,
     );

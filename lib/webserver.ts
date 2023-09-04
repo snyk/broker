@@ -1,8 +1,8 @@
 import express from 'express';
-const bodyParser = require('body-parser');
-const fs = require('fs');
+import bodyParser from 'body-parser';
+import fs from 'fs';
 import { log as logger } from './log';
-const { maskToken, hashToken } = require('./token');
+import { maskToken, hashToken } from './token';
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 

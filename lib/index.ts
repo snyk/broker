@@ -1,8 +1,3 @@
-// This is the temporary fix for https://snyk.io/vuln/SNYK-JS-PREDEFINE-1054935
-// The vulnerability is introduced via snyk-broker@* › primus@6.1.0 › fusing@1.0.0 › predefine@0.1.2
-// We require predefine early to replace vulnerable function `merge` with not vulnerable analog `lodash.merge`.
-require('predefine').merge = require('lodash.merge');
-
 import 'clarify'; // clean the stacktraces
 
 import filterRulesLoader from './filter-rules-loading';

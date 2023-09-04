@@ -1,16 +1,21 @@
 import Primus from 'primus';
-const Emitter = require('primus-emitter');
+import Emitter from 'primus-emitter';
 import { log as logger } from '../log';
 import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
-const { maskToken, hashToken } = require('../token');
-const {
+import { maskToken, hashToken } from '../token';
+import {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
-} = require('../metrics');
+} from '../metrics';
+import {
+  clientDisconnected,
+  clientConnected,
+  clientPinged,
+} from '../dispatcher';
 
 export default ({ server, filters, config }) => {
   // Requires are done recursively, so this is here to avoid contaminating the Client
-  const dispatcher = require('../dispatcher');
+
   const ioConfig = {
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -82,9 +87,7 @@ export default ({ server, filters, config }) => {
             'client disconnected before identifying itself',
           );
         }
-        setImmediate(
-          async () => await dispatcher.clientDisconnected(token, clientId),
-        );
+        setImmediate(async () => await clientDisconnected(token, clientId));
       }
     };
 
@@ -134,16 +137,14 @@ export default ({ server, filters, config }) => {
       socket.on('request', response(token));
       socket.on('incoming::ping', (time) => {
         setImmediate(
-          async () =>
-            await dispatcher.clientPinged(token, clientId, clientVersion, time),
+          async () => await clientPinged(token, clientId, clientVersion, time),
         );
       });
 
       clientId = clientData.metadata.clientId;
       clientVersion = clientData.metadata.version;
       setImmediate(
-        async () =>
-          await dispatcher.clientConnected(token, clientId, clientVersion),
+        async () => await clientConnected(token, clientId, clientVersion),
       );
       incrementSocketConnectionGauge();
       identified = true;

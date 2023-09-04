@@ -1,6 +1,6 @@
 import primus from 'primus';
 import rp from 'request-promise-native';
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 import socket from './socket';
 import { FiltersType } from '../filters';
 import { log as logger, sanitise } from '../log';
