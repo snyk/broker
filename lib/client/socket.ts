@@ -1,8 +1,11 @@
-import '../patch-https-request-for-proxying';
+import '../common/http/patch-https-request-for-proxying';
 
 import Primus from 'primus';
-import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
-import { log as logger } from '../log';
+import {
+  forwardWebSocketRequest,
+  streamResponseHandler,
+} from '../common/relay';
+import { log as logger } from '../logs/logger';
 import primusEmitter from 'primus-emitter';
 
 function createWebSocket(

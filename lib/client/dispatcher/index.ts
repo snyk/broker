@@ -1,6 +1,6 @@
-import { log as logger } from '../../log';
+import { log as logger } from '../../logs/logger';
 import { Config } from '../config';
-import { hashToken } from '../../token';
+import { hashToken } from '../../common/utils/token';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 

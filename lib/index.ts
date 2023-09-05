@@ -1,8 +1,8 @@
 import 'clarify'; // clean the stacktraces
 
-import filterRulesLoader from './filter-rules-loading';
-import { log as logger } from './log';
-import { config as globalConfig } from './config';
+import filterRulesLoader from './common/filter/filter-rules-loading';
+import { log as logger } from './logs/logger';
+import { config as globalConfig } from './common/config';
 process.on('uncaughtExceptionMonitor', (error, origin) => {
   logger.error({ error, origin }, 'found unhandled exception');
 });
@@ -19,7 +19,7 @@ process.on('unhandledRejection', (reason: any) => {
 export const app = async ({ port = 7341, client = false, config }) => {
   // note: the config is loaded in the main function to allow us to mock in tests
   if (process.env.JEST_WORKER_ID) {
-    delete require.cache[require.resolve('./config')];
+    delete require.cache[require.resolve('./common/config')];
   }
 
   const method = client ? 'client' : 'server';

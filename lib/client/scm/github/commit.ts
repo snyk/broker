@@ -1,4 +1,4 @@
-import { log as logger } from '../../../log';
+import { log as logger } from '../../../logs/logger';
 import { GitHubCommitParsingError } from './errors';
 import type { GitHubCommitPayload, GitUser } from './types';
 

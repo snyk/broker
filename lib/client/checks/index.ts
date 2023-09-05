@@ -1,4 +1,4 @@
-import { log as logger } from '../../log';
+import { log as logger } from '../../logs/logger';
 import { getHttpChecks } from './http';
 import type { Config } from '../config';
 import type { Check, CheckResult } from './types';

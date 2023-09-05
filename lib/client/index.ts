@@ -2,11 +2,11 @@ import primus from 'primus';
 import rp from 'request-promise-native';
 import { v4 as uuidv4 } from 'uuid';
 import socket from './socket';
-import { FiltersType } from '../filters';
-import { log as logger, sanitise } from '../log';
-import { forwardHttpRequest } from '../relay';
-import { webserver } from '../webserver';
-import version from '../version';
+import { FiltersType } from '../common/filter/filters';
+import { log as logger, sanitise } from '../logs/logger';
+import { forwardHttpRequest } from '../common/relay';
+import { webserver } from '../common/http/webserver';
+import version from '../common/utils/version';
 import { getServerId, highAvailabilityModeEnabled } from './dispatcher';
 import { executePreflightChecks, preflightChecksEnabled } from './checks';
 import {

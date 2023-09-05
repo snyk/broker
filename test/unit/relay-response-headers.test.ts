@@ -13,7 +13,7 @@ requestDefaultsMock.mockImplementation((_options) => {
   return requestMock;
 });
 
-import { forwardWebSocketRequest as relay } from '../../lib/relay';
+import { forwardWebSocketRequest as relay } from '../../lib/common/relay';
 
 describe('header relay', () => {
   beforeEach(() => {

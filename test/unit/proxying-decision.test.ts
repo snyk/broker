@@ -15,7 +15,7 @@ describe('Proxy decision', () => {
     // loaded now, for config to be reloaded after env vars
     const {
       shouldProxy,
-    } = require('../../lib/patch-https-request-for-proxying');
+    } = require('../../lib/common/http/patch-https-request-for-proxying');
     expect(shouldProxy(parse('https://broker.snyk.io'))).toEqual(false);
   });
 
@@ -26,7 +26,7 @@ describe('Proxy decision', () => {
     // loaded now, for config to be reloaded after env vars
     const {
       shouldProxy,
-    } = require('../../lib/patch-https-request-for-proxying');
+    } = require('../../lib/common/http/patch-https-request-for-proxying');
     const url = parse('http://symbolics.com');
     expect(shouldProxy(url)).toEqual(false);
     expect(shouldProxy(parse('https://shambhala.org/'))).toEqual(true);
@@ -39,7 +39,7 @@ describe('Proxy decision', () => {
     // loaded now, for config to be reloaded after env vars
     const {
       shouldProxy,
-    } = require('../../lib/patch-https-request-for-proxying');
+    } = require('../../lib/common/http/patch-https-request-for-proxying');
     const url = parse('http://symbolics.com');
     expect(shouldProxy(url)).toEqual(false);
     expect(shouldProxy(parse('https://shambhala.org/'))).toEqual(true);
@@ -52,7 +52,7 @@ describe('Proxy decision', () => {
     // loaded now, for config to be reloaded after env vars
     const {
       shouldProxy,
-    } = require('../../lib/patch-https-request-for-proxying');
+    } = require('../../lib/common/http/patch-https-request-for-proxying');
 
     expect(shouldProxy(parse('http://symbolics.com/?hello'))).toEqual(false);
   });
@@ -63,7 +63,7 @@ describe('Proxy decision', () => {
 
     const {
       shouldProxy,
-    } = require('../../lib/patch-https-request-for-proxying');
+    } = require('../../lib/common/http/patch-https-request-for-proxying');
 
     expect(shouldProxy(parse(`https://wiki.c2.com`))).toEqual(false);
     expect(shouldProxy(parse(`https://symbolics.com`))).toEqual(false);

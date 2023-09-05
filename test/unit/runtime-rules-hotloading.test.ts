@@ -1,5 +1,5 @@
 import path from 'path';
-import loadFilterRules from '../../lib/filter-rules-loading';
+import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
 
 const scmRulesToTest = [
   'azure-repos',

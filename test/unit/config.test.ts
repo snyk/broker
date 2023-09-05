@@ -8,7 +8,7 @@ process.env.GITHUB_PASSWORD_POOL = '9012, 3456';
 process.env.GITHUB_AUTH = 'Basic $GITHUB_USERNAME:$GITHUB_PASSWORD';
 process.env.COMPLEX_TOKEN = '1234$$%#@!$!$@$$$';
 
-import { config } from '../../lib/config';
+import { config } from '../../lib/common/config';
 describe('config', () => {
   it('contain application config', () => {
     const foo = process.env.FOO;
