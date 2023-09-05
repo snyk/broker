@@ -1,5 +1,5 @@
-import * as logger from '../../../log';
-import * as version from '../../../version';
+import { log as logger } from '../../../log';
+import version from '../../../version';
 import { axiosInstance } from '../../../axios';
 import { retry } from '../../retry/exponential-backoff';
 import type { AxiosResponse } from 'axios';

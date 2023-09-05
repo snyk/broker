@@ -1,4 +1,4 @@
-import logger = require('../../log');
+import { log as logger } from '../../log';
 import { Config } from '../config';
 import { hashToken } from '../../token';
 import { HttpDispatcherServiceClient } from './client/api';

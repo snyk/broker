@@ -1,4 +1,4 @@
-const { Gauge, Histogram, Counter } = require('prom-client');
+import { Gauge, Histogram, Counter } from 'prom-client';
 
 const socketConnectionGauge = new Gauge({
   name: 'broker_socket_connection_total',
@@ -64,7 +64,7 @@ function incrementWebSocketRequestsTotal(rejectedByFilter) {
   webSocketRequestsTotal.inc({ rejectedByFilter: rejectedByFilter }, 1);
 }
 
-module.exports = {
+export {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
   observeResponseSize,

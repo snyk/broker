@@ -1,10 +1,10 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const logger = require('./log');
-const { maskToken, hashToken } = require('./token');
-
-module.exports = main;
+import express from 'express';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import { log as logger } from './log';
+import { maskToken, hashToken } from './token';
+import { createServer as createHttpServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
 
 // bodyparser < 2 initializes req.body to {} for requests with no body. This
 // breaks later serialization, so this pair of middlewares ensures that requests
@@ -22,15 +22,15 @@ const stripEmptyRequestBody = (req, res, next) => {
   next();
 };
 
-const extractBrokerTokenFromUrl = (urlString = '') => {
+const extractBrokerTokenFromUrl = (urlString) => {
   const regex = /^\/broker\/([a-z0-9-]+)\//;
   return urlString.match(regex) ? urlString.match(regex)[1] : null;
 };
 
-function main(config = {}, altPort = null) {
-  let { httpsKey = null, httpsCert = null, port = 7341 } = config;
-  const http = !httpsKey && !httpsCert; // no https if there's no certs
-  const https = http ? require('http') : require('https');
+export const webserver = (config, altPort: number) => {
+  let { httpsKey = null, httpsCert = null, port = 7341 } = config; // eslint-disable-line prefer-const
+  const isHttp = !httpsKey && !httpsCert; // no https if there's no certs
+
   const app = express();
 
   app.disable('x-powered-by');
@@ -73,17 +73,16 @@ function main(config = {}, altPort = null) {
   }
 
   logger.info({ port }, 'local server is listening');
-  const serverArgs = http
-    ? [app]
-    : [
+
+  const server = isHttp
+    ? createHttpServer(app).listen(port)
+    : createHttpsServer(
         {
           key: fs.readFileSync(httpsKey),
           cert: fs.readFileSync(httpsCert),
         },
         app,
-      ];
-
-  const server = https.createServer(...serverArgs).listen(port);
+      ).listen(port);
 
   return { app, server };
-}
+};

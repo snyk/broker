@@ -1,11 +1,14 @@
-let request = require('request');
-const logger = require('./log');
-const stream = require('stream');
-const { replaceUrlPartialChunk } = require('./replace-vars');
-const version = require('./version');
+import request from 'request';
+import { log as logger } from './log';
+import stream from 'stream';
+import { replaceUrlPartialChunk } from './replace-vars';
+import version from './version';
 
-request = request.defaults({
-  timeout: parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT) || 60000,
+let streamPostRequestHandler = request;
+streamPostRequestHandler = request.defaults({
+  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
+    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
+    : 60000,
   agentOptions: {
     keepAlive: true,
     keepAliveMsecs: 60000,
@@ -51,10 +54,9 @@ class BrokerServerPostResponseHandler {
     if (this.#serverId) {
       url.searchParams.append('server_id', this.#serverId);
     }
-
     const brokerServerPostRequestUrl = url.toString();
 
-    const brokerServerPostRequest = request({
+    const brokerServerPostRequest = streamPostRequestHandler({
       url: brokerServerPostRequestUrl,
       method: 'post',
       headers: {
@@ -239,6 +241,4 @@ function isJson(responseHeaders) {
   return responseHeaders['content-type']?.includes('json') || false;
 }
 
-module.exports = {
-  BrokerServerPostResponseHandler,
-};
+export { BrokerServerPostResponseHandler };

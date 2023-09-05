@@ -1,37 +1,34 @@
+const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
+const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
+const githubTkPool = [(process.env.GITHUB_TOKEN_POOL = 'GITHUB_456')];
+const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
+const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
+const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
+const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
+const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
+const jiraPassPool = [(process.env.JIRA_PASSWORD_POOL = 'JRA_POOL_PASS')];
+const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
+const artifactoryUrl = (process.env.ARTIFACTORY_URL =
+  'http://basic:auth@artifactory.com');
+const nexusUrl = (process.env.BASE_NEXUS_URL = 'http://basic:auth@nexus.com');
+const crAgentUrl = (process.env.CR_AGENT_URL = 'CONTAINER_AGENT_URL');
+const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
+const crUsername = (process.env.CR_USERNAME = 'CONTAINER_USERNAME');
+const crPassword = (process.env.CR_PASSWORD = 'CONTAINER_PASSWORD');
+const crToken = (process.env.CR_TOKEN = 'CONTAINER_TOKEN');
+const crRoleArn = (process.env.CR_ROLE_ARN = 'CONTAINER_ROLE_ARN');
+const crExternalId = (process.env.CR_EXTERNAL_ID = 'CONTAINER_EXTERNAL_ID');
+const crRegion = (process.env.CR_REGION = 'CONTAINER_REGION');
+const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
+const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
+const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
+const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
+
 import { Writable } from 'stream';
+import { log } from '../../lib/log';
 
 describe('log', () => {
   it('sanitizes log data', () => {
-    const brokerTk = (process.env.BROKER_TOKEN = 'BROKER_123');
-    const githubTk = (process.env.GITHUB_TOKEN = 'GITHUB_123');
-    const githubTkPool = [(process.env.GITHUB_TOKEN_POOL = 'GITHUB_456')];
-    const gitlabTk = (process.env.GITLAB_TOKEN = 'GITLAB_123');
-    const bbUser = (process.env.BITBUCKET_USERNAME = 'BB_USER');
-    const bbPass = (process.env.BITBUCKET_PASSWORD = 'BB_PASS');
-    const jiraUser = (process.env.JIRA_USERNAME = 'JRA_USER');
-    const jiraPass = (process.env.JIRA_PASSWORD = 'JRA_PASS');
-    const jiraPassPool = [(process.env.JIRA_PASSWORD_POOL = 'JRA_POOL_PASS')];
-    const azureReposToken = (process.env.AZURE_REPOS_TOKEN = 'AZURE_TOKEN');
-    const artifactoryUrl = (process.env.ARTIFACTORY_URL =
-      'http://basic:auth@artifactory.com');
-    const nexusUrl = (process.env.BASE_NEXUS_URL =
-      'http://basic:auth@nexus.com');
-    const crAgentUrl = (process.env.CR_AGENT_URL = 'CONTAINER_AGENT_URL');
-    const crCredentials = (process.env.CR_CREDENTIALS = 'CR_CREDS');
-    const crUsername = (process.env.CR_USERNAME = 'CONTAINER_USERNAME');
-    const crPassword = (process.env.CR_PASSWORD = 'CONTAINER_PASSWORD');
-    const crToken = (process.env.CR_TOKEN = 'CONTAINER_TOKEN');
-    const crRoleArn = (process.env.CR_ROLE_ARN = 'CONTAINER_ROLE_ARN');
-    const crExternalId = (process.env.CR_EXTERNAL_ID = 'CONTAINER_EXTERNAL_ID');
-    const crRegion = (process.env.CR_REGION = 'CONTAINER_REGION');
-    const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
-    const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
-    const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
-    const gitClientUrl = (process.env.GIT_CLIENT_URL =
-      'http://git-client-url.com');
-
-    const log = require('../../lib/log');
-
     const sensitiveInfo = [
       brokerTk,
       githubTk,

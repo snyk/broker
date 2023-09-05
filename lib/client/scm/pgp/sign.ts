@@ -1,4 +1,4 @@
-import * as openpgp from 'openpgp';
+import { decryptKey, readPrivateKey, createMessage, sign } from 'openpgp';
 import { PgpPrivateKeyValidationError } from './errors';
 import type { CreateSignatureOptions, PgpPrivateKey } from './types';
 
@@ -10,16 +10,16 @@ export async function createSignature(
 ): Promise<string> {
   validatePrivateKey(options.privateKey);
 
-  const privateKey = await openpgp.decryptKey({
-    privateKey: await openpgp.readPrivateKey({
+  const privateKey = await decryptKey({
+    privateKey: await readPrivateKey({
       armoredKey: options.privateKey.armoredKey,
     }),
     passphrase: options.privateKey.passphrase,
   });
 
-  const message = await openpgp.createMessage({ text: options.messageRaw });
+  const message = await createMessage({ text: options.messageRaw });
 
-  const detachedSignature = await openpgp.sign({
+  const detachedSignature = await sign({
     message,
     signingKeys: privateKey,
     detached: true,

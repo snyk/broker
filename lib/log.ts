@@ -1,7 +1,7 @@
-const bunyan = require('bunyan');
-const escapeRegExp = require('lodash.escaperegexp');
-const mapValues = require('lodash.mapvalues');
-const config = require('./config');
+import bunyan from 'bunyan';
+import escapeRegExp from 'lodash.escaperegexp';
+import mapValues from 'lodash.mapvalues';
+import { config } from './config';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
@@ -21,7 +21,7 @@ const sanitiseConfigVariables = (raw, variable) => {
 };
 
 // sanitises sensitive values, replacing all occurences with label
-function sanitise(raw) {
+export const sanitise = (raw) => {
   if (!raw || typeof raw !== 'string') {
     return raw;
   }
@@ -68,7 +68,7 @@ function sanitise(raw) {
   }
 
   return raw;
-}
+};
 
 function sanitiseObject(obj) {
   return mapValues(obj, (v) => sanitise(v));
@@ -106,7 +106,7 @@ function serialiseError(error) {
   return result;
 }
 
-const log = bunyan.createLogger({
+export const log = bunyan.createLogger({
   name: 'snyk-broker',
   serializers: {
     token: sanitise,
@@ -122,10 +122,9 @@ const log = bunyan.createLogger({
     error: serialiseError,
   },
 });
+type LogLevels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
-log.level(process.env.LOG_LEVEL || 'info');
+log.level((process.env.LOG_LEVEL as LogLevels) || 'info');
 
 // pin sanitation function on the log so it can be used publicly
-log.sanitise = sanitise;
-
-module.exports = log;
+// log.sanitise = sanitise;

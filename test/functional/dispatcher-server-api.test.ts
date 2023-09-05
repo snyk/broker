@@ -1,5 +1,4 @@
 const nock = require('nock');
-
 describe('Broker Server Dispatcher API interaction', () => {
   const apiVersion = '2022-12-02%7Eexperimental';
   // token hashed with 256-sha algorithm

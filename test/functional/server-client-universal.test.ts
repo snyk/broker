@@ -1,5 +1,5 @@
 process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
-import * as path from 'path';
+import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,

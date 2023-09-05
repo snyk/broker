@@ -1,4 +1,4 @@
-import logger = require('../../../log');
+import { log as logger } from '../../../log';
 import { Request, Response } from 'express';
 import { getHttpChecks } from '../http';
 import type { CheckResult } from '../types';

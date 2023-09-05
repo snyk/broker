@@ -1,4 +1,4 @@
-import * as logger from '../../log';
+import { log as logger } from '../../log';
 import {
   convertBodyToGitHubCommitPayload,
   isGitHubCreateCommitEndpoint,
@@ -37,7 +37,9 @@ export function gitHubTreeCheckNeeded(
   );
 }
 
-export const commitSigningEnabled = (config: Config): boolean => {
+export const commitSigningEnabled = (
+  config: Config | Record<string, any>,
+): boolean => {
   let gpgPassphraseConfigured = false;
   if (
     typeof config.GPG_PASSPHRASE !== 'undefined' &&

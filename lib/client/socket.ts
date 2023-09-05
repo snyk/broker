@@ -1,8 +1,9 @@
-require('../patch-https-request-for-proxying');
+import '../patch-https-request-for-proxying';
 
-const Primus = require('primus');
-const relay = require('../relay');
-const logger = require('../log');
+import Primus from 'primus';
+import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
+import { log as logger } from '../log';
+import primusEmitter from 'primus-emitter';
 
 function createWebSocket(
   token,
@@ -16,7 +17,7 @@ function createWebSocket(
     transformer: 'engine.io',
     parser: 'EJSON',
     plugin: {
-      emitter: require('primus-emitter'),
+      emitter: primusEmitter,
     },
     pathname: `/primus/${token}`,
   });
@@ -62,8 +63,8 @@ function createWebSocket(
     'broker client is connecting to broker server',
   );
 
-  const response = relay.response(filters, config, io, serverId);
-  const streamingResponse = relay.streamingResponse;
+  const response = forwardWebSocketRequest(filters, config, io, serverId);
+  const streamingResponse = streamResponseHandler;
 
   // RS note: this bind doesn't feel right, it feels like a sloppy way of
   // getting the filters into the request function.
@@ -106,7 +107,7 @@ function createWebSocket(
   return io;
 }
 
-module.exports = ({
+export default ({
   url,
   token,
   filters,
@@ -120,7 +121,7 @@ module.exports = ({
     const error = new ReferenceError(
       'BROKER_TOKEN is required to successfully identify itself to the server',
     );
-    error.code = 'MISSING_BROKER_TOKEN';
+    error['code'] = 'MISSING_BROKER_TOKEN';
     throw error;
   }
 
@@ -130,7 +131,7 @@ module.exports = ({
     const error = new ReferenceError(
       'BROKER_SERVER_URL is required to connect to the broker server',
     );
-    error.code = 'MISSING_BROKER_SERVER_URL';
+    error['code'] = 'MISSING_BROKER_SERVER_URL';
     throw error;
   }
 

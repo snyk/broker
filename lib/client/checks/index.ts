@@ -1,4 +1,4 @@
-import logger = require('../../log');
+import { log as logger } from '../../log';
 import { getHttpChecks } from './http';
 import type { Config } from '../config';
 import type { Check, CheckResult } from './types';

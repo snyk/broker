@@ -5,10 +5,12 @@
  * broker server is in the no_proxy list.
  * Start from the "Entry point" below.
  */
-const url = require('url');
-const tunnel = require('tunnel');
-const { brokerServerUrl, httpsProxy, noProxy, proxyAuth } = require('./config');
-const brokerServer = url.parse(brokerServerUrl || '');
+import url from 'url';
+import tunnel from 'tunnel';
+import https from 'https';
+
+import { config } from './config';
+const brokerServer = url.parse(config.brokerServerUrl || '');
 brokerServer.port =
   brokerServer.port || brokerServer.protocol === 'https:' ? '443' : '80';
 
@@ -33,7 +35,7 @@ function parseNoProxyZone(zone) {
 function uriInNoProxy(uri) {
   const port = uri.port || (uri.protocol === 'https:' ? '443' : '80');
   const hostname = formatHostname(uri.hostname);
-  const noProxyList = noProxy.split(',');
+  const noProxyList = config.noProxy.split(',');
 
   // iterate through the noProxyList until it finds a match.
   return noProxyList.map(parseNoProxyZone).some(function (noProxyZone) {
@@ -57,19 +59,19 @@ function shouldProxy(uri) {
 
   // if no https proxy is defined - don't proxy
 
-  if (!httpsProxy) {
+  if (!config.httpsProxy) {
     return false;
   }
 
   // if the noProxy is a wildcard then return null
 
-  if (noProxy === '*') {
+  if (config.noProxy === '*') {
     return false;
   }
 
   // if the noProxy is not empty and the uri is found return null
 
-  if (noProxy && noProxy !== '' && uriInNoProxy(uri)) {
+  if (config.noProxy && config.noProxy !== '' && uriInNoProxy(uri)) {
     return false;
   }
 
@@ -78,11 +80,11 @@ function shouldProxy(uri) {
 }
 
 // Entry point: To patch or not to patch?
-if (brokerServer.host && httpsProxy && shouldProxy(brokerServer)) {
-  const { hostname, port } = url.parse(httpsProxy);
+if (brokerServer.host && config.httpsProxy && shouldProxy(brokerServer)) {
+  const { hostname, port } = url.parse(config.httpsProxy);
   const tunnelProxy = { host: hostname, port };
-  if (proxyAuth) {
-    tunnelProxy.proxyAuth = proxyAuth;
+  if (config.proxyAuth) {
+    tunnelProxy['proxyAuth'] = config.proxyAuth;
   }
 
   const tunnelingAgent = tunnel.httpsOverHttp({
@@ -91,7 +93,6 @@ if (brokerServer.host && httpsProxy && shouldProxy(brokerServer)) {
 
   // actual monkey patching: BEWARE!
   // we're only patching HTTPS requests to the broker server
-  const https = require('https');
   const oldhttpsreq = https.request;
   https.request = function (options, callback) {
     if (options.host === brokerServer.host) {
@@ -101,4 +102,4 @@ if (brokerServer.host && httpsProxy && shouldProxy(brokerServer)) {
   };
 }
 
-module.exports = { shouldProxy }; // for testing
+export { shouldProxy }; // for testing

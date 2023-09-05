@@ -1,5 +1,5 @@
 jest.mock('request');
-import * as request from 'request';
+import request from 'request';
 
 const requestDefaultsMock = jest.mocked(request.defaults, true);
 const requestMock = jest.fn((req, fn) => {
@@ -13,7 +13,7 @@ requestDefaultsMock.mockImplementation((_options) => {
   return requestMock;
 });
 
-import { response as relay } from '../../lib/relay';
+import { forwardWebSocketRequest as relay } from '../../lib/relay';
 
 describe('body relay', () => {
   beforeEach(() => {

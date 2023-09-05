@@ -1,34 +1,42 @@
-const logger = require('../log');
-const socket = require('./socket');
-const relay = require('../relay');
-const version = require('../version');
-const { maskToken, hashToken } = require('../token');
-const metrics = require('../metrics');
-const { applyPrometheusMiddleware } = require('./prometheus-middleware');
-const { validateBrokerTypeMiddleware } = require('./broker-middleware');
+import { FiltersType } from '../filters';
+import { log as logger } from '../log';
+import socket from './socket';
+import { forwardHttpRequest, StreamResponseHandler } from '../relay';
+import version from '../version';
+import { maskToken, hashToken } from '../token';
+import { incrementHttpRequestsTotal } from '../metrics';
+import { applyPrometheusMiddleware } from './prometheus-middleware';
+import { validateBrokerTypeMiddleware } from './broker-middleware';
+import { webserver } from '../webserver';
+import { serverStarting, serverStopping } from '../dispatcher';
+interface ServerOpts {
+  port: number;
+  config: Record<string, any>;
+  filters: FiltersType;
+}
 
-module.exports = async ({ config = {}, port = null, filters = {} }) => {
+export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'running in server mode');
 
   // start the local webserver to listen for relay requests
-  const { app, server } = require('../webserver')(config, port);
+  const { app, server } = webserver(serverOpts.config, serverOpts.port);
   // Requires are done recursively, so this is here to avoid contaminating the Client
-  const dispatcher = require('../dispatcher');
+
   const onSignal = async () => {
     logger.debug('received exit signal, closing server');
-    await dispatcher.serverStopping(() => {
+    await serverStopping(() => {
       process.exit(0);
     });
   };
   process.once('SIGINT', onSignal);
   process.once('SIGTERM', onSignal);
-  await dispatcher.serverStarting();
+  await serverStarting();
 
   // bind the socket server to the web server
   const { io, connections } = socket({
     server,
-    filters: filters.private,
-    config,
+    filters: serverOpts.filters?.private,
+    config: serverOpts.config,
   });
 
   if (!process.env.JEST_WORKER_ID) {
@@ -55,12 +63,12 @@ module.exports = async ({ config = {}, port = null, filters = {} }) => {
       const token = req.params.token;
       const maskedToken = maskToken(token);
       const hashedToken = hashToken(token);
-      req.maskedToken = maskedToken;
-      req.hashedToken = hashedToken;
+      req['maskedToken'] = maskedToken;
+      req['hashedToken'] = hashedToken;
 
       // check if we have this broker in the connections
       if (!connections.has(token)) {
-        metrics.incrementHttpRequestsTotal(false);
+        incrementHttpRequestsTotal(false);
         logger.warn(
           { maskedToken, hashedToken },
           'no matching connection found',
@@ -73,8 +81,9 @@ module.exports = async ({ config = {}, port = null, filters = {} }) => {
       res.locals.io = connections.get(token)[0].socket;
       res.locals.socketVersion = connections.get(token)[0].socketVersion;
       res.locals.capabilities = connections.get(token)[0].metadata.capabilities;
-      req.locals = {};
-      req.locals.capabilities = connections.get(token)[0].metadata.capabilities;
+      req['locals'] = {};
+      req['locals']['capabilities'] =
+        connections.get(token)[0].metadata.capabilities;
 
       // strip the leading url
       req.url = req.url.slice(`/broker/${token}`.length);
@@ -83,11 +92,11 @@ module.exports = async ({ config = {}, port = null, filters = {} }) => {
       next();
     },
     validateBrokerTypeMiddleware,
-    relay.request(filters.public),
+    forwardHttpRequest(serverOpts.filters?.public),
   );
 
   app.post('/response-data/:brokerToken/:streamingId', (req, res) => {
-    metrics.incrementHttpRequestsTotal(false);
+    incrementHttpRequestsTotal(false);
     const token = req.params.brokerToken;
     const streamingID = req.params.streamingId;
     const maskedToken = maskToken(token);
@@ -99,10 +108,10 @@ module.exports = async ({ config = {}, port = null, filters = {} }) => {
       requestId: req.headers['snyk-request-id'],
     };
     logger.info(logContext, 'Handling response-data request');
-    req.maskedToken = maskedToken;
-    req.hashedToken = hashedToken;
+    req['maskedToken'] = maskedToken;
+    req['hashedToken'] = hashedToken;
 
-    const streamHandler = relay.StreamResponseHandler.create(streamingID);
+    const streamHandler = StreamResponseHandler.create(streamingID);
     if (!streamHandler) {
       logger.error(logContext, 'unable to find request matching streaming id');
       res

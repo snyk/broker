@@ -1,5 +1,5 @@
-import * as bunyan from 'bunyan';
-import Logger = require('bunyan');
+import bunyan from 'bunyan';
+import Logger from 'bunyan';
 
 /**
  * Configures and creates bunyan logger with specified level (default 'info').

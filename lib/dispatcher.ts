@@ -1,8 +1,8 @@
-const { hashToken } = require('./token');
-const logger = require('./log');
-const config = require('./config');
-const { axiosInstance } = require('./axios');
-const { v4: uuid } = require('uuid');
+import { hashToken } from './token';
+import { log as logger } from './log';
+import { config } from './config';
+import { axiosInstance } from './axios';
+import { v4 as uuid } from 'uuid';
 
 class DispatcherClient {
   #url;
@@ -58,7 +58,7 @@ class DispatcherClient {
       url.searchParams.append('broker_client_id', clientId);
     }
     if (time != -1) {
-      url.searchParams.append('latency', Date.now() - time);
+      url.searchParams.append('latency', `${Date.now() - time}`);
     }
     url.searchParams.append('request_type', requestType);
 
@@ -90,7 +90,7 @@ class DispatcherClient {
     );
   }
 
-  async #makeRequest(logContext, url, method, requestBody, cb) {
+  async #makeRequest(logContext, url, method, requestBody?, cb?) {
     const requestId = uuid();
     // version *must* be provided
     const urlWithVersion = new URL(url);
@@ -131,7 +131,7 @@ class DispatcherClient {
           'successfully sent request to Dispatcher',
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error(
         {
           ...logContext,
@@ -150,11 +150,11 @@ class DispatcherClient {
   }
 }
 
-let clientConnected;
-let clientPinged;
-let clientDisconnected;
-let serverStarting;
-let serverStopping;
+export let clientConnected;
+export let clientPinged;
+export let clientDisconnected;
+export let serverStarting;
+export let serverStopping;
 
 if (config.dispatcherUrl) {
   const kc = new DispatcherClient(
@@ -214,11 +214,3 @@ if (config.dispatcherUrl) {
     cb();
   };
 }
-
-module.exports = {
-  clientConnected,
-  clientPinged,
-  clientDisconnected,
-  serverStarting,
-  serverStopping,
-};

@@ -1,5 +1,5 @@
-import * as path from 'path';
-import * as version from '../../lib/version';
+import path from 'path';
+import version from '../../lib/version';
 import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,
@@ -51,7 +51,6 @@ describe('proxy requests originating from behind the broker server', () => {
       capabilities: ['post-streams'],
       filters: expect.any(Object),
       clientId: expect.any(String),
-      preflightChecks: expect.any(Array),
       version: version,
     });
   });

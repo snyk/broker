@@ -1,4 +1,4 @@
-import * as tryJSONParse from '../../lib/try-json-parse';
+import tryJSONParse from '../../lib/try-json-parse';
 
 describe('tryJSONParse', () => {
   it('parses JSON', () => {

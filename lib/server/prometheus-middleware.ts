@@ -1,4 +1,4 @@
-import * as promBundle from 'express-prom-bundle';
+import promBundle from 'express-prom-bundle';
 import { RequestHandler } from 'express';
 
 export const applyPrometheusMiddleware = (): RequestHandler => {

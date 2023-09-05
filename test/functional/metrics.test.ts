@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 import * as metrics from '../../lib/metrics';
 import { axiosClient } from '../setup/axios-client';
 import {

@@ -1,8 +1,9 @@
-const path = require('path');
-const yaml = require('js-yaml');
-const fs = require('fs');
+import path from 'path';
+import yaml from 'js-yaml';
+import fs from 'fs';
 
-const logger = require('./log');
+import { log as logger } from './log';
+import { FiltersType } from './filters';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
 const IAC_SCM_ORIGINS = [
@@ -40,7 +41,7 @@ function injectRulesAtRuntime(filters) {
     } else if (!filters.private[0].origin.includes('AZURE')) {
       // API endpoints for IAC (github, ghe, bitbucket server), doesn't matter for azure, gitlab
       // file pattern is different for Azure repos, requirements work for all others
-      let template = nestedCopy(
+      const template = nestedCopy(
         filters.private.filter(
           (entry) =>
             entry.method === 'GET' &&
@@ -73,7 +74,7 @@ function injectRulesAtRuntime(filters) {
       }
     } else if (filters.private[0].origin.includes('AZURE')) {
       // Copying and modifying in place in array, not doing NestedCopy here
-      let templateToModify = filters.private.filter(
+      const templateToModify = filters.private.filter(
         (entry) =>
           entry.method === 'GET' &&
           entry.valid &&
@@ -122,7 +123,7 @@ function injectRulesAtRuntime(filters) {
       { accept: process.env.ACCEPT_CODE || process.env.ACCEPT_GIT },
       'Injecting Accept rules for Code/Git',
     );
-    let templateGET = nestedCopy(
+    const templateGET = nestedCopy(
       filters.private.filter(
         (entry) =>
           entry.method === 'GET' &&
@@ -142,14 +143,14 @@ function injectRulesAtRuntime(filters) {
     templateGET.origin = templateGET.origin
       .replace('https://${GITHUB_TOKEN}', 'https://pat:${GITHUB_TOKEN}')
       .replace('https://${GITLAB}', 'https://oauth2:${GITLAB_TOKEN}@${GITLAB}');
-    let templatePOST = nestedCopy(templateGET);
+    const templatePOST = nestedCopy(templateGET);
 
     templatePOST.method = 'POST';
 
     templatePOST['//'] = 'allow git-upload-pack (for git clone)';
 
     // Code snippets rules
-    let templateGETForSnippets = nestedCopy(
+    const templateGETForSnippets = nestedCopy(
       filters.private.filter(
         (entry) =>
           entry.method === 'GET' &&
@@ -198,8 +199,8 @@ function injectRulesAtRuntime(filters) {
   return filters;
 }
 
-module.exports = (acceptFilename = '', folderLocation = '') => {
-  let filters = {};
+export default (acceptFilename = '', folderLocation = ''): FiltersType => {
+  let filters;
   if (acceptFilename) {
     const acceptLocation = path.resolve(
       folderLocation ? folderLocation : process.cwd(),
