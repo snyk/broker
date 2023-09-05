@@ -1,5 +1,5 @@
-import { axiosInstance } from '../../../axios';
-import { log as logger } from '../../../log';
+import { axiosInstance } from '../../../common/http/axios';
+import { log as logger } from '../../../logs/logger';
 import {
   CreateConnectionRequestData,
   CreateConnectionRequestParams,

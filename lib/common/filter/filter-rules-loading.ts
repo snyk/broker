@@ -2,7 +2,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import fs from 'fs';
 
-import { log as logger } from './log';
+import { log as logger } from '../../logs/logger';
 import { FiltersType } from './filters';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];

@@ -1,4 +1,4 @@
-import { hashToken, maskToken } from '../../lib/token';
+import { hashToken, maskToken } from '../../lib/common/utils/token';
 
 describe('token', () => {
   describe('hashToken', () => {

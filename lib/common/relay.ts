@@ -3,38 +3,36 @@ import undefsafe from 'undefsafe';
 import { parse } from 'url';
 import { format } from 'url';
 import { v4 as uuid } from 'uuid';
-import Filters from './filters';
-import { replace, replaceUrlPartialChunk } from './replace-vars';
-import tryJSONParse from './try-json-parse';
-import { log as logger } from './log';
-import version from './version';
-import { maskToken, hashToken } from './token';
+import Filters from './filter/filters';
+import { replace, replaceUrlPartialChunk } from './utils/replace-vars';
+import tryJSONParse from './utils/try-json-parse';
+import { log as logger } from '../logs/logger';
+import version from './utils/version';
+import { maskToken, hashToken } from './utils/token';
 import stream from 'stream';
-import NodeCache from 'node-cache';
 import {
   incrementHttpRequestsTotal,
   incrementUnableToSizeResponse,
   observeResponseSize,
   incrementWebSocketRequestsTotal,
-} from './metrics';
+} from './utils/metrics';
 import { config } from './config';
-import { BrokerServerPostResponseHandler } from './stream-posts';
+import { BrokerServerPostResponseHandler } from './http/server-stream-posts';
 import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} from './client/scm';
+} from '../client/scm';
 import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from 'express';
-
-interface StreamResponse {
-  streamBuffer: stream.PassThrough;
-  response: ExpressResponse;
-  streamSize?: number;
-}
+import { StreamResponse, streamsStore } from './http/downstream-stream';
+import { RequestPayload } from './types/http';
+import { isJson } from './utils/json';
+import { logError, logResponse } from '../logs/log';
+import { LogContext } from './types/log';
 
 let relayRequest = request;
 relayRequest = request.defaults({
@@ -48,72 +46,11 @@ relayRequest = request.defaults({
     maxTotalSockets: 1000,
   },
 });
-
-export class StreamResponseHandler {
-  streamingID: string;
-  streamResponse: StreamResponse;
-  // streamBuffer;
-  // response;
-  // streamSize = 0;
-
-  static create(streamingID) {
-    const stream = streams.get(streamingID);
-    if (!stream) {
-      return null;
-    }
-    const streamResponse = stream as StreamResponse;
-
-    return new StreamResponseHandler(
-      streamingID,
-      streamResponse.streamBuffer,
-      streamResponse.response,
-    );
-  }
-
-  constructor(streamingID, streamBuffer, response) {
-    this.streamingID = streamingID;
-    this.streamResponse = { streamBuffer, response, streamSize: 0 };
-  }
-
-  writeStatusAndHeaders = (statusAndHeaders) => {
-    this.streamResponse.response
-      .status(statusAndHeaders.status)
-      .set(statusAndHeaders.headers);
-  };
-
-  writeChunk = (chunk, waitForDrainCb) => {
-    this.streamResponse.streamSize += chunk.length;
-    if (!this.streamResponse.streamBuffer.write(chunk) && waitForDrainCb) {
-      waitForDrainCb(this.streamResponse.streamBuffer);
-    }
-  };
-
-  finished = () => {
-    this.streamResponse.streamBuffer.end();
-    streams.del(this.streamingID);
-    observeResponseSize({
-      bytes: this.streamResponse.streamSize,
-      isStreaming: true,
-    });
-  };
-
-  destroy = (error) => {
-    this.streamResponse.streamBuffer.destroy(error);
-    streams.del(this.streamingID);
-  };
-}
-
-const streams = new NodeCache({
-  stdTTL: parseInt(config.cacheExpiry) || 3600, // 1 hour
-  checkperiod: parseInt(config.cacheCheckPeriod) || 60, // 1 min
-  useClones: false,
-});
-
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */
 export const streamResponseHandler = (token) => {
   return (streamingID, chunk, finished, ioResponse) => {
-    const streamFromId = streams.get(streamingID) as StreamResponse;
+    const streamFromId = streamsStore.get(streamingID) as StreamResponse;
 
     if (streamFromId) {
       const { streamBuffer, response } = streamFromId;
@@ -126,11 +63,11 @@ export const streamResponseHandler = (token) => {
         if (chunk) {
           streamSize += chunk.length;
           streamBuffer.write(chunk);
-          streams.set(streamingID, { streamSize, streamBuffer, response });
+          streamsStore.set(streamingID, { streamSize, streamBuffer, response });
         }
         if (finished) {
           streamBuffer.end();
-          streams.del(streamingID);
+          streamsStore.del(streamingID);
           observeResponseSize({
             bytes: streamSize,
             isStreaming: true,
@@ -217,7 +154,7 @@ export const forwardHttpRequest = (filterRules) => {
           'sending stream request over websocket connection',
         );
 
-        streams.set(streamingID, {
+        streamsStore.set(streamingID, {
           response: res,
           streamBuffer,
           streamSize: 0,
@@ -353,39 +290,6 @@ function legacyStreaming(logContext, rqst, config, io, streamingID) {
         status: 500,
       });
     });
-}
-
-interface LogContext {
-  url: string;
-  requestMethod: string;
-  requestHeaders: Record<string, any>;
-  requestId: string;
-  streamingID?: string;
-  transport?: string;
-  maskedToken: string;
-  hashedToken: string;
-  error?: string;
-  resultUrlSchemeAdded?: boolean;
-  httpUrl?: string;
-  userAgentHeaderSet?: boolean;
-  authHeaderSetByRuleAuth?: boolean;
-  authHeaderSetByRuleUrl?: boolean;
-  bodyVarsSubstitution?: string;
-  headerVarsSubstitution?: string;
-  ioUrl?: string;
-  responseStatus?: string;
-  responseHeaders?: string;
-  responseBodyType?: string;
-  ioErrorType?: string;
-  ioOriginalBodySize?: string;
-}
-
-export interface RequestPayload {
-  url: string;
-  headers?: any;
-  method: string;
-  body?: any;
-  streamingID?: string;
 }
 
 // 1. Request coming in over websocket conn (logged)
@@ -718,29 +622,3 @@ export const forwardWebSocketRequest = (
     });
   };
 };
-
-function isJson(responseHeaders) {
-  return responseHeaders['content-type']
-    ? responseHeaders['content-type'].includes('json')
-    : false;
-}
-
-function logResponse(logContext, status, response, config) {
-  logContext.responseStatus = status;
-  logContext.responseHeaders = response.headers;
-  logContext.responseBody =
-    config && config.LOG_ENABLE_BODY === 'true' ? response.body : null;
-
-  logger.info(logContext, 'sending response back to websocket connection');
-}
-
-function logError(logContext, error) {
-  logger.error(
-    {
-      ...logContext,
-      error,
-      stackTrace: new Error('stacktrace generator').stack,
-    },
-    'error while sending websocket request over HTTP connection',
-  );
-}

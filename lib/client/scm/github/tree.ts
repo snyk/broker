@@ -1,4 +1,4 @@
-import { log as logger } from '../../../log';
+import { log as logger } from '../../../logs/logger';
 import { GitHubTreeParsingError, GitHubTreeValidationError } from './errors';
 import type { GitHubTree, GitHubCreateTreePayload } from './types';
 
