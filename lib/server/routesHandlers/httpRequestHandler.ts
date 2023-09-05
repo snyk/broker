@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { log as logger } from '../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
-import { getConnections } from '../socket';
+import { getSocketConnections } from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = (
@@ -9,7 +9,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  const connections = getConnections();
+  const connections = getSocketConnections();
   const token = req.params.token;
   const desensitizedToken = getDesensitizedToken(token);
   req['maskedToken'] = desensitizedToken.maskedToken;
