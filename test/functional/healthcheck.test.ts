@@ -1,5 +1,5 @@
 import path from 'path';
-import version from '../../lib/version';
+import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,

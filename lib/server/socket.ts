@@ -1,17 +1,20 @@
 import Primus from 'primus';
 import Emitter from 'primus-emitter';
-import { log as logger } from '../log';
-import { forwardWebSocketRequest, streamResponseHandler } from '../relay';
-import { maskToken, hashToken } from '../token';
+import { log as logger } from '../logs/logger';
+import {
+  forwardWebSocketRequest,
+  streamResponseHandler,
+} from '../common/relay';
+import { maskToken, hashToken } from '../common/utils/token';
 import {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
-} from '../metrics';
+} from '../common/utils/metrics';
 import {
   clientDisconnected,
   clientConnected,
   clientPinged,
-} from '../dispatcher';
+} from './infra/dispatcher';
 
 export default ({ server, filters, config }) => {
   // Requires are done recursively, so this is here to avoid contaminating the Client

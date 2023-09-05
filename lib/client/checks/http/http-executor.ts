@@ -1,6 +1,6 @@
-import { log as logger } from '../../../log';
-import version from '../../../version';
-import { axiosInstance } from '../../../axios';
+import { log as logger } from '../../../logs/logger';
+import version from '../../../common/utils/version';
+import { axiosInstance } from '../../../common/http/axios';
 import { retry } from '../../retry/exponential-backoff';
 import type { AxiosResponse } from 'axios';
 import type { CheckId, CheckResult, CheckStatus } from '../types';

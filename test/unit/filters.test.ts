@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import Filters from '../../lib/filters';
+import Filters from '../../lib/common/filter/filters';
 
 const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 

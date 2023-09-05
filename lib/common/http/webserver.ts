@@ -1,8 +1,12 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs';
-import { log as logger } from './log';
-import { maskToken, hashToken } from './token';
+import { log as logger } from '../../logs/logger';
+import {
+  maskToken,
+  hashToken,
+  extractBrokerTokenFromUrl,
+} from '../utils/token';
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 
@@ -20,11 +24,6 @@ const stripEmptyRequestBody = (req, res, next) => {
     delete req.body;
   }
   next();
-};
-
-const extractBrokerTokenFromUrl = (urlString) => {
-  const regex = /^\/broker\/([a-z0-9-]+)\//;
-  return urlString.match(regex) ? urlString.match(regex)[1] : null;
 };
 
 export const webserver = (config, altPort: number) => {

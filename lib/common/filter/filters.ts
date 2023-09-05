@@ -3,12 +3,12 @@ import pathRegexp from 'path-to-regexp';
 import qs from 'qs';
 import path from 'path';
 import undefsafe from 'undefsafe';
-import { replace } from './replace-vars';
-import authHeader from './auth-header';
-import tryJSONParse from './try-json-parse';
-import { log as logger } from './log';
-import { RequestPayload } from './relay';
-import { config } from './config';
+import { replace } from '../../common/utils/replace-vars';
+import authHeader from '../../common/utils/auth-header';
+import tryJSONParse from '../../common/utils/try-json-parse';
+import { log as logger } from '../../logs/logger';
+import { config } from '../config';
+import { RequestPayload } from '../types/http';
 
 interface AuthObject {
   scheme: string;

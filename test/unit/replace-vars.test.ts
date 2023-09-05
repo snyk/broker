@@ -1,4 +1,7 @@
-import { replace, replaceUrlPartialChunk } from '../../lib/replace-vars';
+import {
+  replace,
+  replaceUrlPartialChunk,
+} from '../../lib/common/utils/replace-vars';
 
 describe('replacePartialChunk', () => {
   const config = {

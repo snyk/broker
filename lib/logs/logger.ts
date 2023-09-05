@@ -1,7 +1,7 @@
 import bunyan from 'bunyan';
 import escapeRegExp from 'lodash.escaperegexp';
 import mapValues from 'lodash.mapvalues';
-import { config } from './config';
+import { config } from '../common/config';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
