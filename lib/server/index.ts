@@ -1,6 +1,5 @@
 import { log as logger } from '../logs/logger';
 import { bindSocketToWebserver } from './socket';
-import { forwardHttpRequest } from '../common/relay';
 import version from '../common/utils/version';
 import { applyPrometheusMiddleware } from './utils/prometheus-middleware';
 import { validateBrokerTypeMiddleware } from './broker-middleware';
@@ -10,6 +9,7 @@ import { handlePostResponse } from './routesHandlers/postResponseHandler';
 import { connectionStatusHandler } from './routesHandlers/connectionStatusHandler';
 import { ServerOpts } from './types/http';
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from './routesHandlers/httpRequestHandler';
+import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'running in server mode');
@@ -40,7 +40,7 @@ export const main = async (serverOpts: ServerOpts) => {
     '/broker/:token/*',
     overloadHttpRequestWithConnectionDetailsMiddleware,
     validateBrokerTypeMiddleware,
-    forwardHttpRequest(serverOpts.filters?.public),
+    getForwardHttpRequestHandler(),
   );
 
   app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
