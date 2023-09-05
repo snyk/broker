@@ -1,24 +1,21 @@
 import Primus from 'primus';
 import Emitter from 'primus-emitter';
 import { log as logger } from '../logs/logger';
+import { ServerOpts } from './types/http';
+import { SocketHandler } from './types/socket';
+import { handleSocketError } from './socketHandlers/errorHandler';
 import {
-  forwardWebSocketRequest,
-  streamResponseHandler,
-} from '../common/relay';
-import { maskToken, hashToken } from '../common/utils/token';
-import {
-  incrementSocketConnectionGauge,
-  decrementSocketConnectionGauge,
-} from '../common/utils/metrics';
-import {
-  clientDisconnected,
-  clientConnected,
-  clientPinged,
-} from './infra/dispatcher';
+  handleSocketConnection,
+  initConnectionHandler,
+} from './socketHandlers/connectionHandler';
 
-export default ({ server, filters, config }) => {
-  // Requires are done recursively, so this is here to avoid contaminating the Client
+const connections = new Map();
 
+export const getConnections = () => {
+  return connections;
+};
+
+const socket = ({ server, filters, config }): SocketHandler => {
   const ioConfig = {
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -38,135 +35,23 @@ export default ({ server, filters, config }) => {
 
   logger.info(ioConfig, 'using io config');
 
-  const connections = new Map();
-  const response = forwardWebSocketRequest(filters, config, io);
-  const streamingResponse = streamResponseHandler;
+  initConnectionHandler(filters, config, io);
 
-  io.on('error', (error) =>
-    logger.error({ error }, 'Primus/engine.io server error'),
-  );
+  io.on('error', handleSocketError);
 
-  io.on('connection', function (socket) {
-    let token = socket.request.uri.pathname
-      .replaceAll(/\/primus\/([^/]+)\//g, '$1')
-      .toLowerCase();
-    let clientId = null;
-    let clientVersion = null;
-    let identified = false;
-    logger.info(
-      { maskedToken: maskToken(token), hashedToken: hashToken(token) },
-      'new client connection',
-    );
+  io.on('connection', handleSocketConnection);
 
-    socket.send('identify', { capabilities: ['receive-post-streams'] });
-
-    const close = (closeReason = 'none') => {
-      if (token) {
-        const maskedToken = maskToken(token);
-        const hashedToken = hashToken(token);
-        if (identified) {
-          const clientPool = connections
-            .get(token)
-            .filter((_) => _.socket !== socket);
-          logger.info(
-            {
-              closeReason,
-              maskedToken,
-              hashedToken,
-              remainingConnectionsCount: clientPool.length,
-            },
-            'client connection closed',
-          );
-          if (clientPool.length) {
-            connections.set(token, clientPool);
-          } else {
-            logger.info({ maskedToken, hashedToken }, 'removing client');
-            connections.delete(token);
-          }
-          decrementSocketConnectionGauge();
-        } else {
-          logger.warn(
-            { maskedToken, hashedToken },
-            'client disconnected before identifying itself',
-          );
-        }
-        setImmediate(async () => await clientDisconnected(token, clientId));
-      }
-    };
-
-    // TODO decide if the socket doesn't identify itself within X period,
-    // should we toss it away?
-    socket.on('identify', (clientData) => {
-      // clientData can be a string token coming from older broker clients,
-      // OR an object coming from newer clients in the form of { token, metadata }
-      if (typeof clientData === 'object') {
-        token = clientData.token && clientData.token.toLowerCase();
-      } else {
-        token = clientData.toLowerCase(); // lowercase to standardise tokens
-        // stub a proper clientData, signal client is too old
-        clientData = { token, metadata: { version: 'pre-4.27' } };
-      }
-
-      if (!token) {
-        logger.warn(
-          { token, metadata: metadataWithoutFilters(clientData.metadata) },
-          'new client connection identified without a token',
-        );
-        return;
-      }
-
-      const maskedToken = maskToken(token);
-      const hashedToken = hashToken(token);
-
-      logger.info(
-        {
-          maskedToken,
-          hashedToken,
-          metadata: metadataWithoutFilters(clientData.metadata),
-        },
-        'new client connection identified',
-      );
-
-      const clientPool = connections.get(token) || [];
-      clientPool.unshift({
-        socket,
-        socketType: 'server',
-        socketVersion: 1,
-        metadata: clientData.metadata,
-      });
-      connections.set(token, clientPool);
-
-      socket.on('chunk', streamingResponse(token));
-      socket.on('request', response(token));
-      socket.on('incoming::ping', (time) => {
-        setImmediate(
-          async () => await clientPinged(token, clientId, clientVersion, time),
-        );
-      });
-
-      clientId = clientData.metadata.clientId;
-      clientVersion = clientData.metadata.version;
-      setImmediate(
-        async () => await clientConnected(token, clientId, clientVersion),
-      );
-      incrementSocketConnectionGauge();
-      identified = true;
-    });
-
-    ['close', 'end', 'disconnect'].forEach((e) => socket.on(e, () => close(e)));
-    socket.on('error', (error) => {
-      logger.warn({ error }, 'error on websocket connection');
-    });
-  });
-
-  return { io, connections };
+  return { io };
 };
 
-const metadataWithoutFilters = (metadataWithFilters) => {
-  return {
-    capabilities: metadataWithFilters.capabilities,
-    clientId: metadataWithFilters.clientId,
-    preflightChecks: metadataWithFilters.preflightChecks,
-    version: metadataWithFilters.version,
-  };
+export const bindSocketToWebserver = (
+  server,
+  serverOpts: ServerOpts,
+): SocketHandler => {
+  // bind the socket server to the web server
+  return socket({
+    server,
+    filters: serverOpts.filters?.private,
+    config: serverOpts.config,
+  });
 };
