@@ -41,7 +41,7 @@ describe('CLI', () => {
   describe('"exec" command', () => {
     it('throws when missing broker id', async () => {
       try {
-        await exec({ _: ['client'] });
+        await exec({ _: ['client'], port: 8010 });
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(
@@ -55,7 +55,7 @@ describe('CLI', () => {
       process.env.BROKER_TOKEN = '1';
 
       try {
-        await exec({ _: ['client'] });
+        await exec({ _: ['client'], port: 8020 });
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(

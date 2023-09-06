@@ -2,7 +2,7 @@ import { log as logger } from '../../../logs/logger';
 import { Request, Response } from 'express';
 import { getHttpChecks } from '../http';
 import type { CheckResult } from '../types';
-import type { Config } from '../../config';
+import type { Config } from '../../types/config';
 
 export const handleChecksRoute = (
   config: any,

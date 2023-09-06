@@ -1,149 +1,77 @@
 import '../common/http/patch-https-request-for-proxying';
 
 import Primus from 'primus';
-import {
-  forwardWebSocketRequest,
-  streamResponseHandler,
-} from '../common/relay';
 import { log as logger } from '../logs/logger';
 import primusEmitter from 'primus-emitter';
+import {
+  reconnectFailedHandler,
+  reconnectScheduledHandler,
+} from './socketHandlers/reconnectHandler';
+import { identifyHandler } from './socketHandlers/identifyHandler';
+import { errorHandler } from './socketHandlers/errorHandler';
+import { openHandler } from './socketHandlers/openHandler';
+import { closeHandler } from './socketHandlers/closeHandler';
+import { ClientOpts } from './types/client';
+import { requestHandler } from './socketHandlers/requestHandler';
+import { chunkHandler } from './socketHandlers/chunkHandler';
+import { initializeSocketHandlers } from './socketHandlers/init';
 
-function createWebSocket(
-  token,
-  url,
-  config,
-  filters,
-  identifyingMetadata,
-  serverId,
-) {
+export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
     plugin: {
       emitter: primusEmitter,
     },
-    pathname: `/primus/${token}`,
+    pathname: `/primus/${clientOps.config.brokerToken}`,
   });
 
-  if (serverId) {
-    const urlWithServerId = new URL(url);
-    urlWithServerId.searchParams.append('server_id', serverId);
-    url = urlWithServerId.toString();
+  if (clientOps.serverId) {
+    const urlWithServerId = new URL(clientOps.config.brokerServerUrl);
+    urlWithServerId.searchParams.append('server_id', clientOps.serverId);
+    clientOps.config.brokerServerUrl = urlWithServerId.toString();
   }
 
   // Will exponentially back-off from 0.5 seconds to a maximum of 20 minutes
   // Retry for a total period of around 4.5 hours
-  const io = new Socket(url, {
+  const io = new Socket(clientOps.config.brokerServerUrl, {
     reconnect: {
       factor: 1.5,
       retries: 30,
       max: 20 * 60 * 1000,
     },
-    ping: parseInt(config.socketPingInterval) || 25000,
-    pong: parseInt(config.socketPongTimeout) || 10000,
-    timeout: parseInt(config.socketConnectTimeout) || 10000,
+    ping: parseInt(clientOps.config.socketPingInterval) || 25000,
+    pong: parseInt(clientOps.config.socketPongTimeout) || 10000,
+    timeout: parseInt(clientOps.config.socketConnectTimeout) || 10000,
   });
-
-  io.on('identify', (serverData) => {
-    io.capabilities = serverData.capabilities;
-  });
-
-  io.on('reconnect scheduled', (opts) => {
-    const attemptIn = Math.floor(opts.scheduled / 1000);
-    logger.warn(
-      `Reconnect retry #${opts.attempt} of ${opts.retries} in about ${attemptIn}s`,
-    );
-  });
-
-  io.on('reconnect failed', () => {
-    io.end();
-    logger.error('Reconnect failed');
-    process.exit(1);
-  });
-
-  logger.info(
-    { url, serverId },
-    'broker client is connecting to broker server',
-  );
-
-  const response = forwardWebSocketRequest(filters, config, io, serverId);
-  const streamingResponse = streamResponseHandler;
-
-  // RS note: this bind doesn't feel right, it feels like a sloppy way of
-  // getting the filters into the request function.
-  io.on('chunk', streamingResponse(token));
-  io.on('request', response(token));
-  io.on('error', ({ type, description }) => {
-    if (type === 'TransportError') {
-      logger.error({ type, description }, 'Failed to connect to broker server');
-    } else {
-      logger.warn({ type, description }, 'Error on websocket connection');
-    }
-  });
-  io.on('open', () => {
-    const metadata = {
-      capabilities: identifyingMetadata.capabilities,
-      clientId: identifyingMetadata.clientId,
-      preflightChecks: identifyingMetadata.preflightChecks,
-      version: identifyingMetadata.version,
-    };
-    logger.info(
-      { url, token, metadata },
-      'successfully established a websocket connection to the broker server',
-    );
-    const clientData = { token, metadata: identifyingMetadata };
-    io.send('identify', clientData);
-  });
-
-  io.on('close', () => {
-    logger.warn(
-      { url, token },
-      'websocket connection to the broker server was closed',
-    );
-  });
-
   io.socketVersion = 1;
   io.socketType = 'client';
+
+  logger.info(
+    { url: clientOps.config.brokerServerUrl, serverId: clientOps.serverId },
+    'broker client is connecting to broker server',
+  );
+  initializeSocketHandlers(io, clientOps);
+
+  // Websocket events
+  io.on('identify', (serverData) => identifyHandler(serverData, io));
+
+  io.on('reconnect scheduled', reconnectScheduledHandler);
+
+  io.on('reconnect failed', () => reconnectFailedHandler(io));
+
+  io.on('chunk', chunkHandler(clientOps));
+
+  // prealably initialized
+  io.on('request', requestHandler(clientOps.config.brokerToken));
+
+  io.on('error', errorHandler);
+
+  io.on('open', () => openHandler(io, clientOps, identifyingMetadata));
+
+  io.on('close', () => closeHandler(clientOps));
 
   // only required if we're manually opening the connection
   // io.open();
   return io;
-}
-
-export default ({
-  url,
-  token,
-  filters,
-  config,
-  identifyingMetadata,
-  serverId,
-}) => {
-  if (!token) {
-    // null, undefined, empty, etc.
-    logger.error({ token }, 'missing client token');
-    const error = new ReferenceError(
-      'BROKER_TOKEN is required to successfully identify itself to the server',
-    );
-    error['code'] = 'MISSING_BROKER_TOKEN';
-    throw error;
-  }
-
-  if (!url) {
-    // null, undefined, empty, etc.
-    logger.error({ url }, 'missing broker url');
-    const error = new ReferenceError(
-      'BROKER_SERVER_URL is required to connect to the broker server',
-    );
-    error['code'] = 'MISSING_BROKER_SERVER_URL';
-    throw error;
-  }
-
-  return createWebSocket(
-    token,
-    url,
-    config,
-    filters,
-    identifyingMetadata,
-    serverId,
-  );
 };
