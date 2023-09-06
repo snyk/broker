@@ -13,7 +13,9 @@ requestDefaultsMock.mockImplementation((_options) => {
   return requestMock;
 });
 
-import { forwardWebSocketRequest as relay } from '../../lib/common/relay';
+import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
+import { ClientOpts } from '../../lib/client/types/client';
+import { ServerOpts } from '../../lib/server/types/http';
 
 describe('header relay', () => {
   beforeEach(() => {
@@ -29,16 +31,20 @@ describe('header relay', () => {
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
     };
-
-    const route = relay(
-      [
-        {
-          method: 'any',
-          url: '/*',
-        },
-      ],
+    const options: ClientOpts | ServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
       config,
-    )(brokerToken);
+      port: 8001,
+    };
+    const route = relay(options)(brokerToken);
 
     const headers = {
       'x-broker-var-sub': 'private-token,replaceme',
@@ -77,15 +83,20 @@ describe('header relay', () => {
       disableHeaderVarsSubstitution: true,
     };
 
-    const route = relay(
-      [
-        {
-          method: 'any',
-          url: '/*',
-        },
-      ],
+    const options: ClientOpts | ServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
       config,
-    )(brokerToken);
+      port: 8001,
+    };
+    const route = relay(options)(brokerToken);
 
     const headers = {
       'x-broker-var-sub': 'private-token,replaceme',

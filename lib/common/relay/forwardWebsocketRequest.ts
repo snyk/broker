@@ -1,38 +1,28 @@
-import request from 'request';
-import undefsafe from 'undefsafe';
-import { parse } from 'url';
-import { format } from 'url';
-import { v4 as uuid } from 'uuid';
-import Filters from './filter/filters';
-import { replace, replaceUrlPartialChunk } from './utils/replace-vars';
-import tryJSONParse from './utils/try-json-parse';
-import { log as logger } from '../logs/logger';
-import version from './utils/version';
-import { maskToken, hashToken } from './utils/token';
-import stream from 'stream';
-import {
-  incrementHttpRequestsTotal,
-  incrementUnableToSizeResponse,
-  observeResponseSize,
-  incrementWebSocketRequestsTotal,
-} from './utils/metrics';
-import { config } from './config';
-import { BrokerServerPostResponseHandler } from './http/server-stream-posts';
+import { RequestPayload } from '../types/http';
+import { LogContext } from '../types/log';
+import { hashToken, maskToken } from '../utils/token';
+import { log as logger } from '../../logs/logger';
+import { BrokerServerPostResponseHandler } from '../http/server-stream-posts';
+import { incrementWebSocketRequestsTotal } from '../utils/metrics';
+import version from '../utils/version';
 import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} from '../client/scm';
-import {
-  Request as ExpressRequest,
-  Response as ExpressResponse,
-} from 'express';
-import { StreamResponse, streamsStore } from './http/downstream-stream';
-import { RequestPayload } from './types/http';
-import { isJson } from './utils/json';
-import { logError, logResponse } from '../logs/log';
-import { LogContext } from './types/log';
+} from '../../client/scm';
+import { logError, logResponse } from '../../logs/log';
+import { isJson } from '../utils/json';
+import { replace, replaceUrlPartialChunk } from '../utils/replace-vars';
+import { parse } from 'url';
+import { format } from 'url';
+import tryJSONParse from '../utils/try-json-parse';
+import undefsafe from 'undefsafe';
+import request from 'request';
+import { config } from '../config';
+import Filters from '../filter/filters';
+import { ClientOpts } from '../../client/types/client';
+import { ServerOpts } from '../../server/types/http';
 
 let relayRequest = request;
 relayRequest = request.defaults({
@@ -46,264 +36,18 @@ relayRequest = request.defaults({
     maxTotalSockets: 1000,
   },
 });
-/**
- * @deprecated Deprecated in favour of {@link StreamResponseHandler} */
-export const streamResponseHandler = (token) => {
-  return (streamingID, chunk, finished, ioResponse) => {
-    const streamFromId = streamsStore.get(streamingID) as StreamResponse;
 
-    if (streamFromId) {
-      const { streamBuffer, response } = streamFromId;
-      let { streamSize } = streamFromId;
-
-      if (streamBuffer) {
-        if (ioResponse) {
-          response.status(ioResponse.status).set(ioResponse.headers);
-        }
-        if (chunk) {
-          streamSize += chunk.length;
-          streamBuffer.write(chunk);
-          streamsStore.set(streamingID, { streamSize, streamBuffer, response });
-        }
-        if (finished) {
-          streamBuffer.end();
-          streamsStore.del(streamingID);
-          observeResponseSize({
-            bytes: streamSize,
-            isStreaming: true,
-          });
-        }
-      } else {
-        logger.warn({ streamingID, token }, 'discarding binary chunk');
-      }
-    } else {
-      logger.warn(
-        { streamingID, token },
-        'trying to write into a closed stream',
-      );
-    }
-  };
-};
-
-// 1. Request coming in over HTTP conn (logged)
-// 2. Filter for rule match (log and block if no match)
-// 3. Relay over websocket conn (logged)
-// 4. Get response over websocket conn (logged)
-// 5. Send response over HTTP conn
-export const forwardHttpRequest = (filterRules) => {
-  const filters = Filters(filterRules);
-
-  return (req: ExpressRequest, res: ExpressResponse) => {
-    // If this is the server, we should receive a Snyk-Request-Id header from upstream
-    // If this is the client, we will have to generate one
-    req.headers['snyk-request-id'] ||= uuid();
-    const logContext: LogContext = {
-      url: req.url,
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      requestId:
-        req.headers['snyk-request-id'] &&
-        Array.isArray(req.headers['snyk-request-id'])
-          ? req.headers['snyk-request-id'].join(',')
-          : req.headers['snyk-request-id'] || '',
-      maskedToken: req['maskedToken'],
-      hashedToken: req['hashedToken'],
-    };
-
-    logger.info(logContext, 'received request over HTTP connection');
-    filters(req, (error, result) => {
-      if (error) {
-        incrementHttpRequestsTotal(true);
-        const reason =
-          'Request does not match any accept rule, blocking HTTP request';
-        error.reason = reason;
-        logContext.error = error;
-        logger.warn(logContext, reason);
-        // TODO: respect request headers, block according to content-type
-        return res
-          .status(401)
-          .send({ message: error.message, reason, url: req.url });
-      }
-      incrementHttpRequestsTotal(false);
-
-      req.url = result.url;
-      logContext.ioUrl = result.url;
-
-      // check if this is a streaming request for binary data
-      if (
-        result.stream ||
-        res?.locals?.capabilities?.includes('post-streams')
-      ) {
-        const streamingID = uuid();
-        const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
-        streamBuffer.on('error', (error) => {
-          // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
-          logger.error(
-            {
-              ...logContext,
-              error,
-              stackTrace: new Error('stacktrace generator').stack,
-            },
-            'caught error piping stream through to HTTP response',
-          );
-          res.destroy(error);
-        });
-        logContext.streamingID = streamingID;
-        logger.debug(
-          logContext,
-          'sending stream request over websocket connection',
-        );
-
-        streamsStore.set(streamingID, {
-          response: res,
-          streamBuffer,
-          streamSize: 0,
-        });
-        streamBuffer.pipe(res);
-
-        res.locals.io.send('request', {
-          url: req.url,
-          method: req.method,
-          body: req.body,
-          headers: req.headers,
-          streamingID,
-        });
-
-        return;
-      }
-
-      logger.debug(logContext, 'sending request over websocket connection');
-
-      // relay the http request over the websocket, handle websocket response
-      res.locals.io.send(
-        'request',
-        {
-          url: req.url,
-          method: req.method,
-          body: req.body,
-          headers: req.headers,
-          streamingID: '',
-        },
-        (ioResponse) => {
-          logContext.responseStatus = ioResponse.status;
-          logContext.responseHeaders = ioResponse.headers;
-          logContext.responseBodyType = typeof ioResponse.body;
-
-          const logMsg = 'sending response back to HTTP connection';
-          if (ioResponse.status <= 200) {
-            logger.debug(logContext, logMsg);
-            let responseBodyString = '';
-            if (typeof ioResponse.body === 'string') {
-              responseBodyString = ioResponse.body;
-            } else if (typeof ioResponse.body === 'object') {
-              responseBodyString = JSON.stringify(ioResponse.body);
-            }
-            if (responseBodyString) {
-              const responseBodyBytes = Buffer.byteLength(
-                responseBodyString,
-                'utf-8',
-              );
-              observeResponseSize({
-                bytes: responseBodyBytes,
-                isStreaming: false,
-              });
-            } else {
-              // fallback metric to let us know if we're recording all response sizes
-              // we expect to remove this should it report 0
-              incrementUnableToSizeResponse();
-            }
-          } else {
-            logContext.ioErrorType = ioResponse.errorType;
-            logContext.ioOriginalBodySize = ioResponse.originalBodySize;
-            logger.warn(logContext, logMsg);
-          }
-
-          const httpResponse = res
-            .status(ioResponse.status)
-            .set(ioResponse.headers);
-
-          const encodingType = undefsafe(
-            ioResponse,
-            'headers.transfer-encoding',
-          );
-          try {
-            // keep chunked http requests without content-length header
-            if (encodingType === 'chunked') {
-              httpResponse.write(ioResponse.body);
-              httpResponse.end();
-            } else {
-              httpResponse.send(ioResponse.body);
-            }
-          } catch (err) {
-            logger.error(
-              {
-                ...logContext,
-                encodingType,
-                err,
-                stackTrace: new Error('stacktrace generator').stack,
-              },
-              'error forwarding response from Web Socket to HTTP connection',
-            );
-          }
-        },
-      );
-    });
-  };
-};
-
-function legacyStreaming(logContext, rqst, config, io, streamingID) {
-  let prevPartialChunk;
-  let isResponseJson;
-  logger.warn(
-    logContext,
-    'server did not advertise received-post-streams capability - falling back to legacy streaming',
-  );
-  // Fall back to older streaming method if somehow connected to older server version
-  rqst
-    .on('response', (response) => {
-      const status = (response && response.statusCode) || 500;
-      logResponse(logContext, status, response, config);
-      isResponseJson = isJson(response.headers);
-      io.send('chunk', streamingID, '', false, {
-        status,
-        headers: response.headers,
-      });
-    })
-    .on('data', (chunk) => {
-      if (config.RES_BODY_URL_SUB && isResponseJson) {
-        const { newChunk, partial } = replaceUrlPartialChunk(
-          Buffer.from(chunk).toString(),
-          prevPartialChunk,
-          config,
-        );
-        prevPartialChunk = partial;
-        chunk = newChunk;
-      }
-      io.send('chunk', streamingID, chunk, false);
-    })
-    .on('end', () => {
-      io.send('chunk', streamingID, '', true);
-    })
-    .on('error', (error) => {
-      logError(logContext, error);
-      io.send('chunk', streamingID, error.message, true, {
-        status: 500,
-      });
-    });
-}
-
-// 1. Request coming in over websocket conn (logged)
-// 2. Filter for rule match (log and block if no match)
-// 3. Relay over HTTP conn (logged)
-// 4. Get response over HTTP conn (logged)
-// 5. Send response over websocket conn
 export const forwardWebSocketRequest = (
-  filterRules,
-  config,
+  options: ClientOpts | ServerOpts,
   io?,
-  serverId?,
 ) => {
-  const filters = Filters(filterRules);
+  // 1. Request coming in over websocket conn (logged)
+  // 2. Filter for rule match (log and block if no match)
+  // 3. Relay over HTTP conn (logged)
+  // 4. Get response over HTTP conn (logged)
+  // 5. Send response over websocket conn
+
+  const filters = Filters(options.filters?.private);
 
   return (brokerToken) => (payload: RequestPayload, emit) => {
     const requestId = payload.headers['snyk-request-id'];
@@ -335,10 +79,10 @@ export const forwardWebSocketRequest = (
       if (io?.capabilities?.includes('receive-post-streams')) {
         const postHandler = new BrokerServerPostResponseHandler(
           logContext,
-          config,
+          options.config,
           brokerToken,
           payload.streamingID,
-          serverId,
+          options.config.serverId,
           requestId,
         );
         if (isResponseFromRequestModule) {
@@ -357,7 +101,7 @@ export const forwardWebSocketRequest = (
             legacyStreaming(
               logContext,
               responseData,
-              config,
+              options.config,
               io,
               payload.streamingID,
             );
@@ -450,14 +194,14 @@ export const forwardWebSocketRequest = (
       // with an env var of the same name (SOME_ENV_VAR).
       // This is used (for example) to substitute the snyk url
       // with the broker's url when defining the target for an incoming webhook.
-      if (!config.disableBodyVarsSubstitution && payload.body) {
+      if (!options.config.disableBodyVarsSubstitution && payload.body) {
         const parsedBody = tryJSONParse(payload.body);
 
         if (parsedBody.BROKER_VAR_SUB) {
           logContext.bodyVarsSubstitution = parsedBody.BROKER_VAR_SUB;
           for (const path of parsedBody.BROKER_VAR_SUB) {
             let source = undefsafe(parsedBody, path); // get the value
-            source = replace(source, config); // replace the variables
+            source = replace(source, options.config); // replace the variables
             undefsafe(parsedBody, path, source); // put it back in
           }
           payload.body = JSON.stringify(parsedBody);
@@ -465,7 +209,7 @@ export const forwardWebSocketRequest = (
       }
 
       if (
-        !config.disableHeaderVarsSubstitution &&
+        !options.config.disableHeaderVarsSubstitution &&
         payload.headers &&
         payload.headers['x-broker-var-sub']
       ) {
@@ -473,7 +217,7 @@ export const forwardWebSocketRequest = (
         logContext.headerVarsSubstitution = payload.headers['x-broker-var-sub'];
         for (const path of payload.headers['x-broker-var-sub'].split(',')) {
           let source = undefsafe(payload.headers, path.trim()); // get the value
-          source = replace(source, config); // replace the variables
+          source = replace(source, options.config); // replace the variables
           undefsafe(payload.headers, path.trim(), source); // put it back in
         }
       }
@@ -489,7 +233,7 @@ export const forwardWebSocketRequest = (
         'content-encoding',
       ].map((_) => delete payload.headers[_]);
 
-      if (config.removeXForwardedHeaders === 'true') {
+      if (options.config.removeXForwardedHeaders === 'true') {
         for (const key in payload.headers) {
           if (key.startsWith('x-forwarded-')) {
             delete payload.headers[key];
@@ -524,7 +268,7 @@ export const forwardWebSocketRequest = (
       payload.headers['Keep-Alive'] = 'timeout=60, max=1000';
 
       if (
-        gitHubTreeCheckNeeded(config, {
+        gitHubTreeCheckNeeded(options.config, {
           method: payload.method,
           url: payload.url,
         })
@@ -544,13 +288,13 @@ export const forwardWebSocketRequest = (
       }
 
       if (
-        gitHubCommitSigningEnabled(config, {
+        gitHubCommitSigningEnabled(options.config, {
           method: payload.method,
           url: payload.url,
         })
       ) {
         try {
-          payload.body = await signGitHubCommit(config, payload.body);
+          payload.body = await signGitHubCommit(options.config, payload.body);
         } catch (error) {
           logger.error({ error }, 'error while signing github commit');
         }
@@ -595,7 +339,8 @@ export const forwardWebSocketRequest = (
         // Note that the other side of the request will also check the length and will also reject it if it's too large
         // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
         // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
-        const maxLength = parseInt(config.socketMaxResponseLength) || 20971520;
+        const maxLength =
+          parseInt(options.config.socketMaxResponseLength) || 20971520;
         if (contentLength && contentLength > maxLength) {
           const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
           logError(logContext, {
@@ -612,13 +357,58 @@ export const forwardWebSocketRequest = (
         }
 
         const status = (response && response.statusCode) || 500;
-        if (config.RES_BODY_URL_SUB && isJson(response.headers)) {
-          const replaced = replaceUrlPartialChunk(responseBody, null, config);
+        if (options.config.RES_BODY_URL_SUB && isJson(response.headers)) {
+          const replaced = replaceUrlPartialChunk(
+            responseBody,
+            null,
+            options.config,
+          );
           responseBody = replaced.newChunk;
         }
-        logResponse(logContext, status, response, config);
+        logResponse(logContext, status, response, options.config);
         emit({ status, body: responseBody, headers: response.headers });
       });
     });
   };
+};
+
+const legacyStreaming = (logContext, rqst, config, io, streamingID) => {
+  let prevPartialChunk;
+  let isResponseJson;
+  logger.warn(
+    logContext,
+    'server did not advertise received-post-streams capability - falling back to legacy streaming',
+  );
+  // Fall back to older streaming method if somehow connected to older server version
+  rqst
+    .on('response', (response) => {
+      const status = (response && response.statusCode) || 500;
+      logResponse(logContext, status, response, config);
+      isResponseJson = isJson(response.headers);
+      io.send('chunk', streamingID, '', false, {
+        status,
+        headers: response.headers,
+      });
+    })
+    .on('data', (chunk) => {
+      if (config.RES_BODY_URL_SUB && isResponseJson) {
+        const { newChunk, partial } = replaceUrlPartialChunk(
+          Buffer.from(chunk).toString(),
+          prevPartialChunk,
+          config,
+        );
+        prevPartialChunk = partial;
+        chunk = newChunk;
+      }
+      io.send('chunk', streamingID, chunk, false);
+    })
+    .on('end', () => {
+      io.send('chunk', streamingID, '', true);
+    })
+    .on('error', (error) => {
+      logError(logContext, error);
+      io.send('chunk', streamingID, error.message, true, {
+        status: 500,
+      });
+    });
 };

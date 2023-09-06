@@ -1,5 +1,5 @@
-import { streamResponseHandler } from '../../common/relay';
+import { legacyStreamResponseHandler } from '../../common/relay/LegacyStreamResponseHandler';
 
 export const chunkHandler = (clientOps) => {
-  return streamResponseHandler(clientOps.config.brokerToken);
+  return legacyStreamResponseHandler(clientOps.config.brokerToken);
 };
