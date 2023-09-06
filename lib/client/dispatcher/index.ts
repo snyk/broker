@@ -1,5 +1,5 @@
 import { log as logger } from '../../logs/logger';
-import { Config } from '../config';
+import { Config } from '../types/config';
 import { hashToken } from '../../common/utils/token';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';

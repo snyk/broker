@@ -24,10 +24,11 @@ interface ValidEntryObject {
   regex?: string;
   header?: string;
 }
-interface Rule {
+export interface Rule {
   method: string;
-  origin: string;
-  path: string;
+  origin?: string;
+  path?: string;
+  url?: string;
   valid?: ValidEntryObject[];
   requiredCapabilities?: Array<string>;
   stream?: boolean;

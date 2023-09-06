@@ -1,4 +1,4 @@
-import { streamResponseHandler } from '../../common/relay';
+import { legacyStreamResponseHandler } from '../../common/relay/LegacyStreamResponseHandler';
 import { incrementSocketConnectionGauge } from '../../common/utils/metrics';
 import { log as logger } from '../../logs/logger';
 import { clientConnected, clientPinged } from '../infra/dispatcher';
@@ -8,7 +8,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { getForwardWebSocketRequestHandler } from './initHandlers';
 
 let response;
-const streamingResponse = streamResponseHandler;
+const streamingResponse = legacyStreamResponseHandler;
 
 export const initIdentifyHandler = () => {
   response = getForwardWebSocketRequestHandler();
