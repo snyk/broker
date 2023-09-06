@@ -2,7 +2,7 @@ import { RequestPayload } from '../types/http';
 import { LogContext } from '../types/log';
 import { hashToken, maskToken } from '../utils/token';
 import { log as logger } from '../../logs/logger';
-import { BrokerServerPostResponseHandler } from '../http/server-stream-posts';
+import { BrokerServerPostResponseHandler } from '../http/downstream-post-stream-to-server';
 import { incrementWebSocketRequestsTotal } from '../utils/metrics';
 import version from '../utils/version';
 import {
@@ -18,24 +18,10 @@ import { parse } from 'url';
 import { format } from 'url';
 import tryJSONParse from '../utils/try-json-parse';
 import undefsafe from 'undefsafe';
-import request from 'request';
-import { config } from '../config';
-import Filters from '../filter/filters';
 import { ClientOpts } from '../../client/types/client';
 import { ServerOpts } from '../../server/types/http';
-
-let relayRequest = request;
-relayRequest = request.defaults({
-  ca: config.caCert,
-  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-    : 60000,
-  agentOptions: {
-    keepAlive: true,
-    keepAliveMsecs: 60000,
-    maxTotalSockets: 1000,
-  },
-});
+import { getRequestToDownstream } from '../http/request';
+import { loadFilters } from '../filter/filtersAsync';
 
 export const forwardWebSocketRequest = (
   options: ClientOpts | ServerOpts,
@@ -47,9 +33,10 @@ export const forwardWebSocketRequest = (
   // 4. Get response over HTTP conn (logged)
   // 5. Send response over websocket conn
 
-  const filters = Filters(options.filters?.private);
+  //   const filters = Filters(options.filters?.private);
+  const filters = loadFilters(options.filters?.private);
 
-  return (brokerToken) => (payload: RequestPayload, emit) => {
+  return (brokerToken) => async (payload: RequestPayload, emit) => {
     const requestId = payload.headers['snyk-request-id'];
     const logContext: LogContext = {
       url: payload.url,
@@ -71,12 +58,16 @@ export const forwardWebSocketRequest = (
       );
     }
 
-    const realEmit = emit;
-    emit = (responseData, isResponseFromRequestModule = false) => {
+    const websocketEmit = emit;
+    const overrideEmit = (
+      responseData,
+      isResponseFromRequestModule = false,
+    ) => {
       // This only works client -> server, it's not possible to post data server -> client
       logContext.requestMethod = '';
       logContext.requestHeaders = {};
       if (io?.capabilities?.includes('receive-post-streams')) {
+        // Traffic over HTTP Post
         const postHandler = new BrokerServerPostResponseHandler(
           logContext,
           options.config,
@@ -96,6 +87,7 @@ export const forwardWebSocketRequest = (
           postHandler.sendData(responseData);
         }
       } else {
+        // Traffic over websockets
         if (payload.streamingID) {
           if (isResponseFromRequestModule) {
             legacyStreaming(
@@ -122,30 +114,16 @@ export const forwardWebSocketRequest = (
             { ...logContext, responseData },
             'sending fixed response over WebSocket connection',
           );
-          realEmit(responseData);
+          websocketEmit(responseData);
         }
       }
     };
 
+    emit = overrideEmit;
+
     logger.info(logContext, 'received request over websocket connection');
 
-    filters(payload, async (filterError, result) => {
-      if (filterError) {
-        incrementWebSocketRequestsTotal(true);
-        const reason =
-          'Response does not match any accept rule, blocking websocket request';
-        logContext.error = filterError;
-        filterError.reason = reason;
-        logger.warn(logContext, reason);
-        return emit({
-          status: 401,
-          body: {
-            message: filterError.message,
-            reason,
-            url: payload.url,
-          },
-        });
-      }
+    const prepareRequestFromFilterResult = async (result) => {
       incrementWebSocketRequestsTotal(false);
 
       if (result.url.startsWith('http') === false) {
@@ -306,27 +284,30 @@ export const forwardWebSocketRequest = (
         method: payload.method,
         body: payload.body,
       };
+      return req;
+    };
+    const makePostStreamingRequest = async (req) => {
+      // this is a streaming request for binary data
+      logger.debug(logContext, 'serving stream request');
 
-      // check if this is a streaming request for binary data
-      if (payload.streamingID) {
-        logger.debug(logContext, 'serving stream request');
-
-        try {
-          emit(relayRequest(req), true);
-        } catch (e) {
-          logger.error(
-            {
-              ...logContext,
-              error: e,
-              stackTrace: new Error('stacktrace generator').stack,
-            },
-            'caught error sending HTTP response over WebSocket',
-          );
-        }
-        return;
+      try {
+        const downstreamRequestHandler = getRequestToDownstream()(req);
+        emit(downstreamRequestHandler, true);
+      } catch (e) {
+        logger.error(
+          {
+            ...logContext,
+            error: e,
+            stackTrace: new Error('stacktrace generator').stack,
+          },
+          'caught error sending HTTP response over WebSocket',
+        );
       }
-
-      relayRequest(req, (error, response, responseBody) => {
+      return;
+    };
+    const makeLegacyRequest = (req) => {
+      // not main http post flow
+      getRequestToDownstream()(req, (error, response, responseBody) => {
         if (error) {
           logError(logContext, error);
           return emit({
@@ -368,7 +349,29 @@ export const forwardWebSocketRequest = (
         logResponse(logContext, status, response, options.config);
         emit({ status, body: responseBody, headers: response.headers });
       });
-    });
+    };
+
+    const filterResponse = filters(payload);
+    if (!filterResponse) {
+      incrementWebSocketRequestsTotal(true);
+      const reason =
+        'Response does not match any accept rule, blocking websocket request';
+      logContext.error = 'blocked';
+      logger.warn(logContext, reason);
+      return emit({
+        status: 401,
+        body: {
+          message: 'blocked',
+          reason,
+          url: payload.url,
+        },
+      });
+    } else {
+      const req = await prepareRequestFromFilterResult(filterResponse);
+      payload.streamingID
+        ? await makePostStreamingRequest(req)
+        : makeLegacyRequest(req);
+    }
   };
 };
 

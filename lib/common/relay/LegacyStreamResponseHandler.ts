@@ -1,7 +1,10 @@
 import { log as logger } from '../../logs/logger';
 import { observeResponseSize } from '../utils/metrics';
 
-import { StreamResponse, streamsStore } from '../http/downstream-stream';
+import {
+  StreamResponse,
+  streamsStore,
+} from '../http/server-post-stream-handler';
 
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */

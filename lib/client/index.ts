@@ -34,14 +34,6 @@ export const main = async (clientOpts: ClientOpts) => {
       version,
     };
 
-    // const io = socket({
-    //   token: clientOpts.config.brokerToken,
-    //   url: clientOpts.config.brokerServerUrl,
-    //   filters: clientOpts.filters?.private,
-    //   config: clientOpts.config,
-    //   identifyingMetadata,
-    //   serverId: clientOpts.config.serverId,
-    // });
     const io = createWebSocket(clientOpts, identifyingMetadata);
 
     // start the local webserver to listen for relay requests

@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 
 import { log as logger } from '../../logs/logger';
-import { FiltersType } from './filters';
+import { FiltersType } from './legacyFilters';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
 const IAC_SCM_ORIGINS = [

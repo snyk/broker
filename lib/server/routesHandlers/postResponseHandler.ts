@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { StreamResponseHandler } from '../../common/http/downstream-stream';
+import { StreamResponseHandler } from '../../common/http/server-post-stream-handler';
 import { log as logger } from '../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
