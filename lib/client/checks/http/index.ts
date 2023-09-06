@@ -1,7 +1,7 @@
 import { executeHttpRequest } from './http-executor';
 import { highAvailabilityModeEnabled } from '../../dispatcher';
 import type { CheckResult, HttpCheck } from '../types';
-import type { Config } from '../../config';
+import type { Config } from '../../types/config';
 
 const defaultTimeoutMs = 10_000;
 

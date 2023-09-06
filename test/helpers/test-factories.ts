@@ -1,5 +1,5 @@
 import { CheckResult, HttpCheck } from '../../lib/client/checks/types';
-import { Config } from '../../lib/client/config';
+import { Config } from '../../lib/client/types/config';
 import { executeHttpRequest } from '../../lib/client/checks/http/http-executor';
 
 export const aHttpCheck = (fields: Partial<HttpCheck>): HttpCheck => {
