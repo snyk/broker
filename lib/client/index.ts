@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWebSocket } from './socket';
 import { log as logger } from '../logs/logger';
-import { forwardHttpRequest } from '../common/relay';
+import { forwardHttpRequest } from '../common/relay/forwardHttpRequest';
 import { webserver } from '../common/http/webserver';
 import version from '../common/utils/version';
 import {
