@@ -1,4 +1,4 @@
-import { FiltersType } from '../../common/filter/filters';
+import { FiltersType } from '../../common/filter/legacyFilters';
 
 export interface ServerOpts {
   port: number;

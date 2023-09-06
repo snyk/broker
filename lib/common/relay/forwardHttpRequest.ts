@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Filters from '../filter/filters';
+import { loadFilters } from '../filter/filtersAsync';
 import undefsafe from 'undefsafe';
 
 import { v4 as uuid } from 'uuid';
@@ -12,15 +12,16 @@ import {
   observeResponseSize,
 } from '../utils/metrics';
 
-import { streamsStore } from '../http/downstream-stream';
+import { streamsStore } from '../http/server-post-stream-handler';
 import { LogContext } from '../types/log';
+
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
 // 3. Relay over websocket conn (logged)
 // 4. Get response over websocket conn (logged)
 // 5. Send response over HTTP conn
 export const forwardHttpRequest = (filterRules) => {
-  const filters = Filters(filterRules);
+  const filters = loadFilters(filterRules);
 
   return (req: Request, res: Response) => {
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
@@ -40,67 +41,56 @@ export const forwardHttpRequest = (filterRules) => {
     };
 
     logger.info(logContext, 'received request over HTTP connection');
-    filters(req, (error, result) => {
-      if (error) {
-        incrementHttpRequestsTotal(true);
-        const reason =
-          'Request does not match any accept rule, blocking HTTP request';
-        error.reason = reason;
-        logContext.error = error;
-        logger.warn(logContext, reason);
-        // TODO: respect request headers, block according to content-type
-        return res
-          .status(401)
-          .send({ message: error.message, reason, url: req.url });
-      }
+    const filterResponse = filters(req);
+
+    const makeWebsocketRequestWithStreamingResponse = (result) => {
       incrementHttpRequestsTotal(false);
 
       req.url = result.url;
       logContext.ioUrl = result.url;
 
-      // check if this is a streaming request for binary data
-      if (
-        result.stream ||
-        res?.locals?.capabilities?.includes('post-streams')
-      ) {
-        const streamingID = uuid();
-        const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
-        streamBuffer.on('error', (error) => {
-          // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
-          logger.error(
-            {
-              ...logContext,
-              error,
-              stackTrace: new Error('stacktrace generator').stack,
-            },
-            'caught error piping stream through to HTTP response',
-          );
-          res.destroy(error);
-        });
-        logContext.streamingID = streamingID;
-        logger.debug(
-          logContext,
-          'sending stream request over websocket connection',
+      const streamingID = uuid();
+      const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
+      streamBuffer.on('error', (error) => {
+        // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
+        logger.error(
+          {
+            ...logContext,
+            error,
+            stackTrace: new Error('stacktrace generator').stack,
+          },
+          'caught error piping stream through to HTTP response',
         );
+        res.destroy(error);
+      });
+      logContext.streamingID = streamingID;
+      logger.debug(
+        logContext,
+        'sending stream request over websocket connection',
+      );
 
-        streamsStore.set(streamingID, {
-          response: res,
-          streamBuffer,
-          streamSize: 0,
-        });
-        streamBuffer.pipe(res);
+      streamsStore.set(streamingID, {
+        response: res,
+        streamBuffer,
+        streamSize: 0,
+      });
+      streamBuffer.pipe(res);
 
-        res.locals.io.send('request', {
-          url: req.url,
-          method: req.method,
-          body: req.body,
-          headers: req.headers,
-          streamingID,
-        });
+      res.locals.io.send('request', {
+        url: req.url,
+        method: req.method,
+        body: req.body,
+        headers: req.headers,
+        streamingID,
+      });
 
-        return;
-      }
+      return;
+    };
+    const makeWebsocketRequestWithWebsocketResponse = (result) => {
+      incrementHttpRequestsTotal(false);
 
+      req.url = result.url;
+      logContext.ioUrl = result.url;
       logger.debug(logContext, 'sending request over websocket connection');
 
       // relay the http request over the websocket, handle websocket response
@@ -176,6 +166,24 @@ export const forwardHttpRequest = (filterRules) => {
           }
         },
       );
-    });
+    };
+    if (!filterResponse) {
+      incrementHttpRequestsTotal(true);
+      const reason =
+        'Request does not match any accept rule, blocking HTTP request';
+      logContext.error = 'blocked';
+      logger.warn(logContext, reason);
+      // TODO: respect request headers, block according to content-type
+      return res.status(401).send({ message: 'blocked', reason, url: req.url });
+    } else {
+      if (
+        filterResponse.stream ||
+        res?.locals?.capabilities?.includes('post-streams')
+      ) {
+        makeWebsocketRequestWithStreamingResponse(filterResponse);
+      } else {
+        makeWebsocketRequestWithWebsocketResponse(filterResponse);
+      }
+    }
   };
 };

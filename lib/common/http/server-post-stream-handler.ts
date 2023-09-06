@@ -1,5 +1,5 @@
 import stream from 'stream';
-import { observeResponseSize } from '../../common/utils/metrics';
+import { observeResponseSize } from '../utils/metrics';
 import { Response } from 'express';
 import NodeCache from 'node-cache';
 import { config } from '../config';
