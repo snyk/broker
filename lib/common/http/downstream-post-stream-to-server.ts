@@ -4,17 +4,17 @@ import stream from 'stream';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import version from '../utils/version';
 
-let streamPostRequestHandler = request;
-streamPostRequestHandler = request.defaults({
-  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-    : 60000,
-  agentOptions: {
-    keepAlive: true,
-    keepAliveMsecs: 60000,
-    maxTotalSockets: 1000,
-  },
-});
+// let streamPostRequestHandler = request;
+// streamPostRequestHandler = request.defaults({
+//   timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
+//     ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
+//     : 60000,
+//   agentOptions: {
+//     keepAlive: true,
+//     keepAliveMsecs: 60000,
+//     maxTotalSockets: 1000,
+//   },
+// });
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -43,7 +43,7 @@ class BrokerServerPostResponseHandler {
     this.#requestId = requestId;
   }
 
-  #initBuffer() {
+  async #initBuffer() {
     this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 });
 
     const url = new URL(
@@ -56,17 +56,34 @@ class BrokerServerPostResponseHandler {
     }
     const brokerServerPostRequestUrl = url.toString();
 
-    const brokerServerPostRequest = streamPostRequestHandler({
-      url: brokerServerPostRequestUrl,
+    const client =
+      brokerServerPostRequestUrl.indexOf('https') < 0
+        ? await import('http')
+        : await import('https');
+    const keepAliveAgent = new client.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 60000,
+      maxTotalSockets: 1000,
+    });
+    const options = {
       method: 'post',
       headers: {
-        'Snyk-Request-Id': this.#requestId,
+        'Snyk-Request-Id': `${this.#requestId}`,
         'Content-Type': BROKER_CONTENT_TYPE,
         Connection: 'Keep-Alive',
         'Keep-Alive': 'timeout=60, max=1000',
         'user-agent': 'Snyk Broker client ' + version,
       },
-    });
+      timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
+        ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
+        : 60000,
+    };
+    options['agent'] = keepAliveAgent;
+    const brokerServerPostRequestFetch = client.request(
+      brokerServerPostRequestUrl,
+      options,
+    );
+
     this.#buffer.on('error', (e) =>
       logger.error(
         {
@@ -77,8 +94,9 @@ class BrokerServerPostResponseHandler {
         'received error sending data to broker server post request buffer',
       ),
     );
+
     this.#buffer.pipe(
-      brokerServerPostRequest
+      brokerServerPostRequestFetch
         .on('error', (e) => {
           logger.error(
             {
@@ -98,7 +116,7 @@ class BrokerServerPostResponseHandler {
                 statusCode: r.statusCode,
                 statusMessage: r.statusMessage,
                 headers: r.headers,
-                body: r.body?.toString(),
+                // body: r. .body?.toString(),
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Received unexpected HTTP response POSTing data to Broker Server',
@@ -163,9 +181,10 @@ class BrokerServerPostResponseHandler {
     };
   }
 
-  forwardRequest(rqst: request.Request) {
+  async forwardRequest(rqst: request.Request) {
     let prevPartialChunk;
     let isResponseJson;
+
     rqst
       .on('error', this.#handleRequestError())
       .on('response', (response) => {
@@ -190,7 +209,7 @@ class BrokerServerPostResponseHandler {
           'successfully sent status & headers to Broker Server',
         );
       })
-      .on('data', (chunk) => {
+      .on('data', async (chunk) => {
         const httpBody =
           this.#config && this.#config.LOG_ENABLE_BODY === 'true'
             ? { body: chunk.toString() }.body
