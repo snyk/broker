@@ -1,34 +1,7 @@
-FROM snyk/ubuntu as base
+ARG BASE_IMAGE=snyk/broker:base
 
-MAINTAINER Snyk Ltd
 
-USER root
-
-RUN apt-get update && apt-get install -y ca-certificates
-
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-RUN npm install --global snyk-broker
-
-# Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/tough-cookie
-RUN npm i -g tough-cookie@4.1.3
-RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules
-
-FROM snyk/ubuntu
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-COPY --from=base /home/node/.npm-global /home/node/.npm-global
-
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-
-# Don't run as root
-WORKDIR /home/node
-USER node
+FROM ${BASE_IMAGE}
 
 # Generate default accept filter
 RUN broker init azure-repos
@@ -43,6 +16,9 @@ USER node
 # or provide as runtime args `-e`    #
 ######################################
 
+# Your unique Broker identifier
+# ENV BROKER_TOKEN <broker-token>
+
 # https://dev.azure.com/{azure-repos-org}
 # ENV AZURE_REPOS_ORG <azure-repos-org>
 # Guide how to get/create the token https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page
@@ -50,9 +26,6 @@ USER node
 # ENV AZURE_REPOS_TOKEN <azure-repos-token>
 # NOTA BENE: without `/` character in the end of URL
 # ENV AZURE_REPOS_HOST dev.azure.com
-
-# Your unique Broker identifier
-# ENV BROKER_TOKEN <broker-token>
 
 # The port used by the broker client to accept internal connections
 # Default value is 7341

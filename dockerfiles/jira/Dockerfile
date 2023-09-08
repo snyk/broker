@@ -1,34 +1,7 @@
-FROM snyk/ubuntu as base
+ARG BASE_IMAGE=snyk/broker:base
 
-MAINTAINER Snyk Ltd
 
-USER root
-
-RUN apt-get update && apt-get install -y ca-certificates
-
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-RUN npm install --global snyk-broker
-
-# Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/tough-cookie
-RUN npm i -g tough-cookie@4.1.3
-RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules
-
-FROM snyk/ubuntu
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-COPY --from=base /home/node/.npm-global /home/node/.npm-global
-
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-
-# Don't run as root
-WORKDIR /home/node
-USER node
+FROM ${BASE_IMAGE}
 
 # Generate default accept filter
 RUN broker init jira
