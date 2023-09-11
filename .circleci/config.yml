@@ -437,7 +437,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/artifactory/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=artifactory"
+          dockerfile: dockerfiles/Dockerfile
           project_name: artifactory
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -457,7 +458,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/azure-repos/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=azure-repos"
+          dockerfile: dockerfiles/Dockerfile
           project_name: azure-repos
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -477,8 +479,9 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/bitbucket-server/Dockerfile
-          project_name: azure-repos
+          additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: bitbucket-server
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push bitbucket-server image
@@ -510,7 +513,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/github-com/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=github-com"
+          dockerfile: dockerfiles/Dockerfile
           project_name: github-com
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -530,7 +534,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/github-enterprise/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=github-enterprise"
+          dockerfile: dockerfiles/Dockerfile
           project_name: github-enterprise
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -550,7 +555,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/gitlab/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile
           project_name: gitlab
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -570,7 +576,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/jira/Dockerfile
+          additional_arguments: "--build-arg BROKER_TYPE=jira"
+          dockerfile: dockerfiles/Dockerfile
           project_name: jira
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -590,8 +597,9 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/nexus/Dockerfile
-          project_name: jira
+          additional_arguments: "--build-arg BROKER_TYPE=nexus"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: nexus
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push nexus image
@@ -610,8 +618,9 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image
-          dockerfile: dockerfiles/nexus2/Dockerfile
-          project_name: jira
+          additional_arguments: "--build-arg BROKER_TYPE=nexus2"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: nexus2
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push nexus2 image
@@ -630,8 +639,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/artifactory/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=artifactory"
+          dockerfile: dockerfiles/Dockerfile
           project_name: artifactory-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -651,8 +660,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/azure-repos/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=azure-repos"
+          dockerfile: dockerfiles/Dockerfile
           project_name: azure-repos-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -672,8 +681,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/bitbucket-server/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=bitbucket-server"
+          dockerfile: dockerfiles/Dockerfile
           project_name: bitbucket-server-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -693,9 +702,9 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/github-com/Dockerfile
-          project_name: bitbucket-server-nlatest
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-com"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: github-com-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push github-com image (nlatest)
@@ -714,8 +723,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/github-enterprise/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-enterprise"
+          dockerfile: dockerfiles/Dockerfile
           project_name: github-enterprise-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -735,8 +744,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/gitlab/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile
           project_name: gitlab-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -756,8 +765,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/jira/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=jira"
+          dockerfile: dockerfiles/Dockerfile
           project_name: jira-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -777,8 +786,8 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/nexus/Dockerfile
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus"
+          dockerfile: dockerfiles/Dockerfile
           project_name: nexus-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
@@ -798,9 +807,9 @@ workflows:
           context: team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/nexus2/Dockerfile
-          project_name: nexus-nlatest
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus2"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: nexus2-nlatest
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push nexus2 image (nlatest)
