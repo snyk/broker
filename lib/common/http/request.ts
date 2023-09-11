@@ -1,19 +1,19 @@
-import request from 'request';
-import { config } from '../config';
+import { Client } from 'undici';
 
-let requestToDownstream = request;
-requestToDownstream = request.defaults({
-  ca: config.caCert,
-  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-    : 60000,
-  agentOptions: {
-    keepAlive: true,
-    keepAliveMsecs: 60000,
-    maxTotalSockets: 1000,
-  },
-});
+// TODO: cacert to be specified here?
 
-export const getRequestToDownstream = () => {
-  return requestToDownstream;
+let client;
+
+export const getRequestToDownstream = (origin) => {
+  client = new Client(origin, {
+    bodyTimeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
+      ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
+      : 30000,
+    keepAliveTimeout: 60 * 1000, // Keep-alive timeout in milliseconds
+  });
+  return client;
+};
+
+export const closeClient = () => {
+  client.close();
 };

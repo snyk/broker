@@ -1,20 +1,9 @@
-import request from 'request';
 import { log as logger } from '../../logs/logger';
 import stream from 'stream';
-import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import version from '../utils/version';
 
-// let streamPostRequestHandler = request;
-// streamPostRequestHandler = request.defaults({
-//   timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-//     ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-//     : 60000,
-//   agentOptions: {
-//     keepAlive: true,
-//     keepAliveMsecs: 60000,
-//     maxTotalSockets: 1000,
-//   },
-// });
+import { replaceUrlPartialChunk } from '../utils/replace-vars';
+import { closeClient } from './request';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -26,6 +15,7 @@ class BrokerServerPostResponseHandler {
   #streamingId;
   #serverId;
   #requestId;
+  #brokerServerPostRequestHttp;
 
   constructor(
     logContext,
@@ -79,7 +69,7 @@ class BrokerServerPostResponseHandler {
         : 60000,
     };
     options['agent'] = keepAliveAgent;
-    const brokerServerPostRequestFetch = client.request(
+    this.#brokerServerPostRequestHttp = client.request(
       brokerServerPostRequestUrl,
       options,
     );
@@ -96,7 +86,7 @@ class BrokerServerPostResponseHandler {
     );
 
     this.#buffer.pipe(
-      brokerServerPostRequestFetch
+      this.#brokerServerPostRequestHttp
         .on('error', (e) => {
           logger.error(
             {
@@ -145,49 +135,46 @@ class BrokerServerPostResponseHandler {
     this.#buffer.uncork();
   }
 
-  #handleRequestError() {
+  #handleRequestError(error) {
     // For reasons unknown, doing foo.on(this.#func)
     // doesn't work - you need return a function from here
-    return (error) => {
-      logger.error(
-        {
-          ...this.#logContext,
-          error,
-          stackTrace: new Error('stacktrace generator').stack,
-        },
-        'received error from request while piping to Broker Server',
+
+    logger.error(
+      {
+        ...this.#logContext,
+        error,
+        stackTrace: new Error('stacktrace generator').stack,
+      },
+      'received error from request while piping to Broker Server',
+    );
+    // If we already have a buffer object, then we've already started sending data back to the original requestor,
+    // so we have to destroy the stream and let that flow through the system
+    // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
+    // we will forward that directly to the Broker Server
+    if (this.#buffer) {
+      this.#buffer.destroy(error);
+    } else {
+      const body = JSON.stringify({ error: error });
+      this.#initBuffer();
+      this.#sendIoData(
+        JSON.stringify({
+          status: 500,
+          headers: {
+            'Content-Length': `${body.length}`,
+            'Content-Type': 'application/json',
+          },
+        }),
       );
-      // If we already have a buffer object, then we've already started sending data back to the original requestor,
-      // so we have to destroy the stream and let that flow through the system
-      // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
-      // we will forward that directly to the Broker Server
-      if (this.#buffer) {
-        this.#buffer.destroy(error);
-      } else {
-        const body = JSON.stringify({ error: error });
-        this.#initBuffer();
-        this.#sendIoData(
-          JSON.stringify({
-            status: 500,
-            headers: {
-              'Content-Length': `${body.length}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-        );
-        this.#buffer.write(body);
-        this.#buffer.end();
-      }
-    };
+      this.#buffer.write(body);
+      this.#buffer.end();
+    }
   }
 
-  async forwardRequest(rqst: request.Request) {
+  async forwardRequest(responsePromise) {
     let prevPartialChunk;
     let isResponseJson;
-
-    rqst
-      .on('error', this.#handleRequestError())
-      .on('response', (response) => {
+    responsePromise
+      .then((response) => {
         const status = response?.statusCode || 500;
         logger.info(
           {
@@ -202,44 +189,48 @@ class BrokerServerPostResponseHandler {
           status,
           headers: response.headers,
         });
+
         this.#initBuffer();
         this.#sendIoData(ioData);
         logger.info(
           this.#logContext,
           'successfully sent status & headers to Broker Server',
         );
-      })
-      .on('data', async (chunk) => {
-        const httpBody =
-          this.#config && this.#config.LOG_ENABLE_BODY === 'true'
-            ? { body: chunk.toString() }.body
-            : null;
-        logger.debug(
-          { ...this.#logContext, chunkLength: chunk.length, httpBody },
-          'writing data to buffer',
-        );
-        if (this.#config.RES_BODY_URL_SUB && isResponseJson) {
-          const { newChunk, partial } = replaceUrlPartialChunk(
-            Buffer.from(chunk).toString(),
-            prevPartialChunk,
-            this.#config,
-          );
-          prevPartialChunk = partial;
-          chunk = newChunk;
-        }
-        if (!this.#buffer.write(chunk)) {
-          logger.trace(this.#logContext, 'pausing request stream');
-          rqst.pause();
-          this.#buffer.once('drain', () => {
-            logger.trace(this.#logContext, 'resuming request stream');
-            rqst.resume();
+        response.body
+          .on('data', async (chunk) => {
+            const httpBody =
+              this.#config && this.#config.LOG_ENABLE_BODY === 'true'
+                ? { body: chunk.toString() }.body
+                : null;
+            logger.debug(
+              { ...this.#logContext, chunkLength: chunk.length, httpBody },
+              'writing data to buffer',
+            );
+            if (this.#config.RES_BODY_URL_SUB && isResponseJson) {
+              const { newChunk, partial } = replaceUrlPartialChunk(
+                Buffer.from(chunk).toString(),
+                prevPartialChunk,
+                this.#config,
+              );
+              prevPartialChunk = partial;
+              chunk = newChunk;
+            }
+            if (!this.#buffer.write(chunk)) {
+              logger.trace(this.#logContext, 'pausing request stream');
+              response.body.pause();
+              this.#buffer.once('drain', () => {
+                logger.trace(this.#logContext, 'resuming request stream');
+                response.body.resume();
+              });
+            }
+          })
+          .on('end', () => {
+            logger.info(this.#logContext, 'writing end to buffer');
+            this.#buffer.end();
           });
-        }
       })
-      .on('end', () => {
-        logger.info(this.#logContext, 'writing end to buffer');
-        this.#buffer.end();
-      });
+      .catch((err) => this.#handleRequestError(err))
+      .finally(() => closeClient());
   }
 
   sendData(responseData) {
