@@ -24,7 +24,7 @@ interface ValidEntryObject {
   regex?: string;
   header?: string;
 }
-export interface Rule {
+export interface PublicRule {
   method: string;
   origin?: string;
   path?: string;
@@ -35,12 +35,23 @@ export interface Rule {
   auth?: AuthObject;
 }
 
-export interface FiltersType {
-  private: Rule[];
-  public: Rule[];
+export interface PrivateRule {
+  method: string;
+  origin: string;
+  path?: string;
+  url?: string;
+  valid?: ValidEntryObject[];
+  requiredCapabilities?: Array<string>;
+  stream?: boolean;
+  auth?: AuthObject;
 }
 
-interface TestResult {
+export interface FiltersType {
+  private: PrivateRule[];
+  public: PublicRule[];
+}
+
+export interface TestResult {
   url: any;
   auth: any;
   stream: boolean | undefined;
@@ -63,8 +74,8 @@ const validateHeaders = (headerFilters, requestHeaders = []) => {
 };
 
 // reads config that defines
-export const loadFilters = (ruleSource: Rule[]) => {
-  let rules: Array<Rule> = [];
+export const loadFilters = (ruleSource: PrivateRule[] | PublicRule[]) => {
+  let rules: Array<PrivateRule | PublicRule> = [];
 
   // polymorphic support
   if (Array.isArray(ruleSource)) {

@@ -64,6 +64,7 @@ const validateHeaders = (headerFilters, requestHeaders = []) => {
 
 /**
  * @deprecated Deprecated in favour of {@link loadFilters} */
+
 export default (ruleSource: Rule[]) => {
   let rules: Array<Rule> = [];
 

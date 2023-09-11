@@ -45,7 +45,6 @@ export const forwardHttpRequest = (filterRules) => {
 
     const makeWebsocketRequestWithStreamingResponse = (result) => {
       incrementHttpRequestsTotal(false);
-
       req.url = result.url;
       logContext.ioUrl = result.url;
 

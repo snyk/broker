@@ -48,7 +48,6 @@ describe('broker client systemcheck endpoint', () => {
     const response = await axiosClient.get(
       `http://localhost:${bc.port}/custom-systemcheck`,
     );
-
     expect(response.data).toBeInstanceOf(Array);
     const systemCheckBody = response.data[0];
 
@@ -85,7 +84,6 @@ describe('broker client systemcheck endpoint', () => {
     expect(response.data).toBeInstanceOf(Array);
     const systemCheckBody = response.data[0];
     const systemCheckHeaders = systemCheckBody.testResponse.body.headers;
-
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',

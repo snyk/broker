@@ -16,7 +16,6 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
     clientOpts.config.brokerClientValidationMethod || 'GET';
   const brokerClientValidationTimeoutMs =
     clientOpts.config.brokerClientValidationTimeoutMs || 5000;
-  const isJsonResponse = !clientOpts.config.brokerClientValidationJsonDisabled;
 
   // set auth header according to config
   const { auths, rawCreds } = loadCredentialsFromConfig(clientOpts.config);
@@ -34,7 +33,6 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
         clientOpts.config,
         brokerClientValidationMethod,
         brokerClientValidationTimeoutMs,
-        isJsonResponse,
       );
       data['maskedCredentials'] =
         rawCred.length <= 6
@@ -55,7 +53,6 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       clientOpts.config,
       brokerClientValidationMethod,
       brokerClientValidationTimeoutMs,
-      isJsonResponse,
     );
     data['maskedCredentials'] = null;
     validationResults.push(data);
