@@ -99,6 +99,8 @@ commands:
             export IMAGE_TAG_LATEST=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*"base".* ]] && export IMAGE_TAG=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*"base".* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ .*"dev".* ]] && export IMAGE_TAG=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ .*"dev".* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
 
             echo "Tagging Broker image $IMAGE_NAME:$IMAGE_TAG..."
             docker tag <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID $IMAGE_NAME:$IMAGE_TAG
@@ -229,93 +231,49 @@ jobs:
           image_tag: <<parameters.image_tag>>
           project_name: <<parameters.project_name>>
       - dockerhub-logout
-
-  build-and-push-docker-image:
-    <<: *defaults
-    environment:
-      BUILDKIT_PROGRESS: plain
-      DOCKER_BUILDKIT: 1
-    parameters:
-      docker_image_name:
-        type: string
-      docker_image_tag:
-        type: string
-      docker_file:
-        type: string
-      snyk_severity_threshold:
-        type: string
-        default: "high"
-    steps:
-      - checkout
-      - dockerhub-login
-      - snyk/install
-      - run:
-          name: Build Docker image
-          command: |
-            export IMAGE_NAME=<<parameters.docker_image_name>>
-            export IMAGE_TAG=${CIRCLE_TAG/v/''}-<<parameters.docker_image_tag>>
-            export IMAGE_TAG_LATEST=<<parameters.docker_image_tag>>
-            [[ "$IMAGE_NAME" == "snyk/ubuntu" ]] && export IMAGE_TAG=<<parameters.docker_image_tag>>
-            [[ "$IMAGE_NAME" == "snyk/ubuntu" ]] && export IMAGE_TAG_LATEST=<<parameters.docker_image_tag>>
-
-            echo "Building Broker image $IMAGE_NAME:$IMAGE_TAG..."
-            docker build --tag $IMAGE_NAME:$IMAGE_TAG --file <<parameters.docker_file>> .
-            echo "Tagging Broker image $IMAGE_NAME:$IMAGE_TAG_LATEST.."
-            docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$IMAGE_TAG_LATEST
-
-            echo "export IMAGE_NAME=$IMAGE_NAME" >> "$BASH_ENV"
-            echo "export IMAGE_TAG=$IMAGE_TAG" >> "$BASH_ENV"
-            echo "export IMAGE_TAG_LATEST=$IMAGE_TAG_LATEST" >> "$BASH_ENV"
-      - run:
-          name: Run Snyk CLI
-          command: |
-            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker
-      - run:
-          name: Run Snyk CLI monitor for continuous monitoring on snyk.io
-          command: |
-            snyk container monitor --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker
-      - run:
-          name: Push Docker image
-          command: |
-            echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG..."
-            docker push $IMAGE_NAME:$IMAGE_TAG
-            echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG_LATEST..."
-            docker push $IMAGE_NAME:$IMAGE_TAG_LATEST
-      - dockerhub-logout
   build-and-push-dev-docker-image:
     <<: *defaults
     environment:
       BUILDKIT_PROGRESS: plain
       DOCKER_BUILDKIT: 1
     parameters:
-      docker_image_name:
+      additional_arguments:
         type: string
-      docker_image_tag:
+        default: ""
+      dockerfile:
         type: string
-      docker_file:
+      image_name:
         type: string
-      snyk_severity_threshold:
+      image_tag:
+        type: string
+      project_name:
+        type: string
+        default: "broker"
+      severity_threshold:
         type: string
         default: "high"
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - dockerhub-login
-      - snyk/install
       - prepare-dev-package-metadata
-      - run:
-          name: Build Docker dev image
-          command: |
-            echo "Building Broker image <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>..."
-            docker build --tag <<parameters.docker_image_name>>:<<parameters.docker_image_tag>> --file <<parameters.docker_file>> .
-      - run:
-          name: Run Snyk CLI
-          command: |
-            snyk container test --docker "$IMAGE_NAME:$IMAGE_TAG" --severity-threshold=<<parameters.snyk_severity_threshold>> --org=platform-broker || true
-      - run:
-          name: Push Docker dev image
-          command: |
-            echo "Pushing Broker image <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>..."
-            docker push <<parameters.docker_image_name>>:<<parameters.docker_image_tag>>
+      - build-and-save-docker-image:
+          additional_arguments: <<parameters.additional_arguments>>
+          dockerfile: <<parameters.dockerfile>>
+          project_name: <<parameters.project_name>>
+      - load-docker-image:
+          project_name: <<parameters.project_name>>
+      - snyk/scan:
+          docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
+          fail-on-issues: false
+          organization: platform-broker
+          project: <<parameters.project_name>>
+          severity-threshold: <<parameters.severity_threshold>>
+      - tag-and-push-docker-image:
+          image_name: <<parameters.image_name>>
+          image_tag: <<parameters.image_tag>>
+          project_name: <<parameters.project_name>>
       - dockerhub-logout
   release:
     <<: *defaults
@@ -823,67 +781,62 @@ workflows:
           project_name: nexus2-nlatest
           <<: *filter-tags-only
 
-      - approve-from-team-broker:
-          name: team-broker-approval
-          type: approval
-          context: team-broker-approval-only
-          requires:
-            - Scan repository for secrets
-          <<: *filter-dev-branch-only
-
       - approve-build-github-com-dev:
           name: github-com-dev image
           type: approval
           requires:
-            - team-broker-approval
+            - Scan repository for secrets
           <<: *filter-dev-branch-only
-
       - build-and-push-dev-docker-image:
-          name: Build github-com image (dev)
+          name: Build and push github-com image (dev)
           context:
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
             - github-com-dev image
-          docker_image_name: snyk/broker
-          docker_image_tag: github-com-dev
-          docker_file: dockerfiles/github-com/Dockerfile.dev
+          additional_arguments: "--build-arg BROKER_TYPE=github-com"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: github-com-dev
+          project_name: github-com-dev
           <<: *filter-dev-branch-only
 
       - approve-build-gitlab-dev:
           name: gitlab-dev image
           type: approval
           requires:
-            - team-broker-approval
+            - Scan repository for secrets
           <<: *filter-dev-branch-only
-
       - build-and-push-dev-docker-image:
-          name: Build gitlab image (dev)
+          name: Build and push gitlab image (dev)
           context:
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
             - gitlab-dev image
-          docker_image_name: snyk/broker
-          docker_image_tag: gitlab-dev
-          docker_file: dockerfiles/gitlab/Dockerfile.dev
+          additional_arguments: "--build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: gitlab-dev
+          project_name: gitlab-dev
           <<: *filter-dev-branch-only
 
       - approve-build-nexus-dev:
           name: nexus-dev image
           type: approval
           requires:
-            - team-broker-approval
+            - Scan repository for secrets
           <<: *filter-dev-branch-only
-
       - build-and-push-dev-docker-image:
-          name: Build nexus image (dev)
+          name: Build and push nexus image (dev)
           context:
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
             - nexus-dev image
-          docker_image_name: snyk/broker
-          docker_image_tag: nexus-dev
-          docker_file: dockerfiles/nexus/Dockerfile.dev
+          additional_arguments: "--build-arg BROKER_TYPE=nexus"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: nexus-dev
+          project_name: nexus-dev
           <<: *filter-dev-branch-only
