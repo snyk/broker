@@ -42,7 +42,8 @@ commands:
           name: Get latest version of Broker NPM package
           command: |
             echo "Getting latest version of Broker NPM package..."
-            BROKER_LATEST_VERSION=$(npm view snyk-broker --json | jq -r '."dist-tags"' | jq -r '."latest"')
+            BROKER_LATEST_VERSION=${CIRCLE_TAG/v/''}
+            echo $BROKER_LATEST_VERSION
             echo "export BROKER_LATEST_VERSION=$BROKER_LATEST_VERSION" >> "$BASH_ENV"
   get-latest-nodejs-version:
     description: "Get latest version of specific Node.js cycle"
@@ -56,6 +57,7 @@ commands:
           command: |
             echo "Getting latest Node.js <<parameters.cycle>> version..."
             NODE_LATEST_VERSION=$(curl --silent https://endoflife.date/api/nodejs.json | jq -r '.[] | select (.cycle == "<<parameters.cycle>>")' | jq -r .latest)
+            echo $NODE_LATEST_VERSION
             echo "export NODE_LATEST_VERSION=$NODE_LATEST_VERSION" >> "$BASH_ENV"
   build-and-save-docker-image:
     description: "Build Docker image and save it to workspace"
@@ -71,7 +73,7 @@ commands:
         default: "broker"
     steps:
       - run:
-          name: Build Docker image (<<parameters.dockerfile>>)
+          name: Build Docker image (<<parameters.project_name>> - <<parameters.dockerfile>>)
           command: |
             echo "Building Broker image $CIRCLE_PROJECT_REPONAME:$CIRCLE_WORKFLOW_ID..."
             docker build \
