@@ -97,10 +97,10 @@ commands:
             export IMAGE_NAME=<<parameters.image_name>>
             export IMAGE_TAG=${CIRCLE_TAG/v/''}-<<parameters.image_tag>>
             export IMAGE_TAG_LATEST=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ .*"base".* ]] && export IMAGE_TAG=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ .*"base".* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ .*"dev".* ]] && export IMAGE_TAG=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ .*"dev".* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
 
             echo "Tagging Broker image $IMAGE_NAME:$IMAGE_TAG..."
             docker tag <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID $IMAGE_NAME:$IMAGE_TAG
