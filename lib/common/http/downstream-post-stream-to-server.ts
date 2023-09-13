@@ -2,8 +2,11 @@ import { log as logger } from '../../logs/logger';
 import stream from 'stream';
 import version from '../utils/version';
 
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import { closeClient } from './request';
+import { shouldProxy } from './patch-https-request-for-proxying';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -46,15 +49,19 @@ class BrokerServerPostResponseHandler {
     }
     const brokerServerPostRequestUrl = url.toString();
 
+    
+        
+    const agent = shouldProxy(url.toString()) ? new HttpsProxyAgent(this.#config.HTTPS_PROXY) : undefined;
+    // const keepAliveAgent = new client.Agent({
+    //   keepAlive: true,
+    //   keepAliveMsecs: 60000,
+    //   maxTotalSockets: 1000,
+    // });
     const client =
-      brokerServerPostRequestUrl.indexOf('https') < 0
+      brokerServerPostRequestUrl.indexOf('https') < 0 || agent?.protocol != 'https'
         ? await import('http')
         : await import('https');
-    const keepAliveAgent = new client.Agent({
-      keepAlive: true,
-      keepAliveMsecs: 60000,
-      maxTotalSockets: 1000,
-    });
+
     const options = {
       method: 'post',
       headers: {
@@ -64,11 +71,12 @@ class BrokerServerPostResponseHandler {
         'Keep-Alive': 'timeout=60, max=1000',
         'user-agent': 'Snyk Broker client ' + version,
       },
+      agent,
       timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
         ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
         : 60000,
     };
-    options['agent'] = keepAliveAgent;
+    
     this.#brokerServerPostRequestHttp = client.request(
       brokerServerPostRequestUrl,
       options,

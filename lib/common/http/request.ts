@@ -2,7 +2,7 @@ import { Client } from 'undici';
 
 // TODO: cacert to be specified here?
 
-let client;
+let client:Client;
 
 export const getRequestToDownstream = (origin) => {
   client = new Client(origin, {
@@ -15,5 +15,7 @@ export const getRequestToDownstream = (origin) => {
 };
 
 export const closeClient = () => {
-  client.close();
+  if(!client.closed){
+    client.close();
+  }
 };
