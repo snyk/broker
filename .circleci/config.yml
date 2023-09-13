@@ -35,6 +35,28 @@ commands:
       - run:
           name: Logout from a Docker registry
           command: docker logout
+  get-latest-broker-version:
+    description: "Get latest version of Broker NPM package"
+    steps:
+      - run:
+          name: Get latest version of Broker NPM package
+          command: |
+            echo "Getting latest version of Broker NPM package..."
+            BROKER_LATEST_VERSION=$(npm view snyk-broker --json | jq -r '."dist-tags"' | jq -r '."latest"')
+            echo "export BROKER_LATEST_VERSION=$BROKER_LATEST_VERSION" >> "$BASH_ENV"
+  get-latest-nodejs-version:
+    description: "Get latest version of specific Node.js cycle"
+    parameters:
+      cycle:
+        type: string
+        default: "18"
+    steps:
+      - run:
+          name: Get latest Node.js <<parameters.cycle>> version
+          command: |
+            echo "Getting latest Node.js <<parameters.cycle>> version..."
+            NODE_LATEST_VERSION=$(curl --silent https://endoflife.date/api/nodejs.json | jq -r '.[] | select (.cycle == "<<parameters.cycle>>")' | jq -r .latest)
+            echo "export NODE_LATEST_VERSION=$NODE_LATEST_VERSION" >> "$BASH_ENV"
   build-and-save-docker-image:
     description: "Build Docker image and save it to workspace"
     parameters:
@@ -186,6 +208,30 @@ jobs:
           additional_arguments: <<parameters.additional_arguments>>
           dockerfile: <<parameters.dockerfile>>
           project_name: <<parameters.project_name>>
+  build-and-save-docker-ubi-image:
+    <<: *defaults
+    environment:
+      BUILDKIT_PROGRESS: plain
+      DOCKER_BUILDKIT: 1
+    parameters:
+      additional_arguments:
+        type: string
+        default: ""
+      dockerfile:
+        type: string
+      project_name:
+        type: string
+        default: "broker"
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - get-latest-broker-version
+      - get-latest-nodejs-version
+      - build-and-save-docker-image:
+          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_LATEST_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
+          dockerfile: <<parameters.dockerfile>>
+          project_name: <<parameters.project_name>>
   scan-docker-image:
     <<: *defaults
     parameters:
@@ -324,13 +370,239 @@ workflows:
               only:
                 - master
 
+  Release Docker UBI images:
+    jobs:
+      - prodsec/secrets-scan:
+          name: Scan repository for secrets
+          context:
+            - snyk-bot-slack
+          channel: broker-alerts-cicd
+          <<: *filter-tags-only
+
+      - build-and-save-docker-ubi-image:
+          name: Build base UBI image
+          context: team-broker-snyk
+          requires:
+            - Scan repository for secrets
+          dockerfile: dockerfiles/base/Dockerfile.ubi
+          project_name: broker-rhel-ubi
+          <<: *filter-tags-only
+      - scan-docker-image:
+          name: Scan base UBI image
+          context: team-broker-snyk
+          requires:
+            - Build base UBI image
+          project: snyk/broker-rhel-ubi
+          project_name: broker-rhel-ubi
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push base UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Scan base UBI image
+          image_name: snyk/broker
+          image_tag: base-rhel-ubi
+          project_name: broker-rhel-ubi
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build artifactory UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=artifactory"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-artifactory
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push artifactory UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build artifactory UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-artifactory
+          project_name: rhel-ubi-artifactory
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build azure-repos UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=azure-repos"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-azure-repos
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push azure-repos UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build azure-repos UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-azure-repos
+          project_name: rhel-ubi-azure-repos
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build bitbucket-server UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-bitbucket-server
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push bitbucket-server UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build bitbucket-server UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-bitbucket-server
+          project_name: rhel-ubi-bitbucket-server
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build github-com UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=github-com"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-github-com
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push github-com UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build github-com UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-github-com
+          project_name: rhel-ubi-github-com
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build github-enterprise UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=github-enterprise"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-github-enterprise
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push github-enterprise UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build github-enterprise UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-github-enterprise
+          project_name: rhel-ubi-github-enterprise
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build gitlab UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-gitlab
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push gitlab UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build gitlab UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-gitlab
+          project_name: rhel-ubi-gitlab
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build jira UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=jira"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-jira
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push jira UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build jira UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-jira
+          project_name: rhel-ubi-jira
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build nexus UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=nexus"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-nexus
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push nexus UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build nexus UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-nexus
+          project_name: rhel-ubi-nexus
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build nexus2 UBI image
+          context: team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BROKER_TYPE=nexus2"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-nexus2
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push nexus2 UBI image
+          context:
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build nexus2 UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-nexus2
+          project_name: rhel-ubi-nexus2
+          <<: *filter-tags-only
+
   Release Docker images:
     jobs:
       - prodsec/secrets-scan:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts
+          channel: broker-alerts-cicd
           filters:
             tags:
               only: /^v.*/
@@ -454,17 +726,17 @@ workflows:
           <<: *filter-tags-only
 
       # todo: refactor building CRA image
-#      - build-and-push-docker-image:
-#          name: Build container-registry-agent image
-#          context:
-#            - team-broker-docker-hub
-#            - team-broker-snyk
-#          requires:
-#            - Build snyk/ubuntu image
-#          docker_image_name: snyk/broker
-#          docker_image_tag: container-registry-agent
-#          docker_file: dockerfiles/container-registry-agent/Dockerfile
-#          <<: *filter-tags-only
+      #      - build-and-push-docker-image:
+      #          name: Build container-registry-agent image
+      #          context:
+      #            - team-broker-docker-hub
+      #            - team-broker-snyk
+      #          requires:
+      #            - Build snyk/ubuntu image
+      #          docker_image_name: snyk/broker
+      #          docker_image_tag: container-registry-agent
+      #          docker_file: dockerfiles/container-registry-agent/Dockerfile
+      #          <<: *filter-tags-only
 
       - build-and-save-docker-image:
           name: Build github-com image

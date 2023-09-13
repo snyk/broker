@@ -1,0 +1,15 @@
+ARG BROKER_TYPE=github-com
+
+
+FROM snyk/broker:base-rhel-ubi
+
+ARG BROKER_TYPE
+ENV BROKER_TYPE=${BROKER_TYPE}
+
+# Generate default accept filter
+USER root
+RUN broker init $BROKER_TYPE
+
+USER snyk
+
+CMD ["broker", "--verbose"]
