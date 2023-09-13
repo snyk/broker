@@ -1,11 +1,6 @@
 {
   "public": [
     {
-      "//": "image scan (discover) callback (v1)",
-      "method": "POST",
-      "path": "/api/v1/import/app"
-    },
-    {
       "//": "image scan done callback (v2)",
       "method": "POST",
       "path": "/api/v2/import/done"
