@@ -7,7 +7,6 @@ orbs:
 defaults: &defaults
   docker:
     - image: cimg/node:18.17
-  parallelism: 2
   working_directory: ~/broker
 filter-tags-only: &filter-tags-only
   filters:
@@ -194,6 +193,7 @@ jobs:
     environment:
       BUILDKIT_PROGRESS: plain
       DOCKER_BUILDKIT: 1
+    parallelism: 4
     parameters:
       additional_arguments:
         type: string
@@ -225,6 +225,7 @@ jobs:
       project_name:
         type: string
         default: "broker"
+    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
@@ -268,6 +269,7 @@ jobs:
       project_name:
         type: string
         default: "broker"
+    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
