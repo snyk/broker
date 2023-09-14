@@ -188,6 +188,8 @@ jobs:
       - run:
           name: Run tests
           command: npm test && npm run test:bin
+      - store_test_results:
+          path: reports
   build-and-save-docker-image:
     <<: *defaults
     environment:
