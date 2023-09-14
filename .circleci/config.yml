@@ -121,8 +121,8 @@ commands:
             export IMAGE_NAME=<<parameters.image_name>>
             export IMAGE_TAG=${CIRCLE_TAG/v/''}-<<parameters.image_tag>>
             export IMAGE_TAG_LATEST=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
 
