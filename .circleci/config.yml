@@ -121,8 +121,8 @@ commands:
             export IMAGE_NAME=<<parameters.image_name>>
             export IMAGE_TAG=${CIRCLE_TAG/v/''}-<<parameters.image_tag>>
             export IMAGE_TAG_LATEST=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
+            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
 
@@ -188,11 +188,14 @@ jobs:
       - run:
           name: Run tests
           command: npm test && npm run test:bin
+      - store_test_results:
+          path: reports
   build-and-save-docker-image:
     <<: *defaults
     environment:
       BUILDKIT_PROGRESS: plain
       DOCKER_BUILDKIT: 1
+    parallelism: 4
     parameters:
       additional_arguments:
         type: string
@@ -224,6 +227,7 @@ jobs:
       project_name:
         type: string
         default: "broker"
+    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
@@ -267,6 +271,7 @@ jobs:
       project_name:
         type: string
         default: "broker"
+    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
@@ -340,7 +345,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts
+          channel: broker-alerts-cicd
 
       - install-npm-packages:
           name: Install NPM packages

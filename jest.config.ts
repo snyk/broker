@@ -11,6 +11,7 @@ const config: Config = {
   maxWorkers: 1,
   modulePathIgnorePatterns: ['<rootDir>/dist'],
   preset: 'ts-jest',
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports' }]],
   testMatch: ['<rootDir>/test/**/*.test.ts'],
   testEnvironment: 'node',
   testTimeout: 20_000,
