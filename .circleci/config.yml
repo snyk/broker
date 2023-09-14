@@ -7,6 +7,7 @@ orbs:
 defaults: &defaults
   docker:
     - image: cimg/node:18.17
+  parallelism: 2
   working_directory: ~/broker
 filter-tags-only: &filter-tags-only
   filters:
@@ -340,7 +341,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts
+          channel: broker-alerts-cicd
 
       - install-npm-packages:
           name: Install NPM packages
