@@ -1,64 +1,18 @@
-FROM snyk/ubuntu as base
+ARG BASE_IMAGE=snyk/broker:base
 
-MAINTAINER Snyk Ltd
 
-USER root
+FROM ${BASE_IMAGE}
 
-RUN apt-get update && apt-get install -y ca-certificates
-
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-RUN npm install --global snyk-broker
-
-# Removing debug@0.7.4 (setheader transitive) to satisfy some scanners still reporting this false positive
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/tough-cookie
-RUN npm i -g tough-cookie@4.1.3
-RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules
-
-FROM node:18-alpine3.17
-
-ENV PATH=$PATH:/home/node/.npm-global/bin
-
-COPY --from=base /home/node/.npm-global /home/node/.npm-global
-
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-
-# Don't run as root
-WORKDIR /home/node
-USER node
+ARG BROKER_TYPE
 
 # Prepare image entrypoint
-COPY --chown=node:node ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
-
+COPY ./bin/container-registry-agent/docker-entrypoint.sh ./docker-entrypoint.sh
 # Generate default accept filter
 RUN broker init container-registry-agent
 # Support for OpenShift - have to run after init to get accept.json and .env
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
 USER node
-
-######################################
-# Custom Broker Client configuration #
-# Redefine in derived Dockerfile,    #
-# or provide as runtime args `-e`    #
-######################################
-
-# Your unique broker identifier, copied from snyk.io org settings page
-# ENV BROKER_TOKEN <broker-token>
-
-# The URL of your broker client (including scheme and port), used by container
-# registry agent to call back to Snyk through brokered connection
-# ENV BROKER_CLIENT_URL "https://<broker-client-host>:<broker-client-port>"
-
-# The URL of your container registry agent
-# ENV CR_AGENT_URL <agent-host>:<agent-port>
-
-# The port used by the broker client to accept internal connections
-# Default value is 7341
-# ENV PORT 7341
 
 EXPOSE $PORT
 
