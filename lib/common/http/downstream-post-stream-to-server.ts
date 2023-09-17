@@ -1,12 +1,9 @@
 import { log as logger } from '../../logs/logger';
 import stream from 'stream';
 import version from '../utils/version';
-
-import { HttpsProxyAgent } from 'https-proxy-agent';
-
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
-import { closeClient } from './request';
-import { shouldProxy } from './patch-https-request-for-proxying';
+import { getProxyForUrl } from 'proxy-from-env';
+import { bootstrap } from 'global-agent';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -49,19 +46,15 @@ class BrokerServerPostResponseHandler {
     }
     const brokerServerPostRequestUrl = url.toString();
 
-    
-        
-    const agent = shouldProxy(url.toString()) ? new HttpsProxyAgent(this.#config.HTTPS_PROXY) : undefined;
-    // const keepAliveAgent = new client.Agent({
-    //   keepAlive: true,
-    //   keepAliveMsecs: 60000,
-    //   maxTotalSockets: 1000,
-    // });
-    const client =
-      brokerServerPostRequestUrl.indexOf('https') < 0 || agent?.protocol != 'https'
-        ? await import('http')
-        : await import('https');
+    const client = brokerServerPostRequestUrl.startsWith('https')
+      ? await import('https')
+      : await import('http');
 
+    const keepAliveAgent = new client.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 60000,
+      maxTotalSockets: 1000,
+    });
     const options = {
       method: 'post',
       headers: {
@@ -71,16 +64,34 @@ class BrokerServerPostResponseHandler {
         'Keep-Alive': 'timeout=60, max=1000',
         'user-agent': 'Snyk Broker client ' + version,
       },
-      agent,
+      keepAliveAgent,
       timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
         ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
         : 60000,
     };
-    
+
+    if (process.env.HTTP_PROXY || process.env.http_proxy) {
+      process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
+    }
+    if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+      process.env.HTTPS_PROXY =
+        process.env.HTTPS_PROXY || process.env.https_proxy;
+    }
+    if (process.env.NP_PROXY || process.env.no_proxy) {
+      process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
+    }
+
     this.#brokerServerPostRequestHttp = client.request(
       brokerServerPostRequestUrl,
       options,
     );
+
+    const proxyUri = getProxyForUrl(brokerServerPostRequestUrl);
+    if (proxyUri) {
+      bootstrap({
+        environmentVariableNamespace: '',
+      });
+    }
 
     this.#buffer.on('error', (e) =>
       logger.error(
@@ -178,11 +189,12 @@ class BrokerServerPostResponseHandler {
     }
   }
 
-  async forwardRequest(responsePromise) {
+  async forwardRequest(responsePromise: NodeJS.ReadableStream) {
     let prevPartialChunk;
     let isResponseJson;
+
     responsePromise
-      .then((response) => {
+      .on('response', (response) => {
         const status = response?.statusCode || 500;
         logger.info(
           {
@@ -204,41 +216,40 @@ class BrokerServerPostResponseHandler {
           this.#logContext,
           'successfully sent status & headers to Broker Server',
         );
-        response.body
-          .on('data', async (chunk) => {
-            const httpBody =
-              this.#config && this.#config.LOG_ENABLE_BODY === 'true'
-                ? { body: chunk.toString() }.body
-                : null;
-            logger.debug(
-              { ...this.#logContext, chunkLength: chunk.length, httpBody },
-              'writing data to buffer',
-            );
-            if (this.#config.RES_BODY_URL_SUB && isResponseJson) {
-              const { newChunk, partial } = replaceUrlPartialChunk(
-                Buffer.from(chunk).toString(),
-                prevPartialChunk,
-                this.#config,
-              );
-              prevPartialChunk = partial;
-              chunk = newChunk;
-            }
-            if (!this.#buffer.write(chunk)) {
-              logger.trace(this.#logContext, 'pausing request stream');
-              response.body.pause();
-              this.#buffer.once('drain', () => {
-                logger.trace(this.#logContext, 'resuming request stream');
-                response.body.resume();
-              });
-            }
-          })
-          .on('end', () => {
-            logger.info(this.#logContext, 'writing end to buffer');
-            this.#buffer.end();
-          });
       })
-      .catch((err) => this.#handleRequestError(err))
-      .finally(() => closeClient());
+      .on('data', async (data) => {
+        let chunk = data;
+        const httpBody =
+          this.#config && this.#config.LOG_ENABLE_BODY === 'true'
+            ? { body: chunk.toString() }.body
+            : null;
+        logger.debug(
+          { ...this.#logContext, chunkLength: chunk.length, httpBody },
+          'writing data to buffer',
+        );
+        if (this.#config.RES_BODY_URL_SUB && isResponseJson) {
+          const { newChunk, partial } = replaceUrlPartialChunk(
+            chunk,
+            prevPartialChunk,
+            this.#config,
+          );
+          prevPartialChunk = partial;
+          chunk = newChunk;
+        }
+        if (!this.#buffer.write(chunk)) {
+          logger.trace(this.#logContext, 'pausing request stream');
+          responsePromise.pause();
+          this.#buffer.once('drain', () => {
+            logger.trace(this.#logContext, 'resuming request stream');
+            responsePromise.resume();
+          });
+        }
+      })
+      .on('error', (err) => this.#handleRequestError(err))
+      .on('end', () => {
+        logger.info(this.#logContext, 'writing end to buffer');
+        this.#buffer.end();
+      });
   }
 
   sendData(responseData) {

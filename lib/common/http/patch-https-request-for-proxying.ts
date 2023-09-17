@@ -90,7 +90,6 @@ if (brokerServer.host && config.httpsProxy && shouldProxy(brokerServer)) {
   const tunnelingAgent = tunnel.httpsOverHttp({
     proxy: tunnelProxy,
   });
-
   // actual monkey patching: BEWARE!
   // we're only patching HTTPS requests to the broker server
   const oldhttpsreq = https.request;

@@ -1,7 +1,7 @@
 import { log as logger } from '../../logs/logger';
 import version from '../../common/utils/version';
 import { sanitise } from '../../logs/logger';
-import { request } from 'undici';
+import { makeRequest } from '../../common/http/request';
 
 const credsFromHeader = (s) => {
   if (s.indexOf(' ') >= 0) {
@@ -59,20 +59,21 @@ export const checkCredentials = async (
 
   let errorOccurred = false;
   try {
-    const response = await request(config.brokerClientValidationUrl, {
+    const response = await makeRequest({
+      url: config.brokerClientValidationUrl,
       headers: validationRequestHeaders,
       method: brokerClientValidationMethod,
       bodyTimeout: brokerClientValidationTimeoutMs,
     });
-    const responseStatusCode = response && response.statusCode;
+    const responseStatusCode = (response.res && response.res.statusCode) || 500;
     data['brokerClientValidationUrlStatusCode'] = responseStatusCode;
     if (responseStatusCode >= 200 && responseStatusCode < 300) {
       // test logic requires to surface internal data
       // which is best not exposed in production
       if (process.env.JEST_WORKER_ID) {
         data['testResponse'] = {
-          headers: response.headers,
-          body: await response.body.json(),
+          headers: response.res.headers,
+          body: JSON.parse(response.body),
         };
       }
       data['ok'] = true;

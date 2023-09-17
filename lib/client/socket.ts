@@ -1,4 +1,4 @@
-import '../common/http/patch-https-request-for-proxying';
+// import '../common/http/patch-https-request-for-proxying';
 
 import Primus from 'primus';
 import { log as logger } from '../logs/logger';

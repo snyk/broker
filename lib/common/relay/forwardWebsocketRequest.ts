@@ -9,11 +9,15 @@ import { isJson } from '../utils/json';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import { ClientOpts } from '../../client/types/client';
 import { ServerOpts } from '../../server/types/http';
-import { getRequestToDownstream } from '../http/request';
+import {
+  makeRequestToDownstream,
+  makeStreamRequestToDownstream,
+} from '../http/request';
 import { loadFilters } from '../filter/filtersAsync';
-import BodyReadable from 'undici/types/readable';
-import Dispatcher from 'undici/types/dispatcher';
-import { prepareRequestFromFilterResult } from './prepareRequest';
+import {
+  PostFilterPreparedRequest,
+  prepareRequestFromFilterResult,
+} from './prepareRequest';
 
 export const forwardWebSocketRequest = (
   options: ClientOpts | ServerOpts,
@@ -114,15 +118,11 @@ export const forwardWebSocketRequest = (
 
     logger.info(logContext, 'received request over websocket connection');
 
-    const makePostStreamingRequest = async (req) => {
+    const makePostStreamingRequest = async (req: PostFilterPreparedRequest) => {
       // this is a streaming request for binary data
       logger.debug(logContext, 'serving stream request');
       try {
-        const downstreamRequestHandler = getRequestToDownstream(req.origin);
-        downstreamRequestHandler.on('connect', (origin) => {
-          logger.debug({ req }, `Downstream client setup to hit ${origin}`);
-        });
-        const response = downstreamRequestHandler.request(req);
+        const response = makeStreamRequestToDownstream(req);
         emit(response, true);
       } catch (e) {
         logger.error(
@@ -136,60 +136,55 @@ export const forwardWebSocketRequest = (
       }
       return;
     };
-    const makeLegacyRequest = (req) => {
+    const makeLegacyRequest = async (req) => {
       // not main http post flow
-      getRequestToDownstream(req.origin)
-        .request(req)
-        .then(async (response: Dispatcher.ResponseData) => {
-          const responseBodyReadable = (await response.body) as BodyReadable;
-          // is there a case where we send binary stuff at all from client to server?
-          const responseBodyBlob = await responseBodyReadable.blob();
-          let responseBodyString = await responseBodyBlob.text();
-
-          const contentLength = responseBodyReadable.readableLength;
-          // Note that the other side of the request will also check the length and will also reject it if it's too large
-          // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
-          // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
-          const maxLength =
-            parseInt(options.config.socketMaxResponseLength) || 20971520;
-          if (contentLength && contentLength > maxLength) {
-            const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
-            logError(logContext, {
-              errorMessage,
-            });
-            return emit({
-              status: 502,
-              errorType: 'BODY_TOO_LARGE',
-              originalBodySize: contentLength,
-              body: {
-                message: errorMessage,
-              },
-            });
-          }
-
-          const status = (response && response.statusCode) || 500;
-          if (options.config.RES_BODY_URL_SUB && isJson(response.headers)) {
-            const replaced = replaceUrlPartialChunk(
-              JSON.parse(responseBodyString),
-              null,
-              options.config,
-            );
-            responseBodyString = replaced.newChunk;
-          }
-          logResponse(logContext, status, response, options.config);
-          emit({
-            status,
-            body: responseBodyString || responseBodyBlob,
-            headers: response.headers,
+      try {
+        const response = await makeRequestToDownstream(req);
+        const statusCode = response.res.statusCode;
+        const responseHeaders = response.res.headers;
+        let responseBody = response.body.toString();
+        const contentLength = responseBody.length;
+        // Note that the other side of the request will also check the length and will also reject it if it's too large
+        // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
+        // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
+        const maxLength =
+          parseInt(options.config.socketMaxResponseLength) || 20971520;
+        if (contentLength && contentLength > maxLength) {
+          const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
+          logError(logContext, {
+            errorMessage,
           });
-        })
-        .catch((error) => {
-          logError(logContext, error);
           return emit({
-            status: 500,
-            body: error.message,
+            status: 502,
+            errorType: 'BODY_TOO_LARGE',
+            originalBodySize: contentLength,
+            body: {
+              message: errorMessage,
+            },
           });
+        }
+
+        if (options.config.RES_BODY_URL_SUB && isJson(responseHeaders)) {
+          const replaced = replaceUrlPartialChunk(
+            JSON.parse(responseBody),
+            null,
+            options.config,
+          );
+          responseBody = replaced.newChunk;
+        }
+        logResponse(logContext, statusCode, responseBody, options.config);
+        emit({
+          status: statusCode,
+          body: responseBody,
+          headers: responseHeaders || {},
         });
+      } catch (error) {
+        logError(logContext, error);
+        return emit({
+          status: 500,
+          body: `${error}`,
+        });
+      }
     };
     const filterResponse = filters(payload);
     if (!filterResponse) {
@@ -226,7 +221,7 @@ export const forwardWebSocketRequest = (
 
       payload.streamingID
         ? await makePostStreamingRequest(req)
-        : makeLegacyRequest(req);
+        : await makeLegacyRequest(req);
     }
   };
 };
