@@ -87,7 +87,6 @@ export const forwardHttpRequest = (filterRules) => {
     };
     const makeWebsocketRequestWithWebsocketResponse = (result) => {
       incrementHttpRequestsTotal(false);
-
       req.url = result.url;
       logContext.ioUrl = result.url;
       logger.debug(logContext, 'sending request over websocket connection');
@@ -144,6 +143,7 @@ export const forwardHttpRequest = (filterRules) => {
             ioResponse,
             'headers.transfer-encoding',
           );
+
           try {
             // keep chunked http requests without content-length header
             if (encodingType === 'chunked') {

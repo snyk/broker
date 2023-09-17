@@ -1,21 +1,85 @@
-import { Client } from 'undici';
+// CAUTION, needle is pinned to 3.0.0 because of https://github.com/tomas/needle/issues/406. need to help needle team to fix this.
+import needle from 'needle';
+import { parse } from 'url';
+import https from 'https';
+import http from 'http';
+import { PostFilterPreparedRequest } from '../relay/prepareRequest';
+import { bootstrap } from 'global-agent';
+import { getProxyForUrl } from 'proxy-from-env';
 
-// TODO: cacert to be specified here?
+const setupRequest = (req) => {
+  if (process.env.HTTP_PROXY || process.env.http_proxy) {
+    process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
+  }
+  if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+    process.env.HTTPS_PROXY =
+      process.env.HTTPS_PROXY || process.env.https_proxy;
+  }
 
-let client:Client;
+  const data = req.body ? Buffer.from(req.body) : null;
+  if (!req.headers) {
+    req.headers = {};
+  }
+  const parsedUrl = parse(req.url);
 
-export const getRequestToDownstream = (origin) => {
-  client = new Client(origin, {
-    bodyTimeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-      ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-      : 30000,
-    keepAliveTimeout: 60 * 1000, // Keep-alive timeout in milliseconds
-  });
-  return client;
+  const method = (req.method || 'get').toLowerCase() as needle.NeedleHttpVerbs;
+  const url = req.url;
+
+  const agent =
+    parsedUrl.protocol === 'http:'
+      ? new http.Agent({ keepAlive: true })
+      : new https.Agent({ keepAlive: true });
+
+  const options: needle.NeedleOptions = {
+    headers: req.headers,
+    timeout: req.timeout,
+    follow_max: 5,
+    agent,
+    parse: false,
+  };
+
+  const proxyUri = getProxyForUrl(url);
+  if (proxyUri) {
+    bootstrap({
+      environmentVariableNamespace: '',
+    });
+  }
+
+  return { method, url, data, options };
 };
 
-export const closeClient = () => {
-  if(!client.closed){
-    client.close();
-  }
+export const makeStreamRequestToDownstream = (
+  req: PostFilterPreparedRequest,
+) => {
+  const { method, url, data, options } = setupRequest(req);
+  return needle.request(method, url, data, options);
+};
+
+export const makeRequestToDownstream = async (
+  payload: PostFilterPreparedRequest,
+): Promise<{ res: needle.NeedleResponse; body: any }> => {
+  const { method, url, data, options } = setupRequest(payload);
+
+  return new Promise((resolve, reject) => {
+    needle.request(method, url, data, options, (err, res, respBody) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve({ res, body: respBody });
+    });
+  });
+};
+
+export const makeRequest = async (
+  payload,
+): Promise<{ res: needle.NeedleResponse; body: any }> => {
+  const { method, url, data, options } = setupRequest(payload);
+  return new Promise((resolve, reject) => {
+    needle.request(method, url, data, options, (err, res, respBody) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve({ res, body: respBody });
+    });
+  });
 };

@@ -24,7 +24,7 @@ export interface PostFilterPreparedRequest {
   url: string;
   headers: Object;
   method: string;
-  body: Object;
+  body: any;
 }
 
 export interface PostFilterPreparingRequestError {
@@ -148,7 +148,6 @@ export const prepareRequestFromFilterResult = async (
   // Unsure why - possibly Primus?
   if (payload.body?.type === 'Buffer')
     payload.body = Buffer.of(payload.body.data);
-
   if (
     gitHubTreeCheckNeeded(options.config, {
       method: payload.method,
