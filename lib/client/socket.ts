@@ -26,9 +26,9 @@ export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
     pathname: `/primus/${clientOps.config.brokerToken}`,
   });
 
-  if (clientOps.serverId) {
+  if (clientOps.config.serverId) {
     const urlWithServerId = new URL(clientOps.config.brokerServerUrl);
-    urlWithServerId.searchParams.append('server_id', clientOps.serverId);
+    urlWithServerId.searchParams.append('server_id', clientOps.config.serverId);
     clientOps.config.brokerServerUrl = urlWithServerId.toString();
   }
 
