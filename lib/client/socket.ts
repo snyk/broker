@@ -29,12 +29,12 @@ export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
   if (clientOps.config.serverId) {
     const urlWithServerId = new URL(clientOps.config.brokerServerUrl);
     urlWithServerId.searchParams.append('server_id', clientOps.config.serverId);
-    clientOps.config.brokerServerUrl = urlWithServerId.toString();
+    clientOps.config.brokerServerUrlForSocket = urlWithServerId.toString();
   }
 
   // Will exponentially back-off from 0.5 seconds to a maximum of 20 minutes
   // Retry for a total period of around 4.5 hours
-  const io = new Socket(clientOps.config.brokerServerUrl, {
+  const io = new Socket(clientOps.config.brokerServerUrlForSocket, {
     reconnect: {
       factor: 1.5,
       retries: 30,
@@ -48,7 +48,10 @@ export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
   io.socketType = 'client';
 
   logger.info(
-    { url: clientOps.config.brokerServerUrl, serverId: clientOps.serverId },
+    {
+      url: clientOps.config.brokerServerUrlForSocket,
+      serverId: clientOps.serverId,
+    },
     'broker client is connecting to broker server',
   );
   initializeSocketHandlers(io, clientOps);
