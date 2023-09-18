@@ -320,6 +320,7 @@ jobs:
       - snyk/scan:
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: false
+          monitor-on-build: false
           organization: platform-broker
           project: <<parameters.project_name>>
           severity-threshold: <<parameters.severity_threshold>>
