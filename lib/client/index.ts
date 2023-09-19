@@ -15,7 +15,7 @@ import { processStartUpHooks } from './hooks/startup/processHooks';
 
 export const main = async (clientOpts: ClientOpts) => {
   try {
-    logger.info({ version }, 'running in client mode');
+    logger.info({ version }, `running in client mode with log level ${logger.level()}`);
 
     const brokerClientId = uuidv4();
     logger.info({ brokerClientId }, 'generated broker client id');
