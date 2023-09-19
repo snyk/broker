@@ -21,6 +21,7 @@ const setupRequest = (req) => {
   if (!req.headers) {
     req.headers = {};
   }
+  req.headers['Connection']='keep-alive'
   const parsedUrl = parse(req.url);
 
   const method = (req.method || 'get').toLowerCase() as needle.NeedleHttpVerbs;

@@ -32,6 +32,7 @@ export const forwardWebSocketRequest = (
   //   const filters = Filters(options.filters?.private);
   const filters = loadFilters(options.filters?.private);
   return (brokerToken) => async (payload: RequestPayload, emit) => {
+    logger.debug({}, `####### Received request from Websocket ${Date.now()}`)
     const t0 = performance.now();
     const requestId = payload.headers['snyk-request-id'];
     const logContext: LogContext = {
