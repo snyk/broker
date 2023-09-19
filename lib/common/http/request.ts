@@ -6,6 +6,7 @@ import http from 'http';
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
 import { bootstrap } from 'global-agent';
 import { getProxyForUrl } from 'proxy-from-env';
+import { log as logger } from '../../logs/logger'
 
 const setupRequest = (req) => {
   if (process.env.HTTP_PROXY || process.env.http_proxy) {
@@ -54,7 +55,9 @@ export const makeStreamRequestToDownstream = (
   const t0 = performance.now()
   const { method, url, data, options } = setupRequest(req);
   const t1 = performance.now()
-  console.log(`##### PERFORMANCE setupRequest took ${t1 - t0} milliseconds.`);
+  logger.debug({},`##################################################################\n
+         PERFORMANCE setupRequest took ${t1 - t0} milliseconds.\n
+         ###################################################`);
   return needle.request(method, url, data, options);
 };
 
