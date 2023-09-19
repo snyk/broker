@@ -55,7 +55,6 @@ export const processStartUpHooks = async (
     let serverId;
     if (highAvailabilityModeEnabled(clientOpts.config)) {
       serverId = await getServerId(clientOpts.config, brokerClientId);
-
       if (serverId === null) {
         logger.warn({}, 'could not receive server id from Broker Dispatcher');
         serverId = '';

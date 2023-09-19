@@ -4,6 +4,8 @@ import version from '../utils/version';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
+import https from 'https';
+import http from 'http';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -47,8 +49,8 @@ class BrokerServerPostResponseHandler {
     const brokerServerPostRequestUrl = url.toString();
 
     const client = brokerServerPostRequestUrl.startsWith('https')
-      ? await import('https')
-      : await import('http');
+      ? https
+      : http;
 
     const keepAliveAgent = new client.Agent({
       keepAlive: true,
@@ -131,6 +133,9 @@ class BrokerServerPostResponseHandler {
               'Received unexpected HTTP response POSTing data to Broker Server',
             );
           }
+        })
+        .on('end', () => {
+          logger.debug({}, `Streaming to broker server completed`);
         }),
     );
     logger.debug(this.#logContext, 'Pipe set up');
@@ -192,9 +197,11 @@ class BrokerServerPostResponseHandler {
   async forwardRequest(responsePromise: NodeJS.ReadableStream) {
     let prevPartialChunk;
     let isResponseJson;
+    let t0, t1;
 
     responsePromise
       .on('response', (response) => {
+        t0 = performance.now();
         const status = response?.statusCode || 500;
         logger.info(
           {
@@ -249,6 +256,14 @@ class BrokerServerPostResponseHandler {
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
         this.#buffer.end();
+        logger.debug({}, `####### Finished returning complete request from Websocket ${Date.now()}`)
+        t1 = performance.now();
+        logger.debug(
+          {},
+          `@@@@@@@@@@@@@@@@@@@@@@@@@@ PERFORMANCE downstream req streaming into buffer took ${
+            t1 - t0
+          }`,
+        );
       });
   }
 

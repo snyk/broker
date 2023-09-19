@@ -82,7 +82,6 @@ function shouldProxy(uri) {
 // Entry point: To patch or not to patch?
 if (brokerServer.host && config.httpsProxy && shouldProxy(brokerServer)) {
   const { hostname, port, auth } = url.parse(config.httpsProxy);
-  console.log(auth);
   const tunnelProxy = { host: hostname, port };
   if (config.proxyAuth || auth) {
     tunnelProxy['proxyAuth'] = config.proxyAuth || auth;

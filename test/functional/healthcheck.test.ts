@@ -67,7 +67,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toMatchObject({
-      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerServerUrl: `http://localhost:${bs.port}/`,
       ok: true,
       websocketConnectionOpen: true,
       version: version,
@@ -128,7 +128,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(500);
     expect(response.data).toStrictEqual({
-      brokerServerUrl: 'http://no-such-server',
+      brokerServerUrl: 'http://no-such-server/',
       ok: false,
       transport: expect.any(String),
       version: version,
