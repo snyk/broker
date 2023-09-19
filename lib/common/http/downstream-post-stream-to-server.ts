@@ -256,6 +256,7 @@ class BrokerServerPostResponseHandler {
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
         this.#buffer.end();
+        logger.debug({}, `####### Finished returning complete request from Websocket ${Date.now()}`)
         t1 = performance.now();
         logger.debug(
           {},
