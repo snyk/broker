@@ -4,6 +4,8 @@ import version from '../utils/version';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
+import https from 'https'
+import http from 'http'
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -47,8 +49,8 @@ class BrokerServerPostResponseHandler {
     const brokerServerPostRequestUrl = url.toString();
 
     const client = brokerServerPostRequestUrl.startsWith('https')
-      ? await import('https')
-      : await import('http');
+      ? https
+      : http
 
     const keepAliveAgent = new client.Agent({
       keepAlive: true,

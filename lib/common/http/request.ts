@@ -51,7 +51,10 @@ const setupRequest = (req) => {
 export const makeStreamRequestToDownstream = (
   req: PostFilterPreparedRequest,
 ) => {
+  const t0 = performance.now()
   const { method, url, data, options } = setupRequest(req);
+  const t1 = performance.now()
+  console.log(`##### PERFORMANCE setupRequest took ${t1 - t0} milliseconds.`);
   return needle.request(method, url, data, options);
 };
 

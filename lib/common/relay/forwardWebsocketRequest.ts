@@ -31,8 +31,8 @@ export const forwardWebSocketRequest = (
 
   //   const filters = Filters(options.filters?.private);
   const filters = loadFilters(options.filters?.private);
-
   return (brokerToken) => async (payload: RequestPayload, emit) => {
+    const t0 = performance.now()
     const requestId = payload.headers['snyk-request-id'];
     const logContext: LogContext = {
       url: payload.url,
@@ -122,7 +122,10 @@ export const forwardWebSocketRequest = (
       // this is a streaming request for binary data
       logger.debug(logContext, 'serving stream request');
       try {
+        const makepostT0 = performance.now()
         const response = makeStreamRequestToDownstream(req);
+        const makepostT1 = performance.now()
+        console.log(`##### PERFORMANCE making rquest before emit took ${makepostT1 - makepostT0} milliseconds.`);
         emit(response, true);
       } catch (e) {
         logger.error(
@@ -186,7 +189,10 @@ export const forwardWebSocketRequest = (
         });
       }
     };
+    const filterT0 = performance.now()
     const filterResponse = filters(payload);
+    const filterT1 = performance.now()
+    console.log(`##### PERFORMANCE Filtering took ${filterT1 - filterT0} milliseconds.`);
     if (!filterResponse) {
       incrementWebSocketRequestsTotal(true);
       const reason =
@@ -218,10 +224,14 @@ export const forwardWebSocketRequest = (
       if (error) {
         return emit({ status: error.status, body: error.errorMsg });
       }
-
+      const t1 = performance.now()
+      console.log(`##### PERFORMANCE Call to prepare everything took ${t1 - t0} milliseconds.`);
       payload.streamingID
         ? await makePostStreamingRequest(req)
         : await makeLegacyRequest(req);
+      const t2 = performance.now()
+      console.log(`##### PERFORMANCE Making the request took ${t2 - t1} milliseconds.`);
+      console.log(`##### PERFORMANCE Forwarding the request took total ${t2 - t0} milliseconds.`);
     }
   };
 };
