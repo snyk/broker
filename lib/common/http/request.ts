@@ -29,8 +29,8 @@ const setupRequest = (req) => {
 
   const agent =
     parsedUrl.protocol === 'http:'
-      ? new http.Agent({ keepAlive: true })
-      : new https.Agent({ keepAlive: true });
+      ? new http.Agent({ keepAlive: true, keepAliveMsecs: 60000, maxTotalSockets: 1000 })
+      : new https.Agent({ keepAlive: true, keepAliveMsecs: 60000, maxTotalSockets: 1000 });
 
   const options: needle.NeedleOptions = {
     headers: req.headers,
