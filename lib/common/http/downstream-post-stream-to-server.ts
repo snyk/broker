@@ -133,6 +133,9 @@ class BrokerServerPostResponseHandler {
               'Received unexpected HTTP response POSTing data to Broker Server',
             );
           }
+        })
+        .on('end', () => {
+          logger.debug({}, `Streaming to broker server completed`);
         }),
     );
     logger.debug(this.#logContext, 'Pipe set up');
@@ -194,9 +197,11 @@ class BrokerServerPostResponseHandler {
   async forwardRequest(responsePromise: NodeJS.ReadableStream) {
     let prevPartialChunk;
     let isResponseJson;
+    let t0, t1;
 
     responsePromise
       .on('response', (response) => {
+        t0 = performance.now();
         const status = response?.statusCode || 500;
         logger.info(
           {
@@ -251,6 +256,13 @@ class BrokerServerPostResponseHandler {
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
         this.#buffer.end();
+        t1 = performance.now();
+        logger.debug(
+          {},
+          `@@@@@@@@@@@@@@@@@@@@@@@@@@ PERFORMANCE downstream req streaming into buffer took ${
+            t1 - t0
+          }`,
+        );
       });
   }
 
