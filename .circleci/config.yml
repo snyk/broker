@@ -274,8 +274,9 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+      - get-tagged-broker-version
       - build-and-save-docker-image:
-          additional_arguments: <<parameters.additional_arguments>>
+          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION
           dockerfile: <<parameters.dockerfile>>
           project_name: <<parameters.project_name>>
   build-and-save-docker-ubi-image:
