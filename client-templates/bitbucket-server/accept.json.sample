@@ -943,6 +943,17 @@
       }
     },
     {
+      "//": "used to query for a merge-base for a pull request",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to check for a repo's default branch",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
@@ -968,17 +979,6 @@
       "//": "get a specific commit identified by the commit hash or name of a branch",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-      "origin": "https://${BITBUCKET}",
-      "auth": {
-        "scheme": "basic",
-        "username": "${BITBUCKET_USERNAME}",
-        "password": "${BITBUCKET_PASSWORD}"
-      }
-    },
-    {
-      "//": "get page of commits between two commits",
-      "method": "GET",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",

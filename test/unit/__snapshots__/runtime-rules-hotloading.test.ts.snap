@@ -1331,6 +1331,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -1362,17 +1373,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -8035,6 +8035,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -8066,17 +8077,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -14818,6 +14818,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -14849,17 +14860,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -21655,6 +21655,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -21686,17 +21697,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -28824,6 +28824,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -28855,17 +28866,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -30065,6 +30065,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -30096,17 +30107,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -42162,6 +42162,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -42193,17 +42204,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
@@ -48824,6 +48824,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
     },
     Object {
+      "//": "used to query for a merge-base for a pull request",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    },
+    Object {
       "//": "used to check for a repo's default branch",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -48855,17 +48866,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
-    },
-    Object {
-      "//": "get page of commits between two commits",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits",
     },
     Object {
       "//": "used to create a Code Insights report",
