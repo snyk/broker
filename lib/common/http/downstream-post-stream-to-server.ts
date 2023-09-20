@@ -105,7 +105,6 @@ class BrokerServerPostResponseHandler {
         'received error sending data to broker server post request buffer',
       ),
     );
-
     this.#buffer.pipe(
       this.#brokerServerPostRequestHttp
         .on('error', (e) => {
@@ -197,11 +196,9 @@ class BrokerServerPostResponseHandler {
   async forwardRequest(responsePromise: NodeJS.ReadableStream) {
     let prevPartialChunk;
     let isResponseJson;
-    let t0, t1;
 
     responsePromise
       .on('response', (response) => {
-        t0 = performance.now();
         const status = response?.statusCode || 500;
         logger.info(
           {
@@ -256,14 +253,6 @@ class BrokerServerPostResponseHandler {
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
         this.#buffer.end();
-        logger.debug({}, `####### Finished returning complete request from Websocket ${Date.now()}`)
-        t1 = performance.now();
-        logger.debug(
-          {},
-          `@@@@@@@@@@@@@@@@@@@@@@@@@@ PERFORMANCE downstream req streaming into buffer took ${
-            t1 - t0
-          }`,
-        );
       });
   }
 

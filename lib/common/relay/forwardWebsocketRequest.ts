@@ -19,6 +19,80 @@ import {
   prepareRequestFromFilterResult,
 } from './prepareRequest';
 
+const makePostStreamingRequest = async (
+  req: PostFilterPreparedRequest,
+  emitCallback,
+  logContext,
+) => {
+  // this is a streaming request for binary data
+  logger.debug(logContext, 'serving stream request');
+  try {
+    const response = makeStreamRequestToDownstream(req);
+    emitCallback(response, true);
+  } catch (e) {
+    logger.error(
+      {
+        ...logContext,
+        error: e,
+        stackTrace: new Error('stacktrace generator').stack,
+      },
+      'caught error sending HTTP response over WebSocket',
+    );
+  }
+  return;
+};
+
+const makeLegacyRequest = async (req, emitCallback, logContext, options) => {
+  // not main http post flow
+  try {
+    const response = await makeRequestToDownstream(req);
+    const statusCode = response.res.statusCode;
+    const responseHeaders = response.res.headers;
+    let responseBody = response.body.toString();
+    const contentLength = responseBody.length;
+    // Note that the other side of the request will also check the length and will also reject it if it's too large
+    // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
+    // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
+    const maxLength =
+      parseInt(options.config.socketMaxResponseLength) || 20971520;
+    if (contentLength && contentLength > maxLength) {
+      const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
+      logError(logContext, {
+        errorMessage,
+      });
+      return emitCallback({
+        status: 502,
+        errorType: 'BODY_TOO_LARGE',
+        originalBodySize: contentLength,
+        body: {
+          message: errorMessage,
+        },
+      });
+    }
+
+    if (options.config.RES_BODY_URL_SUB && isJson(responseHeaders)) {
+      const replaced = replaceUrlPartialChunk(
+        JSON.parse(responseBody),
+        null,
+        options.config,
+      );
+      responseBody = replaced.newChunk;
+    }
+    logResponse(logContext, statusCode, responseBody, options.config);
+    emitCallback({
+      status: statusCode,
+      body: responseBody,
+      headers: responseHeaders || {},
+    });
+  } catch (error) {
+    logError(logContext, error);
+    return emitCallback({
+      status: 500,
+      body: `${error}`,
+    });
+  }
+};
+
 export const forwardWebSocketRequest = (
   options: ClientOpts | ServerOpts,
   io?,
@@ -31,47 +105,48 @@ export const forwardWebSocketRequest = (
 
   //   const filters = Filters(options.filters?.private);
   const filters = loadFilters(options.filters?.private);
-  return (brokerToken) => async (payload: RequestPayload, emit) => {
-    logger.debug({}, `####### Received request from Websocket ${Date.now()}`)
-    const t0 = performance.now();
-    const requestId = payload.headers['snyk-request-id'];
-    const logContext: LogContext = {
-      url: payload.url,
-      requestMethod: payload.method,
-      requestHeaders: payload.headers,
-      requestId,
-      streamingID: payload.streamingID,
-      maskedToken: maskToken(brokerToken),
-      hashedToken: hashToken(brokerToken),
-      transport: io?.socket?.transport?.name ?? 'unknown',
-    };
-    if (!requestId) {
-      // This should be a warning but older clients won't send one
-      // TODO make this a warning when significant majority of clients are on latest version
-      logger.trace(
-        logContext,
-        'Header Snyk-Request-Id not included in headers passed through',
-      );
-    }
+  return (brokerToken) => {
+    return async (payload: RequestPayload, emit) => {
+      // Setting the transformer to inject the streamingID on the stream
 
-    const websocketEmit = emit;
-    const overrideEmit = (
-      responseData,
-      isResponseFromRequestModule = false,
-    ) => {
-      // This only works client -> server, it's not possible to post data server -> client
-      logContext.requestMethod = '';
-      logContext.requestHeaders = {};
-      if (io?.capabilities?.includes('receive-post-streams')) {
-        // Traffic over HTTP Post
-        const postHandler = new BrokerServerPostResponseHandler(
+      const requestId = payload.headers['snyk-request-id'];
+      const logContext: LogContext = {
+        url: payload.url,
+        requestMethod: payload.method,
+        requestHeaders: payload.headers,
+        requestId,
+        streamingID: payload.streamingID,
+        maskedToken: maskToken(brokerToken),
+        hashedToken: hashToken(brokerToken),
+        transport: io?.socket?.transport?.name ?? 'unknown',
+      };
+      if (!requestId) {
+        // This should be a warning but older clients won't send one
+        // TODO make this a warning when significant majority of clients are on latest version
+        logger.trace(
           logContext,
-          options.config,
-          brokerToken,
-          payload.streamingID,
-          options.config.serverId,
-          requestId,
+          'Header Snyk-Request-Id not included in headers passed through',
         );
+      }
+      const postHandler = new BrokerServerPostResponseHandler(
+        logContext,
+        options.config,
+        brokerToken,
+        payload.streamingID,
+        options.config.serverId,
+        requestId,
+      );
+
+      const websocketEmit = emit;
+
+      const postOverrideEmit = (
+        responseData,
+        isResponseFromRequestModule = false,
+      ) => {
+        logContext.requestMethod = '';
+        logContext.requestHeaders = {};
+        // Traffic over HTTP Post
+
         if (isResponseFromRequestModule) {
           logger.trace(
             logContext,
@@ -82,8 +157,13 @@ export const forwardWebSocketRequest = (
           // Only for responses generated internally in the Broker Client/Server
           postHandler.sendData(responseData);
         }
-      } else {
-        // Traffic over websockets
+      };
+      const legacyOverrideEmit = (
+        responseData,
+        isResponseFromRequestModule = false,
+      ) => {
+        logContext.requestMethod = '';
+        logContext.requestHeaders = {};
         if (payload.streamingID) {
           if (isResponseFromRequestModule) {
             legacyStreaming(
@@ -112,155 +192,53 @@ export const forwardWebSocketRequest = (
           );
           websocketEmit(responseData);
         }
+      };
+      if (io?.capabilities?.includes('receive-post-streams')) {
+        emit = postOverrideEmit;
+      } else {
+        emit = legacyOverrideEmit;
       }
-    };
 
-    emit = overrideEmit;
+      logger.info(logContext, 'received request over websocket connection');
 
-    logger.info(logContext, 'received request over websocket connection');
+      const filterResponse = filters(payload);
 
-    const makePostStreamingRequest = async (req: PostFilterPreparedRequest) => {
-      // this is a streaming request for binary data
-      logger.debug(logContext, 'serving stream request');
-      try {
-        const makepostT0 = performance.now();
-        const response = makeStreamRequestToDownstream(req);
-        const makepostT1 = performance.now();
-        logger.debug(
-          {},
-          `##################################################################\n
-         PERFORMANCE making rquest before emit took ${
-           makepostT1 - makepostT0
-         } milliseconds.\n
-         ###################################################`,
-        );
-        emit(response, true);
-      } catch (e) {
-        logger.error(
-          {
-            ...logContext,
-            error: e,
-            stackTrace: new Error('stacktrace generator').stack,
-          },
-          'caught error sending HTTP response over WebSocket',
-        );
-      }
-      return;
-    };
-    const makeLegacyRequest = async (req) => {
-      // not main http post flow
-      try {
-        const response = await makeRequestToDownstream(req);
-        const statusCode = response.res.statusCode;
-        const responseHeaders = response.res.headers;
-        let responseBody = response.body.toString();
-        const contentLength = responseBody.length;
-        // Note that the other side of the request will also check the length and will also reject it if it's too large
-        // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
-        // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
-        const maxLength =
-          parseInt(options.config.socketMaxResponseLength) || 20971520;
-        if (contentLength && contentLength > maxLength) {
-          const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
-          logError(logContext, {
-            errorMessage,
-          });
-          return emit({
-            status: 502,
-            errorType: 'BODY_TOO_LARGE',
-            originalBodySize: contentLength,
-            body: {
-              message: errorMessage,
-            },
-          });
-        }
-
-        if (options.config.RES_BODY_URL_SUB && isJson(responseHeaders)) {
-          const replaced = replaceUrlPartialChunk(
-            JSON.parse(responseBody),
-            null,
-            options.config,
-          );
-          responseBody = replaced.newChunk;
-        }
-        logResponse(logContext, statusCode, responseBody, options.config);
-        emit({
-          status: statusCode,
-          body: responseBody,
-          headers: responseHeaders || {},
-        });
-      } catch (error) {
-        logError(logContext, error);
+      if (!filterResponse) {
+        incrementWebSocketRequestsTotal(true);
+        const reason =
+          'Response does not match any accept rule, blocking websocket request';
+        logContext.error = 'blocked';
+        logger.warn(logContext, reason);
         return emit({
-          status: 500,
-          body: `${error}`,
+          status: 401,
+          body: {
+            message: 'blocked',
+            reason,
+            url: payload.url,
+          },
         });
+      } else {
+        incrementWebSocketRequestsTotal(false);
+        const { req, error } = await prepareRequestFromFilterResult(
+          filterResponse,
+          payload,
+          logContext,
+          options,
+          brokerToken,
+          io?.socketType,
+        );
+        logger.debug(
+          logContext,
+          'sending websocket request over HTTP connection',
+        );
+        if (error) {
+          return emit({ status: error.status, body: error.errorMsg });
+        }
+        payload.streamingID
+          ? await makePostStreamingRequest(req, emit, logContext)
+          : await makeLegacyRequest(req, emit, logContext, options);
       }
     };
-    const filterT0 = performance.now();
-    const filterResponse = filters(payload);
-    const filterT1 = performance.now();
-    logger.debug(
-      {},
-      `##### PERFORMANCE Filtering took ${filterT1 - filterT0} milliseconds.\n
-###################################################`,
-    );
-    if (!filterResponse) {
-      incrementWebSocketRequestsTotal(true);
-      const reason =
-        'Response does not match any accept rule, blocking websocket request';
-      logContext.error = 'blocked';
-      logger.warn(logContext, reason);
-      return emit({
-        status: 401,
-        body: {
-          message: 'blocked',
-          reason,
-          url: payload.url,
-        },
-      });
-    } else {
-      incrementWebSocketRequestsTotal(false);
-      const { req, error } = await prepareRequestFromFilterResult(
-        filterResponse,
-        payload,
-        logContext,
-        options,
-        brokerToken,
-        io?.socketType,
-      );
-      logger.debug(
-        logContext,
-        'sending websocket request over HTTP connection',
-      );
-      if (error) {
-        return emit({ status: error.status, body: error.errorMsg });
-      }
-      const t1 = performance.now();
-      logger.debug(
-        {},
-        `##### PERFORMANCE Call to prepare everything took ${
-          t1 - t0
-        } milliseconds.\n
-###################################################`,
-      );
-      payload.streamingID
-        ? await makePostStreamingRequest(req)
-        : await makeLegacyRequest(req);
-      const t2 = performance.now();
-      logger.debug(
-        {},
-        `##### PERFORMANCE Making the request took ${t2 - t1} milliseconds.\n
-###################################################`,
-      );
-      logger.debug(
-        {},
-        `##### PERFORMANCE Forwarding the request took total ${
-          t2 - t0
-        } milliseconds.\n
-###################################################`,
-      );
-    }
   };
 };
 
