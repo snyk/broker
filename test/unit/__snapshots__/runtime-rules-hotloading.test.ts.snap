@@ -1339,7 +1339,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -8043,7 +8043,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -14826,7 +14826,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -21663,7 +21663,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -28832,7 +28832,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -30073,7 +30073,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -42170,7 +42170,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",
@@ -48832,7 +48832,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
     },
     Object {
       "//": "used to check for a repo's default branch",

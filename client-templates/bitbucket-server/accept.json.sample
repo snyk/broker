@@ -945,7 +945,7 @@
     {
       "//": "used to query for a merge-base for a pull request",
       "method": "GET",
-      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/{pullRequestId}/changes",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
