@@ -52,11 +52,12 @@ class BrokerServerPostResponseHandler {
       ? https
       : http;
 
-    const keepAliveAgent = new client.Agent({
+    const keepAliveAgent = new https.Agent({
       keepAlive: true,
       keepAliveMsecs: 60000,
       maxTotalSockets: 1000,
     });
+    
     const options = {
       method: 'post',
       headers: {
@@ -71,7 +72,6 @@ class BrokerServerPostResponseHandler {
         ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
         : 60000,
     };
-
     if (process.env.HTTP_PROXY || process.env.http_proxy) {
       process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
     }
@@ -83,11 +83,11 @@ class BrokerServerPostResponseHandler {
       process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
     }
 
+    // this leaks memory on Node 18. node 20 seems fine
     this.#brokerServerPostRequestHttp = client.request(
       brokerServerPostRequestUrl,
       options,
-    );
-
+    );    
     const proxyUri = getProxyForUrl(brokerServerPostRequestUrl);
     if (proxyUri) {
       bootstrap({
@@ -104,7 +104,7 @@ class BrokerServerPostResponseHandler {
         },
         'received error sending data to broker server post request buffer',
       ),
-    );
+    )
     this.#buffer.pipe(
       this.#brokerServerPostRequestHttp
         .on('error', (e) => {
@@ -126,7 +126,7 @@ class BrokerServerPostResponseHandler {
                 statusCode: r.statusCode,
                 statusMessage: r.statusMessage,
                 headers: r.headers,
-                // body: r. .body?.toString(),
+                body: r.body?.toString(),
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Received unexpected HTTP response POSTing data to Broker Server',
@@ -134,10 +134,12 @@ class BrokerServerPostResponseHandler {
           }
         })
         .on('end', () => {
-          logger.debug({}, `Streaming to broker server completed`);
-        }),
-    );
-    logger.debug(this.#logContext, 'Pipe set up');
+          logger.debug({}, `Streaming to broker server completed ${this.#streamingId}`);
+          // this.#buffer.end();
+        })
+       
+    )
+    logger.debug(this.#logContext, `Pipe set up ${this.#streamingId}`);
   }
 
   #sendIoData(ioData) {
@@ -252,7 +254,6 @@ class BrokerServerPostResponseHandler {
       .on('error', (err) => this.#handleRequestError(err))
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
-        this.#buffer.end();
       });
   }
 

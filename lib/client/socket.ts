@@ -12,9 +12,8 @@ import { errorHandler } from './socketHandlers/errorHandler';
 import { openHandler } from './socketHandlers/openHandler';
 import { closeHandler } from './socketHandlers/closeHandler';
 import { ClientOpts } from './types/client';
-import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
-import { initializeSocketHandlers } from './socketHandlers/init';
+import { initializeRequestHandler } from './socketHandlers/requestHandler';
 
 export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
   const Socket = Primus.createSocket({
@@ -54,7 +53,7 @@ export const createWebSocket = (clientOps: ClientOpts, identifyingMetadata) => {
     },
     'broker client is connecting to broker server',
   );
-  initializeSocketHandlers(io, clientOps);
+  const requestHandler = initializeRequestHandler(io, clientOps);
 
   // Websocket events
   io.on('identify', (serverData) => identifyHandler(serverData, io));

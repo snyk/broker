@@ -7,7 +7,7 @@
     "broker": "./dist/cli/index.js"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -70,7 +70,6 @@
     "express": "^4.17.1",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
-    "https-proxy-agent": "^7.0.2",
     "js-yaml": "^3.13.1",
     "lodash.escaperegexp": "^4.1.2",
     "lodash.mapvalues": "^4.6.0",
