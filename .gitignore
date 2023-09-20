@@ -29,6 +29,7 @@ accept.json
 # IDE generated files           #
 #################################
 .idea/
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

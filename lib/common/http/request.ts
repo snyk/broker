@@ -21,7 +21,7 @@ const setupRequest = (req) => {
   if (!req.headers) {
     req.headers = {};
   }
-  req.headers['Connection']='keep-alive'
+  req.headers['Connection'] = 'keep-alive';
   const parsedUrl = parse(req.url);
 
   const method = (req.method || 'get').toLowerCase() as needle.NeedleHttpVerbs;
@@ -29,8 +29,16 @@ const setupRequest = (req) => {
 
   const agent =
     parsedUrl.protocol === 'http:'
-      ? new http.Agent({ keepAlive: true, keepAliveMsecs: 60000, maxTotalSockets: 1000 })
-      : new https.Agent({ keepAlive: true, keepAliveMsecs: 60000, maxTotalSockets: 1000 });
+      ? new http.Agent({
+          keepAlive: true,
+          keepAliveMsecs: 60000,
+          maxTotalSockets: 1000,
+        })
+      : new https.Agent({
+          keepAlive: true,
+          keepAliveMsecs: 60000,
+          maxTotalSockets: 1000,
+        });
 
   const options: needle.NeedleOptions = {
     headers: req.headers,
