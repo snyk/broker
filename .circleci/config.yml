@@ -36,16 +36,16 @@ commands:
       - run:
           name: Logout from a Docker registry
           command: docker logout
-  get-latest-broker-version:
-    description: "Get latest version of Broker NPM package"
+  get-tagged-broker-version:
+    description: "Get tagged version of Broker NPM package"
     steps:
       - run:
-          name: Get latest version of Broker NPM package
+          name: Get tagged version of Broker NPM package
           command: |
-            echo "Getting latest version of Broker NPM package..."
-            BROKER_LATEST_VERSION=${CIRCLE_TAG/v/''}
-            echo $BROKER_LATEST_VERSION
-            echo "export BROKER_LATEST_VERSION=$BROKER_LATEST_VERSION" >> "$BASH_ENV"
+            echo "Getting tagged version of Broker NPM package..."
+            BROKER_VERSION=${CIRCLE_TAG/v/''}
+            echo BROKER_VERSION
+            echo "export BROKER_VERSION=$BROKER_VERSION" >> "$BASH_ENV"
   get-latest-nodejs-version:
     description: "Get latest version of specific Node.js cycle"
     parameters:
@@ -122,10 +122,12 @@ commands:
             export IMAGE_NAME=<<parameters.image_name>>
             export IMAGE_TAG=${CIRCLE_TAG/v/''}-<<parameters.image_tag>>
             export IMAGE_TAG_LATEST=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG=<<parameters.image_tag>>
-            [[ "$IMAGE_TAG" =~ ^${CIRCLE_TAG/v/''}-base.* ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG=<<parameters.image_tag>>
             [[ "$IMAGE_TAG" =~ .*dev$ ]] && export IMAGE_TAG_LATEST=<<parameters.image_tag>>
+
+            echo "Configured Broker image tags:"
+            echo "  - IMAGE_TAG:        $IMAGE_TAG"
+            echo "  - IMAGE_TAG_LATEST: $IMAGE_TAG_LATEST"
 
             echo "Tagging Broker image $IMAGE_NAME:$IMAGE_TAG..."
             docker tag <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID $IMAGE_NAME:$IMAGE_TAG
@@ -142,7 +144,6 @@ commands:
             docker push $IMAGE_NAME:$IMAGE_TAG
             echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG_LATEST..."
             docker push $IMAGE_NAME:$IMAGE_TAG_LATEST
-
   prepare-dev-package-metadata:
     steps:
       - run:
@@ -260,7 +261,6 @@ jobs:
     environment:
       BUILDKIT_PROGRESS: plain
       DOCKER_BUILDKIT: 1
-    parallelism: 4
     parameters:
       additional_arguments:
         type: string
@@ -292,15 +292,14 @@ jobs:
       project_name:
         type: string
         default: "broker"
-    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
-      - get-latest-broker-version
+          docker_layer_caching: false
+      - get-tagged-broker-version
       - get-latest-nodejs-version
       - build-and-save-docker-image:
-          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_LATEST_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
+          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
           dockerfile: <<parameters.dockerfile>>
           project_name: <<parameters.project_name>>
   scan-docker-image:
@@ -317,7 +316,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - load-docker-image:
           project_name: <<parameters.project_name>>
       - snyk/scan:
@@ -336,7 +335,6 @@ jobs:
       project_name:
         type: string
         default: "broker"
-    parallelism: 4
     steps:
       - checkout
       - setup_remote_docker:
@@ -373,7 +371,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - dockerhub-login
       - prepare-dev-package-metadata
       - build-and-save-docker-image:
@@ -503,7 +501,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=artifactory"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=artifactory"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-artifactory
           <<: *filter-tags-only
@@ -529,7 +527,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=azure-repos"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=azure-repos"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-azure-repos
           post-steps:
@@ -557,7 +555,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=bitbucket-server"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-bitbucket-server
           post-steps:
@@ -585,7 +583,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=container-registry-agent"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=container-registry-agent"
           dockerfile: dockerfiles/container-registry-agent/Dockerfile.ubi
           project_name: rhel-ubi-container-registry-agent
           post-steps:
@@ -613,7 +611,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=github-com"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=github-com"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-github-com
           post-steps:
@@ -641,7 +639,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=github-enterprise"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=github-enterprise"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-github-enterprise
           post-steps:
@@ -669,7 +667,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=gitlab"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=gitlab"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-gitlab
           post-steps:
@@ -697,7 +695,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=jira"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=jira"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-jira
           post-steps:
@@ -725,7 +723,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=nexus"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=nexus"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-nexus
           post-steps:
@@ -753,7 +751,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base UBI image
-          additional_arguments: "--build-arg BROKER_TYPE=nexus2"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=nexus2"
           dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-nexus2
           post-steps:
@@ -792,6 +790,8 @@ workflows:
           context:
             - snyk-bot-slack
             - team-broker-snyk
+          requires:
+            - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile
           project_name: broker
           post-steps:
@@ -830,9 +830,11 @@ workflows:
           context:
             - snyk-bot-slack
             - team-broker-snyk
+          requires:
+            - Scan repository for secrets
           additional_arguments: "--build-arg NODE_VERSION=20.6.0"
           dockerfile: dockerfiles/base/Dockerfile
-          project_name: broker
+          project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -844,7 +846,7 @@ workflows:
           requires:
             - Build base image (nlatest)
           project: snyk/broker
-          project_name: broker
+          project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure:
                 channel: broker-alerts-vulns
@@ -859,7 +861,7 @@ workflows:
             - Scan base image (nlatest)
           image_name: snyk/broker
           image_tag: base-nlatest
-          project_name: broker
+          project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -871,7 +873,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=artifactory"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=artifactory"
           dockerfile: dockerfiles/Dockerfile
           project_name: artifactory
           post-steps:
@@ -899,7 +901,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=azure-repos"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=azure-repos"
           dockerfile: dockerfiles/Dockerfile
           project_name: azure-repos
           post-steps:
@@ -927,7 +929,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=bitbucket-server"
           dockerfile: dockerfiles/Dockerfile
           project_name: bitbucket-server
           post-steps:
@@ -955,7 +957,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=container-registry-agent"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=container-registry-agent"
           dockerfile: dockerfiles/container-registry-agent/Dockerfile
           project_name: container-registry-agent
           post-steps:
@@ -983,7 +985,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=github-com"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=github-com"
           dockerfile: dockerfiles/Dockerfile
           project_name: github-com
           post-steps:
@@ -1011,7 +1013,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=github-enterprise"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=github-enterprise"
           dockerfile: dockerfiles/Dockerfile
           project_name: github-enterprise
           post-steps:
@@ -1039,7 +1041,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=gitlab"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=gitlab"
           dockerfile: dockerfiles/Dockerfile
           project_name: gitlab
           post-steps:
@@ -1067,7 +1069,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=jira"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=jira"
           dockerfile: dockerfiles/Dockerfile
           project_name: jira
           post-steps:
@@ -1095,7 +1097,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=nexus"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=nexus"
           dockerfile: dockerfiles/Dockerfile
           project_name: nexus
           post-steps:
@@ -1123,7 +1125,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image
-          additional_arguments: "--build-arg BROKER_TYPE=nexus2"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=nexus2"
           dockerfile: dockerfiles/Dockerfile
           project_name: nexus2
           post-steps:
@@ -1151,7 +1153,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=artifactory"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=artifactory"
           dockerfile: dockerfiles/Dockerfile
           project_name: artifactory-nlatest
           post-steps:
@@ -1179,7 +1181,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=azure-repos"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=azure-repos"
           dockerfile: dockerfiles/Dockerfile
           project_name: azure-repos-nlatest
           post-steps:
@@ -1207,7 +1209,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=bitbucket-server"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server"
           dockerfile: dockerfiles/Dockerfile
           project_name: bitbucket-server-nlatest
           post-steps:
@@ -1235,7 +1237,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=container-registry-agent"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=container-registry-agent"
           dockerfile: dockerfiles/container-registry-agent/Dockerfile
           project_name: container-registry-agent-nlatest
           post-steps:
@@ -1263,7 +1265,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-com"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-com"
           dockerfile: dockerfiles/Dockerfile
           project_name: github-com-nlatest
           post-steps:
@@ -1291,7 +1293,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-enterprise"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-enterprise"
           dockerfile: dockerfiles/Dockerfile
           project_name: github-enterprise-nlatest
           post-steps:
@@ -1319,7 +1321,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=gitlab"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=gitlab"
           dockerfile: dockerfiles/Dockerfile
           project_name: gitlab-nlatest
           post-steps:
@@ -1347,7 +1349,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=jira"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=jira"
           dockerfile: dockerfiles/Dockerfile
           project_name: jira-nlatest
           post-steps:
@@ -1375,7 +1377,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus"
           dockerfile: dockerfiles/Dockerfile
           project_name: nexus-nlatest
           post-steps:
@@ -1403,7 +1405,7 @@ workflows:
             - team-broker-snyk
           requires:
             - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus2"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus2"
           dockerfile: dockerfiles/Dockerfile
           project_name: nexus2-nlatest
           post-steps:
