@@ -57,7 +57,7 @@ class BrokerServerPostResponseHandler {
       keepAliveMsecs: 60000,
       maxTotalSockets: 1000,
     });
-    
+
     const options = {
       method: 'post',
       headers: {
@@ -87,7 +87,7 @@ class BrokerServerPostResponseHandler {
     this.#brokerServerPostRequestHttp = client.request(
       brokerServerPostRequestUrl,
       options,
-    );    
+    );
     const proxyUri = getProxyForUrl(brokerServerPostRequestUrl);
     if (proxyUri) {
       bootstrap({
@@ -104,7 +104,7 @@ class BrokerServerPostResponseHandler {
         },
         'received error sending data to broker server post request buffer',
       ),
-    )
+    );
     this.#buffer.pipe(
       this.#brokerServerPostRequestHttp
         .on('error', (e) => {
@@ -134,11 +134,13 @@ class BrokerServerPostResponseHandler {
           }
         })
         .on('end', () => {
-          logger.debug({}, `Streaming to broker server completed ${this.#streamingId}`);
+          logger.debug(
+            {},
+            `Streaming to broker server completed ${this.#streamingId}`,
+          );
           // this.#buffer.end();
-        })
-       
-    )
+        }),
+    );
     logger.debug(this.#logContext, `Pipe set up ${this.#streamingId}`);
   }
 
