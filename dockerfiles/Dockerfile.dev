@@ -28,8 +28,6 @@ RUN rm -rf /home/node/node_modules/tough-cookie
 RUN npm i -g tough-cookie@4.1.3
 RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/node_modules
 
-
-
 FROM ${BASE_IMAGE}
 
 ARG BROKER_TYPE
@@ -41,7 +39,7 @@ COPY --from=broker-builder /home/node/metadata.json /metadata.json
 COPY --from=broker-builder /home/node/node_modules /home/node/node_modules
 
 # Generate default accept filter
-RUN broker init $BROKER_TYPE
+RUN /home/node/node_modules/snyk-broker/dist/cli/index.js init $BROKER_TYPE
 # Support for OpenShift - have to run after init to get accept.json and .env
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
@@ -49,4 +47,4 @@ USER node
 
 EXPOSE $PORT
 
-CMD ["broker", "--verbose"]
+CMD ["/home/node/node_modules/snyk-broker/dist/cli/index.js", "--verbose"]
