@@ -1450,6 +1450,29 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
 
+      - approve-build-github-com-nlatest-dev:
+          name: github-com-nlatest-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push github-com-nlatest image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - github-com-nlatest-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-com"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: github-com-nlatest-dev
+          project_name: github-com-nlatest-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+
       - approve-build-gitlab-dev:
           name: gitlab-dev image
           type: approval
@@ -1473,6 +1496,29 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
 
+      - approve-build-gitlab-nlatest-dev:
+          name: gitlab-nlatest-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push gitlab-nlatest image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - gitlab-nlatest-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: gitlab-nlatest-dev
+          project_name: gitlab-nlatest-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+
       - approve-build-nexus-dev:
           name: nexus-dev image
           type: approval
@@ -1492,6 +1538,29 @@ workflows:
           image_name: snyk/broker
           image_tag: nexus-dev
           project_name: nexus-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+
+      - approve-build-nexus-nlatest-dev:
+          name: nexus-nlatest-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push nexus-nlatest image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - nexus-nlatest-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: nexus-nlatest-dev
+          project_name: nexus-nlatest-dev
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
