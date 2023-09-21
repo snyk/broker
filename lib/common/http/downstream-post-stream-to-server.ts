@@ -256,6 +256,7 @@ class BrokerServerPostResponseHandler {
       .on('error', (err) => this.#handleRequestError(err))
       .on('end', () => {
         logger.info(this.#logContext, 'writing end to buffer');
+        this.#buffer.end();
       });
   }
 
