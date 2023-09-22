@@ -11,6 +11,7 @@ export const openHandler = (io, clientOps: ClientOpts, identifyingMetadata) => {
   logger.info(
     {
       url: clientOps.config.brokerServerUrl,
+      serverId: clientOps.config.serverId || '',
       token: clientOps.config.brokerToken,
       metadata,
     },
