@@ -58,6 +58,9 @@ RUN groupadd --gid 1000 node && \
     # smoke tests to verify node and npm installation
     node --version && \
     npm --version && \
+    # update npm to the latest version globally
+    npm install --global npm@latest && \
+    npm --version && \
     # remove non-needed packages and clean apt cache
     apt remove --assume-yes \
       curl \
