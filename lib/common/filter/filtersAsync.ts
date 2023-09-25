@@ -40,7 +40,7 @@ export interface FiltersType {
   public: Rule[];
 }
 
-interface TestResult {
+export interface TestResult {
   url: any;
   auth: any;
   stream: boolean | undefined;

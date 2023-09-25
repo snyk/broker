@@ -21,7 +21,7 @@ import undefsafe from 'undefsafe';
 import { ClientOpts } from '../../client/types/client';
 import { ServerOpts } from '../../server/types/http';
 import { getRequestToDownstream } from '../http/request';
-import { loadFilters } from '../filter/filtersAsync';
+import { TestResult, loadFilters } from '../filter/filtersAsync';
 
 export const forwardWebSocketRequest = (
   options: ClientOpts | ServerOpts,
@@ -123,7 +123,7 @@ export const forwardWebSocketRequest = (
 
     logger.info(logContext, 'received request over websocket connection');
 
-    const prepareRequestFromFilterResult = async (result) => {
+    const prepareRequestFromFilterResult = async (result: TestResult) => {
       incrementWebSocketRequestsTotal(false);
 
       if (result.url.startsWith('http') === false) {
