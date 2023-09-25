@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=ubuntu:20.04
-ARG NODE_VERSION=18.17.1
+ARG NODE_VERSION=18.18.0
 
 
 FROM ${BASE_IMAGE} as node-base
@@ -57,6 +57,9 @@ RUN groupadd --gid 1000 node && \
     ln -s /usr/local/bin/node /usr/local/bin/nodejs && \
     # smoke tests to verify node and npm installation
     node --version && \
+    npm --version && \
+    # update npm to the latest version globally
+    npm install --global npm@latest && \
     npm --version && \
     # remove non-needed packages and clean apt cache
     apt remove --assume-yes \
