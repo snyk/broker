@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { log as logger } from '../log';
-import { config } from '../config';
+import { log as logger } from '../logs/logger';
+import { config } from '../common/config';
 export const validateBrokerTypeMiddleware = (
   req: Request,
   res: Response,

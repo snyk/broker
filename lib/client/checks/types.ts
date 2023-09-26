@@ -1,4 +1,4 @@
-import type { Config } from '../config';
+import type { Config } from '../types/config';
 
 /**
  * Represents an abstract check with common functionality and properties.

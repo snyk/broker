@@ -1,4 +1,4 @@
-import { axiosInstance } from '../../../../../lib/axios';
+import { axiosInstance } from '../../../../../lib/common/http/axios';
 import { MockServer } from 'jest-mock-server';
 import { aHttpCheck } from '../../../../helpers/test-factories';
 import { executeHttpRequest } from '../../../../../lib/client/checks/http/http-executor';

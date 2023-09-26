@@ -13,7 +13,9 @@ requestDefaultsMock.mockImplementation((_options) => {
   return requestMock;
 });
 
-import { forwardWebSocketRequest as relay } from '../../lib/relay';
+import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
+import { ClientOpts } from '../../lib/client/types/client';
+import { ServerOpts } from '../../lib/server/types/http';
 
 describe('body relay', () => {
   beforeEach(() => {
@@ -29,16 +31,21 @@ describe('body relay', () => {
       HOST: 'localhost',
       PORT: '8001',
     };
-
-    const route = relay(
-      [
-        {
-          method: 'any',
-          url: '/*',
-        },
-      ],
+    const options: ClientOpts | ServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
       config,
-    )(brokerToken);
+      port: 8001,
+    };
+
+    const route = relay(options)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
@@ -77,15 +84,20 @@ describe('body relay', () => {
       disableBodyVarsSubstitution: true,
     };
 
-    const route = relay(
-      [
-        {
-          method: 'any',
-          url: '/*',
-        },
-      ],
+    const options: ClientOpts | ServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
       config,
-    )(brokerToken);
+      port: 8001,
+    };
+    const route = relay(options)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],

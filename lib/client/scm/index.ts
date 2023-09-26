@@ -1,4 +1,4 @@
-import { log as logger } from '../../log';
+import { log as logger } from '../../logs/logger';
 import {
   convertBodyToGitHubCommitPayload,
   isGitHubCreateCommitEndpoint,
@@ -11,7 +11,7 @@ import {
 } from './github/tree';
 import { createSignature, normalizeArmoredKeyIfNeeded } from './pgp/sign';
 import { getCommitSigningGitHubFilterRules } from './github/commit-signing-filter-rules';
-import type { Config } from '../config';
+import type { Config } from '../types/config';
 import type { FilterRule } from './types';
 
 export function gitHubCommitSigningEnabled(

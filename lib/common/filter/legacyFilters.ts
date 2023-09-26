@@ -3,12 +3,12 @@ import pathRegexp from 'path-to-regexp';
 import qs from 'qs';
 import path from 'path';
 import undefsafe from 'undefsafe';
-import { replace } from './replace-vars';
-import authHeader from './auth-header';
-import tryJSONParse from './try-json-parse';
-import { log as logger } from './log';
-import { RequestPayload } from './relay';
-import { config } from './config';
+import { replace } from '../utils/replace-vars';
+import authHeader from '../utils/auth-header';
+import tryJSONParse from '../utils/try-json-parse';
+import { log as logger } from '../../logs/logger';
+import { config } from '../config';
+import { RequestPayload } from '../types/http';
 
 interface AuthObject {
   scheme: string;
@@ -24,10 +24,11 @@ interface ValidEntryObject {
   regex?: string;
   header?: string;
 }
-interface Rule {
+export interface Rule {
   method: string;
-  origin: string;
-  path: string;
+  origin?: string;
+  path?: string;
+  url?: string;
   valid?: ValidEntryObject[];
   requiredCapabilities?: Array<string>;
   stream?: boolean;
@@ -61,7 +62,8 @@ const validateHeaders = (headerFilters, requestHeaders = []) => {
   return true;
 };
 
-// reads config that defines
+/**
+ * @deprecated Deprecated in favour of {@link loadFilters} */
 export default (ruleSource: Rule[]) => {
   let rules: Array<Rule> = [];
 

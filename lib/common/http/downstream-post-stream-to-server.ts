@@ -1,8 +1,8 @@
 import request from 'request';
-import { log as logger } from './log';
+import { log as logger } from '../../logs/logger';
 import stream from 'stream';
-import { replaceUrlPartialChunk } from './replace-vars';
-import version from './version';
+import { replaceUrlPartialChunk } from '../utils/replace-vars';
+import version from '../utils/version';
 
 let streamPostRequestHandler = request;
 streamPostRequestHandler = request.defaults({
@@ -163,7 +163,7 @@ class BrokerServerPostResponseHandler {
     };
   }
 
-  forwardRequest(rqst) {
+  forwardRequest(rqst: request.Request) {
     let prevPartialChunk;
     let isResponseJson;
     rqst

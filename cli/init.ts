@@ -1,7 +1,7 @@
 import { promises as fsp, createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 const root = path.resolve(__dirname, '../client-templates/');
-import { log as logger } from '../lib/log';
+import { log as logger } from '../lib/logs/logger';
 
 export default async (templateName) => {
   if (!templateName) {

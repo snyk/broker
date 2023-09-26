@@ -25,7 +25,7 @@ const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
 const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
 
 import { Writable } from 'stream';
-import { log } from '../../lib/log';
+import { log } from '../../lib/logs/logger';
 
 describe('log', () => {
   it('sanitizes log data', () => {
