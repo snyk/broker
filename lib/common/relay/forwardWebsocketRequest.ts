@@ -49,68 +49,77 @@ export const forwardWebSocketRequest = (
       );
     }
 
+    // It clarifies which emit handler is for websockets vs POST response
     const websocketEmit = emit;
-    const overrideEmit = (
+
+    const postOverrideEmit = (
       responseData,
       isResponseFromRequestModule = false,
     ) => {
-      // This only works client -> server, it's not possible to post data server -> client
       logContext.requestMethod = '';
       logContext.requestHeaders = {};
-      if (io?.capabilities?.includes('receive-post-streams')) {
-        // Traffic over HTTP Post
-        const postHandler = new BrokerServerPostResponseHandler(
+
+      const postHandler = new BrokerServerPostResponseHandler(
+        logContext,
+        options.config,
+        brokerToken,
+        payload.streamingID,
+        options.config.serverId,
+        requestId,
+      );
+      if (isResponseFromRequestModule) {
+        logger.trace(
           logContext,
-          options.config,
-          brokerToken,
-          payload.streamingID,
-          options.config.serverId,
-          requestId,
+          'posting streaming response back to Broker Server',
         );
-        if (isResponseFromRequestModule) {
-          logger.trace(
-            logContext,
-            'posting streaming response back to Broker Server',
-          );
-          postHandler.forwardRequest(responseData);
-        } else {
-          // Only for responses generated internally in the Broker Client/Server
-          postHandler.sendData(responseData);
-        }
+        postHandler.forwardRequest(responseData);
       } else {
-        // Traffic over websockets
-        if (payload.streamingID) {
-          if (isResponseFromRequestModule) {
-            legacyStreaming(
-              logContext,
-              responseData,
-              options.config,
-              io,
-              payload.streamingID,
-            );
-          } else {
-            io.send('chunk', payload.streamingID, '', false, {
-              status: responseData.status,
-              headers: responseData.headers,
-            });
-            io.send(
-              'chunk',
-              payload.streamingID,
-              JSON.stringify(responseData.body),
-              true,
-            );
-          }
-        } else {
-          logger.trace(
-            { ...logContext, responseData },
-            'sending fixed response over WebSocket connection',
-          );
-          websocketEmit(responseData);
-        }
+        // Only for responses generated internally in the Broker Client/Server
+        postHandler.sendData(responseData);
       }
     };
 
-    emit = overrideEmit;
+    const legacyOverrideEmit = (
+      responseData,
+      isResponseFromRequestModule = false,
+    ) => {
+      // Traffic over websockets
+      if (payload.streamingID) {
+        if (isResponseFromRequestModule) {
+          legacyStreaming(
+            logContext,
+            responseData,
+            options.config,
+            io,
+            payload.streamingID,
+          );
+        } else {
+          io.send('chunk', payload.streamingID, '', false, {
+            status: responseData.status,
+            headers: responseData.headers,
+          });
+          io.send(
+            'chunk',
+            payload.streamingID,
+            JSON.stringify(responseData.body),
+            true,
+          );
+        }
+      } else {
+        logger.trace(
+          { ...logContext, responseData },
+          'sending fixed response over WebSocket connection',
+        );
+        websocketEmit(responseData);
+      }
+    };
+
+    if (io?.capabilities?.includes('receive-post-streams')) {
+      // Traffic over HTTP Post
+      emit = postOverrideEmit;
+    } else {
+      emit = legacyOverrideEmit;
+    }
 
     logger.info(logContext, 'received request over websocket connection');
 
