@@ -44,7 +44,7 @@ commands:
           command: |
             echo "Getting tagged version of Broker NPM package..."
             BROKER_VERSION=${CIRCLE_TAG/v/''}
-            echo BROKER_VERSION
+            echo $BROKER_VERSION
             echo "export BROKER_VERSION=$BROKER_VERSION" >> "$BASH_ENV"
   get-latest-nodejs-version:
     description: "Get latest version of specific Node.js cycle"
@@ -154,7 +154,7 @@ commands:
     parameters:
       channel:
         type: string
-        default: "broker-alerts-cicd"
+        default: broker-alerts-cicd
     steps:
       - slack/notify:
           channel: <<parameters.channel>>
@@ -195,22 +195,18 @@ commands:
                   ]
                 },
                 {
-                  "type": "section",
-                  "fields": [
+                  "type": "actions",
+                  "elements": [
                     {
-                      "type": "mrkdwn",
-                      "text": "*Mentions*: ${SLACK_PARAM_MENTIONS}"
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "emoji": true,
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
                     }
-                  ],
-                  "accessory": {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "emoji": true,
-                      "text": "View Job"
-                    },
-                    "url": "${CIRCLE_BUILD_URL}"
-                  }
+                  ]
                 }
               ]
             }
@@ -267,6 +263,9 @@ jobs:
         default: ""
       dockerfile:
         type: string
+      nodejs_cycle:
+        type: string
+        default: ""
       project_name:
         type: string
         default: "broker"
@@ -275,8 +274,10 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - get-tagged-broker-version
+      - get-latest-nodejs-version:
+          cycle: <<parameters.nodejs_cycle>>
       - build-and-save-docker-image:
-          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION
+          additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
           dockerfile: <<parameters.dockerfile>>
           project_name: <<parameters.project_name>>
   build-and-save-docker-ubi-image:
@@ -794,6 +795,7 @@ workflows:
           requires:
             - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile
+          nodejs_cycle: "18"
           project_name: broker
           post-steps:
             - notify-slack-on-failure
@@ -833,8 +835,8 @@ workflows:
             - team-broker-snyk
           requires:
             - Scan repository for secrets
-          additional_arguments: "--build-arg NODE_VERSION=20.6.0"
           dockerfile: dockerfiles/base/Dockerfile
+          nodejs_cycle: "20"
           project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure
