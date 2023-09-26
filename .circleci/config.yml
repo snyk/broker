@@ -1495,7 +1495,28 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
-
+      - approve-build-bitbucket-server-dev:
+          name: bitbucket-server-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push bitbucket-server image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - bitbucket-server-dev image
+          additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: bitbucket-server-dev
+          project_name: bitbucket-server-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
       - approve-build-gitlab-nlatest-dev:
           name: gitlab-nlatest-dev image
           type: approval
