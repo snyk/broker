@@ -82,6 +82,7 @@ export const webserver = (config, altPort: number) => {
         },
         app,
       ).listen(port);
+  server.timeout = 600000;
 
   return { app, server };
 };

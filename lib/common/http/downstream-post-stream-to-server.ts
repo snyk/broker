@@ -6,9 +6,7 @@ import version from '../utils/version';
 
 let streamPostRequestHandler = request;
 streamPostRequestHandler = request.defaults({
-  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-    : 60000,
+  timeout: 600000,
   agentOptions: {
     keepAlive: true,
     keepAliveMsecs: 60000,
