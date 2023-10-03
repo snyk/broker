@@ -1,3 +1,5 @@
+const PORT = 8001;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 jest.mock('request');
 import request from 'request';
 
@@ -20,6 +22,10 @@ import { ServerOpts } from '../../lib/server/types/http';
 describe('body relay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
@@ -82,6 +88,7 @@ describe('body relay', () => {
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
+      brokerServerUrl: 'http://localhost:8001',
     };
 
     const options: ClientOpts | ServerOpts = {

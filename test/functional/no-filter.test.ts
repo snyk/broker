@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -39,6 +41,7 @@ describe('no filters broker', () => {
     await tws.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('successfully broker with no filter should reject', async () => {

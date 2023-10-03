@@ -63,7 +63,6 @@ export const forwardWebSocketRequest = (
         logContext,
         options.config,
         brokerToken,
-        payload.streamingID,
         options.config.serverId,
         requestId,
       );
@@ -72,10 +71,10 @@ export const forwardWebSocketRequest = (
           logContext,
           'posting streaming response back to Broker Server',
         );
-        postHandler.forwardRequest(responseData);
+        postHandler.forwardRequest(responseData, payload.streamingID);
       } else {
         // Only for responses generated internally in the Broker Client/Server
-        postHandler.sendData(responseData);
+        postHandler.sendData(responseData, payload.streamingID);
       }
     };
 

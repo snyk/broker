@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import { promises as fsp, readFileSync } from 'fs';
 import { dir, setGracefulCleanup } from 'tmp-promise';
 import exec from '../../cli/exec';
@@ -15,6 +17,9 @@ describe('CLI', () => {
       const originalWorkDir = process.cwd();
 
       process.chdir(originalWorkDir);
+    });
+    afterAll(() => {
+      delete process.env.BROKER_SERVER_URL;
     });
 
     it.each(templates)('creates files from %p template', async (template) => {

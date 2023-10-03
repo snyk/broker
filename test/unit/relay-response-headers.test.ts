@@ -1,3 +1,5 @@
+const PORT = 8001;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 jest.mock('request');
 import request from 'request';
 
@@ -21,7 +23,9 @@ describe('header relay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
+  afterAll(() => {
+    delete process.env.BROKER_SERVER_URL;
+  });
   it('swaps header values found in BROKER_VAR_SUB', (done) => {
     expect.hasAssertions();
 
@@ -81,6 +85,7 @@ describe('header relay', () => {
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       disableHeaderVarsSubstitution: true,
+      brokerServerUrl: 'http://localhost:8001',
     };
 
     const options: ClientOpts | ServerOpts = {

@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
@@ -28,10 +30,10 @@ describe('proxy requests originating from behind the broker server with pooled c
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept });
+    bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
     bc = await createBrokerClient({
-      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
       brokerToken: '12345',
       filters: clientAccept,
       passwordPool: ['password1', 'password2'],
@@ -43,6 +45,7 @@ describe('proxy requests originating from behind the broker server with pooled c
     await tws.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('identification', async () => {

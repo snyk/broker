@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 const nock = require('nock');
 describe('Broker Server Dispatcher API interaction', () => {
   const apiVersion = '2022-12-02%7Eexperimental';
@@ -25,6 +27,7 @@ describe('Broker Server Dispatcher API interaction', () => {
   afterAll(() => {
     spyLogWarn.mockReset();
     spyLogError.mockReset();
+    delete process.env.BROKER_SERVER_URL;
   });
   beforeEach(() => {
     spyFn.mockReset();

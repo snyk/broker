@@ -4,6 +4,8 @@ import { log as logger } from '../../logs/logger';
 import { logError, logResponse } from '../../logs/log';
 import { isJson } from '../utils/json';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
+import http from 'http';
+import https from 'https';
 
 export const makePostStreamingRequest = async (
   req: PostFilterPreparedRequest,
@@ -14,8 +16,20 @@ export const makePostStreamingRequest = async (
   logger.debug(logContext, 'serving stream request');
 
   try {
-    const downstreamRequestHandler = getRequestToDownstream()(req);
-    emitCallback(downstreamRequestHandler, true);
+    const client = req.url.startsWith('https') ? https : http;
+    const options: http.RequestOptions = {
+      method: req.method,
+      headers: req.headers as any,
+      timeout: 600000,
+    };
+
+    const downstreamRequestHandler = client.request(req.url, options, (res) => {
+      emitCallback(res, true);
+    });
+    if (req.body) {
+      downstreamRequestHandler.write(req.body);
+    }
+    downstreamRequestHandler.end();
   } catch (e) {
     logger.error(
       {
