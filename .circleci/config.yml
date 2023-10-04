@@ -611,7 +611,7 @@ workflows:
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=container-registry-agent"
-          dockerfile: dockerfiles/container-registry-agent/Dockerfile.ubi
+          dockerfile: dockerfiles/Dockerfile.ubi
           project_name: rhel-ubi-container-registry-agent
           post-steps:
             - notify-slack-on-failure
@@ -986,7 +986,7 @@ workflows:
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=container-registry-agent"
-          dockerfile: dockerfiles/container-registry-agent/Dockerfile
+          dockerfile: dockerfiles/Dockerfile
           project_name: container-registry-agent
           post-steps:
             - notify-slack-on-failure
@@ -1266,7 +1266,7 @@ workflows:
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=container-registry-agent"
-          dockerfile: dockerfiles/container-registry-agent/Dockerfile
+          dockerfile: dockerfiles/Dockerfile
           project_name: container-registry-agent-nlatest
           post-steps:
             - notify-slack-on-failure
