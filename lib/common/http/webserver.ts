@@ -71,18 +71,22 @@ export const webserver = (config, altPort: number) => {
     port = altPort;
   }
 
-  logger.info({ port }, 'local server is listening');
-
   const server = isHttp
-    ? createHttpServer(app).listen(port)
+    ? createHttpServer(app)
     : createHttpsServer(
         {
           key: fs.readFileSync(httpsKey),
           cert: fs.readFileSync(httpsCert),
         },
         app,
-      ).listen(port);
-  server.timeout = 600000;
-
+      );
+  server.requestTimeout = process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT
+    ? parseInt(process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT)
+    : 600000;
+  server.listen(port);
+  logger.info(
+    { port, requestTimeout: server.requestTimeout },
+    'local server is listening',
+  );
   return { app, server };
 };
