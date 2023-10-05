@@ -1,4 +1,4 @@
-import { getRequestToDownstream } from '../http/request';
+import { makeRequestToDownstream } from '../http/request';
 import { PostFilterPreparedRequest } from './prepareRequest';
 import { log as logger } from '../../logs/logger';
 import { logError, logResponse } from '../../logs/log';
@@ -42,23 +42,22 @@ export const makePostStreamingRequest = async (
   }
   return;
 };
-export const makeLegacyRequest = (
+export const makeLegacyRequest = async (
   req: PostFilterPreparedRequest,
   emitCallback,
   logContext,
   options,
 ) => {
   // not main http post flow
-  getRequestToDownstream()(req, (error, response, responseBody) => {
-    if (error) {
-      logError(logContext, error);
-      return emitCallback({
-        status: 500,
-        body: error.message,
-      });
-    }
+  try {
+    const response = await makeRequestToDownstream(
+      req.url,
+      req.headers,
+      req.method,
+      req.body,
+    );
 
-    const contentLength = responseBody.length;
+    const contentLength = response.body.length;
     // Note that the other side of the request will also check the length and will also reject it if it's too large
     // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
     // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
@@ -82,15 +81,21 @@ export const makeLegacyRequest = (
     const status = (response && response.statusCode) || 500;
     if (options.config.RES_BODY_URL_SUB && isJson(response.headers)) {
       const replaced = replaceUrlPartialChunk(
-        responseBody,
+        response.body,
         null,
         options.config,
       );
-      responseBody = replaced.newChunk;
+      response.body = replaced.newChunk;
     }
     logResponse(logContext, status, response, options.config);
-    emitCallback({ status, body: responseBody, headers: response.headers });
-  });
+    emitCallback({ status, body: response.body, headers: response.headers });
+  } catch (error) {
+    logError(logContext, error);
+    return emitCallback({
+      status: 500,
+      body: error,
+    });
+  }
 };
 export const legacyStreaming = (logContext, rqst, config, io, streamingID) => {
   let prevPartialChunk;

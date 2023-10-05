@@ -1,18 +1,16 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
-jest.mock('request');
-import request from 'request';
 
-const requestDefaultsMock = jest.mocked(request.defaults, true);
-const requestMock = jest.fn((req, fn) => {
-  fn!(null, { statusCode: 200 } as any, {});
-});
+jest.mock('../../lib/common/http/request');
+import { makeRequestToDownstream } from '../../lib/common/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-requestDefaultsMock.mockImplementation((_options) => {
-  return requestMock;
+const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  resolve(data);
 });
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
@@ -26,6 +24,7 @@ describe('body relay', () => {
 
   afterAll(() => {
     delete process.env.BROKER_SERVER_URL;
+    jest.clearAllMocks();
   });
 
   it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
@@ -68,9 +67,9 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual(
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][3];
+        expect(JSON.parse(arg).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
 
@@ -121,9 +120,9 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][3];
+        expect(JSON.parse(arg).url).toEqual('${HOST}:${PORT}/webhook');
 
         done();
       },

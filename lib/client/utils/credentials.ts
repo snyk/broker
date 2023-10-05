@@ -1,7 +1,7 @@
 import { log as logger } from '../../logs/logger';
 import version from '../../common/utils/version';
 import { sanitise } from '../../logs/logger';
-import rp from 'request-promise-native';
+import { makeRequestToDownstream } from '../../common/http/request';
 
 const credsFromHeader = (s) => {
   if (s.indexOf(' ') >= 0) {
@@ -43,7 +43,7 @@ export const checkCredentials = async (
   config,
   brokerClientValidationMethod,
   brokerClientValidationTimeoutMs,
-  isJsonResponse,
+  // isJsonResponse,
 ) => {
   const data = {
     brokerClientValidationUrl: sanitise(config.brokerClientValidationUrl),
@@ -60,53 +60,67 @@ export const checkCredentials = async (
 
   let errorOccurred = true;
   // This was originally `request`, but `await` is a lot easier to understand than nested callback hell.
-  await rp({
-    url: config.brokerClientValidationUrl,
-    headers: validationRequestHeaders,
-    method: brokerClientValidationMethod,
-    timeout: brokerClientValidationTimeoutMs,
-    json: isJsonResponse,
-    resolveWithFullResponse: true,
-    agentOptions: {
-      ca: config.caCert, // Optional CA cert
-    },
-  })
-    .then((response) => {
-      // test logic requires to surface internal data
-      // which is best not exposed in production
+  try {
+    const response = await makeRequestToDownstream(
+      config.brokerClientValidationUrl,
+      validationRequestHeaders,
+      brokerClientValidationMethod,
+    );
+    // await rp({
+    //   url: config.brokerClientValidationUrl,
+    //   headers: validationRequestHeaders,
+    //   method: brokerClientValidationMethod,
+    //   timeout: brokerClientValidationTimeoutMs,
+    //   json: isJsonResponse,
+    //   resolveWithFullResponse: true,
+    //   agentOptions: {
+    //     ca: config.caCert, // Optional CA cert
+    //   },
+    // })
+    // test logic requires to surface internal data
+    // which is best not exposed in production
+
+    const responseStatusCode = response && response.statusCode;
+    if (!responseStatusCode) {
+      logger.error(
+        { response },
+        'Failed systemcheck, unexpected response code',
+      );
+      throw new Error('Failed systemcheck');
+    }
+    data['brokerClientValidationUrlStatusCode'] = responseStatusCode;
+
+    // check for 2xx status code
+
+    if (responseStatusCode > 300) {
+      data['ok'] = false;
+      data['error'] =
+        responseStatusCode === 401 || responseStatusCode === 403
+          ? 'Failed due to invalid credentials'
+          : 'Status code is not 2xx';
+
+      logger.error(data, response && response.body, 'Systemcheck failed');
+    } else {
+      const parsedBodyResponse = JSON.parse(response.body || {});
+      // const responseToReturn = response
+      response.body = parsedBodyResponse;
       if (process.env.JEST_WORKER_ID) {
         data['testResponse'] = response;
       }
 
-      const responseStatusCode = response && response.statusCode;
-      data['brokerClientValidationUrlStatusCode'] = responseStatusCode;
-
-      // check for 2xx status code
-      const goodStatusCode = /^2/.test(responseStatusCode);
-      if (!goodStatusCode) {
-        data['ok'] = false;
-        data['error'] =
-          responseStatusCode === 401 || responseStatusCode === 403
-            ? 'Failed due to invalid credentials'
-            : 'Status code is not 2xx';
-
-        logger.error(data, response && response.body, 'Systemcheck failed');
-        return;
-      }
-
       errorOccurred = false;
       data['ok'] = true;
-    })
-    .catch((error) => {
-      // test logic requires to surface internal data
-      // which is best not exposed in production
-      if (process.env.JEST_WORKER_ID) {
-        data['testError'] = error;
-      }
+    }
+  } catch (error) {
+    // test logic requires to surface internal data
+    // which is best not exposed in production
+    if (process.env.JEST_WORKER_ID) {
+      data['testError'] = error;
+    }
 
-      data['ok'] = false;
-      data['error'] = error.message;
-    });
+    data['ok'] = false;
+    data['error'] = error;
+  }
 
   return { data, errorOccurred };
 };

@@ -1,19 +1,56 @@
-import request from 'request';
-import { config } from '../config';
+import http from 'http';
+import https from 'https';
 
-let requestToDownstream = request;
-requestToDownstream = request.defaults({
-  ca: config.caCert,
-  timeout: process.env.BROKER_DOWNSTREAM_TIMEOUT
-    ? parseInt(process.env.BROKER_DOWNSTREAM_TIMEOUT)
-    : 60000,
-  agentOptions: {
-    keepAlive: true,
-    keepAliveMsecs: 60000,
-    maxTotalSockets: 1000,
-  },
-});
+export interface HttpResponse {
+  headers: Object;
+  statusCode: number | undefined;
+  body: any;
+}
 
-export const getRequestToDownstream = () => {
-  return requestToDownstream;
+// TODO: TLS config, Timeout and retries
+
+export const makeRequestToDownstream = async (
+  url: string,
+  headers: Object,
+  method: string,
+  body?: string,
+): Promise<HttpResponse> => {
+  const httpClient = url.startsWith('https') ? https : http;
+  const options: http.RequestOptions = {
+    method: method,
+    headers: headers as any,
+  };
+
+  return new Promise<HttpResponse>((resolve, reject) => {
+    try {
+      const req = httpClient.request(url, options, (response) => {
+        let data = '';
+
+        // A chunk of data has been received.
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        // The whole response has been received.
+        response.on('end', () => {
+          resolve({
+            headers: response.headers,
+            statusCode: response.statusCode,
+            body: data,
+          });
+        });
+
+        // An error occurred while fetching.
+        response.on('error', (error) => {
+          reject(error);
+        });
+      });
+      if (body) {
+        req.write(body);
+      }
+      req.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
 };

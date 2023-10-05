@@ -1,6 +1,9 @@
+import { loadBrokerConfig } from '../../lib/common/config';
+
 const PORT = 9999;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 const nock = require('nock');
+
 describe('Broker Server Dispatcher API interaction', () => {
   const apiVersion = '2022-12-02%7Eexperimental';
   // token hashed with 256-sha algorithm
@@ -48,6 +51,7 @@ describe('Broker Server Dispatcher API interaction', () => {
     try {
       process.env.DISPATCHER_URL = `${serverUrl}`;
       process.env.hostname = '0';
+      loadBrokerConfig();
       const dispatcher = require('../../lib/server/infra/dispatcher');
       await expect(
         dispatcher.clientConnected(token, clientId, clientVersion),
@@ -80,6 +84,7 @@ describe('Broker Server Dispatcher API interaction', () => {
 
     process.env.DISPATCHER_URL = `${serverUrl}`;
     process.env.hostname = '0';
+    loadBrokerConfig();
     const dispatcher = require('../../lib/dispatcher');
     await expect(
       dispatcher.clientPinged(

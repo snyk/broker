@@ -54,7 +54,6 @@ describe('broker client systemcheck endpoint', () => {
 
     expect(response.data).toBeInstanceOf(Array);
     const systemCheckBody = response.data[0];
-
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',

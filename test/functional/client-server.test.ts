@@ -30,7 +30,7 @@ describe('proxy requests originating from behind the broker client', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept });
+    bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
     bc = await createBrokerClient({
       brokerServerUrl: `http://localhost:${bs.port}`,

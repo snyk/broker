@@ -2,7 +2,7 @@ import 'clarify'; // clean the stacktraces
 
 import filterRulesLoader from './common/filter/filter-rules-loading';
 import { log as logger } from './logs/logger';
-import { config as globalConfig } from './common/config';
+import { config as globalConfig, loadBrokerConfig } from './common/config';
 process.on('uncaughtExceptionMonitor', (error, origin) => {
   logger.error({ error, origin }, 'found unhandled exception');
 });
@@ -25,6 +25,8 @@ export const app = async ({ port = 7341, client = false, config }) => {
   const method = client ? 'client' : 'server';
   process.env.BROKER_TYPE = method;
 
+  // loading it "manually" simplifies lot testing
+  loadBrokerConfig();
   const localConfig = Object.assign({}, globalConfig, config) as Record<
     string,
     any

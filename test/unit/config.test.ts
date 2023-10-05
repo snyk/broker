@@ -8,8 +8,11 @@ process.env.GITHUB_PASSWORD_POOL = '9012, 3456';
 process.env.GITHUB_AUTH = 'Basic $GITHUB_USERNAME:$GITHUB_PASSWORD';
 process.env.COMPLEX_TOKEN = '1234$$%#@!$!$@$$$';
 
-import { config } from '../../lib/common/config';
+import { config, loadBrokerConfig } from '../../lib/common/config';
 describe('config', () => {
+  beforeAll(() => {
+    loadBrokerConfig();
+  });
   it('contain application config', () => {
     const foo = process.env.FOO;
     const token = process.env.BROKER_TOKEN;

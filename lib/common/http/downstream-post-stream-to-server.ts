@@ -12,7 +12,7 @@ import { config } from '../config';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
-const client = config.brokerServerUrl.startsWith('https') ? https : http;
+const client = config.brokerServerUrl?.startsWith('https') ? https : http;
 
 const agent = new client.Agent({
   keepAlive: true,
