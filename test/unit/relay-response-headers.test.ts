@@ -9,7 +9,7 @@ import { makeRequestToDownstream } from '../../lib/common/http/request';
 const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  resolve(data);
+  return data;
 });
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
@@ -63,11 +63,12 @@ describe('header relay', () => {
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][1];
-
-        expect(arg['private-token']).toEqual(`Bearer ${config.SECRET_TOKEN}`);
-        expect(arg.replaceme).toEqual(`replace ${config.VALUE}`);
-        expect(arg.donttouch).toEqual('not to be changed ${VALUE}');
+        const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['private-token']).toEqual(
+          `Bearer ${config.SECRET_TOKEN}`,
+        );
+        expect(arg.headers.replaceme).toEqual(`replace ${config.VALUE}`);
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );
@@ -115,10 +116,10 @@ describe('header relay', () => {
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][1];
-        expect(arg['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
-        expect(arg.replaceme).toEqual('replace ${VALUE}');
-        expect(arg.donttouch).toEqual('not to be changed ${VALUE}');
+        const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
+        expect(arg.headers.replaceme).toEqual('replace ${VALUE}');
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );

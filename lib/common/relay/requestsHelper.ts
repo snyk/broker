@@ -50,12 +50,7 @@ export const makeLegacyRequest = async (
 ) => {
   // not main http post flow
   try {
-    const response = await makeRequestToDownstream(
-      req.url,
-      req.headers,
-      req.method,
-      req.body,
-    );
+    const response = await makeRequestToDownstream(req);
 
     const contentLength = response.body.length;
     // Note that the other side of the request will also check the length and will also reject it if it's too large

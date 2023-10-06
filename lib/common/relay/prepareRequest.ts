@@ -22,7 +22,7 @@ export interface PostFilterPreparedRequest {
   url: string;
   headers: Object;
   method: string;
-  body: any;
+  body?: any;
 }
 
 export const prepareRequestFromFilterResult = async (

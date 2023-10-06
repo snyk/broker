@@ -10,7 +10,7 @@ import { makeRequestToDownstream } from '../../lib/common/http/request';
 const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  resolve(data);
+  return data;
 });
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
@@ -68,8 +68,8 @@ describe('body relay', () => {
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][3];
-        expect(JSON.parse(arg).url).toEqual(
+        const arg = mockedFn.mock.calls[0][0];
+        expect(JSON.parse(arg.body).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
 
@@ -121,8 +121,8 @@ describe('body relay', () => {
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][3];
-        expect(JSON.parse(arg).url).toEqual('${HOST}:${PORT}/webhook');
+        const arg = mockedFn.mock.calls[0][0];
+        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
 
         done();
       },

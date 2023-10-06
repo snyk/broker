@@ -1,29 +1,45 @@
 import http from 'http';
 import https from 'https';
-
+import { getProxyForUrl } from 'proxy-from-env';
+import { bootstrap } from 'global-agent';
+import { log as logger } from '../../logs/logger';
+import { PostFilterPreparedRequest } from '../relay/prepareRequest';
+import { config } from '../config';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
   body: any;
 }
 
-// TODO: TLS config, Timeout and retries
+if (process.env.HTTP_PROXY || process.env.http_proxy) {
+  process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
+}
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+  process.env.HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.https_proxy;
+}
+if (process.env.NP_PROXY || process.env.no_proxy) {
+  process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
+}
 
 export const makeRequestToDownstream = async (
-  url: string,
-  headers: Object,
-  method: string,
-  body?: string,
+  req: PostFilterPreparedRequest,
+  retries = config.MAX_RETRY || 3,
 ): Promise<HttpResponse> => {
-  const httpClient = url.startsWith('https') ? https : http;
+  const proxyUri = getProxyForUrl(req.url);
+  if (proxyUri) {
+    bootstrap({
+      environmentVariableNamespace: '',
+    });
+  }
+  const httpClient = req.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
-    method: method,
-    headers: headers as any,
+    method: req.method,
+    headers: req.headers as any,
   };
 
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
-      const req = httpClient.request(url, options, (response) => {
+      const request = httpClient.request(req.url, options, (response) => {
         let data = '';
 
         // A chunk of data has been received.
@@ -33,22 +49,48 @@ export const makeRequestToDownstream = async (
 
         // The whole response has been received.
         response.on('end', () => {
-          resolve({
-            headers: response.headers,
-            statusCode: response.statusCode,
-            body: data,
-          });
+          if (
+            response.statusCode &&
+            response.statusCode >= 200 &&
+            response.statusCode < 300
+          ) {
+            resolve({
+              headers: response.headers,
+              statusCode: response.statusCode,
+              body: data,
+            });
+          } else {
+            logger.error(
+              { msg: response.statusCode || 'NO RESPONSE CODE' },
+              'Error making request to downstream - Unexpected Response',
+            );
+            reject('Error making request to downstream - Unexpected Response');
+          }
         });
 
         // An error occurred while fetching.
         response.on('error', (error) => {
-          reject(error);
+          if (retries > 0) {
+            logger.warn(
+              { msg: req.url },
+              `Request failed. Retrying after 500ms...`,
+            );
+            setTimeout(() => {
+              resolve(makeRequestToDownstream(req, retries - 1));
+            }, 500); // Wait for 0.5 second before retrying
+          } else {
+            logger.error(
+              { error },
+              'Error making request to downstream. Giving up after retries.',
+            );
+            reject(error);
+          }
         });
       });
-      if (body) {
-        req.write(body);
+      if (req.body) {
+        request.write(req.body);
       }
-      req.end();
+      request.end();
     } catch (err) {
       reject(err);
     }

@@ -61,11 +61,11 @@ export const checkCredentials = async (
   let errorOccurred = true;
   // This was originally `request`, but `await` is a lot easier to understand than nested callback hell.
   try {
-    const response = await makeRequestToDownstream(
-      config.brokerClientValidationUrl,
-      validationRequestHeaders,
-      brokerClientValidationMethod,
-    );
+    const response = await makeRequestToDownstream({
+      url: config.brokerClientValidationUrl,
+      headers: validationRequestHeaders,
+      method: brokerClientValidationMethod,
+    });
     // await rp({
     //   url: config.brokerClientValidationUrl,
     //   headers: validationRequestHeaders,
