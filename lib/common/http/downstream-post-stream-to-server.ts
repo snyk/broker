@@ -247,7 +247,7 @@ class BrokerServerPostResponseHandler {
         );
       }
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'Error in request pipelining');
     }
   }
 

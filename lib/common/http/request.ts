@@ -11,6 +11,7 @@ export interface HttpResponse {
   statusText?: string;
   body: any;
 }
+const MAX_RETRY = config.MAX_RETRY || 3;
 
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
   process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
@@ -24,7 +25,7 @@ if (process.env.NP_PROXY || process.env.no_proxy) {
 
 export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
-  retries = config.MAX_RETRY || 3,
+  retries = MAX_RETRY,
 ): Promise<HttpResponse> => {
   const proxyUri = getProxyForUrl(req.url);
   if (proxyUri) {
@@ -55,26 +56,27 @@ export const makeRequestToDownstream = async (
             response.statusCode >= 200 &&
             response.statusCode < 300
           ) {
-            resolve({
-              headers: response.headers,
-              statusCode: response.statusCode,
-              body: data,
-            });
-          } else {
-            logger.error(
-              { msg: response.statusCode || 'NO RESPONSE CODE' },
-              'Error making request to downstream - Unexpected Response',
+            logger.trace(
+              { statusCode: response.statusCode, url: req.url },
+              `Successful request`,
             );
-            reject('Error making request to downstream - Unexpected Response');
+          } else {
+            logger.debug(
+              { statusCode: response.statusCode, url: req.url },
+              `Non 2xx HTTP Code Received`,
+            );
           }
+          resolve({
+            headers: response.headers,
+            statusCode: response.statusCode,
+            body: data,
+          });
         });
-
-        // An error occurred while fetching.
         response.on('error', (error) => {
           if (retries > 0) {
             logger.warn(
               { msg: req.url },
-              `Request failed. Retrying after 500ms...`,
+              `Downstream Response failed. Retrying after 500ms...`,
             );
             setTimeout(() => {
               resolve(makeRequestToDownstream(req, retries - 1));
@@ -82,15 +84,35 @@ export const makeRequestToDownstream = async (
           } else {
             logger.error(
               { error },
-              'Error making request to downstream. Giving up after retries.',
+              `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
             );
             reject(error);
           }
         });
       });
+      // An error occurred while fetching.
+      request.on('error', (error) => {
+        if (retries > 0) {
+          logger.warn(
+            { url: req.url, err: error },
+            `Request failed. Retrying after 500ms...`,
+          );
+          setTimeout(() => {
+            resolve(makeRequestToDownstream(req, retries - 1));
+          }, 500); // Wait for 0.5 second before retrying
+        } else {
+          logger.error(
+            { url: req.url, err: error },
+            `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
+          );
+          reject(error);
+        }
+      });
+
       if (req.body) {
         request.write(req.body);
       }
+
       request.end();
     } catch (err) {
       reject(err);
@@ -100,7 +122,7 @@ export const makeRequestToDownstream = async (
 
 export const makeStreamingRequestToDownstream = (
   req: PostFilterPreparedRequest,
-  retries = config.MAX_RETRY || 3,
+  retries = MAX_RETRY,
 ): Promise<http.IncomingMessage> => {
   const proxyUri = getProxyForUrl(req.url);
   if (proxyUri) {
@@ -122,25 +144,33 @@ export const makeStreamingRequestToDownstream = (
           response.statusCode >= 200 &&
           response.statusCode < 300
         ) {
-          resolve(response);
+          logger.trace(
+            { statusCode: response.statusCode, url: req.url },
+            `Successful request`,
+          );
         } else {
-          if (retries > 0) {
-            logger.warn(
-              { msg: req.url },
-              `Request failed. Retrying after 500ms...`,
-            );
-            setTimeout(() => {
-              resolve(makeStreamingRequestToDownstream(req, retries - 1));
-            }, 500); // Wait for 0.5 second before retrying
-          } else {
-            logger.error(
-              { msg: req.url },
-              'Error making request to downstream. Giving up after retries.',
-            );
-            reject(
-              'Error making request to downstream. Giving up after retries.',
-            );
-          }
+          logger.debug(
+            { statusCode: response.statusCode, url: req.url },
+            `Non 2xx HTTP Code Received`,
+          );
+        }
+        resolve(response);
+      });
+      request.on('error', (error) => {
+        if (retries > 0) {
+          logger.warn(
+            { url: req.url, err: error },
+            `Request failed. Retrying after 500ms...`,
+          );
+          setTimeout(() => {
+            resolve(makeStreamingRequestToDownstream(req, retries - 1));
+          }, 500); // Wait for 0.5 second before retrying
+        } else {
+          logger.error(
+            { url: req.url, err: error },
+            `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
+          );
+          reject(error);
         }
       });
       if (req.body) {
@@ -190,12 +220,13 @@ export const makeSingleRawRequestToDownstream = async (
 
         // An error occurred while fetching.
         response.on('error', (error) => {
-          logger.error(
-            { error },
-            'Error making request to downstream. Giving up after retries.',
-          );
+          logger.error({ error }, 'Error making request to downstream.');
           reject(error);
         });
+      });
+      request.on('error', (error) => {
+        logger.error({ error }, 'Error making request to downstream.');
+        reject(error);
       });
       if (req.body) {
         request.write(req.body);
