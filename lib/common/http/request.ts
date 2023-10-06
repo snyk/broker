@@ -96,3 +96,58 @@ export const makeRequestToDownstream = async (
     }
   });
 };
+
+export const makeStreamingRequestToDownstream = (
+  req: PostFilterPreparedRequest,
+  retries = config.MAX_RETRY || 3,
+): Promise<http.IncomingMessage> => {
+  const proxyUri = getProxyForUrl(req.url);
+  if (proxyUri) {
+    bootstrap({
+      environmentVariableNamespace: '',
+    });
+  }
+  const httpClient = req.url.startsWith('https') ? https : http;
+  const options: http.RequestOptions = {
+    method: req.method,
+    headers: req.headers as any,
+  };
+
+  return new Promise<http.IncomingMessage>((resolve, reject) => {
+    try {
+      const request = httpClient.request(req.url, options, (response) => {
+        if (
+          response.statusCode &&
+          response.statusCode >= 200 &&
+          response.statusCode < 300
+        ) {
+          resolve(response);
+        } else {
+          if (retries > 0) {
+            logger.warn(
+              { msg: req.url },
+              `Request failed. Retrying after 500ms...`,
+            );
+            setTimeout(() => {
+              resolve(makeStreamingRequestToDownstream(req, retries - 1));
+            }, 500); // Wait for 0.5 second before retrying
+          } else {
+            logger.error(
+              { msg: req.url },
+              'Error making request to downstream. Giving up after retries.',
+            );
+            reject(
+              'Error making request to downstream. Giving up after retries.',
+            );
+          }
+        }
+      });
+      if (req.body) {
+        request.write(req.body);
+      }
+      request.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
