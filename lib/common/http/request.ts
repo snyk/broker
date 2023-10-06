@@ -8,6 +8,7 @@ import { config } from '../config';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
+  statusText?: string;
   body: any;
 }
 
@@ -141,6 +142,60 @@ export const makeStreamingRequestToDownstream = (
             );
           }
         }
+      });
+      if (req.body) {
+        request.write(req.body);
+      }
+      request.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+export const makeSingleRawRequestToDownstream = async (
+  req: PostFilterPreparedRequest,
+): Promise<HttpResponse> => {
+  const proxyUri = getProxyForUrl(req.url);
+  if (proxyUri) {
+    bootstrap({
+      environmentVariableNamespace: '',
+    });
+  }
+  const httpClient = req.url.startsWith('https') ? https : http;
+  const options: http.RequestOptions = {
+    method: req.method,
+    headers: req.headers as any,
+  };
+
+  return new Promise<HttpResponse>((resolve, reject) => {
+    try {
+      const request = httpClient.request(req.url, options, (response) => {
+        let data = '';
+
+        // A chunk of data has been received.
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        // The whole response has been received.
+        response.on('end', () => {
+          resolve({
+            headers: response.headers,
+            statusCode: response.statusCode,
+            statusText: response.statusMessage || '',
+            body: data,
+          });
+        });
+
+        // An error occurred while fetching.
+        response.on('error', (error) => {
+          logger.error(
+            { error },
+            'Error making request to downstream. Giving up after retries.',
+          );
+          reject(error);
+        });
       });
       if (req.body) {
         request.write(req.body);
