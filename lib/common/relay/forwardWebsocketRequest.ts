@@ -148,7 +148,12 @@ export const forwardWebSocketRequest = (
       );
       payload.streamingID
         ? await makePostStreamingRequest(preparedRequest.req, emit, logContext)
-        : makeLegacyRequest(preparedRequest.req, emit, logContext, options);
+        : await makeLegacyRequest(
+            preparedRequest.req,
+            emit,
+            logContext,
+            options,
+          );
     }
   };
 };

@@ -16,7 +16,7 @@ const client = config.brokerServerUrl?.startsWith('https') ? https : http;
 
 const agent = new client.Agent({
   keepAlive: true,
-  keepAliveMsecs: 300000,
+  keepAliveMsecs: 600000,
 });
 
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
