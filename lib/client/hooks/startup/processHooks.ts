@@ -10,7 +10,6 @@ export const processStartUpHooks = async (
   brokerClientId: string,
 ): Promise<HookResults> => {
   try {
-    let okToBoot = true;
     if (!clientOpts.config.brokerToken) {
       const brokerToken = clientOpts.config.brokerToken;
       // null, undefined, empty, etc.
@@ -18,7 +17,6 @@ export const processStartUpHooks = async (
         { brokerToken },
         '[MISSING_BROKER_TOKEN] BROKER_TOKEN is required to successfully identify itself to the server',
       );
-      okToBoot = false;
       const error = new ReferenceError(
         'BROKER_TOKEN is required to successfully identify itself to the server',
       );
@@ -33,17 +31,11 @@ export const processStartUpHooks = async (
         { brokerServerUrl },
         '[MISSING_BROKER_SERVER_URL] BROKER_SERVER_URL is required to connect to the broker server',
       );
-      okToBoot = false;
       const error = new ReferenceError(
         'BROKER_SERVER_URL is required to connect to the broker server',
       );
       error['code'] = 'MISSING_BROKER_SERVER_URL';
       throw error;
-    }
-
-    // Return early before processing anything further since the basics are not there....
-    if (!okToBoot) {
-      return { okToBoot };
     }
 
     if (!clientOpts.config.BROKER_CLIENT_URL) {
@@ -86,13 +78,12 @@ export const processStartUpHooks = async (
     }
 
     return {
-      okToBoot,
       preflightCheckResults: preflightCheckResults.length
         ? preflightCheckResults
         : undefined,
     };
   } catch (error) {
     logger.error({ error }, 'Error processing startup hooks');
-    return { okToBoot: false };
+    throw error;
   }
 };

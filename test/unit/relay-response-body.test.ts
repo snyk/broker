@@ -1,16 +1,16 @@
-jest.mock('request');
-import request from 'request';
+const PORT = 8001;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
-const requestDefaultsMock = jest.mocked(request.defaults, true);
-const requestMock = jest.fn((req, fn) => {
-  fn!(null, { statusCode: 200 } as any, {});
-});
+jest.mock('../../lib/common/http/request');
+import { makeRequestToDownstream } from '../../lib/common/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-requestDefaultsMock.mockImplementation((_options) => {
-  return requestMock;
+const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return data;
 });
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
@@ -19,6 +19,11 @@ import { ServerOpts } from '../../lib/server/types/http';
 
 describe('body relay', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    delete process.env.BROKER_SERVER_URL;
     jest.clearAllMocks();
   });
 
@@ -62,8 +67,8 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
         expect(JSON.parse(arg.body).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
@@ -82,6 +87,7 @@ describe('body relay', () => {
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
+      brokerServerUrl: 'http://localhost:8001',
     };
 
     const options: ClientOpts | ServerOpts = {
@@ -114,8 +120,8 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
         expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
 
         done();

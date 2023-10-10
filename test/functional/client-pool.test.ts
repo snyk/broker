@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -27,17 +29,18 @@ describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () 
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept });
+    bs = await createBrokerServer({ port: PORT, filters: serverAccept });
   });
   afterAll(async () => {
     await tws.server.close();
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   describe('1st client', () => {
     beforeAll(async () => {
       bcFirst = await createBrokerClient({
-        brokerServerUrl: `http://localhost:${bs.port}`,
+        brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
         brokerToken: '12345',
         filters: clientAccept,
       });
@@ -45,6 +48,7 @@ describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () 
     });
     afterAll(async () => {
       await closeBrokerClient(bcFirst);
+      delete process.env.BROKER_SERVER_URL;
     });
 
     it('successfully broker POST with 1st connected client', async () => {

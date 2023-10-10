@@ -1,9 +1,11 @@
 import { log as logger } from '../../../logs/logger';
 import version from '../../../common/utils/version';
-import { axiosInstance } from '../../../common/http/axios';
 import { retry } from '../../retry/exponential-backoff';
-import type { AxiosResponse } from 'axios';
 import type { CheckId, CheckResult, CheckStatus } from '../types';
+import {
+  HttpResponse,
+  makeSingleRawRequestToDownstream,
+} from '../../../common/http/request';
 
 export async function executeHttpRequest(
   checkOptions: {
@@ -19,24 +21,22 @@ export async function executeHttpRequest(
   logger.debug({ checkId: checkOptions.id }, 'executing http check');
 
   try {
-    const response = await retry<CheckResult>(
-      () =>
-        axiosInstance.request({
-          method: httpOptions.method,
-          url: httpOptions.url,
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'User-Agent': `broker client/${version} (http check service)`,
-          },
-          timeout: httpOptions.timeoutMs,
-          validateStatus: () => true,
-        }),
+    const request = {
+      url: httpOptions.url,
+      method: httpOptions.method,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': `broker client/${version} (http check service)`,
+      },
+    };
+    const response: HttpResponse = await retry<HttpResponse>(
+      () => makeSingleRawRequestToDownstream(request),
       { retries: 3, operation: `http check ${checkOptions.id}` },
     );
-    logger.trace({ response: response.data }, 'http check raw response data');
+    logger.trace({ response: response }, 'http check raw response data');
 
-    const checkResult = convertAxiosResponseToCheckResult(
+    const checkResult = convertHttpResponseToCheckResult(
       {
         id: checkOptions.id,
         name: checkOptions.name,
@@ -58,22 +58,26 @@ export async function executeHttpRequest(
   }
 }
 
-export function convertAxiosResponseToCheckResult(
+export function convertHttpResponseToCheckResult(
   check: { id: CheckId; name: string; url: string; method: 'GET' | 'POST' },
-  response: AxiosResponse,
+  response: HttpResponse,
 ): CheckResult {
   let status: CheckStatus;
-  if (response.status >= 200 && response.status <= 299) {
+  if (
+    response.statusCode &&
+    response.statusCode >= 200 &&
+    response.statusCode <= 299
+  ) {
     status = 'passing';
-  } else if (response.status == 429) {
+  } else if (response.statusCode == 429) {
     status = 'warning';
   } else {
     status = 'error';
   }
 
-  const output = `HTTP ${check.method} ${check.url}: ${response.status} ${
+  const output = `HTTP ${check.method} ${check.url}: ${response.statusCode} ${
     response.statusText
-  }, response: ${truncate(JSON.stringify(response.data))}`;
+  }, response: ${truncate(JSON.stringify(response.body))}`;
 
   return {
     id: check.id,

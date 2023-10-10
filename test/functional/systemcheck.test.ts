@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -29,6 +31,7 @@ describe('broker client systemcheck endpoint', () => {
   afterAll(async () => {
     await tws.server.close();
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   afterEach(async () => {
@@ -51,7 +54,6 @@ describe('broker client systemcheck endpoint', () => {
 
     expect(response.data).toBeInstanceOf(Array);
     const systemCheckBody = response.data[0];
-
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toStrictEqual({
       brokerClientValidationMethod: 'GET',

@@ -1,70 +1,58 @@
-import request from 'request';
 import { log as logger } from '../../logs/logger';
 import stream from 'stream';
+import { pipeline } from 'stream/promises';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import version from '../utils/version';
 
-let streamPostRequestHandler = request;
-streamPostRequestHandler = request.defaults({
-  timeout: 600000,
-  agentOptions: {
-    keepAlive: true,
-    keepAliveMsecs: 60000,
-    maxTotalSockets: 1000,
-  },
-});
+import { getProxyForUrl } from 'proxy-from-env';
+import { bootstrap } from 'global-agent';
+import https from 'https';
+import http from 'http';
+import { config } from '../config';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
+const client = config.brokerServerUrl?.startsWith('https') ? https : http;
+
+const agent = new client.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 600000,
+});
+
+if (process.env.HTTP_PROXY || process.env.http_proxy) {
+  process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
+}
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+  process.env.HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.https_proxy;
+}
+if (process.env.NP_PROXY || process.env.no_proxy) {
+  process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
+}
+const proxyUri = getProxyForUrl(config.brokerServerUrl);
+if (proxyUri) {
+  bootstrap({
+    environmentVariableNamespace: '',
+  });
+}
 class BrokerServerPostResponseHandler {
   #buffer;
+  #brokerTransformer;
   #logContext;
   #config;
   #brokerToken;
   #streamingId;
   #serverId;
   #requestId;
+  #brokerSrvPostRequestHandler;
 
-  constructor(
-    logContext,
-    config,
-    brokerToken,
-    streamingId,
-    serverId,
-    requestId,
-  ) {
+  constructor(logContext, config, brokerToken, serverId, requestId) {
     this.#logContext = logContext;
     this.#config = config;
     this.#brokerToken = brokerToken;
-    this.#streamingId = streamingId;
     this.#serverId = serverId;
     this.#requestId = requestId;
-  }
-
-  #initBuffer() {
     this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 });
 
-    const url = new URL(
-      `${this.#config.brokerServerUrl}/response-data/${this.#brokerToken}/${
-        this.#streamingId
-      }`,
-    );
-    if (this.#serverId) {
-      url.searchParams.append('server_id', this.#serverId);
-    }
-    const brokerServerPostRequestUrl = url.toString();
-
-    const brokerServerPostRequest = streamPostRequestHandler({
-      url: brokerServerPostRequestUrl,
-      method: 'post',
-      headers: {
-        'Snyk-Request-Id': this.#requestId,
-        'Content-Type': BROKER_CONTENT_TYPE,
-        Connection: 'Keep-Alive',
-        'Keep-Alive': 'timeout=60, max=1000',
-        'user-agent': 'Snyk Broker client ' + version,
-      },
-    });
     this.#buffer.on('error', (e) =>
       logger.error(
         {
@@ -75,36 +63,66 @@ class BrokerServerPostResponseHandler {
         'received error sending data to broker server post request buffer',
       ),
     );
-    this.#buffer.pipe(
-      brokerServerPostRequest
-        .on('error', (e) => {
+  }
+
+  async #initHttpClientRequest() {
+    const url = new URL(
+      `${this.#config.brokerServerUrl}/response-data/${this.#brokerToken}/${
+        this.#streamingId
+      }`,
+    );
+    if (this.#serverId) {
+      url.searchParams.append('server_id', this.#serverId);
+    }
+    const brokerServerPostRequestUrl = url.toString();
+
+    const options = {
+      method: 'post',
+      headers: {
+        'Snyk-Request-Id': `${this.#requestId}`,
+        'Content-Type': BROKER_CONTENT_TYPE,
+        Connection: 'Keep-Alive',
+        'Keep-Alive': 'timeout=600000, max=1000000',
+        'user-agent': 'Snyk Broker client ' + version,
+      },
+      agent: agent,
+      timeout: 600000,
+    };
+
+    this.#brokerSrvPostRequestHandler = client.request(
+      brokerServerPostRequestUrl,
+      options,
+    );
+    this.#brokerSrvPostRequestHandler
+      .on('error', (e) => {
+        logger.error(
+          {
+            error: e,
+            stackTrace: new Error('stacktrace generator').stack,
+          },
+          'received error sending data via POST to Broker Server',
+        );
+        this.#buffer.destroy(e);
+      })
+      .on('response', (r) => {
+        if (r.statusCode !== 200) {
           logger.error(
             {
-              ...this.#logContext,
-              error: e,
+              statusCode: r.statusCode,
+              statusMessage: r.statusMessage,
+              headers: r.headers,
+              body: r.body?.toString(),
               stackTrace: new Error('stacktrace generator').stack,
             },
-            'received error sending data via POST to Broker Server',
+            'Received unexpected HTTP response POSTing data to Broker Server',
           );
-          this.#buffer.destroy(e);
-        })
-        .on('response', (r) => {
-          if (r.statusCode !== 200) {
-            logger.error(
-              {
-                ...this.#logContext,
-                statusCode: r.statusCode,
-                statusMessage: r.statusMessage,
-                headers: r.headers,
-                body: r.body?.toString(),
-                stackTrace: new Error('stacktrace generator').stack,
-              },
-              'Received unexpected HTTP response POSTing data to Broker Server',
-            );
-          }
-        }),
-    );
-    logger.debug(this.#logContext, 'Pipe set up');
+        }
+      })
+      .on('finish', () => {
+        this.#brokerSrvPostRequestHandler.removeAllListeners();
+      });
+
+    logger.debug(this.#logContext, 'POST Request Client setup');
   }
 
   #sendIoData(ioData) {
@@ -145,7 +163,6 @@ class BrokerServerPostResponseHandler {
         this.#buffer.destroy(error);
       } else {
         const body = JSON.stringify({ error: error });
-        this.#initBuffer();
         this.#sendIoData(
           JSON.stringify({
             status: 500,
@@ -161,74 +178,89 @@ class BrokerServerPostResponseHandler {
     };
   }
 
-  forwardRequest(rqst: request.Request) {
+  async forwardRequest(response: http.IncomingMessage, streamingID) {
+    this.#streamingId = streamingID;
     let prevPartialChunk;
-    let isResponseJson;
-    rqst
-      .on('error', this.#handleRequestError())
-      .on('response', (response) => {
-        const status = response?.statusCode || 500;
-        logger.info(
-          {
-            ...this.#logContext,
-            responseStatus: status,
-            responseHeaders: response.headers,
-          },
-          'response received, setting up stream to Broker Server',
-        );
-        isResponseJson = isJson(response.headers);
-        const ioData = JSON.stringify({
-          status,
-          headers: response.headers,
-        });
-        this.#initBuffer();
-        this.#sendIoData(ioData);
-        logger.info(
-          this.#logContext,
-          'successfully sent status & headers to Broker Server',
-        );
-      })
-      .on('data', (chunk) => {
+
+    const status = response?.statusCode || 500;
+    logger.debug(
+      {
+        ...this.#logContext,
+        responseStatus: status,
+        responseHeaders: response.headers,
+      },
+      'response received, setting up stream to Broker Server',
+    );
+    const isResponseJson = isJson(response.headers);
+    const ioData = JSON.stringify({
+      status,
+      headers: response.headers,
+    });
+    this.#initHttpClientRequest();
+    this.#sendIoData(ioData);
+    logger.debug(
+      this.#logContext,
+      'successfully sent status & headers to Broker Server',
+    );
+    const localLogContext = this.#logContext;
+    // TODO: break into 2 distinct transform, only to add to pipeline if conditions are met
+    // Take out of here if possible
+    this.#brokerTransformer = new stream.Transform({
+      transform(chunk, encoding, callback) {
         const httpBody =
-          this.#config && this.#config.LOG_ENABLE_BODY === 'true'
+          config && config.LOG_ENABLE_BODY === 'true'
             ? { body: chunk.toString() }.body
             : null;
         logger.debug(
-          { ...this.#logContext, chunkLength: chunk.length, httpBody },
+          { ...localLogContext, chunkLength: chunk.length, httpBody },
           'writing data to buffer',
         );
-        if (this.#config.RES_BODY_URL_SUB && isResponseJson) {
+        if (config.RES_BODY_URL_SUB && isResponseJson) {
           const { newChunk, partial } = replaceUrlPartialChunk(
             Buffer.from(chunk).toString(),
             prevPartialChunk,
-            this.#config,
+            config,
           );
           prevPartialChunk = partial;
           chunk = newChunk;
         }
-        if (!this.#buffer.write(chunk)) {
-          logger.trace(this.#logContext, 'pausing request stream');
-          rqst.pause();
-          this.#buffer.once('drain', () => {
-            logger.trace(this.#logContext, 'resuming request stream');
-            rqst.resume();
-          });
-        }
-      })
-      .on('end', () => {
-        logger.info(this.#logContext, 'writing end to buffer');
-        this.#buffer.end();
-      });
+        callback(null, chunk);
+      },
+    });
+    response.on('error', this.#handleRequestError());
+    try {
+      if (
+        (config && config.LOG_ENABLE_BODY === 'true') ||
+        (config.RES_BODY_URL_SUB && isResponseJson)
+      ) {
+        await pipeline(
+          response,
+          this.#buffer,
+          this.#brokerTransformer,
+          this.#brokerSrvPostRequestHandler,
+        );
+      } else {
+        await pipeline(
+          response,
+          this.#buffer,
+          this.#brokerSrvPostRequestHandler,
+        );
+      }
+    } catch (err) {
+      logger.error({ err }, 'Error in request pipelining');
+    }
   }
 
-  sendData(responseData) {
+  async sendData(responseData, streamingID) {
+    this.#streamingId = streamingID;
     const body = responseData.body;
     delete responseData.body;
     logger.debug(
       { ...this.#logContext, responseData, body },
       'posting internal response back to Broker Server as it is expecting streaming response',
     );
-    this.#initBuffer();
+    this.#initHttpClientRequest();
+    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler);
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();

@@ -19,13 +19,8 @@ export const main = async (clientOpts: ClientOpts) => {
 
     const brokerClientId = uuidv4();
     logger.info({ brokerClientId }, 'generated broker client id');
-
     const hookResults = await processStartUpHooks(clientOpts, brokerClientId);
-    if (!hookResults.okToBoot) {
-      throw new Error(
-        `Processing startup hooks error. Interrupting broker client boot up.`,
-      );
-    }
+
     const identifyingMetadata = {
       capabilities: ['post-streams'],
       clientId: brokerClientId,
@@ -86,5 +81,6 @@ export const main = async (clientOpts: ClientOpts) => {
     };
   } catch (err) {
     logger.warn({ err }, `Shutting down client`);
+    throw err;
   }
 };

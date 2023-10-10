@@ -1,16 +1,15 @@
-jest.mock('request');
-import request from 'request';
-
-const requestDefaultsMock = jest.mocked(request.defaults, true);
-const requestMock = jest.fn((req, fn) => {
-  fn!(null, { statusCode: 200 } as any, {});
-});
+const PORT = 8001;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
+jest.mock('../../lib/common/http/request');
+import { makeRequestToDownstream } from '../../lib/common/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-requestDefaultsMock.mockImplementation((_options) => {
-  return requestMock;
+const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return data;
 });
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
@@ -21,7 +20,10 @@ describe('header relay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
+  afterAll(() => {
+    delete process.env.BROKER_SERVER_URL;
+    jest.clearAllMocks();
+  });
   it('swaps header values found in BROKER_VAR_SUB', (done) => {
     expect.hasAssertions();
 
@@ -60,13 +62,13 @@ describe('header relay', () => {
         headers: headers,
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
-        expect(arg.headers!['private-token']).toEqual(
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['private-token']).toEqual(
           `Bearer ${config.SECRET_TOKEN}`,
         );
-        expect(arg.headers!.replaceme).toEqual(`replace ${config.VALUE}`);
-        expect(arg.headers!.donttouch).toEqual('not to be changed ${VALUE}');
+        expect(arg.headers.replaceme).toEqual(`replace ${config.VALUE}`);
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );
@@ -81,6 +83,7 @@ describe('header relay', () => {
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       disableHeaderVarsSubstitution: true,
+      brokerServerUrl: 'http://localhost:8001',
     };
 
     const options: ClientOpts | ServerOpts = {
@@ -112,11 +115,11 @@ describe('header relay', () => {
         headers: headers,
       },
       () => {
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        const arg = requestMock.mock.calls[0][0];
-        expect(arg.headers!['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
-        expect(arg.headers!.replaceme).toEqual('replace ${VALUE}');
-        expect(arg.headers!.donttouch).toEqual('not to be changed ${VALUE}');
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
+        expect(arg.headers.replaceme).toEqual('replace ${VALUE}');
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );

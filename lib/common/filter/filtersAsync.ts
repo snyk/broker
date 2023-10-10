@@ -77,7 +77,6 @@ export const loadFilters = (ruleSource: Rule[]) => {
   }
 
   logger.info({ rulesCount: rules.length }, 'loading new rules');
-
   // array of entries with
   const tests = rules.map((entry) => {
     const keys: pathRegexp.Key[] = [];

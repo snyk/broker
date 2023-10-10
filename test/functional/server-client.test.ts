@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
@@ -28,10 +30,10 @@ describe('proxy requests originating from behind the broker server', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept });
+    bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
     bc = await createBrokerClient({
-      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
       brokerToken: 'broker-token-12345',
       filters: clientAccept,
       type: 'client',
@@ -43,6 +45,7 @@ describe('proxy requests originating from behind the broker server', () => {
     await tws.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('server identifies self to client', async () => {
@@ -60,7 +63,6 @@ describe('proxy requests originating from behind the broker server', () => {
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
       { some: { example: 'json' } },
     );
-
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({
       some: { example: 'json' },
@@ -128,7 +130,6 @@ describe('proxy requests originating from behind the broker server', () => {
         },
       },
     );
-
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
       message: 'blocked',

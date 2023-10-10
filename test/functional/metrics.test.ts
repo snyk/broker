@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import * as metrics from '../../lib/common/utils/metrics';
 import { axiosClient } from '../setup/axios-client';
@@ -27,10 +29,10 @@ describe('metrics', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept });
+    bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
     bc = await createBrokerClient({
-      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
       brokerToken: '12345',
       filters: clientAccept,
     });
@@ -41,6 +43,7 @@ describe('metrics', () => {
     await tws.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('observes response size when streaming', async () => {

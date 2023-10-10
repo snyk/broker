@@ -1,4 +1,5 @@
 import { parse } from 'url';
+// import { loadBrokerConfig } from '../../lib/common/config';
 
 describe('Proxy decision', () => {
   afterEach(() => {
@@ -6,12 +7,14 @@ describe('Proxy decision', () => {
     delete process.env.NO_PROXY;
     delete process.env.https_proxy;
     delete process.env.HTTPS_PROXY;
+
     jest.resetModules();
   });
 
   it('should not proxy when no https proxy is defined', () => {
     // http, not httpS
     process.env.http_proxy = 'localhost:4444';
+
     // loaded now, for config to be reloaded after env vars
     const {
       shouldProxy,

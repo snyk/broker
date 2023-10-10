@@ -1,9 +1,55 @@
+// const PORT = 9999;
+// process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import { promises as fsp, readFileSync } from 'fs';
 import { dir, setGracefulCleanup } from 'tmp-promise';
-import exec from '../../cli/exec';
-import init from '../../cli/init';
 
 describe('CLI', () => {
+  afterAll(() => {
+    delete process.env.BROKER_TOKEN;
+    delete process.env.BROKER_SERVER_URL;
+  });
+  describe('"exec" command', () => {
+    beforeEach(() => {
+      delete process.env.BROKER_TOKEN;
+      delete process.env.BROKER_SERVER_URL;
+    });
+
+    it('throws when missing broker id', async () => {
+      const exec = await import('../../cli/exec');
+      try {
+        await exec.default({ _: ['client'], port: 8010 });
+        expect(true).toBeFalsy(); // safety check: should fail is the call above doesn't throw
+      } catch (err) {
+        expect(err).toEqual(
+          new ReferenceError(
+            'BROKER_TOKEN is required to successfully identify itself to the server',
+          ),
+        );
+      }
+    });
+  });
+  describe('"exec" command', () => {
+    beforeAll(() => {
+      delete process.env.BROKER_TOKEN;
+      delete process.env.BROKER_SERVER_URL;
+    });
+
+    it('cli throws when missing broker server', async () => {
+      process.env.BROKER_TOKEN = '1';
+      const exec = await import('../../cli/exec');
+      try {
+        await exec.default({ _: ['client'], port: 8020 });
+        expect(true).toBeFalsy(); // safety check: should fail is the call above doesn't throw
+      } catch (err) {
+        expect(err).toEqual(
+          new ReferenceError(
+            'BROKER_SERVER_URL is required to connect to the broker server',
+          ),
+        );
+      }
+    });
+  });
+
   describe('"init" command', () => {
     const templates = [['bitbucket-server'], ['github'], ['gitlab']];
 
@@ -16,12 +62,15 @@ describe('CLI', () => {
 
       process.chdir(originalWorkDir);
     });
+    afterAll(() => {
+      delete process.env.BROKER_SERVER_URL;
+    });
 
     it.each(templates)('creates files from %p template', async (template) => {
       const templateDir = await dir({ unsafeCleanup: true });
       process.chdir(templateDir.path);
-
-      await init(template);
+      const init = await import('../../cli/init');
+      await init.default(template);
 
       const stats = await Promise.all([
         fsp.stat('.env'),
@@ -35,34 +84,6 @@ describe('CLI', () => {
       expect(() =>
         JSON.parse(readFileSync('accept.json', { encoding: 'utf-8' })),
       ).not.toThrowError();
-    });
-  });
-
-  describe('"exec" command', () => {
-    it('throws when missing broker id', async () => {
-      try {
-        await exec({ _: ['client'], port: 8010 });
-      } catch (err) {
-        expect(err).toEqual(
-          new ReferenceError(
-            'BROKER_TOKEN is required to successfully identify itself to the server',
-          ),
-        );
-      }
-    });
-
-    it('cli throws when missing broker server', async () => {
-      process.env.BROKER_TOKEN = '1';
-
-      try {
-        await exec({ _: ['client'], port: 8020 });
-      } catch (err) {
-        expect(err).toEqual(
-          new ReferenceError(
-            'BROKER_TOKEN is required to successfully identify itself to the server',
-          ),
-        );
-      }
     });
   });
 });

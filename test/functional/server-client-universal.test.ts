@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
@@ -33,10 +35,10 @@ describe('proxy requests originating from behind the broker server', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({ filters: serverAccept, port: 8100 });
+    bs = await createBrokerServer({ filters: serverAccept, port: PORT });
 
     bc = await createBrokerClient({
-      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
       brokerToken: 'broker-token-12345',
       filters: clientAccept,
       type: 'client',
@@ -52,6 +54,7 @@ describe('proxy requests originating from behind the broker server', () => {
     await tws.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   it('successfully broker GET', async () => {

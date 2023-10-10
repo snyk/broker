@@ -10,5 +10,4 @@ export interface ClientOpts {
 
 export interface HookResults {
   preflightCheckResults?: CheckResult[];
-  okToBoot: boolean;
 }

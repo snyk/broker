@@ -4,11 +4,33 @@ import camelcase from 'camelcase';
 import { loadConfig } from 'snyk-config';
 import dotenv from 'dotenv';
 
-dotenv.config({
-  path: path.join(process.cwd(), '.env'),
-});
+export let config: Record<string, any> = {};
 
-const localConfig = loadConfig(path.join(__dirname, '..'));
+export const loadBrokerConfig = () => {
+  dotenv.config({
+    path: path.join(process.cwd(), '.env'),
+  });
+
+  const localConfig = loadConfig(path.join(__dirname, '..'));
+
+  expand(process.env);
+
+  config = Object.assign({}, camelify(localConfig), camelify(process.env));
+  if (config.caCert) {
+    config.caCert = fs.readFileSync(
+      path.resolve(process.cwd(), config.caCert as string),
+    );
+  }
+
+  for (const [key, value] of Object.entries(config)) {
+    if (
+      (key.endsWith('Pool') || key.endsWith('_POOL')) &&
+      !Array.isArray(value)
+    ) {
+      config[key] = value.split(',').map((s) => s.trim());
+    }
+  }
+};
 
 function camelify(res: Record<string, any>): Record<string, any> {
   return Object.keys(res).reduce((acc, key) => {
@@ -85,26 +107,4 @@ function expand(obj: Record<string, any>): Record<string, any> {
   }
 
   return obj;
-}
-
-expand(process.env);
-
-export const config: Record<string, any> = Object.assign(
-  {},
-  camelify(localConfig),
-  camelify(process.env),
-);
-if (config.caCert) {
-  config.caCert = fs.readFileSync(
-    path.resolve(process.cwd(), config.caCert as string),
-  );
-}
-
-for (const [key, value] of Object.entries(config)) {
-  if (
-    (key.endsWith('Pool') || key.endsWith('_POOL')) &&
-    !Array.isArray(value)
-  ) {
-    config[key] = value.split(',').map((s) => s.trim());
-  }
 }

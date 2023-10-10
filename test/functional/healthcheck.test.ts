@@ -1,3 +1,5 @@
+const PORT = 9999;
+process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
@@ -31,6 +33,7 @@ describe('proxy requests originating from behind the broker client', () => {
   afterAll(async () => {
     await tws.server.close();
     await closeBrokerServer(bs);
+    delete process.env.BROKER_SERVER_URL;
   });
 
   afterEach(async () => {

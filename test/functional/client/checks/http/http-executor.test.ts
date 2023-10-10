@@ -1,4 +1,4 @@
-import { axiosInstance } from '../../../../../lib/common/http/axios';
+import http from 'http';
 import { MockServer } from 'jest-mock-server';
 import { aHttpCheck } from '../../../../helpers/test-factories';
 import { executeHttpRequest } from '../../../../../lib/client/checks/http/http-executor';
@@ -92,7 +92,7 @@ describe('client/checks/http/http-executor.ts', () => {
     });
 
     it('should add common http headers to request', async () => {
-      const spyOnRequestFn = jest.spyOn(axiosInstance, 'request');
+      const spyOnRequestFn = jest.spyOn(http, 'request');
       server.get(`/broker-server/healthcheck`).mockImplementationOnce((ctx) => {
         ctx.status = 200;
         ctx.body = { status: 'ok' };
@@ -106,7 +106,7 @@ describe('client/checks/http/http-executor.ts', () => {
         { url: check.url, method: check.method, timeoutMs: check.timeoutMs },
       );
 
-      expect(spyOnRequestFn.mock.lastCall[0].headers).toMatchObject({
+      expect(spyOnRequestFn.mock.lastCall[1].headers).toMatchObject({
         Accept: expect.any(String),
         'Content-Type': expect.any(String),
       });

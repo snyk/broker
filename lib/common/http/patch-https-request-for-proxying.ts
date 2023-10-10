@@ -9,7 +9,8 @@ import url from 'url';
 import tunnel from 'tunnel';
 import https from 'https';
 
-import { config } from '../config';
+import { config, loadBrokerConfig } from '../config';
+loadBrokerConfig();
 const brokerServer = url.parse(config.brokerServerUrl || '');
 brokerServer.port =
   brokerServer.port || brokerServer.protocol === 'https:' ? '443' : '80';
