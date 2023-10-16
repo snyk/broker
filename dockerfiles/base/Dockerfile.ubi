@@ -53,6 +53,7 @@ RUN yum upgrade --assumeyes && \
     rpm --erase --nodeps libarchive && \
     rpm --erase --nodeps libcurl && \
     rpm --erase --nodeps libsolv && \
+    rpm --erase --nodeps libnghttp2 && \
     rpm --erase --nodeps platform-python && \
     rpm --erase --nodeps platform-python-setuptools && \
     rpm --erase --nodeps python3-cloud-what && \
