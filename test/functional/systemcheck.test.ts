@@ -69,6 +69,34 @@ describe('broker client systemcheck endpoint', () => {
     ).not.toBeTruthy();
   });
 
+  it('good validation url, custom endpoint, no authorization, no json response', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: 'broker-token-12345',
+      type: 'client',
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo/textresponse`,
+      brokerSystemcheckPath: '/custom-systemcheck',
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axiosClient.get(
+      `http://localhost:${bc.port}/custom-systemcheck`,
+    );
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data[0];
+    expect(response.status).toEqual(200);
+    expect(systemCheckBody).toStrictEqual({
+      brokerClientValidationMethod: 'GET',
+      brokerClientValidationTimeoutMs: expect.any(Number),
+      brokerClientValidationUrl: `http://localhost:${tws.port}/echo/textresponse`,
+      brokerClientValidationUrlStatusCode: 200,
+      maskedCredentials: null,
+      ok: true,
+      testResponse: expect.any(Object),
+    });
+    expect(systemCheckBody.testResponse.body).toEqual('OK');
+  });
+
   it('good validation url, authorization header', async () => {
     bc = await createBrokerClient({
       brokerServerUrl: `http://localhost:${bs.port}`,

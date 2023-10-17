@@ -2,6 +2,7 @@ import { log as logger } from '../../logs/logger';
 import version from '../../common/utils/version';
 import { sanitise } from '../../logs/logger';
 import { makeRequestToDownstream } from '../../common/http/request';
+import { isJson } from '../../common/utils/json';
 
 const credsFromHeader = (s) => {
   if (s.indexOf(' ') >= 0) {
@@ -101,7 +102,10 @@ export const checkCredentials = async (
 
       logger.error(data, response && response.body, 'Systemcheck failed');
     } else {
-      const parsedBodyResponse = JSON.parse(response.body || {});
+      const parsedBodyResponse = isJson(response.headers)
+        ? JSON.parse(response.body)
+        : response.body;
+
       // const responseToReturn = response
       response.body = parsedBodyResponse;
       if (process.env.JEST_WORKER_ID) {
@@ -117,7 +121,6 @@ export const checkCredentials = async (
     if (process.env.JEST_WORKER_ID) {
       data['testError'] = error;
     }
-
     data['ok'] = false;
     data['error'] = error;
   }

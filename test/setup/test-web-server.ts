@@ -178,6 +178,15 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  // mimics functionality of https://httpbin.org/headers
+  echoRouter.get(
+    '/echo/textresponse',
+    (req: express.Request, resp: express.Response) => {
+      resp.status(200);
+      resp.send('OK');
+    },
+  );
+
   echoRouter.post(
     '/echo-headers/:param?',
     (req: express.Request, resp: express.Response) => {
