@@ -4,6 +4,7 @@ interface BackendAPI {
 
 interface BrokerClient {
   PREFLIGHT_CHECKS_ENABLED: string;
+  INSECURE_DOWNSTREAM: string;
 }
 
 interface BrokerServer {
