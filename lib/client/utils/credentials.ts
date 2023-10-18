@@ -106,7 +106,6 @@ export const checkCredentials = async (
         ? JSON.parse(response.body)
         : response.body;
 
-      // const responseToReturn = response
       response.body = parsedBodyResponse;
       if (process.env.JEST_WORKER_ID) {
         data['testResponse'] = response;
