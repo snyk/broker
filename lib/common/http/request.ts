@@ -5,6 +5,7 @@ import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
 import { config } from '../config';
+import { switchToInsecure } from './utils';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
@@ -27,90 +28,98 @@ export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<HttpResponse> => {
-  const proxyUri = getProxyForUrl(req.url);
+  const localRequest = req;
+  if (config.INSECURE_DOWNSTREAM) {
+    localRequest.url = switchToInsecure(localRequest.url);
+  }
+  const proxyUri = getProxyForUrl(localRequest.url);
   if (proxyUri) {
     bootstrap({
       environmentVariableNamespace: '',
     });
   }
-  const httpClient = req.url.startsWith('https') ? https : http;
+  const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
-    method: req.method,
-    headers: req.headers as any,
+    method: localRequest.method,
+    headers: localRequest.headers as any,
   };
 
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
-      const request = httpClient.request(req.url, options, (response) => {
-        let data = '';
+      const request = httpClient.request(
+        localRequest.url,
+        options,
+        (response) => {
+          let data = '';
 
-        // A chunk of data has been received.
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        // The whole response has been received.
-        response.on('end', () => {
-          if (
-            response.statusCode &&
-            response.statusCode >= 200 &&
-            response.statusCode < 300
-          ) {
-            logger.trace(
-              { statusCode: response.statusCode, url: req.url },
-              `Successful request`,
-            );
-          } else {
-            logger.debug(
-              { statusCode: response.statusCode, url: req.url },
-              `Non 2xx HTTP Code Received`,
-            );
-          }
-          resolve({
-            headers: response.headers,
-            statusCode: response.statusCode,
-            body: data,
+          // A chunk of data has been received.
+          response.on('data', (chunk) => {
+            data += chunk;
           });
-        });
-        response.on('error', (error) => {
-          if (retries > 0) {
-            logger.warn(
-              { msg: req.url },
-              `Downstream Response failed. Retrying after 500ms...`,
-            );
-            setTimeout(() => {
-              resolve(makeRequestToDownstream(req, retries - 1));
-            }, 500); // Wait for 0.5 second before retrying
-          } else {
-            logger.error(
-              { error },
-              `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
-            );
-            reject(error);
-          }
-        });
-      });
+
+          // The whole response has been received.
+          response.on('end', () => {
+            if (
+              response.statusCode &&
+              response.statusCode >= 200 &&
+              response.statusCode < 300
+            ) {
+              logger.trace(
+                { statusCode: response.statusCode, url: localRequest.url },
+                `Successful request`,
+              );
+            } else {
+              logger.debug(
+                { statusCode: response.statusCode, url: localRequest.url },
+                `Non 2xx HTTP Code Received`,
+              );
+            }
+            resolve({
+              headers: response.headers,
+              statusCode: response.statusCode,
+              body: data,
+            });
+          });
+          response.on('error', (error) => {
+            if (retries > 0) {
+              logger.warn(
+                { msg: localRequest.url },
+                `Downstream Response failed. Retrying after 500ms...`,
+              );
+              setTimeout(() => {
+                resolve(makeRequestToDownstream(localRequest, retries - 1));
+              }, 500); // Wait for 0.5 second before retrying
+            } else {
+              logger.error(
+                { error },
+                `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
+              );
+              reject(error);
+            }
+          });
+        },
+      );
       // An error occurred while fetching.
       request.on('error', (error) => {
         if (retries > 0) {
           logger.warn(
-            { url: req.url, err: error },
+            { url: localRequest.url, err: error },
             `Request failed. Retrying after 500ms...`,
           );
           setTimeout(() => {
-            resolve(makeRequestToDownstream(req, retries - 1));
+            resolve(makeRequestToDownstream(localRequest, retries - 1));
           }, 500); // Wait for 0.5 second before retrying
         } else {
           logger.error(
-            { url: req.url, err: error },
+            { url: localRequest.url, err: error },
             `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
           reject(error);
         }
       });
 
-      if (req.body) {
-        request.write(req.body);
+      if (localRequest.body) {
+        request.write(localRequest.body);
       }
 
       request.end();
@@ -124,38 +133,46 @@ export const makeStreamingRequestToDownstream = (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<http.IncomingMessage> => {
-  const proxyUri = getProxyForUrl(req.url);
+  const localRequest = req;
+  if (config.INSECURE_DOWNSTREAM) {
+    localRequest.url = switchToInsecure(localRequest.url);
+  }
+  const proxyUri = getProxyForUrl(localRequest.url);
   if (proxyUri) {
     bootstrap({
       environmentVariableNamespace: '',
     });
   }
-  const httpClient = req.url.startsWith('https') ? https : http;
+  const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
-    method: req.method,
-    headers: req.headers as any,
+    method: localRequest.method,
+    headers: localRequest.headers as any,
   };
 
   return new Promise<http.IncomingMessage>((resolve, reject) => {
     try {
-      const request = httpClient.request(req.url, options, (response) => {
-        if (
-          response.statusCode &&
-          response.statusCode >= 200 &&
-          response.statusCode < 300
-        ) {
-          logger.trace(
-            { statusCode: response.statusCode, url: req.url },
-            `Successful request`,
-          );
-        } else {
-          logger.debug(
-            { statusCode: response.statusCode, url: req.url },
-            `Non 2xx HTTP Code Received`,
-          );
-        }
-        resolve(response);
-      });
+      const request = httpClient.request(
+        localRequest.url,
+        options,
+        (response) => {
+          if (
+            response.statusCode &&
+            response.statusCode >= 200 &&
+            response.statusCode < 300
+          ) {
+            logger.trace(
+              { statusCode: response.statusCode, url: localRequest.url },
+              `Successful request`,
+            );
+          } else {
+            logger.debug(
+              { statusCode: response.statusCode, url: localRequest.url },
+              `Non 2xx HTTP Code Received`,
+            );
+          }
+          resolve(response);
+        },
+      );
       request.on('error', (error) => {
         if (retries > 0) {
           logger.warn(
@@ -163,18 +180,20 @@ export const makeStreamingRequestToDownstream = (
             `Request failed. Retrying after 500ms...`,
           );
           setTimeout(() => {
-            resolve(makeStreamingRequestToDownstream(req, retries - 1));
+            resolve(
+              makeStreamingRequestToDownstream(localRequest, retries - 1),
+            );
           }, 500); // Wait for 0.5 second before retrying
         } else {
           logger.error(
-            { url: req.url, err: error },
+            { url: localRequest.url, err: error },
             `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
           reject(error);
         }
       });
-      if (req.body) {
-        request.write(req.body);
+      if (localRequest.body) {
+        request.write(localRequest.body);
       }
       request.end();
     } catch (err) {
@@ -186,50 +205,58 @@ export const makeStreamingRequestToDownstream = (
 export const makeSingleRawRequestToDownstream = async (
   req: PostFilterPreparedRequest,
 ): Promise<HttpResponse> => {
-  const proxyUri = getProxyForUrl(req.url);
+  const localRequest = req;
+  if (config.INSECURE_DOWNSTREAM) {
+    localRequest.url = switchToInsecure(localRequest.url);
+  }
+  const proxyUri = getProxyForUrl(localRequest.url);
   if (proxyUri) {
     bootstrap({
       environmentVariableNamespace: '',
     });
   }
-  const httpClient = req.url.startsWith('https') ? https : http;
+  const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
-    method: req.method,
-    headers: req.headers as any,
+    method: localRequest.method,
+    headers: localRequest.headers as any,
   };
 
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
-      const request = httpClient.request(req.url, options, (response) => {
-        let data = '';
+      const request = httpClient.request(
+        localRequest.url,
+        options,
+        (response) => {
+          let data = '';
 
-        // A chunk of data has been received.
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        // The whole response has been received.
-        response.on('end', () => {
-          resolve({
-            headers: response.headers,
-            statusCode: response.statusCode,
-            statusText: response.statusMessage || '',
-            body: data,
+          // A chunk of data has been received.
+          response.on('data', (chunk) => {
+            data += chunk;
           });
-        });
 
-        // An error occurred while fetching.
-        response.on('error', (error) => {
-          logger.error({ error }, 'Error making request to downstream.');
-          reject(error);
-        });
-      });
+          // The whole response has been received.
+          response.on('end', () => {
+            resolve({
+              headers: response.headers,
+              statusCode: response.statusCode,
+              statusText: response.statusMessage || '',
+              body: data,
+            });
+          });
+
+          // An error occurred while fetching.
+          response.on('error', (error) => {
+            logger.error({ error }, 'Error making request to downstream.');
+            reject(error);
+          });
+        },
+      );
       request.on('error', (error) => {
         logger.error({ error }, 'Error making request to downstream.');
         reject(error);
       });
-      if (req.body) {
-        request.write(req.body);
+      if (localRequest.body) {
+        request.write(localRequest.body);
       }
       request.end();
     } catch (err) {

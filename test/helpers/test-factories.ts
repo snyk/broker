@@ -36,6 +36,7 @@ export const aConfig = (fields: Partial<Config>): Config => {
     GIT_COMMITTER_EMAIL: '',
     GPG_PASSPHRASE: '',
     GPG_PRIVATE_KEY: '',
+    INSECURE_DOWNSTREAM: 'false',
     ...fields,
   };
 };

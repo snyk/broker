@@ -1,3 +1,4 @@
+import { loadBrokerConfig } from '../../lib/common/config';
 import {
   makeRequestToDownstream,
   makeSingleRawRequestToDownstream,
@@ -8,6 +9,7 @@ import http from 'http';
 const nock = require('nock');
 
 const serverUrl = 'http://dummy-downstream-service';
+const httpsServerUrl = 'http://dummy-downstream-service';
 const error = { message: 'Error occurred', code: 'ECONNRESET' };
 describe('Test HTTP request helpers', () => {
   beforeAll(async () => {
@@ -106,5 +108,44 @@ describe('Test HTTP request helpers', () => {
     } catch (err) {
       expect(err).toEqual(error);
     }
+  });
+
+  it('INSECURE DOWNSTREAM overrides https to http', async () => {
+    process.env.INSECURE_DOWNSTREAM = 'true';
+    loadBrokerConfig();
+    const response = await makeRequestToDownstream({
+      url: `${httpsServerUrl}/test`,
+      headers: {},
+      method: 'GET',
+    });
+    expect(response).toEqual({ body: 'OK', headers: {}, statusCode: 200 });
+    delete process.env.INSECURE_DOWNSTREAM;
+  });
+  it('INSECURE DOWNSTREAM overrides https to http streaming requests', async () => {
+    process.env.INSECURE_DOWNSTREAM = 'true';
+    loadBrokerConfig();
+    const response = await makeStreamingRequestToDownstream({
+      url: `${httpsServerUrl}/test`,
+      headers: {},
+      method: 'GET',
+    });
+    expect(response).toBeInstanceOf(http.IncomingMessage);
+    delete process.env.INSECURE_DOWNSTREAM;
+  });
+  it('INSECURE DOWNSTREAM overrides https to http single raw request', async () => {
+    process.env.INSECURE_DOWNSTREAM = 'true';
+    loadBrokerConfig();
+    const response = await makeSingleRawRequestToDownstream({
+      url: `${httpsServerUrl}/test`,
+      headers: {},
+      method: 'GET',
+    });
+    expect(response).toEqual({
+      body: 'OK',
+      headers: {},
+      statusCode: 200,
+      statusText: '',
+    });
+    delete process.env.INSECURE_DOWNSTREAM;
   });
 });

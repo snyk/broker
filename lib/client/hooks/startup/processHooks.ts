@@ -77,6 +77,13 @@ export const processStartUpHooks = async (
       );
     }
 
+    if (clientOpts.config.INSECURE_DOWNSTREAM) {
+      logger.warn(
+        {},
+        'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted',
+      );
+    }
+
     return {
       preflightCheckResults: preflightCheckResults.length
         ? preflightCheckResults
