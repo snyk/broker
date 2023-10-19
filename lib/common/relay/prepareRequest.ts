@@ -147,6 +147,8 @@ export const prepareRequestFromFilterResult = async (
   // Request library is buggy and will throw an error if we're POST'ing an empty body without an explicit Content-Length header
   if (!payload.body || payload.body.length === 0) {
     payload.headers['Content-Length'] = '0';
+  } else {
+    payload.headers['Content-length'] = payload.body.length;
   }
 
   payload.headers['connection'] = 'Keep-Alive';
