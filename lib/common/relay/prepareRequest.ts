@@ -137,7 +137,7 @@ export const prepareRequestFromFilterResult = async (
     Object.assign(payload.headers, { 'X-Broker-Token': brokerToken });
   }
 
-  logger.debug(logContext, 'sending websocket request over HTTP connection');
+  logger.debug(logContext, '[Relay] Preparing Downstream Request');
 
   // Sometimes we receive the body as a {type, data} object
   // Unsure why - possibly Primus?

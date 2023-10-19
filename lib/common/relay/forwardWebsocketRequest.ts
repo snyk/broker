@@ -1,5 +1,5 @@
 import { RequestPayload } from '../types/http';
-import { LogContext } from '../types/log';
+import { ExtendedLogContext } from '../types/log';
 import { hashToken, maskToken } from '../utils/token';
 import { log as logger } from '../../logs/logger';
 import { BrokerServerPostResponseHandler } from '../http/downstream-post-stream-to-server';
@@ -29,7 +29,7 @@ export const forwardWebSocketRequest = (
 
   return (brokerToken) => async (payload: RequestPayload, emit) => {
     const requestId = payload.headers['snyk-request-id'];
-    const logContext: LogContext = {
+    const logContext: ExtendedLogContext = {
       url: payload.url,
       requestMethod: payload.method,
       requestHeaders: payload.headers,
@@ -43,7 +43,7 @@ export const forwardWebSocketRequest = (
     if (!requestId) {
       // This should be a warning but older clients won't send one
       // TODO make this a warning when significant majority of clients are on latest version
-      logger.trace(
+      logger.debug(
         logContext,
         'Header Snyk-Request-Id not included in headers passed through',
       );
@@ -67,12 +67,16 @@ export const forwardWebSocketRequest = (
         requestId,
       );
       if (isResponseFromRequestModule) {
-        logger.trace(
+        logger.debug(
           logContext,
-          'posting streaming response back to Broker Server',
+          '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
         );
         postHandler.forwardRequest(responseData, payload.streamingID);
       } else {
+        logger.debug(
+          logContext,
+          '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
+        );
         // Only for responses generated internally in the Broker Client/Server
         postHandler.sendData(responseData, payload.streamingID);
       }
@@ -105,9 +109,9 @@ export const forwardWebSocketRequest = (
           );
         }
       } else {
-        logger.trace(
+        logger.debug(
           { ...logContext, responseData },
-          'sending fixed response over WebSocket connection',
+          '[Websocket Flow] (Legacy) Sending fixed response over WebSocket connection',
         );
         websocketEmit(responseData);
       }
@@ -120,14 +124,21 @@ export const forwardWebSocketRequest = (
       emit = legacyOverrideEmit;
     }
 
-    logger.info(logContext, 'received request over websocket connection');
+    const simplifiedContext = logContext;
+    delete simplifiedContext.requestHeaders;
+    logger.info(
+      simplifiedContext,
+      `[Websocket Flow] Received request from ${
+        process.env.BROKER_TYPE == 'client' ? 'server' : 'client'
+      }`,
+    );
 
     const filterResponse = filters(payload);
     if (!filterResponse) {
       incrementWebSocketRequestsTotal(true);
       const reason =
-        'Response does not match any accept rule, blocking websocket request';
-      logContext.error = 'blocked';
+        '[Websocket Flow][Blocked Request] Does not match any accept rule';
+      logContext.error = 'Blocked by filter rules';
       logger.warn(logContext, reason);
       return emit({
         status: 401,

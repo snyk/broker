@@ -134,7 +134,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: '/not-allowed',
     });
   });
@@ -171,7 +171,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: '/echo-body/filtered',
     });
   });
@@ -200,7 +200,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: '/echo-query/filtered?proxyMe=now!',
     });
   });
@@ -214,7 +214,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: '/echo-query/filtered',
     });
   });
@@ -295,7 +295,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: '/long/nested%2Fpath%2Fto%2Ffile.ext',
     });
   });

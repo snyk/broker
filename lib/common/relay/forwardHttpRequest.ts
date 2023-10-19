@@ -13,7 +13,7 @@ import {
 } from '../utils/metrics';
 
 import { streamsStore } from '../http/server-post-stream-handler';
-import { LogContext } from '../types/log';
+import { ExtendedLogContext } from '../types/log';
 
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
@@ -27,7 +27,7 @@ export const forwardHttpRequest = (filterRules) => {
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
     // If this is the client, we will have to generate one
     req.headers['snyk-request-id'] ||= uuid();
-    const logContext: LogContext = {
+    const logContext: ExtendedLogContext = {
       url: req.url,
       requestMethod: req.method,
       requestHeaders: req.headers,
@@ -40,7 +40,9 @@ export const forwardHttpRequest = (filterRules) => {
       hashedToken: req['hashedToken'],
     };
 
-    logger.info(logContext, 'received request over HTTP connection');
+    const simplifiedContext = logContext;
+    delete simplifiedContext.requestHeaders;
+    logger.info(simplifiedContext, '[HTTP Flow] Received request');
     const filterResponse = filters(req);
 
     const makeWebsocketRequestWithStreamingResponse = (result) => {
@@ -59,14 +61,14 @@ export const forwardHttpRequest = (filterRules) => {
             error,
             stackTrace: new Error('stacktrace generator').stack,
           },
-          'caught error piping stream through to HTTP response',
+          '[HTTP Flow][Relay] Error piping POST response stream through to HTTP response',
         );
         res.destroy(error);
       });
       logContext.streamingID = streamingID;
       logger.debug(
         logContext,
-        'sending stream request over websocket connection',
+        '[HTTP Flow][Relay] Sending request over websocket connection expecting POST stream response',
       );
 
       streamsStore.set(streamingID, {
@@ -91,7 +93,10 @@ export const forwardHttpRequest = (filterRules) => {
 
       req.url = result.url;
       logContext.ioUrl = result.url;
-      logger.debug(logContext, 'sending request over websocket connection');
+      logger.debug(
+        logContext,
+        '[HTTP Flow][Relay] Sending request over websocket connection expecting Websocket response',
+      );
 
       // relay the http request over the websocket, handle websocket response
       res.locals.io.send(
@@ -108,8 +113,9 @@ export const forwardHttpRequest = (filterRules) => {
           logContext.responseHeaders = ioResponse.headers;
           logContext.responseBodyType = typeof ioResponse.body;
 
-          const logMsg = 'sending response back to HTTP connection';
-          if (ioResponse.status <= 200) {
+          const logMsg =
+            '[HTTP Flow][Relay] Return response from Websocket back to HTTP connection';
+          if (ioResponse.status <= 299) {
             logger.debug(logContext, logMsg);
             let responseBodyString = '';
             if (typeof ioResponse.body === 'string') {
@@ -132,9 +138,11 @@ export const forwardHttpRequest = (filterRules) => {
               incrementUnableToSizeResponse();
             }
           } else {
+            const errorLogMsg =
+              '[HTTP Flow][Relay] Non 2xx response from Websocket back to HTTP connection';
             logContext.ioErrorType = ioResponse.errorType;
             logContext.ioOriginalBodySize = ioResponse.originalBodySize;
-            logger.warn(logContext, logMsg);
+            logger.warn(logContext, errorLogMsg);
           }
 
           const httpResponse = res
@@ -161,7 +169,7 @@ export const forwardHttpRequest = (filterRules) => {
                 err,
                 stackTrace: new Error('stacktrace generator').stack,
               },
-              'error forwarding response from Web Socket to HTTP connection',
+              '[HTTP Flow][Relay] Error forwarding response from Web Socket to HTTP connection',
             );
           }
         },
