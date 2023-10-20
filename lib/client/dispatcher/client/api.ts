@@ -1,9 +1,9 @@
-import { axiosInstance } from '../../../common/http/axios';
+import { makeRequestToDownstream } from '../../../common/http/request';
+import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
 import { log as logger } from '../../../logs/logger';
 import {
   CreateConnectionRequestData,
   CreateConnectionRequestParams,
-  CreateConnectionResponse,
   DispatcherServiceClient,
   ServerId,
 } from '../dispatcher-service';
@@ -22,28 +22,25 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
   ): Promise<ServerId> {
     try {
       const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
-
-      const response = await axiosInstance.post<CreateConnectionResponse>(
-        path,
-        {
+      const url = new URL(path, this.baseUrl);
+      url.searchParams.append('version', this.version);
+      const req: PostFilterPreparedRequest = {
+        url: url.toString(),
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/vnd.api+json',
+        },
+        body: JSON.stringify({
           data: {
             attributes: {
               deployment_location: data.deployment_location,
               broker_token_first_char: data.broker_token_first_char,
             },
           },
-        },
-        {
-          baseURL: this.baseUrl,
-          headers: {
-            'Content-type': 'application/vnd.api+json',
-          },
-          params: { version: this.version },
-          validateStatus: () => true,
-        },
-      );
-
-      const apiResponse = response.data.data;
+        }),
+      };
+      const response = await makeRequestToDownstream(req);
+      const apiResponse = JSON.parse(response.body).data;
       if (!apiResponse?.attributes) {
         logger.trace(
           { apiResponse },

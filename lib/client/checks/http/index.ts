@@ -29,7 +29,10 @@ const brokerServerStatusCheck = (config: Config): HttpCheck => {
 };
 
 const restApiStatusCheck = (config: Config): HttpCheck => {
-  const url = config.API_BASE_URL || 'https://api.snyk.io';
+  const url =
+    config.API_BASE_URL || config.BROKER_SERVER_URL
+      ? config.BROKER_SERVER_URL.replace('//broker.', '//api.')
+      : 'https://api.snyk.io';
   const enabled = highAvailabilityModeEnabled(config);
   return {
     id: 'rest-api-status',
