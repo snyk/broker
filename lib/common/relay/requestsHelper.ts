@@ -14,7 +14,10 @@ export const makePostStreamingRequest = async (
   logContext,
 ) => {
   // this is a streaming request for binary data
-  logger.debug(logContext, 'serving stream request');
+  logger.debug(
+    logContext,
+    '[Downstream] Make Post stream request to downstream',
+  );
 
   try {
     const downstreamRequestIncomingResponse =
@@ -27,7 +30,7 @@ export const makePostStreamingRequest = async (
         error: e,
         stackTrace: new Error('stacktrace generator').stack,
       },
-      'caught error sending HTTP response over WebSocket',
+      '[Downstream] Caught error making streaming request to downstream ',
     );
   }
   return;
@@ -71,6 +74,16 @@ export const makeLegacyRequest = async (
         options.config,
       );
       response.body = replaced.newChunk;
+    }
+    if (status > 404) {
+      logger.warn(
+        {
+          statusCode: response.statusCode,
+          responseHeaders: response.headers,
+          url: req.url,
+        },
+        `[Websocket Flow][Inbound] Unexpected status code for relayed request`,
+      );
     }
     logResponse(logContext, status, response, options.config);
     emitCallback({ status, body: response.body, headers: response.headers });

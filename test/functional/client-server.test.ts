@@ -188,7 +188,7 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: 'http://localhost:9000/server-side-blocked',
     });
   });
@@ -202,7 +202,7 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.data).toStrictEqual({
       message: 'blocked',
       reason:
-        'Response does not match any accept rule, blocking websocket request',
+        '[Websocket Flow][Blocked Request] Does not match any accept rule',
       url: 'http://localhost:9000/server-side-blocked-streaming',
     });
   });
