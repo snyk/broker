@@ -4,8 +4,6 @@ import { hashToken } from '../../common/utils/token';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
 
-export const defaultBrokerDispatcherBaseUrl = 'https://api.snyk.io';
-
 export function highAvailabilityModeEnabled(config: any): boolean {
   // high availability mode is disabled per default
   let highAvailabilityModeEnabled = false;
@@ -37,13 +35,17 @@ export async function getServerId(
     throw error;
   }
 
+  const defaultBrokerDispatcherBaseUrl =
+    config.API_BASE_URL || config.BROKER_SERVER_URL
+      ? config.BROKER_SERVER_URL.replace('//broker.', '//api.')
+      : 'https://api.snyk.io';
   const haConfig = getHAConfig(config);
   const baseUrl =
     haConfig.BROKER_DISPATCHER_BASE_URL || defaultBrokerDispatcherBaseUrl;
   const client = new HttpDispatcherServiceClient(baseUrl);
   const hashedToken = hashToken(config.BROKER_TOKEN);
 
-  const maxRetries = 30;
+  const maxRetries = 10;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await getServerIdFromDispatcher(
@@ -60,7 +62,7 @@ export async function getServerId(
         },
       );
     } catch (err) {
-      const timeout = 2 ** attempt * 100;
+      const timeout = 2 ** attempt * 30000;
       logger.warn(
         { attempt, timeout },
         `waiting for ${timeout}ms before next Broker Dispatcher API call`,
