@@ -4698,6 +4698,12 @@ Object {
       "path": "/repos/:name/:repo/git/refs/:ref",
     },
     Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
+    },
+    Object {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -11445,6 +11451,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -18264,6 +18276,12 @@ Object {
       "path": "/repos/:name/:repo/git/refs/:ref",
     },
     Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
+    },
+    Object {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -25065,6 +25083,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -35697,6 +35721,12 @@ Object {
       "path": "/repos/:name/:repo/git/refs/:ref",
     },
     Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
+    },
+    Object {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -37172,6 +37202,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
@@ -45523,6 +45559,12 @@ Object {
       "path": "/repos/:name/:repo/git/refs/:ref",
     },
     Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
+    },
+    Object {
       "//": "search for open snyk pull requests",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -52183,6 +52225,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/git/refs/:ref",
+    },
+    Object {
+      "//": "compares two commits against each other",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/compare/:base...:head",
     },
     Object {
       "//": "search for open snyk pull requests",
