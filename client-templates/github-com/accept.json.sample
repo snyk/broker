@@ -336,6 +336,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "list a user's orgs",
+      "method": "GET",
+      "path": "/users/:username/orgs",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "list an orgs's repos",
       "method": "GET",
       "path": "/orgs/:username/repos",
