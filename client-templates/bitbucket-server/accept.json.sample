@@ -19,6 +19,40 @@
       }
     },
     {
+      "//": "list the user's workspaces",
+      "method": "GET",
+      "path": "/rest/api/2.0/workspaces",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list the workspace's members",
+      "method": "GET",
+      "path": "/rest/api/2.0/workspaces/:workspace/members",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list the workspace's repos",
+      "method": "GET",
+      "path": "/rest/api/2.0/workspaces/:workspace",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+
+    {
       "//": "list the project's repos",
       "method": "GET",
       "path": "/projects/:projectKey/repos",
@@ -943,6 +977,28 @@
       }
     },
     {
+      "//": "used to query for open pull requests by id",
+      "method": "GET",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to query for open pull requests statuses by id",
+      "method": "GET",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests:/:pr/statuses",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to query for a merge-base for a pull request",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
@@ -968,6 +1024,28 @@
       "//": "Used to get a branch specified by query string",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list commit for a given repo",
+      "method": "GET",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
+      "method": "GET",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/diffstat/commits/:sha",
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
