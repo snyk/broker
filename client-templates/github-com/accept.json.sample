@@ -324,6 +324,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "get a user's details",
+      "method": "GET",
+      "path": "/users/:username",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "list a user's repos",
       "method": "GET",
       "path": "/users/:username/repos",
@@ -2114,6 +2120,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "used to get teams's repo list",
+      "method": "GET",
+      "path": "/orgs/:owner/teams/:team/repos",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "used to get orgs's teams list",
       "method": "GET",
       "path": "/orgs/:username/teams",
@@ -2135,6 +2147,12 @@
       "//": "used to get repo's contributors list",
       "method": "GET",
       "path": "/repos/:owner/:repo/contributors",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to get repo's languages",
+      "method": "GET",
+      "path": "/repos/:owner/:repo/languages",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
