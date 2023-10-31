@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  cosign: cpanato/cosign-orb@1.2.0
   prodsec: snyk/prodsec-orb@1.0
   slack: circleci/slack@4.12.5
   snyk: snyk/snyk@1.7.2
@@ -144,6 +145,14 @@ commands:
             docker push $IMAGE_NAME:$IMAGE_TAG
             echo "Pushing Broker image $IMAGE_NAME:$IMAGE_TAG_LATEST..."
             docker push $IMAGE_NAME:$IMAGE_TAG_LATEST
+      - run:
+          name: Sign Docker image with Cosign
+          command: |
+            export IMAGE_WITH_DIGEST=$(docker image inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME:$IMAGE_TAG)
+            echo "Using digest $IMAGE_WITH_DIGEST to sign the image..."
+            export COSIGN_KEY=$(echo $COSIGN_ENCODED_KEY | base64 -d)
+            cosign sign --yes --key env://COSIGN_KEY --annotations tag=$IMAGE_TAG $IMAGE_WITH_DIGEST
+            unset COSIGN_KEY
   prepare-dev-package-metadata:
     steps:
       - run:
@@ -344,6 +353,8 @@ jobs:
       - dockerhub-login
       - load-docker-image:
           project_name: <<parameters.project_name>>
+      - cosign/install:
+          version: v2.2.0
       - tag-and-push-docker-image:
           image_name: <<parameters.image_name>>
           image_tag: <<parameters.image_tag>>
@@ -389,6 +400,8 @@ jobs:
           organization: platform-broker
           project: <<parameters.project_name>>
           severity-threshold: <<parameters.severity_threshold>>
+      - cosign/install:
+          version: v2.2.0
       - tag-and-push-docker-image:
           image_name: <<parameters.image_name>>
           image_tag: <<parameters.image_tag>>
@@ -485,6 +498,7 @@ workflows:
           name: Push base UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -511,6 +525,7 @@ workflows:
           name: Push artifactory UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -539,6 +554,7 @@ workflows:
           name: Push azure-repos UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -567,6 +583,7 @@ workflows:
           name: Push bitbucket-server UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -595,6 +612,7 @@ workflows:
           name: Push bitbucket-server UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -623,6 +641,7 @@ workflows:
           name: Push github-com UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -651,6 +670,7 @@ workflows:
           name: Push github-enterprise UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -679,6 +699,7 @@ workflows:
           name: Push gitlab UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -707,6 +728,7 @@ workflows:
           name: Push jira UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -735,6 +757,7 @@ workflows:
           name: Push jira bearer auth UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -763,6 +786,7 @@ workflows:
           name: Push nexus UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -791,6 +815,7 @@ workflows:
           name: Push nexus2 UBI image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -845,6 +870,7 @@ workflows:
           name: Push base image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -886,6 +912,7 @@ workflows:
           name: Push base image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -914,6 +941,7 @@ workflows:
           name: Push artifactory image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -942,6 +970,7 @@ workflows:
           name: Push azure-repos image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -970,6 +999,7 @@ workflows:
           name: Push bitbucket-server image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -998,6 +1028,7 @@ workflows:
           name: Push container-registry-agent image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1026,6 +1057,7 @@ workflows:
           name: Push github-com image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1054,6 +1086,7 @@ workflows:
           name: Push github-enterprise image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1082,6 +1115,7 @@ workflows:
           name: Push gitlab image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1110,6 +1144,7 @@ workflows:
           name: Push jira image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1120,7 +1155,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build jira bearer auth image
           context:
@@ -1138,6 +1173,7 @@ workflows:
           name: Push jira bearer auth image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1166,6 +1202,7 @@ workflows:
           name: Push nexus image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1194,6 +1231,7 @@ workflows:
           name: Push nexus2 image
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1222,6 +1260,7 @@ workflows:
           name: Push artifactory image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1250,6 +1289,7 @@ workflows:
           name: Push azure-repos image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1278,6 +1318,7 @@ workflows:
           name: Push bitbucket-server image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1306,6 +1347,7 @@ workflows:
           name: Push container-registry-agent image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1334,6 +1376,7 @@ workflows:
           name: Push github-com image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1362,6 +1405,7 @@ workflows:
           name: Push github-enterprise image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1390,6 +1434,7 @@ workflows:
           name: Push gitlab image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1418,6 +1463,7 @@ workflows:
           name: Push jira image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1446,6 +1492,7 @@ workflows:
           name: Push jira bearer auth image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1474,6 +1521,7 @@ workflows:
           name: Push nexus image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1502,6 +1550,7 @@ workflows:
           name: Push nexus2 image (nlatest)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1523,6 +1572,7 @@ workflows:
           name: Build and push github-com image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1546,6 +1596,7 @@ workflows:
           name: Build and push github-com-nlatest image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1569,6 +1620,7 @@ workflows:
           name: Build and push gitlab image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1581,6 +1633,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
+
       - approve-build-bitbucket-server-dev:
           name: bitbucket-server-dev image
           type: approval
@@ -1591,6 +1644,7 @@ workflows:
           name: Build and push bitbucket-server image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1603,6 +1657,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
+
       - approve-build-gitlab-nlatest-dev:
           name: gitlab-nlatest-dev image
           type: approval
@@ -1613,6 +1668,7 @@ workflows:
           name: Build and push gitlab-nlatest image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1636,6 +1692,7 @@ workflows:
           name: Build and push nexus image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
@@ -1659,6 +1716,7 @@ workflows:
           name: Build and push nexus-nlatest image (dev)
           context:
             - snyk-bot-slack
+            - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
