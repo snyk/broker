@@ -102,7 +102,8 @@ LABEL org.opencontainers.image.authors="team-broker" \
       org.opencontainers.image.ref.name="snyk-broker" \
       org.opencontainers.image.source="https://github.com/snyk/broker" \
       org.opencontainers.image.vendor="Snyk, Ltd." \
-      org.opencontainers.image.version="${BROKER_VERSION:-local}"
+      org.opencontainers.image.version="${BROKER_VERSION:-local}" \
+      io.snyk.containers.image.dockerfile="/dockerfiles/base/Dockerfile"
 
 COPY --from=broker-builder /home/node/.npm-global /home/node/.npm-global
 COPY --from=broker-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
