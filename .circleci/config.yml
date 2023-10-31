@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  cosign: cpanato/cosign-orb@1.2.0
   prodsec: snyk/prodsec-orb@1.0
   slack: circleci/slack@4.12.5
   snyk: snyk/snyk@1.7.2
@@ -61,6 +60,20 @@ commands:
             NODE_LATEST_VERSION=$(curl --silent https://endoflife.date/api/nodejs.json | jq -r '.[] | select (.cycle == "<<parameters.cycle>>")' | jq -r .latest)
             echo $NODE_LATEST_VERSION
             echo "export NODE_LATEST_VERSION=$NODE_LATEST_VERSION" >> "$BASH_ENV"
+  install-cosign:
+    parameters:
+      version:
+        type: string
+        default: "v2.2.0"
+    steps:
+      - run:
+          name: Install cosign
+          command: |
+            curl -L https://github.com/sigstore/cosign/releases/download/<<parameters.version>>/cosign-linux-amd64 -o cosign
+            chmod +x cosign && sudo mv cosign /usr/local/bin/cosign
+      - run:
+          name: Verify cosign
+          command: cosign version
   build-and-save-docker-image:
     description: "Build Docker image and save it to workspace"
     parameters:
@@ -353,8 +366,7 @@ jobs:
       - dockerhub-login
       - load-docker-image:
           project_name: <<parameters.project_name>>
-      - cosign/install:
-          version: v2.2.0
+      - install-cosign
       - tag-and-push-docker-image:
           image_name: <<parameters.image_name>>
           image_tag: <<parameters.image_tag>>
@@ -400,8 +412,7 @@ jobs:
           organization: platform-broker
           project: <<parameters.project_name>>
           severity-threshold: <<parameters.severity_threshold>>
-      - cosign/install:
-          version: v2.2.0
+      - install-cosign
       - tag-and-push-docker-image:
           image_name: <<parameters.image_name>>
           image_tag: <<parameters.image_tag>>
