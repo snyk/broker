@@ -30,6 +30,7 @@ export interface CheckResult {
 }
 
 export type CheckId = string;
+export type CheckOptions = { id: CheckId; name: string };
 export type CheckStatus = 'passing' | 'warning' | 'error';
 
 /**

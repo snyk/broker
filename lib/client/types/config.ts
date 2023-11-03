@@ -3,8 +3,11 @@ interface BackendAPI {
 }
 
 interface BrokerClient {
-  PREFLIGHT_CHECKS_ENABLED: string;
+  BROKER_CLIENT_URL: string;
+  HTTPS_CERT: string;
+  HTTPS_KEY: string;
   INSECURE_DOWNSTREAM: string;
+  PREFLIGHT_CHECKS_ENABLED: string;
 }
 
 interface BrokerServer {
