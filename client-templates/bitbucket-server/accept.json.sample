@@ -30,6 +30,17 @@
       }
     },
     {
+      "//": "list the user's workspaces - AppRisk connector",
+      "method": "GET",
+      "path": "/workspaces",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "list the workspace's members",
       "method": "GET",
       "path": "/rest/api/2.0/workspaces/:workspace/members",
@@ -51,7 +62,17 @@
         "password": "${BITBUCKET_PASSWORD}"
       }
     },
-
+    {
+      "//": "list the workspace's repos",
+      "method": "GET",
+      "path": "/workspaces/:workspace",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
     {
       "//": "list the project's repos",
       "method": "GET",
@@ -988,10 +1009,32 @@
       }
     },
     {
+      "//": "used to query for open pull requests by id - AppRisk",
+      "method": "GET",
+      "path": "/repositories/:workspace/:repo/pullrequests",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
       "//": "used to query for open pull requests statuses by id",
       "method": "GET",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests:/:pr/statuses",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests/:pr/statuses",
       "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "used to query for open pull requests statuses by id - AppRisk",
+      "method": "GET",
+      "path": "/repositories/:workspace/:repo/pullrequests/:pr/statuses",
+      "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
         "username": "${BITBUCKET_USERNAME}",
@@ -1025,6 +1068,50 @@
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
       "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list commit for a given repo",
+      "method": "GET",
+      "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list repos for a given workspace",
+      "method": "GET",
+      "path": "/repositories/:workspace",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list members for a given workspace - AppRisk",
+      "method": "GET",
+      "path": "/workspaces/:workspace/members",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
+    },
+    {
+      "//": "list commit for a given repo - AppRisk",
+      "method": "GET",
+      "path": "/repositories/:workspace/:repo/commits",
+      "origin": "https://${BITBUCKET_API}",
       "auth": {
         "scheme": "basic",
         "username": "${BITBUCKET_USERNAME}",
