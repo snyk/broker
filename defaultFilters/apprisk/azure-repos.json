@@ -1,0 +1,92 @@
+[
+  {
+    "//": "get api's connection status",
+    "method": "GET",
+    "path": "/:owner/_apis/connectionData",
+    "origin": "https://${AZURE_REPOS_HOST}/",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get core api's location for sanity check",
+    "method": "OPTIONS",
+    "path": "/:owner/_apis/Location",
+    "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get resource access for sanity check",
+    "method": "GET",
+    "path": "/:owner/_apis/ResourceAreas",
+    "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get list of builds for given repository",
+    "method": "GET",
+    "path": "/:owner/:project/_apis/git/build/builds",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull security namespaces",
+    "method": "GET",
+    "path": "/:owner/_apis/securitynamespaces",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull access control lists of security namespaces",
+    "method": "GET",
+    "path": "/:owner/_apis/accesscontrollists/:namespaceId",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull teams",
+    "method": "GET",
+    "path": "/:owner/_apis/teams",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull project's languages",
+    "method": "GET",
+    "path": "/:owner/:project/_apis/projectanalysis/languagemetrics",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull users via graph api",
+    "method": "GET",
+    "path": "/:owner/_apis/graph/users",
+    "origin": "https://vssps.dev.azure.com/",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  }
+]

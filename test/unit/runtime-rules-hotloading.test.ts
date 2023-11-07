@@ -1,10 +1,12 @@
 import path from 'path';
 import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
+import { CONFIGURATION } from '../../lib/common/config';
+import camelcase from 'camelcase';
 
 const scmRulesToTest = [
   'azure-repos',
   'bitbucket-server',
-  'github-com',
+  'github',
   'github-enterprise',
   'gitlab',
 ];
@@ -15,7 +17,11 @@ describe('filter Rules Loading', () => {
     (folder) => {
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -30,7 +36,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_IAC = 'rf';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -46,7 +56,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_IAC = 'tf,yaml, json,yml,tpl';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -62,7 +76,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_IAC = 'tf,json';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -78,7 +96,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_CODE = 'true';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -94,7 +116,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_GIT = 'true';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -111,7 +137,11 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT = 'accept.json';
 
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
@@ -128,13 +158,41 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_IAC = 'yaml';
       process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
-        'accept.json.sample',
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+        },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_CODE;
       delete process.env.ACCEPT_IAC;
+      delete process.env.ACCEPT;
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Injection of valid AppRisk rules - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_APPRISK = 'true';
+      process.env.ACCEPT = 'accept.json';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_APPRISK;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
       delete process.env.ACCEPT;
     },
   );
