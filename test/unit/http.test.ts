@@ -10,12 +10,21 @@ const nock = require('nock');
 
 const serverUrl = 'http://dummy-downstream-service';
 const httpsServerUrl = 'http://dummy-downstream-service';
+const httpsSnykServerUrl = 'https://api.snyk.io';
 const error = { message: 'Error occurred', code: 'ECONNRESET' };
 describe('Test HTTP request helpers', () => {
   beforeAll(async () => {
     nock(`${serverUrl}`)
       .persist()
       .get(`/test`)
+      .reply(() => {
+        const response = 'OK';
+        return [200, response];
+      });
+
+    nock(`${httpsSnykServerUrl}`)
+      .persist()
+      .get(`/snyk`)
       .reply(() => {
         const response = 'OK';
         return [200, response];
@@ -115,6 +124,18 @@ describe('Test HTTP request helpers', () => {
     loadBrokerConfig();
     const response = await makeRequestToDownstream({
       url: `${httpsServerUrl}/test`,
+      headers: {},
+      method: 'GET',
+    });
+    expect(response).toEqual({ body: 'OK', headers: {}, statusCode: 200 });
+    delete process.env.INSECURE_DOWNSTREAM;
+  });
+
+  it('INSECURE DOWNSTREAM does NOT override https to http for Snyk calls', async () => {
+    process.env.INSECURE_DOWNSTREAM = 'true';
+    loadBrokerConfig();
+    const response = await makeRequestToDownstream({
+      url: `${httpsSnykServerUrl}/snyk`,
       headers: {},
       method: 'GET',
     });
