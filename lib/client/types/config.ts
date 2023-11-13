@@ -3,7 +3,7 @@ interface BackendAPI {
 }
 
 interface BrokerClient {
-  BROKER_CLIENT_URL: string;
+  BROKER_CLIENT_URL?: string;
   HTTPS_CERT: string;
   HTTPS_KEY: string;
   INSECURE_DOWNSTREAM: string;

@@ -11,7 +11,7 @@ export function validateBrokerClientUrl(
 
   const brokerClientUrl = config.BROKER_CLIENT_URL;
   try {
-    if (!isHttpUrl(brokerClientUrl)) {
+    if (brokerClientUrl && !isHttpUrl(brokerClientUrl)) {
       return {
         id: checkOptions.id,
         name: checkOptions.name,
@@ -29,7 +29,7 @@ export function validateBrokerClientUrl(
       } satisfies CheckResult;
     }
 
-    if (isHostnameLocalhost(brokerClientUrl)) {
+    if (brokerClientUrl && isHostnameLocalhost(brokerClientUrl)) {
       return {
         id: checkOptions.id,
         name: checkOptions.name,
@@ -75,7 +75,7 @@ function isHttpsWithoutCertificates(config: Config): boolean {
   );
 
   try {
-    if (urlContainsProtocol(brokerClientUrl, 'https:')) {
+    if (brokerClientUrl && urlContainsProtocol(brokerClientUrl, 'https:')) {
       const httpsCert = config.HTTPS_CERT || '';
       const httpsKey = config.HTTPS_KEY || '';
       logger.debug(

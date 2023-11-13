@@ -17,11 +17,24 @@ describe('client/checks', () => {
       expect(configChecks[0].enabled).toEqual(true);
     });
 
-    it('should return false for broker-client-url-validation.enabled if broker client url is not configured', () => {
+    it('should return false for broker-client-url-validation.enabled if broker client url is configured empty', () => {
       const config = aConfig({
         BROKER_CLIENT_URL: '',
       });
 
+      const configChecks = getConfigChecks(config).filter(
+        (c) => c.id === 'broker-client-url-validation',
+      );
+
+      expect(configChecks).toHaveLength(1);
+      expect(configChecks[0].enabled).toEqual(false);
+    });
+
+    it('should return false for broker-client-url-validation.enabled if broker client url is not configured at all', () => {
+      const config = aConfig({
+        BROKER_CLIENT_URL: '',
+      });
+      delete config['BROKER_CLIENT_URL'];
       const configChecks = getConfigChecks(config).filter(
         (c) => c.id === 'broker-client-url-validation',
       );
