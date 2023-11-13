@@ -110,3 +110,5 @@ COPY --from=broker-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-
 
 WORKDIR /home/node
 USER node
+
+ENV NODE_EXTRA_CA_CERTS=${CA_CERT}

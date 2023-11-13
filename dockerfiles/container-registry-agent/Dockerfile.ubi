@@ -9,6 +9,8 @@ USER root
 RUN broker init container-registry-agent
 USER snyk
 
+ENV NODE_EXTRA_CA_CERTS=${CA_CERT}
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["broker", "--verbose"]

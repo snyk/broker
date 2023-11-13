@@ -14,6 +14,8 @@ USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
 USER node
 
+ENV NODE_EXTRA_CA_CERTS=${CA_CERT}
+
 EXPOSE $PORT
 
 ENTRYPOINT ["/home/node/docker-entrypoint.sh"]
