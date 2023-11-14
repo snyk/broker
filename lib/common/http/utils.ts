@@ -1,7 +1,10 @@
 import { log as logger } from '../../logs/logger';
 export const switchToInsecure = (url: string) => {
-  logger.debug({ url }, 'Forcing insecure url');
   const urlToSwitch = new URL(url);
-  urlToSwitch.protocol = 'http';
+  if (!urlToSwitch.hostname.includes('.snyk.io')) {
+    logger.debug({ url }, 'Forcing insecure url');
+    urlToSwitch.protocol = 'http';
+  }
+
   return urlToSwitch.toString();
 };
