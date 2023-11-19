@@ -1,9 +1,42 @@
 [
   {
-    "//": "list the user's workspaces",
+    "//": "used to get repo's commits",
     "method": "GET",
-    "path": "/rest/api/2.0/workspaces",
+    "path": "/projects/:projectKey/repos/:repo/commits",
     "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get specific commit",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/commits/:commit/diff",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "list commit for a given repo",
+    "method": "GET",
+    "path": "/:workspace/:repo/commits",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
+    "method": "GET",
+    "path": "/:workspace/:repo/diffstat/commits/:sha",
+    "origin": "https://${BITBUCKET}",
     "auth": {
       "scheme": "basic",
       "username": "${BITBUCKET_USERNAME}",
@@ -22,9 +55,9 @@
     }
   },
   {
-    "//": "list the workspace's members",
+    "//": "list the user's workspaces - AppRisk connector",
     "method": "GET",
-    "path": "/rest/api/2.0/workspaces/:workspace/members",
+    "path": "/projects",
     "origin": "https://${BITBUCKET_API}",
     "auth": {
       "scheme": "basic",
@@ -33,9 +66,9 @@
     }
   },
   {
-    "//": "list the workspace's repos",
+    "//": "used to get groups",
     "method": "GET",
-    "path": "/rest/api/2.0/workspaces/:workspace",
+    "path": "/admin/groups",
     "origin": "https://${BITBUCKET_API}",
     "auth": {
       "scheme": "basic",
@@ -44,120 +77,10 @@
     }
   },
   {
-    "//": "list the workspace's repos",
+    "//": "used to get group's members",
     "method": "GET",
-    "path": "/workspaces/:workspace",
+    "path": "/admin/groups/more-members",
     "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "used to query for open pull requests by id",
-    "method": "GET",
-    "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests",
-    "origin": "https://${BITBUCKET}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "used to query for open pull requests by id - AppRisk",
-    "method": "GET",
-    "path": "/repositories/:workspace/:repo/pullrequests",
-    "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "used to query for open pull requests statuses by id",
-    "method": "GET",
-    "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests/:pr/statuses",
-    "origin": "https://${BITBUCKET}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "used to query for open pull requests statuses by id - AppRisk",
-    "method": "GET",
-    "path": "/repositories/:workspace/:repo/pullrequests/:pr/statuses",
-    "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "list commit for a given repo",
-    "method": "GET",
-    "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
-    "origin": "https://${BITBUCKET}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "list repos for a given workspace",
-    "method": "GET",
-    "path": "/repositories/:workspace",
-    "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "list members for a given workspace - AppRisk",
-    "method": "GET",
-    "path": "/workspaces/:workspace/members",
-    "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "list commit for a given repo - AppRisk",
-    "method": "GET",
-    "path": "/repositories/:workspace/:repo/commits",
-    "origin": "https://${BITBUCKET_API}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "list commit for a given repo",
-    "method": "GET",
-    "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
-    "origin": "https://${BITBUCKET}",
-    "auth": {
-      "scheme": "basic",
-      "username": "${BITBUCKET_USERNAME}",
-      "password": "${BITBUCKET_PASSWORD}"
-    }
-  },
-  {
-    "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
-    "method": "GET",
-    "path": "/rest/api/2.0/repositories/:workspace/:repo/diffstat/commits/:sha",
-    "origin": "https://${BITBUCKET}",
     "auth": {
       "scheme": "basic",
       "username": "${BITBUCKET_USERNAME}",
