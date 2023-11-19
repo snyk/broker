@@ -1,5 +1,16 @@
 [
   {
+    "//": "list the user's projects",
+    "method": "GET",
+    "path": "/projects",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
     "//": "list the user's workspaces",
     "method": "GET",
     "path": "/rest/api/2.0/workspaces",
@@ -55,6 +66,930 @@
     }
   },
   {
+    "//": "list the project's repos",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "list the user's repos",
+    "method": "GET",
+    "path": "/repos",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "fetch a given repo",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "read all file names to find manifests",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/files/:searchPath?",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/package.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpackage.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/package-lock.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpackage-lock.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Gemfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FGemfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Gemfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FGemfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/pom.xml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpom.xml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/*req*.txt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F*req*.txt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/requirements/*.txt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Frequirements%2F*.txt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/pyproject.toml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpyproject.toml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/poetry.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpoetry.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Pipfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FPipfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Pipfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FPipfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/yarn.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fyarn.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/build.gradle",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fbuild.gradle",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/gradle.lockfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fgradle.lockfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/gradle.properties",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fgradle.properties",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Packages.props",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FPackages.props",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Directory.Build.props",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FDirectory.Build.props",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Directory.Build.targets",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FDirectory.Build.targets",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/build.sbt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fbuild.sbt",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/packages.config",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fpackages.config",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/*.csproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F*.csproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/*.vbproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F*.vbproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/*.fsproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F*.fsproj",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/project.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fproject.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Gopkg.toml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FGopkg.toml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Gopkg.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FGopkg.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/vendor.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fvendor.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/composer.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fcomposer.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/composer.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fcomposer.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/project.assets.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fproject.assets.json",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Podfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FPodfile",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/Podfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2FPodfile.lock",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/go.mod",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fgo.mod",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/go.sum",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to determine the full dependency tree",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fgo.sum",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to scan Dockerfile",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/*Dockerfile*",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to scan Dockerfile",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F*Dockerfile*",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to check if there's any ignore rules or existing patches",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/.snyk",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to check if there's any ignore rules or existing patches",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2F.snyk",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "get list of API capabilities",
+    "method": "GET",
+    "path": "/rest/capabilities",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+    "method": "POST",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/webhooks",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+    "method": "DELETE",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/webhooks/:webhookId",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to create commit status messages",
+    "method": "POST",
+    "path": "/rest/build-status/1.0/commits/:sha",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to create a new branch for fix PRs",
+    "method": "POST",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/branches",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to create or update a file for fix PRs",
+    "method": "PUT",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/browse/*",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to create a pull request for fix PRs",
+    "method": "POST",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to query for open pull requests by branch",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
     "//": "used to query for open pull requests by id",
     "method": "GET",
     "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests",
@@ -92,6 +1027,39 @@
     "method": "GET",
     "path": "/repositories/:workspace/:repo/pullrequests/:pr/statuses",
     "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to query for a merge-base for a pull request",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/changes",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to check for a repo's default branch",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/branches/default",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "Used to get a branch specified by query string",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/branches:filterText?",
+    "origin": "https://${BITBUCKET}",
     "auth": {
       "scheme": "basic",
       "username": "${BITBUCKET_USERNAME}",
@@ -157,6 +1125,210 @@
     "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
     "method": "GET",
     "path": "/rest/api/2.0/repositories/:workspace/:repo/diffstat/commits/:sha",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "get a specific commit identified by the commit hash or name of a branch",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:sha",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to create a Code Insights report",
+    "method": "PUT",
+    "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to remove a Code Insights report",
+    "method": "DELETE",
+    "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to add Code Insights annotations to a report",
+    "method": "POST",
+    "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "get list of API capabilities for Code Insights",
+    "method": "GET",
+    "path": "/rest/insights/:apiVersion/capabilities",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to remove Code Insights annotations for a report",
+    "method": "DELETE",
+    "path": "/rest/insights/:apiVersion/projects/:project/repos/:repo/commits/:sha/reports/:report/annotations",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project.",
+    "method": "GET",
+    "path": "/rest/api/1.0/application-properties",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get current user. so we'll be able to fetch current user's repos, that are not part of any project - this is using atlassian's SDK api.",
+    "method": "GET",
+    "path": "/plugins/servlet/applinks/whoami",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get the current user's project-like structure. So we'll be able to bind all user's private repos (that are not included in different project)",
+    "method": "GET",
+    "path": "/projects/:projectKey",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to check if the user has admin or higher permissions",
+    "method": "GET",
+    "path": "/admin/permissions/users",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+
+  {
+    "//": "used to get groups",
+    "method": "GET",
+    "path": "/admin/groups",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },      {
+  "//": "used to get group's members",
+  "method": "GET",
+  "path": "/admin/groups/more-members",
+  "origin": "https://${BITBUCKET_API}",
+  "auth": {
+    "scheme": "basic",
+    "username": "${BITBUCKET_USERNAME}",
+    "password": "${BITBUCKET_PASSWORD}"
+  }
+},
+  {
+    "//": "used to get all the users. it's called only for admin permissioned user. to retrieve all the repos they can access",
+    "method": "GET",
+    "path": "/users",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to redirect requests to snyk git client",
+    "method": "any",
+    "path": "/snykgit/*",
+    "origin": "${GIT_CLIENT_URL}"
+  },
+  {
+    "//": "used to fetch a given repo from API",
+    "method": "GET",
+    "path": "/rest/api/1.0/projects/:project/repos/:repo",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get default reviewers for a pull request",
+    "method": "GET",
+    "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get repo's commits",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/commits",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  } ,
+  {
+    "//": "used to get specific commit",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/commits/:commit/diff",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to query for open pull requests by id",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo/pullrequests",
     "origin": "https://${BITBUCKET}",
     "auth": {
       "scheme": "basic",
