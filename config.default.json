@@ -12,6 +12,5 @@
     "jira",
     "nexus",
     "nexus2"
-  ],
-  "brokerDownstreamTypeAzureRepos" :"true"
+  ]
 }
