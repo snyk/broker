@@ -1,4 +1,5 @@
 import { log as logger } from '../../logs/logger';
+import { getConfigChecks } from './config';
 import { getHttpChecks } from './http';
 import type { Config } from '../types/config';
 import type { Check, CheckResult } from './types';
@@ -29,6 +30,10 @@ export async function executePreflightChecks(
   const preflightChecks: Check[] = [];
   const httpChecks = getHttpChecks(config as Config).filter((c) => c.enabled);
   preflightChecks.push(...httpChecks);
+  const configChecks = getConfigChecks(config as Config).filter(
+    (c) => c.enabled,
+  );
+  preflightChecks.push(...configChecks);
 
   const preflightCheckResults: CheckResult[] = [];
   const results = await Promise.allSettled(

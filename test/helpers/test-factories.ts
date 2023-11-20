@@ -28,6 +28,7 @@ export const aHttpCheck = (fields: Partial<HttpCheck>): HttpCheck => {
 export const aConfig = (fields: Partial<Config>): Config => {
   return {
     API_BASE_URL: 'http://api:8080',
+    BROKER_CLIENT_URL: 'http://broker-client:8000',
     BROKER_DISPATCHER_BASE_URL: 'http://dispatcher:8080',
     BROKER_HA_MODE_ENABLED: 'false',
     BROKER_SERVER_URL: 'http://broker-server:8080',
@@ -38,5 +39,5 @@ export const aConfig = (fields: Partial<Config>): Config => {
     GPG_PRIVATE_KEY: '',
     INSECURE_DOWNSTREAM: 'false',
     ...fields,
-  };
+  } as Config;
 };
