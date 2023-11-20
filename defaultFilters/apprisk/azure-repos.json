@@ -570,5 +570,15 @@
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
     }
+  }, {
+    "//": "get releases",
+    "method": "OPTIONS",
+    "path": "/${AZURE_REPOS_ORG}/_apis/Release",
+    "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
   }
+
 ]
