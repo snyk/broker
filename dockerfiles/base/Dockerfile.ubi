@@ -70,7 +70,6 @@ RUN <<EOF
     rpm --erase --nodeps platform-python-setuptools
     rpm --erase --nodeps python3-cloud-what
     rpm --erase --nodeps python3-libs
-    rpm --erase --nodeps python3-libxml2
     rpm --erase --nodeps python3-rpm
     rpm --erase --nodeps python3-setuptools-wheel
     rpm --erase --nodeps python3-subscription-manager-rhsm
