@@ -3,7 +3,10 @@ import { ExtendedLogContext } from '../types/log';
 import { hashToken, maskToken } from '../utils/token';
 import { log as logger } from '../../logs/logger';
 import { BrokerServerPostResponseHandler } from '../http/downstream-post-stream-to-server';
-import { incrementWebSocketRequestsTotal } from '../utils/metrics';
+import {
+  incrementHttpRequestsTotal,
+  incrementWebSocketRequestsTotal,
+} from '../utils/metrics';
 import { ClientOpts } from '../../client/types/client';
 import { ServerOpts } from '../../server/types/http';
 import { loadFilters } from '../filter/filtersAsync';
@@ -135,7 +138,7 @@ export const forwardWebSocketRequest = (
 
     const filterResponse = filters(payload);
     if (!filterResponse) {
-      incrementWebSocketRequestsTotal(true);
+      incrementWebSocketRequestsTotal(true, 'inbound-request');
       const reason =
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
       logContext.error = 'Blocked by filter rules';
@@ -149,6 +152,7 @@ export const forwardWebSocketRequest = (
         },
       });
     } else {
+      incrementWebSocketRequestsTotal(false, 'inbound-request');
       const preparedRequest = await prepareRequestFromFilterResult(
         filterResponse,
         payload,
@@ -157,6 +161,7 @@ export const forwardWebSocketRequest = (
         brokerToken,
         io?.socketType,
       );
+      incrementHttpRequestsTotal(false, 'outbound-request');
       payload.streamingID
         ? await makePostStreamingRequest(preparedRequest.req, emit, logContext)
         : await makeLegacyRequest(

@@ -9,6 +9,7 @@ import stream from 'stream';
 import {
   incrementHttpRequestsTotal,
   incrementUnableToSizeResponse,
+  incrementWebSocketRequestsTotal,
   observeResponseSize,
 } from '../utils/metrics';
 
@@ -46,8 +47,6 @@ export const forwardHttpRequest = (filterRules) => {
     const filterResponse = filters(req);
 
     const makeWebsocketRequestWithStreamingResponse = (result) => {
-      incrementHttpRequestsTotal(false);
-
       req.url = result.url;
       logContext.ioUrl = result.url;
 
@@ -85,12 +84,10 @@ export const forwardHttpRequest = (filterRules) => {
         headers: req.headers,
         streamingID,
       });
-
+      incrementWebSocketRequestsTotal(false, 'outbound-request');
       return;
     };
     const makeWebsocketRequestWithWebsocketResponse = (result) => {
-      incrementHttpRequestsTotal(false);
-
       req.url = result.url;
       logContext.ioUrl = result.url;
       logger.debug(
@@ -174,9 +171,10 @@ export const forwardHttpRequest = (filterRules) => {
           }
         },
       );
+      incrementWebSocketRequestsTotal(false, 'outbound-request');
     };
     if (!filterResponse) {
-      incrementHttpRequestsTotal(true);
+      incrementHttpRequestsTotal(true, 'inbound-request');
       const reason =
         'Request does not match any accept rule, blocking HTTP request';
       logContext.error = 'blocked';
@@ -184,6 +182,7 @@ export const forwardHttpRequest = (filterRules) => {
       // TODO: respect request headers, block according to content-type
       return res.status(401).send({ message: 'blocked', reason, url: req.url });
     } else {
+      incrementHttpRequestsTotal(false, 'inbound-request');
       if (
         filterResponse.stream ||
         res?.locals?.capabilities?.includes('post-streams')

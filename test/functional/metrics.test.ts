@@ -48,6 +48,8 @@ describe('metrics', () => {
 
   it('observes response size when streaming', async () => {
     const metricsSpy = jest.spyOn(metrics, 'observeResponseSize');
+    const httpMetricsSpy = jest.spyOn(metrics, 'incrementHttpRequestsTotal');
+    const wsMetricsSpy = jest.spyOn(metrics, 'incrementWebSocketRequestsTotal');
     const expectedBytes = 256_000; // 250kb
 
     await axiosClient.get(
@@ -59,5 +61,7 @@ describe('metrics', () => {
       bytes: expectedBytes,
       isStreaming: true,
     });
+    expect(httpMetricsSpy).toHaveBeenCalledTimes(3); // 1 inbound http, one data request inbound, one outbound (from the simulated client)
+    expect(wsMetricsSpy).toHaveBeenCalledTimes(2); // 1 outbound-request to client, 1 inbound-request (from the simulated client)
   });
 });

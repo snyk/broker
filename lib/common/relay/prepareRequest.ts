@@ -1,6 +1,5 @@
 import { format, parse } from 'url';
 import { TestResult } from '../filter/filtersAsync';
-import { incrementWebSocketRequestsTotal } from '../utils/metrics';
 import version from '../utils/version';
 import tryJSONParse from '../utils/try-json-parse';
 import { replace } from '../utils/replace-vars';
@@ -33,7 +32,6 @@ export const prepareRequestFromFilterResult = async (
   brokerToken,
   socketType,
 ) => {
-  incrementWebSocketRequestsTotal(false);
   let errorPreparing: PostFilterPreparingRequestError | null = null;
 
   if (result.url.startsWith('http') === false) {

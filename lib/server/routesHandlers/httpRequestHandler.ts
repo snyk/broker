@@ -17,7 +17,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = (
 
   // check if we have this broker in the connections
   if (!connections.has(token)) {
-    incrementHttpRequestsTotal(false);
+    incrementHttpRequestsTotal(true, 'inbound-request');
     logger.warn({ desensitizedToken }, 'no matching connection found');
     return res.status(404).json({ ok: false });
   }
