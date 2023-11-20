@@ -45,43 +45,45 @@ ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin
 COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
 COPY --from=node-base /tmp/node/bin/node /usr/bin/node
 
-RUN yum upgrade --assumeyes && \
-    yum clean all && \
-    rm -rf /var/cache/yum && \
+RUN <<EOF
+    set -ex
+    yum upgrade --assumeyes
+    yum clean all
+    rm -rf /var/cache/yum
     # create default user and group
-    groupadd --gid 10001 snyk && \
-    useradd --gid 10001 --no-create-home --shell /sbin/nologin --uid 10001 snyk && \
+    groupadd --gid 10001 snyk
+    useradd --gid 10001 --no-create-home --shell /sbin/nologin --uid 10001 snyk
     # remove non-used OS packages
-    rpm --erase --nodeps curl && \
-    rpm --erase --nodeps python3-urllib3 && \
-    rpm --erase --nodeps python3-requests && \
-    rpm --erase --nodeps dnf-plugin-subscription-manager && \
-    rpm --erase --nodeps gdb-gdbserver && \
-    rpm --erase --nodeps glibc-common && \
-    rpm --erase --nodeps glibc-minimal-langpack && \
-    rpm --erase --nodeps gnutls && \
-    rpm --erase --nodeps libarchive && \
-    rpm --erase --nodeps libcurl && \
-    rpm --erase --nodeps libsolv && \
-    rpm --erase --nodeps libnghttp2 && \
-    rpm --erase --nodeps platform-python && \
-    rpm --erase --nodeps platform-python-setuptools && \
-    rpm --erase --nodeps python3-cloud-what && \
-    rpm --erase --nodeps python3-libs && \
-    rpm --erase --nodeps python3-libxml2 && \
-    rpm --erase --nodeps python3-rpm && \
-    rpm --erase --nodeps python3-setuptools-wheel && \
-    rpm --erase --nodeps python3-subscription-manager-rhsm && \
-    rpm --erase --nodeps python3-syspurpose && \
-    rpm --erase --nodeps subscription-manager && \
-    rpm --erase --nodeps subscription-manager-rhsm-certificates && \
-    rpm --erase --nodeps systemd && \
-    rpm --erase --nodeps systemd-libs && \
-    rpm --erase --nodeps systemd-pam && \
-    rpm --erase --nodeps tar && \
-    rpm --erase --nodeps tpm2-tss && \
-    rpm --erase --nodeps vim-minimal && \
-    rpm --erase --nodeps rpm-build-libs && \
+    rpm --erase --nodeps curl
+    rpm --erase --nodeps python3-urllib3
+    rpm --erase --nodeps python3-requests
+    rpm --erase --nodeps dnf-plugin-subscription-manager
+    rpm --erase --nodeps gdb-gdbserver
+    rpm --erase --nodeps glibc-common
+    rpm --erase --nodeps glibc-minimal-langpack
+    rpm --erase --nodeps gnutls
+    rpm --erase --nodeps libarchive
+    rpm --erase --nodeps libcurl
+    rpm --erase --nodeps libsolv
+    rpm --erase --nodeps libnghttp2
+    rpm --erase --nodeps platform-python
+    rpm --erase --nodeps platform-python-setuptools
+    rpm --erase --nodeps python3-cloud-what
+    rpm --erase --nodeps python3-libs
+    rpm --erase --nodeps python3-rpm
+    rpm --erase --nodeps python3-setuptools-wheel
+    rpm --erase --nodeps python3-subscription-manager-rhsm
+    rpm --erase --nodeps python3-syspurpose
+    rpm --erase --nodeps subscription-manager
+    rpm --erase --nodeps subscription-manager-rhsm-certificates
+    rpm --erase --nodeps systemd
+    rpm --erase --nodeps systemd-libs
+    rpm --erase --nodeps systemd-pam
+    rpm --erase --nodeps tar
+    rpm --erase --nodeps tpm2-tss
+    rpm --erase --nodeps vim-minimal
+    rpm --erase --nodeps rpm-build-libs
     rpm --erase --nodeps rpm-libs
+EOF
 
 USER snyk
