@@ -5,7 +5,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 
 export const handlePostResponse = (req: Request, res: Response) => {
-  incrementHttpRequestsTotal(false);
+  incrementHttpRequestsTotal(false, 'data-response');
   const token = req.params.brokerToken;
   const streamingID = req.params.streamingId;
   const desensitizedToken = getDesensitizedToken(token);

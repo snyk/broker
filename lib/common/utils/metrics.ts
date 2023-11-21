@@ -31,13 +31,13 @@ const unableToSizeResponseCounter = new Counter({
 const httpRequestsTotal = new Counter({
   name: 'http_request_total',
   help: 'Number of HTTP requests',
-  labelNames: ['rejectedByFilter'],
+  labelNames: ['rejectedByFilter', 'flowDirection'],
 });
 
 const webSocketRequestsTotal = new Counter({
   name: 'broker_ws_request_total',
   help: 'Number of requests received via WebSocket',
-  labelNames: ['rejectedByFilter'],
+  labelNames: ['rejectedByFilter', 'flowDirection'],
 });
 
 function incrementSocketConnectionGauge() {
@@ -56,12 +56,18 @@ function incrementUnableToSizeResponse() {
   unableToSizeResponseCounter.inc(1);
 }
 
-function incrementHttpRequestsTotal(rejectedByFilter) {
-  httpRequestsTotal.inc({ rejectedByFilter: rejectedByFilter }, 1);
+function incrementHttpRequestsTotal(rejectedByFilter, flowDirection) {
+  httpRequestsTotal.inc(
+    { rejectedByFilter: rejectedByFilter, flowDirection: flowDirection },
+    1,
+  );
 }
 
-function incrementWebSocketRequestsTotal(rejectedByFilter) {
-  webSocketRequestsTotal.inc({ rejectedByFilter: rejectedByFilter }, 1);
+function incrementWebSocketRequestsTotal(rejectedByFilter, flowDirection) {
+  webSocketRequestsTotal.inc(
+    { rejectedByFilter: rejectedByFilter, flowDirection: flowDirection },
+    1,
+  );
 }
 
 export {
