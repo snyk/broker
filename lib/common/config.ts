@@ -6,12 +6,19 @@ import dotenv from 'dotenv';
 
 export let config: Record<string, any> = {};
 
+export interface CONFIG {
+  supportedBrokerTypes: string[];
+  brokerType: 'client' | 'server';
+}
+
+export type CONFIGURATION = CONFIG & Record<string, any>;
+
 export const loadBrokerConfig = () => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
 
-  const localConfig = loadConfig(path.join(__dirname, '..'));
+  const localConfig = loadConfig(process.cwd());
 
   expand(process.env);
 

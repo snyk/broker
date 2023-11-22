@@ -1,0 +1,62 @@
+[
+  {
+    "//": "used to get repo's teams list",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/teams",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get teams's repo list",
+    "method": "GET",
+    "path": "/orgs/:owner/teams/:team/repos",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get orgs's teams list",
+    "method": "GET",
+    "path": "/orgs/:username/teams",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get team's members list",
+    "method": "GET",
+    "path": "/orgs/:username/teams/:team_slug/members",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get org's members list",
+    "method": "GET",
+    "path": "/orgs/:username/members",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get repo's contributors list",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/contributors",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get repo's languages",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/languages",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get repo's topics list",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/topics",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get user",
+    "method": "GET",
+    "path": "/:user/:repo",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
+    "//": "used to get user's orgs",
+    "method": "GET",
+    "path": "/users/:username/orgs",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  }
+]

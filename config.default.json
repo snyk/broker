@@ -1,3 +1,16 @@
 {
-  "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false
+  "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
+  "SUPPORTED_BROKER_TYPES": [
+    "artifactory",
+    "azure-repos",
+    "bitbucket-server",
+    "container-registry-agent",
+    "github-enterprise",
+    "github",
+    "gitlab",
+    "jira-bearer-auth",
+    "jira",
+    "nexus",
+    "nexus2"
+  ]
 }

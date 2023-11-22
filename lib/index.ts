@@ -2,7 +2,11 @@ import 'clarify'; // clean the stacktraces
 
 import filterRulesLoader from './common/filter/filter-rules-loading';
 import { log as logger } from './logs/logger';
-import { config as globalConfig, loadBrokerConfig } from './common/config';
+import {
+  CONFIGURATION,
+  config as globalConfig,
+  loadBrokerConfig,
+} from './common/config';
 process.on('uncaughtExceptionMonitor', (error, origin) => {
   logger.error({ error, origin }, 'found unhandled exception');
 });
@@ -30,8 +34,8 @@ export const app = async ({ port = 7341, client = false, config }) => {
   const localConfig = Object.assign({}, globalConfig, config) as Record<
     string,
     any
-  >;
-  const filters = filterRulesLoader(localConfig?.accept);
+  > as CONFIGURATION;
+  const filters = filterRulesLoader(localConfig);
   if (method == 'client') {
     // if the localConfig has the broker server, then we must assume it's a client
     return await (

@@ -4,6 +4,9 @@ import fs from 'fs';
 
 import { log as logger } from '../../logs/logger';
 import { FiltersType } from './legacyFilters';
+import { CONFIGURATION } from '../config';
+import camelcase from 'camelcase';
+import { Rule } from './filtersAsync';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
 const IAC_SCM_ORIGINS = [
@@ -24,7 +27,7 @@ function nestedCopy(array) {
   return JSON.parse(JSON.stringify(array));
 }
 
-function injectRulesAtRuntime(filters) {
+function injectRulesAtRuntime(filters: FiltersType, config: CONFIGURATION) {
   if (process.env.ACCEPT_IAC) {
     logger.info(
       { accept: process.env.ACCEPT_IAC },
@@ -38,16 +41,16 @@ function injectRulesAtRuntime(filters) {
         { accept: extensions },
         '[MISCONFIGURATION] None of the requested ACCEPT IAC file extensions is compatible',
       );
-    } else if (!filters.private[0].origin.includes('AZURE')) {
+    } else if (!filters.private[0].origin?.includes('AZURE')) {
       // API endpoints for IAC (github, ghe, bitbucket server), doesn't matter for azure, gitlab
       // file pattern is different for Azure repos, requirements work for all others
       const template = nestedCopy(
         filters.private.filter(
           (entry) =>
             entry.method === 'GET' &&
-            entry.path.includes('requirements') &&
+            entry.path?.includes('requirements') &&
             IAC_SCM_ORIGINS.filter((origin) =>
-              entry.origin.includes(`{${origin}}`),
+              entry.origin?.includes(`{${origin}}`),
             ).length > 0,
         ),
       );
@@ -78,12 +81,16 @@ function injectRulesAtRuntime(filters) {
         (entry) =>
           entry.method === 'GET' &&
           entry.valid &&
-          entry.valid[0].values.includes('**/requirements/*.txt'),
+          entry.valid[0].values?.includes('**/requirements/*.txt'),
       );
       for (let i = 0; i < templateToModify.length; i++) {
         for (let j = 0; j < extensions.length; j++) {
-          templateToModify[i].valid[0].values.push(`**/*.${extensions[j]}`);
-          templateToModify[i].valid[0].values.push(`**%2F*.${extensions[j]}`);
+          if (
+            templateToModify[i].valid &&
+            templateToModify[i].valid!.length > 0
+          )
+            templateToModify[i].valid![0].values!.push(`**/*.${extensions[j]}`);
+          templateToModify[i].valid![0].values!.push(`**%2F*.${extensions[j]}`);
         }
       }
     } else {
@@ -95,7 +102,7 @@ function injectRulesAtRuntime(filters) {
   }
   if (process.env.ACCEPT_LARGE_MANIFESTS) {
     const scmType = CODE_SCM_ORIGINS.find((element) => {
-      if (filters.private[0].origin.includes(element)) {
+      if (filters.private[0].origin?.includes(element)) {
         return true;
       }
     });
@@ -128,7 +135,7 @@ function injectRulesAtRuntime(filters) {
         (entry) =>
           entry.method === 'GET' &&
           CODE_SCM_ORIGINS.filter((origin) =>
-            entry.origin.includes(`{${origin}}`),
+            entry.origin?.includes(`{${origin}}`),
           ).length > 0,
       )[0],
     );
@@ -155,7 +162,7 @@ function injectRulesAtRuntime(filters) {
         (entry) =>
           entry.method === 'GET' &&
           SNIPPETS_CODE_SCM_ORIGINS.filter((origin) =>
-            entry.origin.includes(`{${origin}}`),
+            entry.origin?.includes(`{${origin}}`),
           ).length > 0,
       )[0],
     );
@@ -196,11 +203,36 @@ function injectRulesAtRuntime(filters) {
       ...[templateGET, templatePOST, templateGETForSnippets],
     );
   }
+  if (process.env.ACCEPT_APPRISK) {
+    logger.info(
+      { accept: process.env.ACCEPT_APPRISK },
+      'Injecting Accept rules for AppRisk',
+    );
+    const type = config.supportedBrokerTypes.find(
+      (type) =>
+        config[
+          camelcase(`BROKER_DOWNSTREAM_TYPE_${type.toLocaleUpperCase()}`)
+        ] == 'true',
+    );
+    if (type) {
+      const appRiskRules = require(path.join(
+        process.cwd(),
+        `defaultFilters/apprisk/${type}.json`,
+      )) as Rule[];
+      // rm entry from filters.private if matching uri in appRiskRules which takes precedence
+      const appRiskRulesPathPattern = appRiskRules.map((x) => x.path);
+      filters.private = filters.private.filter(
+        (x) => !appRiskRulesPathPattern.includes(x.path),
+      );
+      filters.private.push(...appRiskRules);
+    }
+  }
   return filters;
 }
 
-export default (acceptFilename = '', folderLocation = ''): FiltersType => {
+export default (config: CONFIGURATION, folderLocation = ''): FiltersType => {
   let filters;
+  const acceptFilename = config.accept || '';
   if (acceptFilename) {
     const acceptLocation = path.resolve(
       folderLocation ? folderLocation : process.cwd(),
@@ -213,7 +245,7 @@ export default (acceptFilename = '', folderLocation = ''): FiltersType => {
   // If user brings an accept json, skip the IAC|CODE rules injection logic
   // If going through the effort of loading a separate file, add your rules there
   if (process.env.ACCEPT === 'accept.json') {
-    filters = injectRulesAtRuntime(filters);
+    filters = injectRulesAtRuntime(filters, config);
   } else {
     logger.info(
       { accept: process.env.ACCEPT },

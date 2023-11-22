@@ -1,0 +1,20 @@
+[
+  {
+    "//": "list the group's members",
+    "method": "GET",
+    "path": "/api/v4/groups/:id/members",
+    "origin": "https://${GITLAB}"
+  },
+  {
+    "//": "list of languages in a project",
+    "method": "GET",
+    "path": "/api/v4/projects/:project/languages",
+    "origin": "https://${GITLAB}"
+  },
+  {
+    "//": "list of groups in a project",
+    "method": "GET",
+    "path": "/api/v4/projects/:project/groups",
+    "origin": "https://${GITLAB}"
+  }
+]
