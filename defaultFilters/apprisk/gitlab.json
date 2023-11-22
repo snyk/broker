@@ -3,55 +3,30 @@
     "//": "list the group's members",
     "method": "GET",
     "path": "/api/v4/groups/:id/members",
-    "origin": "https://${GITLAB}",
-    "auth":
-    {
-      "scheme": "bearer",
-      "token": "${GITLAB_TOKEN}"
-    }
+    "origin": "https://${GITLAB}"
   },
   {
     "//": "list of languages in a project",
     "method": "GET",
     "path": "/api/v4/projects/:project/languages",
-    "origin": "https://${GITLAB}",
-    "auth":
-    {
-      "scheme": "bearer",
-      "token": "${GITLAB_TOKEN}"
-    }
+    "origin": "https://${GITLAB}"
   },
   {
     "//": "list of groups in a project",
     "method": "GET",
     "path": "/api/v4/projects/:project/groups",
-    "origin": "https://${GITLAB}",
-    "auth":
-    {
-      "scheme": "bearer",
-      "token": "${GITLAB_TOKEN}"
-    }
+    "origin": "https://${GITLAB}"
   },
   {
     "//": "list the user's projects",
     "method": "GET",
     "path": "/api/v4/projects",
-    "origin": "https://${GITLAB}",
-    "auth":
-    {
-      "scheme": "bearer",
-      "token": "${GITLAB_TOKEN}"
-    }
+    "origin": "https://${GITLAB}"
   },
   {
     "//": "used to get repo's contributors list",
     "method": "GET",
     "path": "/api/v4/projects/:project/repository/commits",
-    "origin": "https://${GITLAB}",
-    "auth":
-    {
-      "scheme": "bearer",
-      "token": "${GITLAB_TOKEN}"
-    }
+    "origin": "https://${GITLAB}"
   }
 ]
