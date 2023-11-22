@@ -382,16 +382,6 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
-      "//": "get api's connection status",
-      "auth": Object {
-        "scheme": "basic",
-        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
-      },
-      "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/",
-      "path": "/:owner/_apis/connectionData",
-    },
-    Object {
       "//": "get core api's location for sanity check",
       "auth": Object {
         "scheme": "basic",
@@ -399,7 +389,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/:owner/_apis/Location",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/Location",
     },
     Object {
       "//": "get resource access for sanity check",
@@ -409,37 +399,27 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/:owner/_apis/ResourceAreas",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/ResourceAreas",
     },
     Object {
-      "//": "get list of builds for given repository",
+      "//": "get specific repository for given organisation",
       "auth": Object {
         "scheme": "basic",
         "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
       },
       "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
-      "path": "/:owner/:project/_apis/git/build/builds",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/git/repositories/:repo",
     },
     Object {
-      "//": "pull security namespaces",
+      "//": "get list of refs",
       "auth": Object {
         "scheme": "basic",
         "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
       },
       "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
-      "path": "/:owner/_apis/securitynamespaces",
-    },
-    Object {
-      "//": "pull access control lists of security namespaces",
-      "auth": Object {
-        "scheme": "basic",
-        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
-      },
-      "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
-      "path": "/:owner/_apis/accesscontrollists/:namespaceId",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/git/repositories/:repo/refs",
     },
     Object {
       "//": "pull teams",
@@ -448,18 +428,8 @@ Object {
         "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
       },
       "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
-      "path": "/:owner/_apis/teams",
-    },
-    Object {
-      "//": "pull project's languages",
-      "auth": Object {
-        "scheme": "basic",
-        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
-      },
-      "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
-      "path": "/:owner/:project/_apis/projectanalysis/languagemetrics",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/teams",
     },
     Object {
       "//": "pull users via graph api",
@@ -470,6 +440,126 @@ Object {
       "method": "GET",
       "origin": "https://vssps.dev.azure.com/",
       "path": "/:owner/_apis/graph/users",
+    },
+    Object {
+      "//": "get api's connection status",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/connectionData",
+    },
+    Object {
+      "//": "get core",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/core",
+    },
+    Object {
+      "//": "get git",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/git",
+    },
+    Object {
+      "//": "get list of repositories for given organisation",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/git/repositories",
+    },
+    Object {
+      "//": "get list of projects for given organisation",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/projects",
+    },
+    Object {
+      "//": "pull teams",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:repo/teams",
+    },
+    Object {
+      "//": "get list of commits for given repository",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get list of team's members",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team/members",
+    },
+    Object {
+      "//": "get list project's languages",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/projectanalysis",
+    },
+    Object {
+      "//": "pull project's languages metrics",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/projectanalysis/languagemetrics",
+    },
+    Object {
+      "//": "expend team",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team",
+    },
+    Object {
+      "//": "get releases",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/\${AZURE_REPOS_ORG}/_apis/Release",
     },
   ],
   "public": Array [
@@ -485,17 +575,6 @@ Object {
 exports[`filter Rules Loading Injection of valid AppRisk rules - Testing bitbucket-server 1`] = `
 Object {
   "private": Array [
-    Object {
-      "//": "list the user's projects",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects",
-    },
     Object {
       "//": "list the project's repos",
       "auth": Object {
@@ -1603,7 +1682,7 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "list the user's workspaces",
+      "//": "used to get repo's commits",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1611,7 +1690,40 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/rest/api/2.0/workspaces",
+      "path": "/projects/:projectKey/repos/:repo/commits",
+    },
+    Object {
+      "//": "used to get specific commit",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:projectKey/repos/:repo/commits/:commit/diff",
+    },
+    Object {
+      "//": "list commit for a given repo",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/:workspace/:repo/commits",
+    },
+    Object {
+      "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/:workspace/:repo/diffstat/commits/:sha",
     },
     Object {
       "//": "list the user's workspaces - AppRisk connector",
@@ -1625,7 +1737,7 @@ Object {
       "path": "/workspaces",
     },
     Object {
-      "//": "list the workspace's members",
+      "//": "list the user's workspaces - AppRisk connector",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1633,10 +1745,10 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/rest/api/2.0/workspaces/:workspace/members",
+      "path": "/projects",
     },
     Object {
-      "//": "list the workspace's repos",
+      "//": "used to get groups",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1644,10 +1756,10 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/rest/api/2.0/workspaces/:workspace",
+      "path": "/admin/groups",
     },
     Object {
-      "//": "list the workspace's repos",
+      "//": "used to get group's members",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1655,117 +1767,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
-      "path": "/workspaces/:workspace",
-    },
-    Object {
-      "//": "used to query for open pull requests by id",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests",
-    },
-    Object {
-      "//": "used to query for open pull requests by id - AppRisk",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/repositories/:workspace/:repo/pullrequests",
-    },
-    Object {
-      "//": "used to query for open pull requests statuses by id",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/pullrequests/:pr/statuses",
-    },
-    Object {
-      "//": "used to query for open pull requests statuses by id - AppRisk",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/repositories/:workspace/:repo/pullrequests/:pr/statuses",
-    },
-    Object {
-      "//": "list commit for a given repo",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
-    },
-    Object {
-      "//": "list repos for a given workspace",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/repositories/:workspace",
-    },
-    Object {
-      "//": "list members for a given workspace - AppRisk",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/workspaces/:workspace/members",
-    },
-    Object {
-      "//": "list commit for a given repo - AppRisk",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/repositories/:workspace/:repo/commits",
-    },
-    Object {
-      "//": "list commit for a given repo",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/commits",
-    },
-    Object {
-      "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET}",
-      "path": "/rest/api/2.0/repositories/:workspace/:repo/diffstat/commits/:sha",
+      "path": "/admin/groups/more-members",
     },
   ],
   "public": Array [
@@ -1882,12 +1884,6 @@ Object {
       "method": "DELETE",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
-    },
-    Object {
-      "//": "check if repo is public",
-      "method": "GET",
-      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB}",
-      "path": "/:user/:repo",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -3492,6 +3488,20 @@ Object {
       "path": "/repos/:name/:repo",
     },
     Object {
+      "//": "get the details of the commit to determine its SHA",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/commits/:ref",
+      "valid": Array [
+        Object {
+          "header": "accept",
+          "values": Array [
+            "application/vnd.github.v4.sha",
+          ],
+        },
+      ],
+    },
+    Object {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -3605,24 +3615,6 @@ Object {
       ],
     },
     Object {
-      "//": "get the details of the commit to determine its SHA",
-      "method": "GET",
-      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/repos/:name/:repo/commits/:ref",
-    },
-    Object {
-      "//": "get a user's details",
-      "method": "GET",
-      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/users/:username",
-    },
-    Object {
-      "//": "list a user's orgs",
-      "method": "GET",
-      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
-      "path": "/users/:username/orgs",
-    },
-    Object {
       "//": "used to get repo's teams list",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -3669,6 +3661,18 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:owner/:repo/topics",
+    },
+    Object {
+      "//": "used to get user",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/:user/:repo",
+    },
+    Object {
+      "//": "used to get user's orgs",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/users/:username/orgs",
     },
   ],
   "public": Array [
@@ -4077,12 +4081,6 @@ Object {
       "method": "DELETE",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
-    },
-    Object {
-      "//": "check if repo is public",
-      "method": "GET",
-      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB}",
-      "path": "/:user/:repo",
     },
     Object {
       "//": "used to determine the full dependency tree",
@@ -5100,10 +5098,28 @@ Object {
       "path": "/repos/:owner/:repo/teams",
     },
     Object {
+      "//": "used to get teams's repo list",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/orgs/:owner/teams/:team/repos",
+    },
+    Object {
+      "//": "used to get orgs's teams list",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/orgs/:username/teams",
+    },
+    Object {
       "//": "used to get team's members list",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/orgs/:username/teams/:team_slug/members",
+    },
+    Object {
+      "//": "used to get org's members list",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/orgs/:username/members",
     },
     Object {
       "//": "used to get repo's contributors list",
@@ -5112,10 +5128,28 @@ Object {
       "path": "/repos/:owner/:repo/contributors",
     },
     Object {
+      "//": "used to get repo's languages",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:owner/:repo/languages",
+    },
+    Object {
       "//": "used to get repo's topics list",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:owner/:repo/topics",
+    },
+    Object {
+      "//": "used to get user",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/:user/:repo",
+    },
+    Object {
+      "//": "used to get user's orgs",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/users/:username/orgs",
     },
   ],
   "public": Array [
