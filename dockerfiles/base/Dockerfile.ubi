@@ -44,6 +44,8 @@ ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin
 
 COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
 COPY --from=node-base /tmp/node/bin/node /usr/bin/node
+COPY config.default.json /home/node/config.default.json
+COPY defaultFilters /home/node/defaultFilters
 
 RUN <<EOF
     set -ex
