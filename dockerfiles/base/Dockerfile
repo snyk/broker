@@ -107,6 +107,7 @@ LABEL org.opencontainers.image.authors="team-broker" \
 
 COPY --from=broker-builder /home/node/.npm-global /home/node/.npm-global
 COPY --from=broker-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY config.default.json /home/node/config.default.json
 
 WORKDIR /home/node
 USER node
