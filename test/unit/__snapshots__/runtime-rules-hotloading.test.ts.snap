@@ -389,7 +389,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/Location",
+      "path": "/:org/_apis/Location",
     },
     Object {
       "//": "get resource access for sanity check",
@@ -399,7 +399,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/ResourceAreas",
+      "path": "/:org/_apis/ResourceAreas",
     },
     Object {
       "//": "get specific repository for given organisation",
@@ -409,7 +409,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/git/repositories/:repo",
+      "path": "/:org/_apis/git/repositories/:repo",
     },
     Object {
       "//": "get list of refs",
@@ -419,7 +419,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/git/repositories/:repo/refs",
+      "path": "/:org/_apis/git/repositories/:repo/refs",
     },
     Object {
       "//": "pull teams",
@@ -429,7 +429,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/teams",
+      "path": "/:org/_apis/teams",
     },
     Object {
       "//": "pull users via graph api",
@@ -449,7 +449,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/connectionData",
+      "path": "/:org/_apis/connectionData",
     },
     Object {
       "//": "get core",
@@ -459,7 +459,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/core",
+      "path": "/:org/_apis/core",
     },
     Object {
       "//": "get git",
@@ -469,7 +469,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/git",
+      "path": "/:org/_apis/git",
     },
     Object {
       "//": "get list of repositories for given organisation",
@@ -479,7 +479,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/git/repositories",
+      "path": "/:org/:project/_apis/git/repositories",
     },
     Object {
       "//": "get list of projects for given organisation",
@@ -489,7 +489,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/projects",
+      "path": "/:org/_apis/projects",
     },
     Object {
       "//": "pull teams",
@@ -499,7 +499,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:repo/teams",
+      "path": "/:org/_apis/projects/:repo/teams",
     },
     Object {
       "//": "get list of commits for given repository",
@@ -509,7 +509,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/git/repositories/:repo/commits",
+      "path": "/:org/:project/_apis/git/repositories/:repo/commits",
     },
     Object {
       "//": "get list of team's members",
@@ -519,7 +519,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team/members",
+      "path": "/:org/_apis/projects/:project/teams/:team/members",
     },
     Object {
       "//": "get list project's languages",
@@ -529,7 +529,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/projectanalysis",
+      "path": "/:org/_apis/projectanalysis",
     },
     Object {
       "//": "pull project's languages metrics",
@@ -539,7 +539,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/:project/_apis/projectanalysis/languagemetrics",
+      "path": "/:org/:project/_apis/projectanalysis/languagemetrics",
     },
     Object {
       "//": "expend team",
@@ -549,7 +549,7 @@ Object {
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team",
+      "path": "/:org/_apis/projects/:project/teams/:team",
     },
     Object {
       "//": "get releases",
@@ -559,7 +559,7 @@ Object {
       },
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/\${AZURE_REPOS_ORG}/_apis/Release",
+      "path": "/:org/_apis/Release",
     },
   ],
   "public": Array [

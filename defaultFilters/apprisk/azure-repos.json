@@ -2,7 +2,7 @@
   {
     "//": "get core api's location for sanity check",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/_apis/Location",
+    "path": "/:org/_apis/Location",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -12,7 +12,7 @@
   {
     "//": "get resource access for sanity check",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/ResourceAreas",
+    "path": "/:org/_apis/ResourceAreas",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -22,7 +22,7 @@
   {
     "//": "get specific repository for given organisation",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/git/repositories/:repo",
+    "path": "/:org/_apis/git/repositories/:repo",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -32,7 +32,7 @@
   {
     "//": "get list of refs",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/git/repositories/:repo/refs",
+    "path": "/:org/_apis/git/repositories/:repo/refs",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -42,7 +42,7 @@
   {
     "//": "pull teams",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/teams",
+    "path": "/:org/_apis/teams",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -62,7 +62,7 @@
   {
     "//": "get api's connection status",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/connectionData",
+    "path": "/:org/_apis/connectionData",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -72,7 +72,7 @@
   {
     "//": "get core",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/_apis/core",
+    "path": "/:org/_apis/core",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -82,7 +82,7 @@
   {
     "//": "get git",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/_apis/git",
+    "path": "/:org/_apis/git",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -92,7 +92,7 @@
   {
     "//": "get list of repositories for given organisation",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/:project/_apis/git/repositories",
+    "path": "/:org/:project/_apis/git/repositories",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -102,7 +102,7 @@
   {
     "//": "get list of projects for given organisation",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/projects",
+    "path": "/:org/_apis/projects",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -112,7 +112,7 @@
   {
     "//": "pull teams",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/projects/:repo/teams",
+    "path": "/:org/_apis/projects/:repo/teams",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -122,7 +122,7 @@
   {
     "//": "get list of commits for given repository",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/:project/_apis/git/repositories/:repo/commits",
+    "path": "/:org/:project/_apis/git/repositories/:repo/commits",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -132,7 +132,7 @@
   {
     "//": "get list of team's members",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team/members",
+    "path": "/:org/_apis/projects/:project/teams/:team/members",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -142,7 +142,7 @@
   {
     "//": "get list project's languages",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/_apis/projectanalysis",
+    "path": "/:org/_apis/projectanalysis",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -152,7 +152,7 @@
   {
     "//": "pull project's languages metrics",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/:project/_apis/projectanalysis/languagemetrics",
+    "path": "/:org/:project/_apis/projectanalysis/languagemetrics",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -162,7 +162,7 @@
   {
     "//": "expend team",
     "method": "GET",
-    "path": "/${AZURE_REPOS_ORG}/_apis/projects/:project/teams/:team",
+    "path": "/:org/_apis/projects/:project/teams/:team",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -171,7 +171,7 @@
   }, {
     "//": "get releases",
     "method": "OPTIONS",
-    "path": "/${AZURE_REPOS_ORG}/_apis/Release",
+    "path": "/:org/_apis/Release",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
