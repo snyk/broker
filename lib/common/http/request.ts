@@ -178,6 +178,27 @@ export const makeStreamingRequestToDownstream = (
               `Non 2xx HTTP Code Received`,
             );
           }
+
+          response.on('error', (error) => {
+            if (retries > 0) {
+              logger.warn(
+                { msg: localRequest.url },
+                `Downstream Response failed. Retrying after 500ms...`,
+              );
+              setTimeout(() => {
+                resolve(
+                  makeStreamingRequestToDownstream(localRequest, retries - 1),
+                );
+              }, 500); // Wait for 0.5 second before retrying
+            } else {
+              logger.error(
+                { error },
+                `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
+              );
+              reject(error);
+            }
+          });
+
           resolve(response);
         },
       );

@@ -13,6 +13,15 @@ import { systemCheckHandler } from './routesHandler/systemCheckHandler';
 import { ClientOpts } from './types/client';
 import { processStartUpHooks } from './hooks/startup/processHooks';
 
+process.on('uncaughtException', (error) => {
+  logger.error(
+    { msg: error.message, stackTrace: error.stack },
+    'Uncaught exception:',
+    error.message,
+  );
+  process.exit(1);
+});
+
 export const main = async (clientOpts: ClientOpts) => {
   try {
     logger.info({ version }, 'running in client mode');
