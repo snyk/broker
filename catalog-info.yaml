@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: broker
+  annotations:
+    github.com/project-slug: snyk/broker
+    github.com/team-slug: snyk/team-broker
+spec:
+  type: snyk-deployed-fedramp
+  lifecycle: "-"
+  owner: team-broker
