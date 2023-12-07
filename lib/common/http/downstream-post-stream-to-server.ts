@@ -52,7 +52,6 @@ class BrokerServerPostResponseHandler {
     this.#serverId = serverId;
     this.#requestId = requestId;
     this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 });
-
     this.#buffer.on('error', (e) =>
       logger.error(
         {
@@ -66,63 +65,77 @@ class BrokerServerPostResponseHandler {
   }
 
   async #initHttpClientRequest() {
-    const url = new URL(
-      `${this.#config.brokerServerUrl}/response-data/${this.#brokerToken}/${
-        this.#streamingId
-      }`,
-    );
-    if (this.#serverId) {
-      url.searchParams.append('server_id', this.#serverId);
-    }
-    const brokerServerPostRequestUrl = url.toString();
+    try {
+      const url = new URL(
+        `${this.#config.brokerServerUrl}/response-data/${this.#brokerToken}/${
+          this.#streamingId
+        }`,
+      );
+      if (this.#serverId) {
+        url.searchParams.append('server_id', this.#serverId);
+      }
+      const brokerServerPostRequestUrl = url.toString();
 
-    const options = {
-      method: 'post',
-      headers: {
-        'Snyk-Request-Id': `${this.#requestId}`,
-        'Content-Type': BROKER_CONTENT_TYPE,
-        Connection: 'Keep-Alive',
-        'Keep-Alive': 'timeout=600000, max=1000000',
-        'user-agent': 'Snyk Broker client ' + version,
-      },
-      agent: agent,
-      timeout: 600000,
-    };
+      const options = {
+        method: 'post',
+        headers: {
+          'Snyk-Request-Id': `${this.#requestId}`,
+          'Content-Type': BROKER_CONTENT_TYPE,
+          Connection: 'Keep-Alive',
+          'Keep-Alive': 'timeout=600000, max=1000000',
+          'user-agent': 'Snyk Broker client ' + version,
+        },
+        agent: agent,
+        timeout: 600000,
+      };
 
-    this.#brokerSrvPostRequestHandler = client.request(
-      brokerServerPostRequestUrl,
-      options,
-    );
-    this.#brokerSrvPostRequestHandler
-      .on('error', (e) => {
-        logger.error(
-          {
-            error: e,
-            stackTrace: new Error('stacktrace generator').stack,
-          },
-          'received error sending data via POST to Broker Server',
-        );
-        this.#buffer.destroy(e);
-      })
-      .on('response', (r) => {
-        if (r.statusCode !== 200) {
+      this.#brokerSrvPostRequestHandler = client.request(
+        brokerServerPostRequestUrl,
+        options,
+      );
+      this.#brokerSrvPostRequestHandler
+        .on('error', (e) => {
           logger.error(
             {
-              statusCode: r.statusCode,
-              statusMessage: r.statusMessage,
-              headers: r.headers,
-              body: r.body?.toString(),
+              error: e,
               stackTrace: new Error('stacktrace generator').stack,
             },
-            'Received unexpected HTTP response POSTing data to Broker Server',
+            'received error sending data via POST to Broker Server',
           );
-        }
-      })
-      .on('finish', () => {
-        this.#brokerSrvPostRequestHandler.removeAllListeners();
-      });
+          this.#buffer.destroy(e);
+        })
+        .on('response', (r) => {
+          r.on('error', (err) => {
+            logger.error(
+              {
+                msg: err.message,
+                err: err,
+                stackTrace: new Error('stacktrace generator').stack,
+              },
+              'Stream Response error in POST to Broker Server',
+            );
+          });
+          if (r.statusCode !== 200) {
+            logger.error(
+              {
+                statusCode: r.statusCode,
+                statusMessage: r.statusMessage,
+                headers: r.headers,
+                body: r.body?.toString(),
+                stackTrace: new Error('stacktrace generator').stack,
+              },
+              'Received unexpected HTTP response POSTing data to Broker Server',
+            );
+          }
+        })
+        .on('finish', () => {
+          this.#brokerSrvPostRequestHandler.removeAllListeners();
+        });
 
-    logger.debug(this.#logContext, 'POST Request Client setup');
+      logger.debug(this.#logContext, 'POST Request Client setup');
+    } catch (err) {
+      logger.error({ err }, 'Error init Client for POST Broker Server Stream');
+    }
   }
 
   #sendIoData(ioData) {
