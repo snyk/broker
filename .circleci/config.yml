@@ -1740,3 +1740,44 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
+      - approve-build-universal-dev:
+          name: universal-dev image
+          type: approval
+          requires:
+            - Scan repository for secrets
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push universal image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - universal-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base"
+          dockerfile: dockerfiles/Dockerfile-universal.dev
+          image_name: snyk/broker
+          image_tag: universal-dev
+          project_name: universal-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push universal-nlatest image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - universal-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
+          dockerfile: dockerfiles/Dockerfile-universal.dev
+          image_name: snyk/broker
+          image_tag: universal-nlatest-dev
+          project_name: universal-nlatest-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+

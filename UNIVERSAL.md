@@ -16,7 +16,7 @@ Each connection still expects a [unique Broker Token](https://docs.snyk.io/enter
 All the [system type settings specified in our docs](https://docs.snyk.io/enterprise-setup/snyk-broker/install-and-configure-snyk-broker/install-and-configure-broker-using-docker#installation-using-docker) remain applicable but will for the most part be associated to a particular connection.
 
 ## How to run the Universal Broker
-1. Create a file called `config.universal.json
+1. Create a file called `config.universal.json`
 2. Use the boilerplate configuration below
     ```
     {
@@ -59,14 +59,14 @@ All the [system type settings specified in our docs](https://docs.snyk.io/enterp
     ```
     docker run --restart=always 
         -p 8001:8001 -e PORT=8001 \
-        -e BROKER_CLIENT_URL=https://<YOUR BROKER CLIENT URL> \
+        -e BROKER_CLIENT_URL=http(s)://<YOUR BROKER CLIENT URL> \
         -e UNIVERSAL_BROKER_ENABLED=true \
         -e BROKER_TOKEN_1=<YOUR BROKER TOKEN 1> \
         -e BROKER_TOKEN_2=<YOUR BROKER TOKEN 2> \
         -e GITLAB_TOKEN=<YOUR GITLAB TOKEN> \
         -e GITHUB_TOKEN=<YOUR GITHUB TOKEN> \
         -v $(pwd)/config.universal.json:/home/node/config.universal.json \
-    snyk/broker:github-com-dev
+    snyk/broker:universal-dev
     ```
     You will recognize similar patterns to your current deployment method.
 
@@ -77,7 +77,13 @@ The universal broker can technically support an unlimited number of connections,
 Further development will bring better visibility of resource consumption out of the box. For the immediate term, we suggest you keep an eye on the resource levels as you add more and more connections.
 
 ### Connection details
-### Supported types
+
+All connections must have the following fields at minimum:
+- `type`: Connection type, being on of the supported types listed below.
+- `identifier`: Your broker token for that connection
+- required values listed below for the corresponding type
+
+#### Supported types
 Any connection must be of one of the following types:
 - artifactory
 - azure-repos
@@ -93,53 +99,53 @@ Any connection must be of one of the following types:
 
 The required values to be specified for each type can be found below, or in the config.default.json in the repo.
 
-### Required values
+#### Required values
 
 For each type, the connection must have the following values.
 
-#### artifactory
+###### artifactory
 - "ARTIFACTORY_URL": "\<username>:\<password>@<yourdomain.artifactory.com>/artifactory"
 
-#### azure-repos
+##### azure-repos
 - "AZURE_REPOS_TOKEN": "\<token>",
 - "AZURE_REPOS_ORG": "\<organisation name>",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### bitbucket-server
+##### bitbucket-server
 - "BITBUCKET_USERNAME": "\<username>",
 - "BITBUCKET_PASSWORD": "\<password>",
 - "BITBUCKET": "bitbucket.yourdomain.com",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### container-registry-agent
+##### container-registry-agent
 - "CR_AGENT_URL": "https://\<agent-host>:\<agent-port>",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### github
+##### github
 - "GITHUB_TOKEN": "\<github-token>",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### github-enterprise
+##### github-enterprise
 - "GITHUB_TOKEN": "\<github-token>",
 - "GITHUB": "ghe.yourdomain.com",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### gitlab
+##### gitlab
 - "GITLAB_TOKEN": "\<gitlab-token>",
 - "GITLAB": "gitlab.yourdomain.com",
 - "BROKER_CLIENT_URL": "http(s)://<broker.client.hostname>:\<port>"
 
-#### jira
+##### jira
 - "JIRA_USERNAME": "\<jira-username>",
 - "JIRA_PASSWORD": "\<jira-password>",
 - "JIRA_HOSTNAME": "jira.yourdomain.com"
 
-#### jira-bearer-auth
+##### jira-bearer-auth
 - "JIRA_PAT": "\<jira-pat>",
 - "JIRA_HOSTNAME": "jira.yourdomain.com"
 
-#### nexus
+##### nexus
 - "BASE_NEXUS_URL": "https://\<username>:\<password>@<your.nexus.hostname>"
 
-#### nexus2
+##### nexus2
 - "BASE_NEXUS_URL": "https://\<username>:\<password>@<your.nexus.hostname>"

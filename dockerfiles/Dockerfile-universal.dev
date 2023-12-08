@@ -1,6 +1,4 @@
 ARG BASE_IMAGE=snyk/broker:base
-ARG BROKER_TYPE=github-com
-
 
 FROM ${BASE_IMAGE} as broker-builder
 
@@ -29,9 +27,6 @@ RUN npm i -g tough-cookie@4.1.3
 RUN mv /home/node/.npm-global/lib/node_modules/tough-cookie /home/node/node_modules
 
 FROM ${BASE_IMAGE}
-
-ARG BROKER_TYPE
-ENV BROKER_TYPE=${BROKER_TYPE}
 
 ENV PATH=$PATH:/home/node/node_modules/.bin
 
