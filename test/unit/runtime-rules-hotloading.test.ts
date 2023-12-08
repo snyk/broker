@@ -1,6 +1,6 @@
 import path from 'path';
 import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
-import { CONFIGURATION } from '../../lib/common/config';
+import { CONFIGURATION } from '../../lib/common/config/config';
 import camelcase from 'camelcase';
 
 const scmRulesToTest = [
@@ -21,6 +21,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -40,6 +41,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -60,6 +62,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -80,6 +83,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -100,6 +104,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -120,6 +125,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -141,6 +147,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -162,6 +169,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
+          filterRulesPath: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -183,6 +191,7 @@ describe('filter Rules Loading', () => {
         brokerType: 'client',
         supportedBrokerTypes: scmRulesToTest,
         accept: 'accept.json.sample',
+        filterRulesPath: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
       const loadedRules = loadFilterRules(

@@ -1,5 +1,3 @@
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -17,6 +15,7 @@ import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
+const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('broker client systemcheck endpoint', () => {
   let tws: TestWebServer;
@@ -24,6 +23,9 @@ describe('broker client systemcheck endpoint', () => {
   let bc: BrokerClient;
 
   beforeAll(async () => {
+    const PORT = 9999;
+    process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
+
     tws = await createTestWebServer();
     bs = await createBrokerServer({ filters: serverAccept });
   });
@@ -45,6 +47,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerSystemcheckPath: '/custom-systemcheck',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -76,6 +79,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo/textresponse`,
       brokerSystemcheckPath: '/custom-systemcheck',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -105,6 +109,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader:
         'token my-special-access-token',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -139,6 +144,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'username:password',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -173,6 +179,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader: 'token magical_header_123',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -207,6 +214,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader: 'tokenmagical_header_123',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -239,6 +247,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'use:pw',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -268,6 +277,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'use:pwd',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -300,6 +310,7 @@ describe('broker client systemcheck endpoint', () => {
         'username:password',
         'username1:password1',
       ],
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -352,6 +363,7 @@ describe('broker client systemcheck endpoint', () => {
       brokerToken: 'broker-token-12345',
       type: 'client',
       brokerClientValidationUrl: 'https://snyk.io/no-such-url-ever',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 

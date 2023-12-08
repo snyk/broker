@@ -34,7 +34,6 @@ export const createBrokerClient = async (
   const port = params?.port
     ? await choosePort(params?.port)
     : await choosePort(DEFAULT_BROKER_CLIENT_PORT);
-
   const opts = {
     port: port,
     client: 'client',
@@ -76,7 +75,6 @@ export const createBrokerClient = async (
       removeXForwardedHeaders: 'true',
     },
   };
-
   const client = await app({ port: port, client: true, config: opts.config });
 
   LOG.debug({ port }, `Broker Client is listening on port ${port}...`);
@@ -93,7 +91,7 @@ export const waitForBrokerServerConnection = async (
   let serverMetadata: unknown;
 
   await new Promise((resolve) => {
-    brokerClient.client.io.on('identify', (serverData) => {
+    brokerClient.client.websocketConnections[0].on('identify', (serverData) => {
       LOG.debug({ serverData }, 'on identify event for broker client');
 
       serverMetadata = serverData;

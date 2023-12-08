@@ -16,7 +16,7 @@ describe('filters', () => {
   describe('on URL', () => {
     describe('for GitHub private filters', () => {
       const rules = JSON.parse(loadFixture(path.join('accept', 'github.json')));
-      const filter = loadFilters(rules.private);
+      const filter = loadFilters(rules.private, 'default', {});
 
       it('should allow valid /repos path to manifest', () => {
         const url = '/repos/angular/angular/contents/package.json';
@@ -370,128 +370,116 @@ describe('filters', () => {
     });
   });
 
-  // describe('on query and body', () => {
-  //   const rules = JSON.parse(loadFixture('relay.json'));
-  //   const filter = loadFilters(rules);
+  describe('on query and body', () => {
+    const rules = JSON.parse(loadFixture('relay.json'));
+    const filter = loadFilters(rules);
 
-  //   it('allows a request filtered on query and body', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/filtered-on-query-and-body',
-  //         method: 'POST',
-  //         body: jsonBuffer({
-  //           commits: [
-  //             {
-  //               modified: ['package.json', 'file1.txt'],
-  //             },
-  //           ],
-  //         }),
-  //       }
-  //     );
-  //     const filterResponseUrl = filterResponse ? filterResponse.url: ''
-  //     expect(filterResponseUrl).toEqual('/filtered-on-query-and-body')
-  //   });
+    it('allows a request filtered on query and body', () => {
+      const filterResponse = filter({
+        url: '/filtered-on-query-and-body',
+        method: 'POST',
+        body: jsonBuffer({
+          commits: [
+            {
+              modified: ['package.json', 'file1.txt'],
+            },
+          ],
+        }),
+      });
+      const filterResponseUrl = filterResponse ? filterResponse.url : '';
+      expect(filterResponseUrl).toEqual('/filtered-on-query-and-body');
+    });
 
-  //   it('allows a request on query with no body', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/filtered-on-query-and-body?filePath=/path/to/package.json',
-  //         method: 'POST',
-  //       }
-  //     );
-  //     const filterResponseUrl = filterResponse ? filterResponse.url: ''
-  //     expect(filterResponseUrl).toEqual('/filtered-on-query-and-body?filePath=/path/to/package.json')
-  //   });
+    it('allows a request on query with no body', () => {
+      const filterResponse = filter({
+        url: '/filtered-on-query-and-body?filePath=/path/to/package.json',
+        method: 'POST',
+      });
+      const filterResponseUrl = filterResponse ? filterResponse.url : '';
+      expect(filterResponseUrl).toEqual(
+        '/filtered-on-query-and-body?filePath=/path/to/package.json',
+      );
+    });
 
-  //   it('blocks the request if both body and query path are not allowed', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/filtered-on-query-and-body?filePath=secret.file',
-  //         method: 'POST',
-  //         body: jsonBuffer({
-  //           commits: [
-  //             {
-  //               modified: ['file2.txt'],
-  //             },
-  //             {
-  //               modified: ['file3.txt', 'file1.txt'],
-  //             },
-  //           ],
-  //         }),
-  //       }
-  //     );
-  //     expect(filterResponse).toBeFalsy()
-  //   });
+    it('blocks the request if both body and query path are not allowed', () => {
+      const filterResponse = filter({
+        url: '/filtered-on-query-and-body?filePath=secret.file',
+        method: 'POST',
+        body: jsonBuffer({
+          commits: [
+            {
+              modified: ['file2.txt'],
+            },
+            {
+              modified: ['file3.txt', 'file1.txt'],
+            },
+          ],
+        }),
+      });
+      expect(filterResponse).toBeFalsy();
+    });
 
-  //   it('blocks the request if the body has no valid items', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/filtered-on-query-and-body',
-  //         method: 'POST',
-  //         body: jsonBuffer({
-  //           commits: [],
-  //         }),
-  //       }
-  //     );
-  //     expect(filterResponse).toBeFalsy()
-  //   });
+    it('blocks the request if the body has no valid items', () => {
+      const filterResponse = filter({
+        url: '/filtered-on-query-and-body',
+        method: 'POST',
+        body: jsonBuffer({
+          commits: [],
+        }),
+      });
+      expect(filterResponse).toBeFalsy();
+    });
 
-  //   describe('fragment identifiers validation', () => {
-  //     it('should not allow access to sensitive files by putting the manifest after a fragment', () => {
-  //       const filterResponse = filter(
-  //         {
-  //           url: '/filtered-on-query-and-body?filePath=/path/to/sensitive/file.js#package.json',
-  //           method: 'POST',
-  //           body: jsonBuffer({
-  //             commits: [],
-  //           }),
-  //         }
-  //       );
-  //       expect(filterResponse).toBeFalsy()
-  //     });
+    describe('fragment identifiers validation', () => {
+      it('should not allow access to sensitive files by putting the manifest after a fragment', () => {
+        const filterResponse = filter({
+          url: '/filtered-on-query-and-body?filePath=/path/to/sensitive/file.js#package.json',
+          method: 'POST',
+          body: jsonBuffer({
+            commits: [],
+          }),
+        });
+        expect(filterResponse).toBeFalsy();
+      });
 
-  //     it('should ignore any non-manifest files after the fragment identifier', () => {
-  //       const filterResponse = filter(
-  //         {
-  //           url: '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
-  //           method: 'POST',
-  //           body: jsonBuffer({
-  //             commits: [],
-  //           }),
-  //         }
-  //       );
-  //       const filterResponseUrl = filterResponse ? filterResponse.url: ''
-  //     expect(filterResponseUrl).toEqual('/filtered-on-query-and-body?filePath=/path/to/package.json')
-  //     });
-  //   });
-  // });
+      it('should ignore any non-manifest files after the fragment identifier', () => {
+        const filterResponse = filter({
+          url: '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
+          method: 'POST',
+          body: jsonBuffer({
+            commits: [],
+          }),
+        });
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toEqual(
+          '/filtered-on-query-and-body?filePath=/path/to/package.json',
+        );
+      });
+    });
+  });
 
-  // describe('on headers', () => {
-  //   const filter = loadFilters(require(__dirname + '/../fixtures/relay.json'));
+  describe('on headers', () => {
+    const filter = loadFilters(require(__dirname + '/../fixtures/relay.json'));
 
-  //   it('should block if the provided header does not match those specified in the whitelist', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/accept-header',
-  //         method: 'GET',
-  //         headers: {
-  //           accept: 'unlisted.header',
-  //         },
-  //       }
-  //     );
-  //     expect(filterResponse).toBeFalsy()
-  //   });
+    it('should block if the provided header does not match those specified in the whitelist', () => {
+      const filterResponse = filter({
+        url: '/accept-header',
+        method: 'GET',
+        headers: {
+          accept: 'unlisted.header',
+        },
+      });
+      expect(filterResponse).toBeFalsy();
+    });
 
-  //   it('should block if the whitelist specifies a required header but no matching header key is provided', () => {
-  //     const filterResponse = filter(
-  //       {
-  //         url: '/accept-header',
-  //         method: 'GET',
-  //       }
-  //     );
-  //     expect(filterResponse).toBeFalsy()
-  //   });
-  // });
+    it('should block if the whitelist specifies a required header but no matching header key is provided', () => {
+      const filterResponse = filter({
+        url: '/accept-header',
+        method: 'GET',
+      });
+      expect(filterResponse).toBeFalsy();
+    });
+  });
 
   // describe('for GitHub', () => {
   //   const rules = JSON.parse(loadFixture(path.join('accept', 'github.json')));
@@ -556,55 +544,49 @@ describe('filters', () => {
   //     expect(filterResponseUrl).toMatch(url)
   //   });
   // });
+
+  describe('with auth', () => {
+    const rules = JSON.parse(loadFixture('relay.json'));
+    const filter = loadFilters(rules);
+
+    it('allows correct basic auth requests', () => {
+      const filterResponse = filter({
+        url: '/basic-auth',
+        method: 'GET',
+      });
+      const filterResponseAuth = filterResponse ? filterResponse.auth : '';
+      expect(filterResponseAuth).toEqual(
+        `Basic ${Buffer.from('user:pass').toString('base64')}`,
+      );
+    });
+
+    it('allows requests with a correct token', () => {
+      const filterResponse = filter({
+        url: '/token-auth',
+        method: 'GET',
+      });
+      const filterResponseAuth = filterResponse ? filterResponse.auth : '';
+      expect(filterResponseAuth).toEqual('Token 1234');
+    });
+  });
+
+  describe('Github big files (optional rules)', () => {
+    const rules = JSON.parse(
+      loadFixture(path.join('accept', 'github-big-files.json')),
+    );
+    const filter = loadFilters(rules.private);
+
+    it('should allow the get file sha API', () => {
+      const filterResponse = filter({
+        url: '/graphql',
+        method: 'POST',
+        body: jsonBuffer({
+          query:
+            '{\n        repository(owner: "some-owner", name: "some-name") {\n          object(expression: "refs/heads/some-thing:a/path/to/package-lock.json") {\n            ... on Blob {\n              oid,\n            }\n          }\n        }\n      }',
+        }),
+      });
+      const filterResponseUrl = filterResponse ? filterResponse.url : '';
+      expect(filterResponseUrl).toEqual('/graphql');
+    });
+  });
 });
-
-// describe('with auth', () => {
-//   const rules = JSON.parse(loadFixture('relay.json'));
-//   const filter = loadFilters(rules);
-
-//   it('allows correct basic auth requests', () => {
-//     const filterResponse = filter(
-//       {
-//         url: '/basic-auth',
-//         method: 'GET',
-//       }
-//     );
-//     const filterResponseAuth = filterResponse ? filterResponse.auth: ''
-//     expect(filterResponseAuth).toEqual(
-//       `Basic ${Buffer.from('user:pass').toString('base64')}`,
-//     );
-//   });
-
-//   it('allows requests with a correct token', () => {
-//     const filterResponse = filter(
-//       {
-//         url: '/token-auth',
-//         method: 'GET',
-//       }
-//     );
-//     const filterResponseAuth = filterResponse ? filterResponse.auth: ''
-//     expect(filterResponseAuth).toEqual('Token 1234');
-//   });
-// });
-
-// describe('Github big files (optional rules)', () => {
-//   const rules = JSON.parse(
-//     loadFixture(path.join('accept', 'github-big-files.json')),
-//   );
-//   const filter = loadFilters(rules.private);
-
-//   it('should allow the get file sha API', () => {
-//     const filterResponse = filter(
-//       {
-//         url: '/graphql',
-//         method: 'POST',
-//         body: jsonBuffer({
-//           query:
-//             '{\n        repository(owner: "some-owner", name: "some-name") {\n          object(expression: "refs/heads/some-thing:a/path/to/package-lock.json") {\n            ... on Blob {\n              oid,\n            }\n          }\n        }\n      }',
-//         }),
-//       }
-//     );
-//     const filterResponseUrl = filterResponse ? filterResponse.url: ''
-//       expect(filterResponseUrl).toEqual('/graphql')
-//   });
-// });

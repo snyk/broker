@@ -1,7 +1,5 @@
-import { loadBrokerConfig } from '../../lib/common/config';
+import { loadBrokerConfig } from '../../lib/common/config/config';
 
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 const nock = require('nock');
 
 describe('Broker Server Dispatcher API interaction', () => {
@@ -31,6 +29,10 @@ describe('Broker Server Dispatcher API interaction', () => {
     spyLogWarn.mockReset();
     spyLogError.mockReset();
     delete process.env.BROKER_SERVER_URL;
+  });
+  beforeAll(() => {
+    const PORT = 9999;
+    process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
   });
   beforeEach(() => {
     spyFn.mockReset();
