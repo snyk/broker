@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { loadFilters } from '../filter/filtersAsync';
 import undefsafe from 'undefsafe';
 
 import { v4 as uuid } from 'uuid';
@@ -15,14 +14,18 @@ import {
 
 import { streamsStore } from '../http/server-post-stream-handler';
 import { ExtendedLogContext } from '../types/log';
+import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
+import { LOADEDFILTERSET } from '../types/filter';
 
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
 // 3. Relay over websocket conn (logged)
 // 4. Get response over websocket conn (logged)
 // 5. Send response over HTTP conn
-export const forwardHttpRequest = (filterRules) => {
-  const filters = loadFilters(filterRules);
+export const forwardHttpRequest = (
+  options: LoadedClientOpts | LoadedServerOpts,
+) => {
+  // const filters = loadFilters(filterRules);
 
   return (req: Request, res: Response) => {
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
@@ -44,8 +47,24 @@ export const forwardHttpRequest = (filterRules) => {
     const simplifiedContext = logContext;
     delete simplifiedContext.requestHeaders;
     logger.info(simplifiedContext, '[HTTP Flow] Received request');
-    const filterResponse = filters(req);
-
+    let filterResponse;
+    if (
+      options.config.brokerType == 'client' &&
+      options.config.universalBrokerEnabled
+    ) {
+      const clientOptions = options as LoadedClientOpts;
+      const loadedFilters = clientOptions.loadedFilters as Map<
+        string,
+        LOADEDFILTERSET
+      >;
+      filterResponse =
+        loadedFilters
+          .get(res.locals.websocket.supportedIntegrationType) // The chosen type is determined by websocket connect middlwr
+          ?.public(req) || false;
+    } else {
+      const loadedFilters = options.loadedFilters as LOADEDFILTERSET;
+      filterResponse = loadedFilters.public(req);
+    }
     const makeWebsocketRequestWithStreamingResponse = (result) => {
       req.url = result.url;
       logContext.ioUrl = result.url;
@@ -77,7 +96,7 @@ export const forwardHttpRequest = (filterRules) => {
       });
       streamBuffer.pipe(res);
 
-      res.locals.io.send('request', {
+      res.locals.websocket.send('request', {
         url: req.url,
         method: req.method,
         body: req.body,
@@ -96,7 +115,8 @@ export const forwardHttpRequest = (filterRules) => {
       );
 
       // relay the http request over the websocket, handle websocket response
-      res.locals.io.send(
+
+      res.locals.websocket.send(
         'request',
         {
           url: req.url,

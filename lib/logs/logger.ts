@@ -1,16 +1,16 @@
 import bunyan from 'bunyan';
 import escapeRegExp from 'lodash.escaperegexp';
 import mapValues from 'lodash.mapvalues';
-import { config } from '../common/config';
+import { getConfig } from '../common/config/config';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
-    new RegExp(escapeRegExp(config[variable]), 'igm'),
+    new RegExp(escapeRegExp(getConfig()[variable]), 'igm'),
     '${' + variable + '}',
   );
 
 const sanitiseConfigVariables = (raw, variable) => {
-  for (const pool of config[variable]) {
+  for (const pool of getConfig()[variable]) {
     raw = raw.replace(
       new RegExp(escapeRegExp(pool), 'igm'),
       '${' + variable + '}',
@@ -20,10 +20,23 @@ const sanitiseConfigVariables = (raw, variable) => {
   return raw;
 };
 
+const sanitiseConfigValue = (raw, value, text) =>
+  raw.replace(value, '${' + text + '}');
+
 // sanitises sensitive values, replacing all occurences with label
 export const sanitise = (raw) => {
   if (!raw || typeof raw !== 'string') {
     return raw;
+  }
+  const config = getConfig();
+  if (config.universalBrokerEnabled) {
+    for (const key in config.connections) {
+      raw = sanitiseConfigValue(
+        raw,
+        config.connections[key].identifier,
+        `${key} identifier`,
+      );
+    }
   }
 
   const variables = [
@@ -107,7 +120,7 @@ function serialiseError(error) {
 }
 
 export const log = bunyan.createLogger({
-  name: 'snyk-broker',
+  name: `snyk-broker`,
   serializers: {
     token: sanitise,
     result: sanitise,

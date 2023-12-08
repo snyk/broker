@@ -1,14 +1,17 @@
 import { forwardHttpRequest } from '../../common/relay/forwardHttpRequest';
 import { forwardWebSocketRequest } from '../../common/relay/forwardWebsocketRequest';
-import { ServerOpts } from '../types/http';
+import { LoadedServerOpts } from '../../common/types/options';
 import { initIdentifyHandler } from './identifyHandler';
 
 let forwardWebSocketResponse;
 let forwardHttpRequestHandler;
 
-export const initConnectionHandler = (serverOpts: ServerOpts, io) => {
-  forwardWebSocketResponse = forwardWebSocketRequest(serverOpts, io);
-  forwardHttpRequestHandler = forwardHttpRequest(serverOpts.filters?.public);
+export const initConnectionHandler = (
+  serverOpts: LoadedServerOpts,
+  websocket,
+) => {
+  forwardWebSocketResponse = forwardWebSocketRequest(serverOpts, websocket);
+  forwardHttpRequestHandler = forwardHttpRequest(serverOpts);
   initRelevantHandlers();
 };
 

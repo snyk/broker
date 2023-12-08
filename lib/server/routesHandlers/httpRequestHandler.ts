@@ -24,7 +24,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = (
 
   // Grab a first (newest) client from the pool
   // This is really silly...
-  res.locals.io = connections.get(token)[0].socket;
+  res.locals.websocket = connections.get(token)[0].socket;
   res.locals.socketVersion = connections.get(token)[0].socketVersion;
   res.locals.capabilities = connections.get(token)[0].metadata.capabilities;
   req['locals'] = {};

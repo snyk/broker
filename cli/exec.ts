@@ -9,5 +9,8 @@ export default async (args) => {
   }
 
   args.client = command === 'client';
+  if (!args.config) {
+    args.config = {};
+  }
   await app(args);
 };

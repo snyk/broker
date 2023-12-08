@@ -1,3 +1,3 @@
-export const identifyHandler = (serverData, io) => {
-  io.capabilities = serverData.capabilities;
+export const identifyHandler = (serverData, websocket) => {
+  websocket.capabilities = serverData.capabilities;
 };

@@ -2,15 +2,28 @@ import { getServerId, highAvailabilityModeEnabled } from '../../dispatcher';
 import { log as logger } from '../../../logs/logger';
 import { executePreflightChecks, preflightChecksEnabled } from '../../checks';
 import { commitSigningEnabled, commitSigningFilterRules } from '../../scm';
-import { ClientOpts, HookResults } from '../../types/client';
+import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
+import { ClientOpts } from '../../../common/types/options';
 
 export const processStartUpHooks = async (
   clientOpts: ClientOpts,
   brokerClientId: string,
 ): Promise<HookResults> => {
   try {
-    if (!clientOpts.config.brokerToken) {
+    clientOpts.config.API_BASE_URL =
+      clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
+      clientOpts.config.API_BASE_URL ??
+      clientOpts.config.BROKER_SERVER_URL?.replace(
+        '//broker.',
+        '//api.',
+      ).replace('//broker2.', '//api.') ??
+      'https://api.snyk.io';
+
+    if (
+      !clientOpts.config.brokerToken &&
+      !clientOpts.config.universalBrokerEnabled
+    ) {
       const brokerToken = clientOpts.config.brokerToken;
       // null, undefined, empty, etc.
       logger.error(
@@ -23,7 +36,6 @@ export const processStartUpHooks = async (
       error['code'] = 'MISSING_BROKER_TOKEN';
       throw error;
     }
-
     if (!clientOpts.config.brokerServerUrl) {
       const brokerServerUrl = clientOpts.config.brokerServerUrl;
       // null, undefined, empty, etc.
@@ -38,24 +50,11 @@ export const processStartUpHooks = async (
       throw error;
     }
 
-    if (!clientOpts.config.BROKER_CLIENT_URL) {
-      const proto =
-        !clientOpts.config.key && !clientOpts.config.cert ? 'http' : 'https';
-      clientOpts.config.BROKER_CLIENT_URL = `${proto}://localhost:${clientOpts.port}`;
-    }
-
-    let serverId;
-    if (highAvailabilityModeEnabled(clientOpts.config)) {
-      serverId = await getServerId(clientOpts.config, brokerClientId);
-
-      if (serverId === null) {
-        logger.warn({}, 'could not receive server id from Broker Dispatcher');
-        serverId = '';
-      } else {
-        logger.info({ serverId }, 'received server id');
-        clientOpts.config.serverId = serverId;
-      }
-    }
+    // if (!clientOpts.config.BROKER_CLIENT_URL) {
+    //   const proto =
+    //     !clientOpts.config.key && !clientOpts.config.cert ? 'http' : 'https';
+    //   clientOpts.config.BROKER_CLIENT_URL = `${proto}://localhost:${clientOpts.port}`;
+    // }
 
     let preflightCheckResults: CheckResult[] = [];
     if (preflightChecksEnabled(clientOpts.config)) {
@@ -68,9 +67,65 @@ export const processStartUpHooks = async (
       }
     }
 
+    let serverId;
+    if (highAvailabilityModeEnabled(clientOpts.config)) {
+      if (clientOpts.config.universalBrokerEnabled) {
+        for (const key in clientOpts.config.connections) {
+          serverId = await getServerId(
+            clientOpts.config,
+            clientOpts.config.connections[key].identifier,
+            brokerClientId,
+          );
+
+          if (serverId === null) {
+            logger.warn(
+              {},
+              'could not receive server id from Broker Dispatcher',
+            );
+            serverId = '';
+          } else {
+            logger.info({ serverId }, 'received server id');
+            clientOpts.config.connections[key].serverId = serverId;
+          }
+        }
+      } else {
+        serverId = await getServerId(
+          clientOpts.config,
+          clientOpts.config.brokerToken,
+          brokerClientId,
+        );
+
+        if (serverId === null) {
+          logger.warn({}, 'could not receive server id from Broker Dispatcher');
+          serverId = '';
+        } else {
+          logger.info({ serverId }, 'received server id');
+          clientOpts.config.serverId = serverId;
+        }
+      }
+    }
+
     if (commitSigningEnabled(clientOpts.config)) {
       const commitSigningRules = commitSigningFilterRules();
-      clientOpts.filters.private?.push(...commitSigningRules);
+      if (clientOpts['universalBrokerEnabled']) {
+        clientOpts.filters['github'].private?.push(...commitSigningRules);
+        clientOpts.filters['github-enterprise'].github.private?.push(
+          ...commitSigningRules,
+        );
+      } else {
+        if (clientOpts.filters instanceof Map) {
+          logger.error(
+            { clientOpts },
+            'Error pushing commit signing rules, unexpected filters type',
+          );
+          throw new Error(
+            'Error pushing commit signing rules, unexpected filters type',
+          );
+        } else {
+          clientOpts.filters.private.push(...commitSigningRules);
+        }
+      }
+
       logger.info(
         { enabled: true, rulesCount: commitSigningRules.length },
         'loading commit signing rules',

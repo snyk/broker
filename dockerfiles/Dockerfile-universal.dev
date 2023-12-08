@@ -40,8 +40,6 @@ COPY --from=broker-builder /home/node/node_modules /home/node/node_modules
 COPY config.default.json /home/node/config.default.json
 COPY defaultFilters /home/node/defaultFilters
 
-# Generate default accept filter
-RUN /home/node/node_modules/snyk-broker/dist/cli/index.js init $BROKER_TYPE
 # Support for OpenShift - have to run after init to get accept.json and .env
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node

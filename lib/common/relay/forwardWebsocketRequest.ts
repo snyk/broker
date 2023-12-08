@@ -7,19 +7,20 @@ import {
   incrementHttpRequestsTotal,
   incrementWebSocketRequestsTotal,
 } from '../utils/metrics';
-import { ClientOpts } from '../../client/types/client';
-import { ServerOpts } from '../../server/types/http';
-import { loadFilters } from '../filter/filtersAsync';
+import { WebSocketConnection } from '../../client/types/client';
+
 import { prepareRequestFromFilterResult } from './prepareRequest';
 import {
   makeLegacyRequest,
   makePostStreamingRequest,
   legacyStreaming,
 } from './requestsHelper';
+import { LOADEDFILTERSET } from '../types/filter';
+import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
 
 export const forwardWebSocketRequest = (
-  options: ClientOpts | ServerOpts,
-  io?,
+  options: LoadedClientOpts | LoadedServerOpts,
+  websocketConnectionHandler: WebSocketConnection,
 ) => {
   // 1. Request coming in over websocket conn (logged)
   // 2. Filter for rule match (log and block if no match)
@@ -27,20 +28,22 @@ export const forwardWebSocketRequest = (
   // 4. Get response over HTTP conn (logged)
   // 5. Send response over websocket conn
 
-  //   const filters = Filters(options.filters?.private);
-  const filters = loadFilters(options.filters?.private);
-
-  return (brokerToken) => async (payload: RequestPayload, emit) => {
+  return (connectionIdentifier) => async (payload: RequestPayload, emit) => {
+    if (options.config.universalBrokerEnabled) {
+      payload.connectionIdentifier = connectionIdentifier;
+    }
     const requestId = payload.headers['snyk-request-id'];
     const logContext: ExtendedLogContext = {
       url: payload.url,
+      connectionName: websocketConnectionHandler.friendlyName ?? '',
       requestMethod: payload.method,
       requestHeaders: payload.headers,
       requestId,
       streamingID: payload.streamingID,
-      maskedToken: maskToken(brokerToken),
-      hashedToken: hashToken(brokerToken),
-      transport: io?.socket?.transport?.name ?? 'unknown',
+      maskedToken: maskToken(connectionIdentifier),
+      hashedToken: hashToken(connectionIdentifier),
+      transport:
+        websocketConnectionHandler?.socket?.transport?.name ?? 'unknown',
     };
 
     if (!requestId) {
@@ -65,8 +68,10 @@ export const forwardWebSocketRequest = (
       const postHandler = new BrokerServerPostResponseHandler(
         logContext,
         options.config,
-        brokerToken,
-        options.config.serverId,
+        connectionIdentifier,
+        options.config.universalBrokerEnabled
+          ? websocketConnectionHandler?.serverId
+          : options.config.serverId,
         requestId,
       );
       if (isResponseFromRequestModule) {
@@ -96,15 +101,21 @@ export const forwardWebSocketRequest = (
             logContext,
             responseData,
             options.config,
-            io,
+            websocketConnectionHandler,
             payload.streamingID,
           );
         } else {
-          io.send('chunk', payload.streamingID, '', false, {
-            status: responseData.status,
-            headers: responseData.headers,
-          });
-          io.send(
+          websocketConnectionHandler?.send(
+            'chunk',
+            payload.streamingID,
+            '',
+            false,
+            {
+              status: responseData.status,
+              headers: responseData.headers,
+            },
+          );
+          websocketConnectionHandler?.send(
             'chunk',
             payload.streamingID,
             JSON.stringify(responseData.body),
@@ -120,7 +131,9 @@ export const forwardWebSocketRequest = (
       }
     };
 
-    if (io?.capabilities?.includes('receive-post-streams')) {
+    if (
+      websocketConnectionHandler?.capabilities?.includes('receive-post-streams')
+    ) {
       // Traffic over HTTP Post
       emit = postOverrideEmit;
     } else {
@@ -136,7 +149,26 @@ export const forwardWebSocketRequest = (
       }`,
     );
 
-    const filterResponse = filters(payload);
+    let filterResponse;
+
+    if (
+      options.config.brokerType == 'client' &&
+      options.config.universalBrokerEnabled
+    ) {
+      const clientOptions = options as LoadedClientOpts;
+      const loadedFilters = clientOptions.loadedFilters as Map<
+        string,
+        LOADEDFILTERSET
+      >;
+      filterResponse =
+        loadedFilters
+          .get(websocketConnectionHandler.supportedIntegrationType)
+          ?.private(payload) || false;
+    } else {
+      const loadedFilters = options.loadedFilters as LOADEDFILTERSET;
+      filterResponse = loadedFilters.private(payload);
+    }
+
     if (!filterResponse) {
       incrementWebSocketRequestsTotal(true, 'inbound-request');
       const reason =
@@ -158,8 +190,8 @@ export const forwardWebSocketRequest = (
         payload,
         logContext,
         options,
-        brokerToken,
-        io?.socketType,
+        connectionIdentifier,
+        websocketConnectionHandler?.socketType,
       );
       incrementHttpRequestsTotal(false, 'outbound-request');
       payload.streamingID

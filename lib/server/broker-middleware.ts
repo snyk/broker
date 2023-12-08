@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { log as logger } from '../logs/logger';
-import { config } from '../common/config';
+import { getConfig } from '../common/config/config';
 export const validateBrokerTypeMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  const config = getConfig();
   const localConfig = config as unknown as Record<string, string>;
   if (
     localConfig.brokerServerUniversalConfigEnabled &&

@@ -1,5 +1,4 @@
 import { format, parse } from 'url';
-import { TestResult } from '../filter/filtersAsync';
 import version from '../utils/version';
 import tryJSONParse from '../utils/try-json-parse';
 import { replace } from '../utils/replace-vars';
@@ -11,6 +10,7 @@ import {
   signGitHubCommit,
   validateGitHubTreePayload,
 } from '../../client/scm';
+import { TestResult } from '../types/filter';
 
 export interface PostFilterPreparingRequestError {
   status: number;

@@ -24,10 +24,11 @@ export function highAvailabilityModeEnabled(config: any): boolean {
 
 export async function getServerId(
   config: any,
+  brokerToken: string,
   brokerClientId: string,
 ): Promise<ServerId | null> {
-  if (!config.BROKER_TOKEN) {
-    logger.error({ token: config.BROKER_TOKEN }, 'missing client token');
+  if (!brokerToken) {
+    logger.error({ token: brokerToken }, 'missing client token');
     const error = new Error(
       'BROKER_TOKEN is required to successfully identify itself to the server',
     );
@@ -35,16 +36,8 @@ export async function getServerId(
     throw error;
   }
 
-  const defaultBrokerDispatcherBaseUrl =
-    config.API_BASE_URL || config.BROKER_SERVER_URL
-      ? config.BROKER_SERVER_URL.replace('//broker.', '//api.')
-      : 'https://api.snyk.io';
-  const haConfig = getHAConfig(config);
-  const baseUrl =
-    haConfig.BROKER_DISPATCHER_BASE_URL || defaultBrokerDispatcherBaseUrl;
-  const client = new HttpDispatcherServiceClient(baseUrl);
-  const hashedToken = hashToken(config.BROKER_TOKEN);
-
+  const client = new HttpDispatcherServiceClient(config.API_BASE_URL);
+  const hashedToken = hashToken(brokerToken);
   const maxRetries = 10;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -58,7 +51,7 @@ export async function getServerId(
           deployment_location: `${
             config.BROKER_CLIENT_LOCATION || 'snyk-broker-client'
           }`,
-          broker_token_first_char: `${config.BROKER_TOKEN[0]}`,
+          broker_token_first_char: `${brokerToken[0]}`,
         },
       );
     } catch (err) {
@@ -72,8 +65,4 @@ export async function getServerId(
   }
 
   return null;
-}
-
-function getHAConfig(config: any): Config {
-  return config as Config;
 }
