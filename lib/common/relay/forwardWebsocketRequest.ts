@@ -59,29 +59,33 @@ export const forwardWebSocketRequest = (
       responseData,
       isResponseFromRequestModule = false,
     ) => {
-      logContext.requestMethod = '';
-      logContext.requestHeaders = {};
+      try {
+        logContext.requestMethod = '';
+        logContext.requestHeaders = {};
 
-      const postHandler = new BrokerServerPostResponseHandler(
-        logContext,
-        options.config,
-        brokerToken,
-        options.config.serverId,
-        requestId,
-      );
-      if (isResponseFromRequestModule) {
-        logger.debug(
+        const postHandler = new BrokerServerPostResponseHandler(
           logContext,
-          '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
+          options.config,
+          brokerToken,
+          options.config.serverId,
+          requestId,
         );
-        postHandler.forwardRequest(responseData, payload.streamingID);
-      } else {
-        logger.debug(
-          logContext,
-          '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
-        );
-        // Only for responses generated internally in the Broker Client/Server
-        postHandler.sendData(responseData, payload.streamingID);
+        if (isResponseFromRequestModule) {
+          logger.debug(
+            logContext,
+            '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
+          );
+          postHandler.forwardRequest(responseData, payload.streamingID);
+        } else {
+          logger.debug(
+            logContext,
+            '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
+          );
+          // Only for responses generated internally in the Broker Client/Server
+          postHandler.sendData(responseData, payload.streamingID);
+        }
+      } catch (err) {
+        logger.error({ err }, `Error Posting via Emit callback.`);
       }
     };
 

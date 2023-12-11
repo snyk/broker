@@ -192,60 +192,66 @@ class BrokerServerPostResponseHandler {
   }
 
   async forwardRequest(response: http.IncomingMessage, streamingID) {
-    this.#streamingId = streamingID;
-    let prevPartialChunk;
-
-    const status = response?.statusCode || 500;
-    logger.debug(
-      {
-        ...this.#logContext,
-        responseStatus: status,
-        responseHeaders: response.headers,
-      },
-      'response received, setting up stream to Broker Server',
-    );
-    const isResponseJson = isJson(response.headers);
-    const ioData = JSON.stringify({
-      status,
-      headers: response.headers,
-    });
-    this.#initHttpClientRequest();
-    this.#sendIoData(ioData);
-    logger.debug(
-      this.#logContext,
-      'successfully sent status & headers to Broker Server',
-    );
-    const localLogContext = this.#logContext;
-    // TODO: break into 2 distinct transform, only to add to pipeline if conditions are met
-    // Take out of here if possible
-    this.#brokerTransformer = new stream.Transform({
-      transform(chunk, encoding, callback) {
-        const httpBody =
-          config && config.LOG_ENABLE_BODY === 'true'
-            ? { body: chunk.toString() }.body
-            : null;
-        logger.debug(
-          { ...localLogContext, chunkLength: chunk.length, httpBody },
-          'writing data to buffer',
-        );
-        if (config.RES_BODY_URL_SUB && isResponseJson) {
-          const { newChunk, partial } = replaceUrlPartialChunk(
-            Buffer.from(chunk).toString(),
-            prevPartialChunk,
-            config,
-          );
-          prevPartialChunk = partial;
-          chunk = newChunk;
-        }
-        callback(null, chunk);
-      },
-    });
-    response.on('error', this.#handleRequestError());
     try {
+      this.#streamingId = streamingID;
+      let prevPartialChunk;
+
+      const status = response?.statusCode || 500;
+      logger.debug(
+        {
+          ...this.#logContext,
+          responseStatus: status,
+          responseHeaders: response.headers,
+        },
+        'response received, setting up stream to Broker Server',
+      );
+      const isResponseJson = isJson(response.headers);
+      const ioData = JSON.stringify({
+        status,
+        headers: response.headers,
+      });
+      this.#initHttpClientRequest();
+      this.#sendIoData(ioData);
+      logger.debug(
+        this.#logContext,
+        'successfully sent status & headers to Broker Server',
+      );
+      const localLogContext = this.#logContext;
+      // TODO: break into 2 distinct transform, only to add to pipeline if conditions are met
+      // Take out of here if possible
+      logger.debug(this.#logContext, 'Setting up transformers');
+      this.#brokerTransformer = new stream.Transform({
+        transform(chunk, encoding, callback) {
+          const httpBody =
+            config && config.LOG_ENABLE_BODY === 'true'
+              ? { body: chunk.toString() }.body
+              : null;
+          logger.debug(
+            { ...localLogContext, chunkLength: chunk.length, httpBody },
+            'writing data to buffer',
+          );
+          if (config.RES_BODY_URL_SUB && isResponseJson) {
+            const { newChunk, partial } = replaceUrlPartialChunk(
+              Buffer.from(chunk).toString(),
+              prevPartialChunk,
+              config,
+            );
+            prevPartialChunk = partial;
+            chunk = newChunk;
+          }
+          callback(null, chunk);
+        },
+      });
+      response.on('error', this.#handleRequestError());
+
       if (
         (config && config.LOG_ENABLE_BODY === 'true') ||
         (config.RES_BODY_URL_SUB && isResponseJson)
       ) {
+        logger.debug(
+          this.#logContext,
+          'Pipelining with body logging on or Body replace ',
+        );
         await pipeline(
           response,
           this.#buffer,
@@ -253,6 +259,7 @@ class BrokerServerPostResponseHandler {
           this.#brokerSrvPostRequestHandler,
         );
       } else {
+        logger.debug(this.#logContext, 'Pipelining standard');
         await pipeline(
           response,
           this.#buffer,
@@ -260,7 +267,10 @@ class BrokerServerPostResponseHandler {
         );
       }
     } catch (err) {
-      logger.error({ err }, 'Error in request pipelining');
+      logger.error(
+        { err },
+        'Error in forwarding the request to broker server pipeline',
+      );
     }
   }
 
