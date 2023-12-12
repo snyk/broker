@@ -12,8 +12,11 @@ const brokerClientUrlCheck = (config: Config): Check => {
     id: 'broker-client-url-validation',
     name: 'Broker Client URL Validation Check',
     enabled: url != undefined && url.length > 0,
-    check: function (): CheckResult {
-      return validateBrokerClientUrl({ id: this.id, name: this.name }, config);
+    check: async function (): Promise<CheckResult> {
+      return await validateBrokerClientUrl(
+        { id: this.id, name: this.name },
+        config,
+      );
     },
   } satisfies Check;
 };

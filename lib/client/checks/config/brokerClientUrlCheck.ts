@@ -2,11 +2,17 @@ import { log as logger } from '../../../logs/logger';
 import type { CheckOptions, CheckResult } from '../types';
 import type { Config } from '../../types/config';
 import { urlContainsProtocol } from '../../../common/utils/urlValidator';
+import {
+  HttpResponse,
+  makeSingleRawRequestToDownstream,
+} from '../../../common/http/request';
+import { retry } from '../../retry/exponential-backoff';
+import version from '../../../common/utils/version';
 
-export function validateBrokerClientUrl(
+export async function validateBrokerClientUrl(
   checkOptions: CheckOptions,
   config: Config,
-): CheckResult {
+): Promise<CheckResult> {
   logger.debug({ checkId: checkOptions.id }, 'executing config check');
 
   const brokerClientUrl = config.BROKER_CLIENT_URL;
@@ -20,7 +26,10 @@ export function validateBrokerClientUrl(
       } satisfies CheckResult;
     }
 
-    if (isHttpsWithoutCertificates(config)) {
+    if (
+      isHttpsWithoutCertificates(config) &&
+      !(await isBrokerClientUrlTLSTerminated(config))
+    ) {
       return {
         id: checkOptions.id,
         name: checkOptions.name,
@@ -89,6 +98,41 @@ function isHttpsWithoutCertificates(config: Config): boolean {
     logger.error({ error }, 'Error checking URL for HTTPS server');
     return false;
   }
+}
+
+async function isBrokerClientUrlTLSTerminated(
+  config: Config,
+): Promise<boolean> {
+  let isTLSTerminated = false;
+  if (config.BROKER_CLIENT_URL_TLS_TERMINATED) {
+    isTLSTerminated = true;
+  } else {
+    const request = {
+      url: `${config.BROKER_CLIENT_URL}/healthcheck`,
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': `broker client/${version} (config check service)`,
+      },
+    };
+    try {
+      const response: HttpResponse = await retry<HttpResponse>(
+        () => makeSingleRawRequestToDownstream(request),
+        { retries: 3, operation: 'config check broker-client-url-validation' },
+      );
+      logger.trace({ response: response }, 'config check raw response data');
+      isTLSTerminated = true;
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Failed to reach the BROKER_CLIENT_URL from the broker client.',
+      );
+      isTLSTerminated = false;
+    }
+  }
+
+  return isTLSTerminated;
 }
 
 function isHostnameLocalhost(brokerClientUrl: string): boolean {
