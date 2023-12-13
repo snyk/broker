@@ -86,11 +86,21 @@ const logPreflightCheckResults = (results: CheckResult[]) => {
     return { id: check.id, status: check.status };
   });
   nonPassingChecksDetails.push(
-    '#############################################################################################',
+    '##########################################################################################',
   );
   console.log('### Preflight checks summary');
   console.table(checks);
   console.log('\n');
-  console.log(nonPassingChecksDetails.join('\n###'));
-  console.log('\n\n');
+  if (checks.some((x) => x.status != 'passing')) {
+    console.log(nonPassingChecksDetails.join('\n###'));
+  } else {
+    console.log(
+      '#############################################################################################',
+    );
+    console.log('### All Preflight checks passing');
+    console.log(
+      '#############################################################################################',
+    );
+  }
+  console.log('\n');
 };
