@@ -3,6 +3,7 @@ import { getConfigChecks } from './config';
 import { getHttpChecks } from './http';
 import type { Config } from '../types/config';
 import type { Check, CheckResult } from './types';
+import { splitStringIntoLines } from './utils';
 
 export function preflightChecksEnabled(config: any): boolean {
   // preflight checks are enabled per default
@@ -56,18 +57,40 @@ export async function executePreflightChecks(
 }
 
 const logPreflightCheckResults = (results: CheckResult[]) => {
+  console.log('\n\n');
   console.log('##############################################################');
-  console.log('### PREFLIGHT CHECKS RESULTS');
+  console.log('### PREFLIGHT CHECKS RESULTS - NON BLOCKING');
   console.log('###');
   console.log('### Preflight checks help to catch errors early, upon broker');
   console.log('### client startup. Note, that broker client will start');
   console.log('### whether the checks were successful or not.');
   console.log('###');
-  console.log('### See more: https://github.com/snyk/broker#preflight-checks');
+  // console.log('### See more: https://github.com/snyk/broker#preflight-checks');
   console.log('##############################################################');
-
+  console.log('\n');
+  const nonPassingChecksDetails: string[] = [
+    `#############################################################################################
+### PREFLIGHT CHECKS DETAILS
+###
+### Review troubleshooting steps at https://github.com/snyk/broker#preflight-checks
+###`,
+  ];
   const checks = results.map((check) => {
+    if (check.status != 'passing') {
+      nonPassingChecksDetails.push(`
+### [${check.name}] ${check.status}.
+### Preflight Check output:
+### ${splitStringIntoLines(check.output, 88, '### ')}
+###`);
+    }
     return { id: check.id, status: check.status };
   });
+  nonPassingChecksDetails.push(
+    '#############################################################################################',
+  );
+  console.log('### Preflight checks summary');
   console.table(checks);
+  console.log('\n');
+  console.log(nonPassingChecksDetails.join('\n###'));
+  console.log('\n\n');
 };
