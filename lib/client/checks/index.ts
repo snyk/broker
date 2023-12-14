@@ -65,14 +65,17 @@ const logPreflightCheckResults = (results: CheckResult[]) => {
   console.log('### client startup. Note, that broker client will start');
   console.log('### whether the checks were successful or not.');
   console.log('###');
-  // console.log('### See more: https://github.com/snyk/broker#preflight-checks');
   console.log('##############################################################');
   console.log('\n');
   const nonPassingChecksDetails: string[] = [
     `#############################################################################################
 ### PREFLIGHT CHECKS DETAILS
 ###
-### Review troubleshooting steps at https://github.com/snyk/broker#preflight-checks
+### ${splitStringIntoLines(
+      `Get help at https://snyk.io/broker-checks`,
+      88,
+      '### ',
+    )}
 ###`,
   ];
   const checks = results.map((check) => {
@@ -81,6 +84,7 @@ const logPreflightCheckResults = (results: CheckResult[]) => {
 ### [${check.name}] ${check.status}.
 ### Preflight Check output:
 ### ${splitStringIntoLines(check.output, 88, '### ')}
+### Help: https://snyk.io/broker-checks?${check.id}
 ###`);
     }
     return { id: check.id, status: check.status };
