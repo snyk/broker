@@ -3596,23 +3596,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to get repo's teams list",
@@ -5073,23 +5056,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to get repo's teams list",
@@ -10396,23 +10362,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to get given manifest file",
@@ -11825,23 +11774,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to get given manifest file",
@@ -17139,23 +17071,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -18580,23 +18495,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -23950,23 +23848,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -25403,23 +25284,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -30771,23 +30635,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -32212,23 +32059,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -39198,23 +39028,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -41401,23 +41214,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -42848,23 +42644,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -44331,23 +44110,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
     Object {
       "//": "used to scan IAC files",
@@ -51263,23 +51025,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
   ],
   "public": Array [
@@ -52686,23 +52431,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
   ],
   "public": Array [
@@ -57931,23 +57659,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
   ],
   "public": Array [
@@ -59354,23 +59065,6 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
-      "valid": Array [
-        Object {
-          "//": "query for all the file names 2 levels deep in the repo. used for auto project detection",
-          "path": "query",
-          "regex": "{\\\\s*repositoryOwner\\\\(login:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*repository\\\\(name:\\\\s*\\"([a-zA-Z0-9-_.]+)\\"\\\\)\\\\s*{\\\\s*object\\\\(expression:\\\\s*\\"([a-zA-Z0-9-_./:]+)\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s+{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s+object\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s+Tree\\\\s*{\\\\s*entries\\\\s*{\\\\s*name\\\\s+type\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}",
-        },
-        Object {
-          "//": "query to find open snyk pull requests, allowing auto dependency upgrade pull requests to open no more than a limited amount of pull requests",
-          "path": "query",
-          "regex": "{\\\\s*search\\\\(\\\\s*query: \\"repo:[a-zA-Z0-9-_.]+\\\\/[a-zA-Z0-9-_.]+ is:pr state:[a-zA-Z]+ head:snyk-\\\\s*(is:[a-zA-Z]+)?\\", type: ISSUE, last: [0-9]+\\\\s*\\\\)\\\\s*{\\\\s*edges {\\\\s*node {\\\\s*\\\\.\\\\.\\\\. on PullRequest {\\\\s*url\\\\s*title\\\\s*createdAt\\\\s*headRefName\\\\s*state\\\\s*mergeable\\\\s*body\\\\s*repository\\\\s*{\\\\s*name\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*rateLimit\\\\s*{\\\\s*limit\\\\s*cost\\\\s*remaining\\\\s*resetAt\\\\s*}\\\\s*}\\\\s*",
-        },
-        Object {
-          "//": "query to get file SHA",
-          "path": "query",
-          "regex": "{\\\\s*repository\\\\(\\\\s*owner:\\\\s*\\"[a-zA-Z0-9-_.]+\\",\\\\s*name:\\\\s*\\"[a-zA-Z0-9-_.]+\\"\\\\)\\\\s*{\\\\s*object\\\\(\\\\s*expression:\\\\s*\\"[a-zA-Z0-9-_./]+:[a-zA-Z0-9-_./]+\\"\\\\)\\\\s*{\\\\s*\\\\.\\\\.\\\\.\\\\s*on\\\\s*Blob\\\\s*{\\\\s*oid\\\\,\\\\s*}\\\\s*}\\\\s*}\\\\s*}\\\\s*",
-        },
-      ],
     },
   ],
   "public": Array [
