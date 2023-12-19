@@ -93,6 +93,7 @@ class BrokerServerPostResponseHandler {
         brokerServerPostRequestUrl,
         options,
       );
+
       this.#brokerSrvPostRequestHandler
         .on('error', (e) => {
           logger.error(
@@ -105,6 +106,16 @@ class BrokerServerPostResponseHandler {
           this.#buffer.destroy(e);
         })
         .on('response', (r) => {
+          r.socket.on('error', (err) => {
+            logger.error(
+              {
+                msg: err.message,
+                err: err,
+                stackTrace: new Error('stacktrace generator').stack,
+              },
+              'Stream Socket Response error in POST to Broker Server',
+            );
+          });
           r.on('error', (err) => {
             logger.error(
               {
@@ -195,7 +206,16 @@ class BrokerServerPostResponseHandler {
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;
-
+      response.socket.on('error', (err) => {
+        logger.error(
+          {
+            msg: err.message,
+            err: err,
+            stackTrace: new Error('stacktrace generator').stack,
+          },
+          'Socket Response error in Streaming from downstream',
+        );
+      });
       const status = response?.statusCode || 500;
       logger.debug(
         {
