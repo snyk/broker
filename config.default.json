@@ -366,6 +366,16 @@
       "name": "Nexus2 Private Registry",
       "type": "nexus2",
       "brokerType": "nexus2"
+    },
+    "jira": {
+      "name": "Jira",
+      "type": "jira",
+      "brokerType": "jira"
+    },
+    "jira-bearer-auth": {
+      "name": "Jira",
+      "type": "jira",
+      "brokerType": "jira-bearer-auth"
     }
   }
 }
