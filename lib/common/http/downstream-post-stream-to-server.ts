@@ -1,6 +1,6 @@
 import { log as logger } from '../../logs/logger';
 import stream from 'stream';
-import { pipeline } from 'stream/promises';
+import { pipeline } from 'stream';
 import { replaceUrlPartialChunk } from '../utils/replace-vars';
 import version from '../utils/version';
 
@@ -272,18 +272,30 @@ class BrokerServerPostResponseHandler {
           this.#logContext,
           'Pipelining with body logging on or Body replace ',
         );
-        await pipeline(
+        pipeline(
           response,
           this.#buffer,
           this.#brokerTransformer,
           this.#brokerSrvPostRequestHandler,
+          (err) => {
+            if (err) {
+              if (err) {
+                logger.error({ err }, 'Error in transformed pipeline');
+              }
+            }
+          },
         );
       } else {
         logger.debug(this.#logContext, 'Pipelining standard');
-        await pipeline(
+        pipeline(
           response,
           this.#buffer,
           this.#brokerSrvPostRequestHandler,
+          (err) => {
+            if (err) {
+              logger.error({ err }, 'Error in standard pipeline');
+            }
+          },
         );
       }
     } catch (err) {
@@ -295,18 +307,26 @@ class BrokerServerPostResponseHandler {
   }
 
   async sendData(responseData, streamingID) {
-    this.#streamingId = streamingID;
-    const body = responseData.body;
-    delete responseData.body;
-    logger.debug(
-      { ...this.#logContext, responseData, body },
-      'posting internal response back to Broker Server as it is expecting streaming response',
-    );
-    this.#initHttpClientRequest();
-    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler);
-    this.#sendIoData(JSON.stringify(responseData));
-    this.#buffer.write(JSON.stringify(body));
-    this.#buffer.end();
+    try {
+      this.#streamingId = streamingID;
+      const body = responseData.body;
+      delete responseData.body;
+      logger.debug(
+        { ...this.#logContext, responseData, body },
+        'posting internal response back to Broker Server as it is expecting streaming response',
+      );
+      this.#initHttpClientRequest();
+      pipeline(this.#buffer, this.#brokerSrvPostRequestHandler, (err) => {
+        if (err) {
+          logger.error({ err }, 'Error in sendData');
+        }
+      });
+      this.#sendIoData(JSON.stringify(responseData));
+      this.#buffer.write(JSON.stringify(body));
+      this.#buffer.end();
+    } catch (err) {
+      logger.error({ err }, 'Error in sendData');
+    }
   }
 }
 

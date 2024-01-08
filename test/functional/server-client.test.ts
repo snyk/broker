@@ -130,6 +130,7 @@ describe('proxy requests originating from behind the broker server', () => {
         },
       },
     );
+
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
       message: 'blocked',
