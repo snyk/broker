@@ -1726,7 +1726,7 @@ Object {
       "path": "/:workspace/:repo/diffstat/commits/:sha",
     },
     Object {
-      "//": "list the user's workspaces - AppRisk connector",
+      "//": "list the user's workspaces",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1737,7 +1737,7 @@ Object {
       "path": "/workspaces",
     },
     Object {
-      "//": "list the user's workspaces - AppRisk connector",
+      "//": "list the user's projects",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
         "scheme": "basic",
@@ -1768,6 +1768,61 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/admin/groups/more-members",
+    },
+    Object {
+      "//": "used to get repositories for a given workspace",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/repositories/:workspace",
+    },
+    Object {
+      "//": "used to get repository",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/repositories/:workspace/:repo",
+    },
+    Object {
+      "//": "used to get pull requests for a given repo",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/repositories/:workspace/:repo/pullrequests",
+    },
+    Object {
+      "//": "list commits for a given repo",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/repositories/:workspace/:repo/commits",
+    },
+    Object {
+      "//": "list members for a given workspace",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/workspaces/:workspace/members",
     },
   ],
   "public": Array [

@@ -44,7 +44,7 @@
     }
   },
   {
-    "//": "list the user's workspaces - AppRisk connector",
+    "//": "list the user's workspaces",
     "method": "GET",
     "path": "/workspaces",
     "origin": "https://${BITBUCKET_API}",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "//": "list the user's workspaces - AppRisk connector",
+    "//": "list the user's projects",
     "method": "GET",
     "path": "/projects",
     "origin": "https://${BITBUCKET_API}",
@@ -80,6 +80,61 @@
     "//": "used to get group's members",
     "method": "GET",
     "path": "/admin/groups/more-members",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get repositories for a given workspace",
+    "method": "GET",
+    "path": "/repositories/:workspace",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get repository",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "used to get pull requests for a given repo",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo/pullrequests",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "list commits for a given repo",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo/commits",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
+    "//": "list members for a given workspace",
+    "method": "GET",
+    "path": "/workspaces/:workspace/members",
     "origin": "https://${BITBUCKET_API}",
     "auth": {
       "scheme": "basic",
