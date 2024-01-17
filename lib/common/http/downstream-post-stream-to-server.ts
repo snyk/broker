@@ -98,7 +98,8 @@ class BrokerServerPostResponseHandler {
         .on('error', (e) => {
           logger.error(
             {
-              error: e,
+              errMsg: e.message,
+              errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
             },
             'received error sending data via POST to Broker Server',
@@ -109,8 +110,8 @@ class BrokerServerPostResponseHandler {
           r.socket.on('error', (err) => {
             logger.error(
               {
-                msg: err.message,
-                err: err,
+                errMsg: err.message,
+                errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Stream Socket Response error in POST to Broker Server',
@@ -119,8 +120,8 @@ class BrokerServerPostResponseHandler {
           r.on('error', (err) => {
             logger.error(
               {
-                msg: err.message,
-                err: err,
+                errMsg: err.message,
+                errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Stream Response error in POST to Broker Server',
@@ -140,7 +141,23 @@ class BrokerServerPostResponseHandler {
           }
         })
         .on('finish', () => {
+          logger.debug(
+            this.#logContext,
+            'Closing Post Request Handler - Removing all listeners',
+          );
           this.#brokerSrvPostRequestHandler.removeAllListeners();
+          this.#brokerSrvPostRequestHandler.on('error', (e) => {
+            logger.error(
+              {
+                errMsg: e.message,
+                errDetails: e,
+                stackTrace: new Error('stacktrace generator').stack,
+              },
+              'received error sending data via POST to Broker Server (post finish event)',
+            );
+            this.#buffer.destroy(e);
+            this.#brokerSrvPostRequestHandler.removeAllListeners();
+          });
         });
 
       logger.debug(this.#logContext, 'POST Request Client setup');

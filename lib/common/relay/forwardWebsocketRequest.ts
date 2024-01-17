@@ -79,7 +79,7 @@ export const forwardWebSocketRequest = (
         } else {
           logger.debug(
             logContext,
-            '[Websocket Flow] Posting HTTP streaming response back to Broker Server',
+            '[Websocket Flow] Posting HTTP response back to Broker Server',
           );
           // Only for responses generated internally in the Broker Client/Server
           postHandler.sendData(responseData, payload.streamingID);
