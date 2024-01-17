@@ -901,7 +901,7 @@ workflows:
           requires:
             - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "20"
+          nodejs_cycle: "21"
           project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure
