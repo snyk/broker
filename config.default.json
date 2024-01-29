@@ -6,6 +6,7 @@
     "bitbucket-server",
     "container-registry-agent",
     "github-enterprise",
+    "github-server-app",
     "github",
     "gitlab",
     "jira-bearer-auth",
