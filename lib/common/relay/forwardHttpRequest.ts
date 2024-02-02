@@ -76,6 +76,12 @@ export const forwardHttpRequest = (filterRules) => {
         streamSize: 0,
       });
       streamBuffer.pipe(res);
+      const simplifiedContextWithStreamingID = simplifiedContext;
+      simplifiedContextWithStreamingID['streamingID'] = streamingID;
+      logger.info(
+        simplifiedContextWithStreamingID,
+        '[HTTP Flow] Brokering request through WS',
+      );
 
       res.locals.io.send('request', {
         url: req.url,
@@ -95,6 +101,10 @@ export const forwardHttpRequest = (filterRules) => {
         '[HTTP Flow][Relay] Sending request over websocket connection expecting Websocket response',
       );
 
+      logger.info(
+        simplifiedContext,
+        '[HTTP Flow] Brokering request through WS',
+      );
       // relay the http request over the websocket, handle websocket response
       res.locals.io.send(
         'request',
