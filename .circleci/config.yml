@@ -7,7 +7,7 @@ orbs:
 
 defaults: &defaults
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:20.11
   working_directory: ~/broker
 filter-tags-only: &filter-tags-only
   filters:
@@ -51,7 +51,7 @@ commands:
     parameters:
       cycle:
         type: string
-        default: "18"
+        default: "20"
     steps:
       - run:
           name: Get latest Node.js <<parameters.cycle>> version
@@ -694,7 +694,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build github-server-app UBI image
           context:
@@ -890,7 +890,7 @@ workflows:
           requires:
             - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "18"
+          nodejs_cycle: "20"
           project_name: broker
           post-steps:
             - notify-slack-on-failure
@@ -1139,7 +1139,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build github-server-app image
           context:
@@ -1487,7 +1487,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build github-server-app image (nlatest)
           context:
