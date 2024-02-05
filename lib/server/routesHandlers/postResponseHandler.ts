@@ -11,7 +11,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
   const desensitizedToken = getDesensitizedToken(token);
   const logContext = {
     hashedToken: desensitizedToken.hashedToken,
-    maskToken: desensitizedToken.maskedToken,
+    maskedToken: desensitizedToken.maskedToken,
     streamingID,
     requestId: req.headers['snyk-request-id'],
   };
