@@ -24,9 +24,9 @@ export const handleSocketConnection = (socket) => {
   });
 
   ['close', 'end', 'disconnect'].forEach((e) =>
-    socket.on(e, () =>
-      handleConnectionCloseOnSocket(e, socket, token, clientId, identified),
-    ),
+    socket.on(e, () => {
+      handleConnectionCloseOnSocket(e, socket, token, clientId, identified);
+    }),
   );
 
   socket.on('error', (error) => handleSocketError(error));

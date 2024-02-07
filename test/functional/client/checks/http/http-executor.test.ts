@@ -9,8 +9,8 @@ describe('client/checks/http/http-executor.ts', () => {
 
   let mockServerBaseUrl: string;
 
-  beforeAll(() => server.start());
-  afterAll(() => server.stop());
+  beforeAll(async () => await server.start());
+  afterAll(async () => await server.stop());
   beforeEach(() => {
     server.reset();
     const url = server.getURL().toString();

@@ -84,6 +84,11 @@ export const webserver = (config, altPort: number) => {
     ? parseInt(process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT)
     : 600000;
   server.listen(port);
+  server.getConnections((err, count) => {
+    if (err) {
+      console.error(err);
+    }
+  });
   logger.info(
     { port, requestTimeout: server.requestTimeout },
     'local server is listening',

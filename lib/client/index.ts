@@ -88,7 +88,7 @@ export const main = async (clientOpts: ClientOpts) => {
       close: (done) => {
         logger.info('client websocket is closing');
         server.close();
-        io.destroy(function () {
+        io.end(function () {
           logger.info('client websocket is closed');
           if (done) {
             return done();

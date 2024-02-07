@@ -21,13 +21,15 @@ const socket = ({ server, serverOpts: ServerOpts }): SocketHandler => {
     transport: {
       allowEIO3: true,
       pingInterval: parseInt(ServerOpts.config.socketPingInterval) || 25000,
-      pingTimeout: parseInt(ServerOpts.config.socketPingTimeout) || 20000,
     },
     compression: Boolean(ServerOpts.config.socketUseCompression) || false,
   };
 
+  // @ts-ignore
   const io = new Primus(server, ioConfig);
+  // @ts-ignore
   io.socketType = 'server';
+  // @ts-ignore
   io.socketVersion = 1;
   io.plugin('emitter', Emitter);
 
@@ -35,6 +37,7 @@ const socket = ({ server, serverOpts: ServerOpts }): SocketHandler => {
 
   initConnectionHandler(ServerOpts, io);
 
+  //@ts-ignore
   io.on('error', handleIoError);
 
   io.on('connection', handleSocketConnection);

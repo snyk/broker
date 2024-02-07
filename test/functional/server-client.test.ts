@@ -42,7 +42,7 @@ describe('proxy requests originating from behind the broker server', () => {
   });
 
   afterAll(async () => {
-    await tws.server.close();
+    tws.server.close(() => console.log('Closed test webserver'));
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
     delete process.env.BROKER_SERVER_URL;
@@ -62,6 +62,7 @@ describe('proxy requests originating from behind the broker server', () => {
     const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
       { some: { example: 'json' } },
+      { headers: { 'snyk-request-id': '123' } },
     );
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({

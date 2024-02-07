@@ -56,7 +56,7 @@ export const main = async (serverOpts: ServerOpts) => {
     close: (done) => {
       logger.info('server websocket is closing');
       server.close();
-      io.destroy(function () {
+      io.close(function () {
         logger.info('server websocket is closed');
         if (done) {
           return done();

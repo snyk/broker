@@ -12,8 +12,8 @@ describe('Broker Dispatcher API client', () => {
   let dispatcherServerBaseUrl: string;
 
   beforeAll(() => server.start());
-  afterAll(() => {
-    server.stop();
+  afterAll(async () => {
+    await server.stop();
     delete process.env.BROKER_SERVER_URL;
   });
   beforeEach(() => {

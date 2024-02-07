@@ -15,19 +15,23 @@ import { ClientOpts } from './types/client';
 import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
+import { SocketOptions } from 'primus';
 
 export const createWebSocket = (
   clientOpts: ClientOpts,
   identifyingMetadata,
 ) => {
-  const Socket = Primus.createSocket({
+  const socketOptions: SocketOptions = {
     transformer: 'engine.io',
     parser: 'EJSON',
     plugin: {
       emitter: primusEmitter,
     },
+    //@ts-ignore
     pathname: `/primus/${clientOpts.config.brokerToken}`,
-  });
+  };
+
+  const Socket = Primus.createSocket(socketOptions);
 
   const urlWithServerId = new URL(clientOpts.config.brokerServerUrl);
   if (clientOpts.config.serverId) {
@@ -46,11 +50,14 @@ export const createWebSocket = (
       retries: 30,
       max: 20 * 60 * 1000,
     },
-    ping: parseInt(clientOpts.config.socketPingInterval) || 25000,
-    pong: parseInt(clientOpts.config.socketPongTimeout) || 10000,
+    // ping: parseInt(clientOpts.config.socketPingInterval) || 25000,
+    // pong: parseInt(clientOpts.config.socketPongTimeout) || 10000,
+    pingTimeout: parseInt(clientOpts.config.socketPingTimeout) || 20000,
     timeout: parseInt(clientOpts.config.socketConnectTimeout) || 10000,
   });
+  // @ts-ignore
   io.socketVersion = 1;
+  // @ts-ignore
   io.socketType = 'client';
 
   logger.info(
@@ -63,23 +70,25 @@ export const createWebSocket = (
   initializeSocketHandlers(io, clientOpts);
 
   // Websocket events
+  // @ts-ignore
   io.on('identify', (serverData) => identifyHandler(serverData, io));
 
   io.on('reconnect scheduled', reconnectScheduledHandler);
 
   io.on('reconnect failed', () => reconnectFailedHandler(io));
 
+  // @ts-ignore
   io.on('chunk', chunkHandler(clientOpts));
 
   // prealably initialized
+  // @ts-ignore
   io.on('request', requestHandler(clientOpts.config.brokerToken));
-
+  // @ts-ignore
   io.on('error', errorHandler);
 
   io.on('open', () => openHandler(io, clientOpts, identifyingMetadata));
-
+  // @ts-ignore
   io.on('close', () => closeHandler(clientOpts));
-
   // only required if we're manually opening the connection
   // io.open();
   return io;
