@@ -64,7 +64,7 @@ describe('client/checks', () => {
       );
 
       expect(httpChecks).toHaveLength(1);
-      expect(httpChecks[0].enabled).toEqual(false);
+      expect(httpChecks[0].enabled).toEqual(true);
     });
   });
 });

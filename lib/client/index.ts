@@ -12,6 +12,8 @@ import { healthCheckHandler } from './routesHandler/healthcheckHandler';
 import { systemCheckHandler } from './routesHandler/systemCheckHandler';
 import { ClientOpts } from './types/client';
 import { processStartUpHooks } from './hooks/startup/processHooks';
+import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
+import { isWebsocketConnOpen } from './utils/socketHelpers';
 
 process.on('uncaughtException', (error) => {
   if (error.message == 'read ECONNRESET') {
@@ -50,7 +52,11 @@ export const main = async (clientOpts: ClientOpts) => {
 
     // start the local webserver to listen for relay requests
     const { app, server } = webserver(clientOpts.config, clientOpts.port);
-
+    const httpToWsForwarder = forwardHttpRequest(clientOpts.filters?.public);
+    const httpToAPIForwarder = forwardHttpRequestOverHttp(
+      clientOpts.filters?.public,
+      clientOpts.config,
+    );
     // IMPORTANT: defined before relay (`app.all('/*', ...`)
     app.get('/health/checks', handleChecksRoute(clientOpts.config));
     app.get('/health/checks/:checkId', handleCheckIdsRoutes(clientOpts.config));
@@ -73,6 +79,21 @@ export const main = async (clientOpts: ClientOpts) => {
       systemCheckHandler,
     );
 
+    app.post(
+      '/webhook/*',
+      (req, res, next) => {
+        res.locals.io = io;
+        next();
+      },
+      (req, res) => {
+        if (isWebsocketConnOpen(res.locals.io)) {
+          httpToWsForwarder(req, res);
+        } else {
+          logger.warn('Websocket connection closed, forwarding via API');
+          httpToAPIForwarder(req, res);
+        }
+      },
+    );
     // relay all other URL paths
     app.all(
       '/*',
@@ -80,7 +101,7 @@ export const main = async (clientOpts: ClientOpts) => {
         res.locals.io = io;
         next();
       },
-      forwardHttpRequest(clientOpts.filters?.public),
+      httpToWsForwarder,
     );
 
     return {
