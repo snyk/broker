@@ -1,5 +1,4 @@
 import { executeHttpRequest } from './http-executor';
-import { highAvailabilityModeEnabled } from '../../dispatcher';
 import type { CheckResult, HttpCheck } from '../types';
 import type { Config } from '../../types/config';
 
@@ -33,11 +32,10 @@ const restApiStatusCheck = (config: Config): HttpCheck => {
     config.API_BASE_URL || config.BROKER_SERVER_URL
       ? config.BROKER_SERVER_URL.replace('//broker.', '//api.')
       : 'https://api.snyk.io';
-  const enabled = highAvailabilityModeEnabled(config);
   return {
     id: 'rest-api-status',
     name: 'REST API Healthcheck',
-    enabled: enabled,
+    enabled: true,
 
     url: `${url}/rest/openapi`,
     method: 'GET',

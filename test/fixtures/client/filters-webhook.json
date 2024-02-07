@@ -1,0 +1,11 @@
+{
+  "private": [
+    
+  ],
+  "public": [
+    {
+      "path": "/webhook/github/:webhookId",
+      "method": "POST"
+    }
+  ]
+}

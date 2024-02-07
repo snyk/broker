@@ -96,6 +96,21 @@ const applyMiddlewares = (app: Express) => {
 const applyEchoRoutes = (app: Express) => {
   const echoRouter = express.Router();
 
+  echoRouter.post(
+    '/webhook/github/12345678-1234-1234-1234-123456789abc',
+    (_: express.Request, resp: express.Response) => {
+      resp.status(200);
+      resp.send('Received webhook via websocket');
+    },
+  );
+  echoRouter.post(
+    '/webhook/github/12345678-1234-1234-1234-000000000000',
+    (_: express.Request, resp: express.Response) => {
+      resp.status(200);
+      resp.send('Received webhook via API');
+    },
+  );
+
   echoRouter.get('/test', (_: express.Request, resp: express.Response) => {
     resp.status(200);
     resp.send('All good');

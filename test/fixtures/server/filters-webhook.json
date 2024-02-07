@@ -1,0 +1,12 @@
+{
+  "private": [
+    {
+      "path": "/webhook/*",
+      "method": "POST",
+      "origin": "http://localhost:9000"
+    }
+  ],
+  "public": [
+
+  ]
+}
