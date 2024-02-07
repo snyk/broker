@@ -48,3 +48,10 @@ accept.json
 Thumbs.db
 .directory
 .DS_Store
+
+#################################
+# Broker configs (sensitive)    #
+#################################
+
+config.universal.json
+config.universaldev.json

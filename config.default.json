@@ -13,5 +13,389 @@
     "jira",
     "nexus",
     "nexus2"
-  ]
+  ],
+  "BROKER_CLIENT_CONFIGURATION": {
+    "common": {
+      "default": {
+        "BROKER_SERVER_URL": "https://broker2.snyk.io",
+        "BROKER_HEALTHCHECK_PATH": "/healthcheck"
+      },
+      "required": {
+      }
+    },
+    "artifactory": {
+      "validations": [{
+        "url": "https://$ARTIFACTORY_URL/api/system/ping",
+        "auth": {
+          "type": "basic",
+          "username": "$ARTIFACTORY_USERNAME",
+          "password": "$ARTIFACTORY_PASSWORD"
+        }
+      }],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$ARTIFACTORY_URL/api/system/ping"
+      },
+      "required": {
+        "ARTIFACTORY_URL": "<username>:<password>@<yourdomain.artifactory.com>/artifactory"
+      }
+    },
+    "azure-repos": {
+      "validations": [{
+        "url":"https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
+        "auth": {
+          "type": "basic",
+          "username": "PAT",
+          "password": "$AZURE_REPOS_TOKEN"
+        }
+      }],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "PAT:$AZURE_REPOS_TOKEN",
+        "GIT_URL": "$AZURE_REPOS_HOST/$AZURE_REPOS_ORG",
+        "GIT_USERNAME": "PAT",
+        "GIT_PASSWORD": "$AZURE_REPOS_TOKEN",
+        "AZURE_REPOS_HOST": "dev.azure.com"
+      },
+      "required": {
+        "AZURE_REPOS_TOKEN": "<token>",
+        "AZURE_REPOS_ORG": "<organisation name>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "bitbucket-server": {
+      "validations": [{
+        "url":"https://$BITBUCKET/rest/api/1.0/projects",
+        "auth": {
+          "type": "basic",
+          "username": "$BITBUCKET_USERNAME",
+          "password": "$BITBUCKET_PASSWORD"
+        }
+      }],
+      "default": {
+        "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD",
+        "GIT_URL": "$BITBUCKET",
+        "GIT_USERNAME": "$BITBUCKET_USERNAME",
+        "GIT_PASSWORD": "$BITBUCKET_PASSWORD"
+      },
+      "required": {
+        "BITBUCKET_USERNAME": "<username>",
+        "BITBUCKET_PASSWORD": "<password>",
+        "BITBUCKET": "bitbucket.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "container-registry-agent": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github": {
+      "validations": [{
+        "url":"https://$GITHUB_API/user",
+        "auth": {
+          "type": "header",
+          "value": "token $GITHUB_TOKEN"
+        }
+      }],
+      "default": {
+        "GITHUB": "github.com",
+        "GITHUB_RAW": "raw.githubusercontent.com",
+        "GITHUB_API": "api.github.com",
+        "GITHUB_GRAPHQL": "api.github.com",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GITHUB_TOKEN"
+      },
+      "required": {
+        "GITHUB_TOKEN": "<github-token>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-enterprise": {
+      "validations": [{
+        "url":"https://$GITHUB_API/user",
+        "auth": {
+          "type": "header",
+          "name": "Authorization",
+          "value": "token $GITHUB_TOKEN"
+        }
+      }],
+      "default": {
+        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_GRAPHQL": "$GITHUB/api",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GITHUB_TOKEN"
+      },
+      "required": {
+        "GITHUB_TOKEN": "<github-token>",
+        "GITHUB": "ghe.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-server-app": {
+      "validations": [{
+        "url":"https://$GITHUB_API/user",
+        "auth": {
+          "type": "header",
+          "name": "Authorization",
+          "value": "token $GITHUB_TOKEN"
+        }
+      }],
+      "default": {
+        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_GRAPHQL": "$GITHUB/api",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GITHUB_TOKEN"
+      },
+      "required": {
+        "GITHUB": "ghe.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "gitlab": {
+      "validations": [{
+        "url":"https://$GITLAB/api/v3/user",
+        "auth": {
+          "type": "header",
+          "name": "private_token",
+          "value": "$GITLAB_TOKEN"
+        }
+      }],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN",
+        "GIT_URL": "$GITLAB",
+        "GIT_USERNAME": "oauth2",
+        "GIT_PASSWORD": "$GITLAB_TOKEN"
+      },
+      "required": {
+        "GITLAB_TOKEN": "<gitlab-token>",
+        "GITLAB": "gitlab.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "jira": {
+      "validations": [{
+        "url":"https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "auth": {
+          "type": "basic",
+          "username": "$JIRA_USERNAME",
+          "password": "$JIRA_PASSWORD"
+        }
+      }],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$JIRA_USERNAME:$JIRA_PASSWORD"
+      },
+      "required": {
+        "JIRA_USERNAME": "<jira-username>",
+        "JIRA_PASSWORD": "<jira-password>",
+        "JIRA_HOSTNAME": "jira.yourdomain.com"
+      }
+    },
+    "jira-bearer-auth": {
+      "validations": [{
+        "url":"https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "auth": {
+          "type": "header",
+          "name": "Authorization",
+          "value": "Bearer $JIRA_PAT"
+        }
+      }],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $JIRA_PAT"
+      },
+      "required": {
+        "JIRA_PAT": "<jira-pat>",
+        "JIRA_HOSTNAME": "jira.yourdomain.com"
+      }
+    },
+    "nexus": {
+      "validations": [{
+        "url": "https://$BASE_NEXUS_URL/service/rest/v1/status/check/api/system/ping",
+        "auth": {
+          "type": "basic",
+          "username": "$NEXUS_USERNAME",
+          "password": "$NEXUS_PASSWORD"
+        }
+      }],
+      "default": {
+        "NEXUS_URL": "$BASE_NEXUS_URL/repository",
+        "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS_URL/service/rest/v1/status/check",
+        "REMOVE_X_FORWARDED_HEADERS": "true"
+      },
+      "required": {
+        "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+      }
+    },
+    "nexus2": {
+      "validations": [{
+        "url": "https://$BASE_NEXUS2_URL/nexus/service/local/status",
+        "auth": {
+          "type": "basic",
+          "username": "$NEXUS2_USERNAME",
+          "password": "$NEXUS2_PASSWORD"
+        }
+      }],
+      "default": {
+        "NEXUS_URL": "$BASE_NEXUS2_URL/nexus/content",
+        "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS2_URL/nexus/service/local/status"
+      },
+      "required": {
+        "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+      }
+    }
+  },
+  "FILTER_RULES_PATHS": {
+    "artifactory": "defaultFilters/artifactory.json",
+    "azure-repos": "defaultFilters/azure-repos.json",
+    "bitbucket-server": "defaultFilters/bitbucket-server.json",
+    "container-registry-agent": "defaultFilters/container-registry-agent.json",
+    "github-enterprise": "defaultFilters/github-enterprise.json",
+    "github-server-app": "defaultFilters/github-server-app.json",
+    "github": "defaultFilters/github.json",
+    "gitlab": "defaultFilters/gitlab.json",
+    "jira": "defaultFilters/jira.json",
+    "jira-bearer-auth": "defaultFilters/jira-bearer-auth.json",
+    "nexus": "defaultFilters/nexus.json",
+    "nexus2": "defaultFilters/nexus2.json"
+  },
+  "SOURCE_TYPES": {
+    "github": {
+      "publicId": "9a3e5d90-b782-468a-a042-9a2073736f0b",
+      "name": "GitHub",
+      "type": "github",
+      "brokerType": "github"
+    },
+    "bitbucket-server": {
+      "publicId": "87c79724-9555-4959-b811-08aa22635614",
+      "name": "Bitbucket Server",
+      "type": "bitbucket-server",
+      "brokerType": "bitbucket-server"
+    },
+    "github-enterprise": {
+      "publicId": "219fbe9f-2fb3-4919-b69c-afd6fab25d54",
+      "name": "GitHub Enterprise",
+      "type": "github-enterprise",
+      "brokerType": "github-enterprise"
+    },
+    "github-server-app": {
+      "publicId": "d79079c2-c675-4e9f-91bd-04d977fc0c9c",
+      "name": "GitHub Server App",
+      "type": "github-server-app",
+      "brokerType": "github-server-app"
+    },
+    "gitlab": {
+      "publicId": "6F37586C-ED9C-47BB-9D95-A2C93698836D",
+      "name": "GitLab",
+      "type": "gitlab",
+      "brokerType": "gitlab"
+    },
+    "docker-hub": {
+      "publicId": "7a4b3f39-eb1c-4a6e-9960-025f783b45c9",
+      "name": "Docker Hub",
+      "type": "docker-hub",
+      "brokerType": "container-registry-agent"
+    },
+    "ecr": {
+      "publicId": "850ff1ce-8bad-f00d-fee1-d00d00caca00",
+      "name": "ECR",
+      "type": "ecr",
+      "brokerType": "container-registry-agent"
+    },
+    "acr": {
+      "publicId": "75831964-2f5d-4c74-a798-0f3839b6ac00",
+      "name": "ACR",
+      "type": "acr",
+      "brokerType": "container-registry-agent"
+    },
+    "gcr": {
+      "publicId": "8a2cf306-50ae-4b3f-b98e-5a819c0ba9b6",
+      "name": "GCR",
+      "type": "gcr",
+      "brokerType": "container-registry-agent"
+    },
+    "artifactory-cr": {
+      "publicId": "66831964-2f5d-4c74-a798-0f3839b6ac00",
+      "name": "Artifactory",
+      "type": "artifactory-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "harbor-cr": {
+      "publicId": "62b98e6e-0c70-47c1-9bc3-f6e7005d1069",
+      "name": "Harbor",
+      "type": "harbor-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "quay-cr": {
+      "publicId": "3e82698b-2563-461f-921a-e41c483e3daf",
+      "name": "Quay",
+      "type": "quay-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "github-cr": {
+      "publicId": "86e781e7-a8f9-40ed-b5b5-e442cc3037de",
+      "name": "GitHub Container Registry",
+      "type": "github-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "nexus-cr": {
+      "publicId": "bc5dc4b4-530e-4dff-b494-b927dbab568f",
+      "name": "Nexus",
+      "type": "nexus-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "digitalocean-cr": {
+      "publicId": "465c35cf-7155-4173-bf59-b2c404ad4867",
+      "name": "DigitalOcean",
+      "type": "digitalocean-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "gitlab-cr": {
+      "publicId": "872fe239-fdc8-4d39-9e88-4fb99a2d5f7e",
+      "name": "GitLab Container Registry",
+      "type": "gitlab-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "google-artifact-cr": {
+      "publicId": "481b389f-e23b-4255-a045-f245d425cef0",
+      "uri": "http://docker-registry-agent",
+      "name": "Google Artifact Registry",
+      "type": "google-artifact-cr",
+      "brokerType": "container-registry-agent"
+    },
+    "azure-repos": {
+      "publicId": "92ff53a7-366d-4639-b75d-d762b5e840b4",
+      "name": "Azure Repos",
+      "type": "azure-repos",
+      "brokerType": "azure-repos"
+    },
+    "artifactory": {
+      "name": "Artifactory Private Registry",
+      "type": "artifactory",
+      "brokerType": "artifactory"
+    },
+    "nexus": {
+      "name": "Nexus Private Registry",
+      "type": "nexus",
+      "brokerType": "nexus"
+    },
+    "nexus2": {
+      "name": "Nexus2 Private Registry",
+      "type": "nexus2",
+      "brokerType": "nexus2"
+    }
+  }
 }
