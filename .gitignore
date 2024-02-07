@@ -14,7 +14,6 @@ reports/
 *.tsbuildinfo
 .eslintcache
 .nyc_output
-package-lock.json
 
 #################################
 # Broker related files          #
