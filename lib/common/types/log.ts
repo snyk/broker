@@ -1,5 +1,6 @@
 export interface LogContext {
   url: string;
+  connectionName?: string;
   requestMethod: string;
   requestId: string;
   streamingID?: string;
