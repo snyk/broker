@@ -32,7 +32,6 @@ export const createBrokerServer = async (
   };
 
   const server = await app(opts);
-
   LOG.debug({ port }, `Broker Server is listening on port ${port}...`);
 
   return Promise.resolve({
@@ -51,7 +50,7 @@ export const waitForBrokerClientConnection = async (
   let metadata: unknown;
 
   await new Promise<{ brokerToken: string; metadata: unknown }>((resolve) => {
-    brokerServer.server.io.on('connection', (spark) => {
+    brokerServer.server.websocket.on('connection', (spark) => {
       LOG.debug(
         {
           spark_id: spark.id,
@@ -75,6 +74,45 @@ export const waitForBrokerClientConnection = async (
   });
 
   return { brokerToken, metadata };
+};
+
+export const waitForUniversalBrokerClientsConnection = async (
+  brokerServer: BrokerServer,
+  numberOfConnectionsExpected = 1,
+): Promise<{
+  brokerTokens: string[];
+  metadataArray: Object[];
+}> => {
+  const brokerTokens: string[] = [];
+  const metadataArray: Object[] = [];
+
+  await new Promise<void>((resolve) => {
+    brokerServer.server.websocket.on('connection', (spark) => {
+      LOG.debug(
+        {
+          spark_id: spark.id,
+          spark_headers: spark.headers,
+          spark_address: spark.address,
+        },
+        'on connection event for broker server',
+      );
+
+      spark.on('identify', (clientData) => {
+        LOG.debug({ clientData }, 'on identify event for broker server');
+
+        const brokerToken = clientData?.token;
+        if (!brokerTokens.includes(brokerToken)) {
+          brokerTokens.push(brokerToken);
+          const metadata = clientData?.metadata;
+          metadataArray.push(metadata);
+          if (brokerTokens.length >= numberOfConnectionsExpected) {
+            resolve();
+          }
+        }
+      });
+    });
+  });
+  return { brokerTokens, metadataArray };
 };
 
 export const closeBrokerServer = async (

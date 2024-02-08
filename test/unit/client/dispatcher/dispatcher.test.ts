@@ -38,7 +38,7 @@ describe('Dispatcher', () => {
     expectedError.name = 'MISSING_BROKER_TOKEN';
 
     try {
-      await getServerId({}, 'random-client-id');
+      await getServerId({}, '', 'random-client-id');
     } catch (error) {
       expect(error).toStrictEqual(expectedError);
     }
@@ -47,7 +47,7 @@ describe('Dispatcher', () => {
     try {
       const serverId = await getServerId(
         {
-          BROKER_DISPATCHER_BASE_URL: serverUrl,
+          API_BASE_URL: serverUrl,
           BROKER_TOKEN: 'abc',
           BROKER_CLIENT_LOCATION: 'random cluster',
         },
@@ -62,7 +62,8 @@ describe('Dispatcher', () => {
   it('getServerId valid request dispatcher request without location', async () => {
     try {
       const serverId = await getServerId(
-        { BROKER_DISPATCHER_BASE_URL: serverUrl, BROKER_TOKEN: 'abc' },
+        { API_BASE_URL: serverUrl, BROKER_TOKEN: 'abc' },
+        'abc',
         'random-client-id',
       );
       expect(serverId).toEqual('snyk-broker-client');

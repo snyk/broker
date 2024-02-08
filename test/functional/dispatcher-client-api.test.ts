@@ -1,5 +1,3 @@
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import { MockServer } from 'jest-mock-server';
 import { HttpDispatcherServiceClient } from '../../lib/client/dispatcher/client/api';
 
@@ -14,7 +12,6 @@ describe('Broker Dispatcher API client', () => {
   beforeAll(() => server.start());
   afterAll(() => {
     server.stop();
-    delete process.env.BROKER_SERVER_URL;
   });
   beforeEach(() => {
     server.reset();

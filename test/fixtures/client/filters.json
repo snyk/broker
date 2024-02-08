@@ -49,6 +49,18 @@
     },
 
     {
+      "path": "/echo-headers/password-pool",
+      "method": "POST",
+      "origin": "http://${PASSWORD}@localhost:9000"
+    },
+
+    {
+      "path": "/echo-headers/github-pool",
+      "method": "POST",
+      "origin": "http://${GITHUB_TOKEN}@localhost:9000"
+    },
+    
+    {
       "path": "/echo-headers/bitbucket",
       "method": "POST",
       "origin": "http://bitbucketUser:bitbucketPassword@localhost:9000"

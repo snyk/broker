@@ -1,4 +1,4 @@
-import { loadBrokerConfig } from '../../lib/common/config';
+import { loadBrokerConfig } from '../../lib/common/config/config';
 import {
   makeRequestToDownstream,
   makeSingleRawRequestToDownstream,

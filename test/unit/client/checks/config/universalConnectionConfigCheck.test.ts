@@ -1,0 +1,124 @@
+import { validateUniversalConnectionsConfig } from '../../../../../lib/client/checks/config/universalConnectionConfigCheck';
+import { getConfigForConnectionsFromConfig } from '../../../../../lib/common/config/universal';
+import { aUniversalDefaultConfig } from '../../../../helpers/test-factories';
+
+describe('client/checks/config', () => {
+  describe('validateBrokerClientUrl()', () => {
+    it('should return error check result if no connection configured', () => {
+      const id = `check_${Date.now()}`;
+      const config = aUniversalDefaultConfig({});
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('error');
+      expect(checkResult.output).toContain('Missing connections in config');
+    });
+
+    it('should return error check result if no connection type', () => {
+      const id = `check_${Date.now()}`;
+      const config = aUniversalDefaultConfig({
+        connections: {
+          'my github connection': {
+            identifier: '123',
+            GITHUB_TOKEN: '${GITHUB_TOKEN}',
+          },
+        },
+      });
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('error');
+      expect(checkResult.output).toContain(
+        'Missing type in connection my github connection is unsupported',
+      );
+    });
+
+    it('should return error check result if unsupported connection type', () => {
+      const id = `check_${Date.now()}`;
+      const config = aUniversalDefaultConfig({
+        connections: {
+          'my github connection': {
+            type: 'invalid_type',
+            identifier: '123',
+            GITHUB_TOKEN: '${GITHUB_TOKEN}',
+          },
+        },
+      });
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('error');
+      expect(checkResult.output).toContain(
+        'invalid_type type in connection my github connection is unsupported',
+      );
+    });
+
+    it('should return error check result if missing required element for connection type', () => {
+      const id = `check_${Date.now()}`;
+      const config = aUniversalDefaultConfig({
+        connections: {
+          'my github connection': {
+            type: 'github',
+            identifier: '${BROKER_TOKEN_1}',
+            GITHUB_TOKEN: '${GITHUB_TOKEN}',
+          },
+        },
+      });
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('error');
+      expect(checkResult.output).toContain(
+        'Missing BROKER_CLIENT_URL required in connection my github connection',
+      );
+    });
+
+    it('should return passing check result if all required elements present for connection type', () => {
+      const id = `check_${Date.now()}`;
+      const config = aUniversalDefaultConfig({
+        connections: {
+          'my github connection': {
+            type: 'github',
+            identifier: '${BROKER_TOKEN_1}',
+            GITHUB_TOKEN: '${GITHUB_TOKEN}',
+            BROKER_CLIENT_URL: 'dummy',
+          },
+        },
+      });
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('passing');
+      expect(checkResult.output).toContain('connections config check: ok');
+    });
+
+    it('should return passing check result if all required elements present for connection type with client url from env var', () => {
+      const id = `check_${Date.now()}`;
+      process.env.BROKER_CLIENT_URL = 'dummy';
+      process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+      const config = aUniversalDefaultConfig({
+        connections: {
+          'my github connection': {
+            type: 'github',
+            identifier: '${BROKER_TOKEN_1}',
+            GITHUB_TOKEN: '${GITHUB_TOKEN}',
+          },
+        },
+      });
+      config.connections['my github connection'] =
+        getConfigForConnectionsFromConfig(config).get('my github connection');
+      const checkResult = validateUniversalConnectionsConfig(
+        { id: id, name: id },
+        config,
+      );
+      expect(checkResult.status).toEqual('passing');
+      expect(checkResult.output).toContain('connections config check: ok');
+      delete process.env.BROKER_CLIENT_URL;
+    });
+  });
+});

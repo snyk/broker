@@ -1,6 +1,7 @@
 import { CheckResult, HttpCheck } from '../../lib/client/checks/types';
 import { Config } from '../../lib/client/types/config';
 import { executeHttpRequest } from '../../lib/client/checks/http/http-executor';
+import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
 
 export const aHttpCheck = (fields: Partial<HttpCheck>): HttpCheck => {
   const id = `check_${Date.now()}`;
@@ -40,4 +41,13 @@ export const aConfig = (fields: Partial<Config>): Config => {
     INSECURE_DOWNSTREAM: 'false',
     ...fields,
   } as Config;
+};
+
+/**
+ * Config with all features disabled.
+ */
+export const aUniversalDefaultConfig = (fields: Partial<Config>): Config => {
+  loadBrokerConfig();
+  const config = { ...getConfig(), ...fields };
+  return config as Config;
 };

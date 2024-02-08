@@ -93,7 +93,7 @@ export const waitForBrokerServerConnection = async (
   let serverMetadata: unknown;
 
   await new Promise((resolve) => {
-    brokerClient.client.io.on('identify', (serverData) => {
+    brokerClient.client.websocketConnections[0].on('identify', (serverData) => {
       LOG.debug({ serverData }, 'on identify event for broker client');
 
       serverMetadata = serverData;

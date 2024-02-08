@@ -1,5 +1,3 @@
-// const PORT = 9999;
-// process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import { promises as fsp, readFileSync } from 'fs';
 import { dir, setGracefulCleanup } from 'tmp-promise';
 
@@ -22,7 +20,7 @@ describe('CLI', () => {
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(
-            'BROKER_TOKEN is required to successfully identify itself to the server',
+            'No Filters found. A Broker requires filters to run. Shutting down.',
           ),
         );
       }
@@ -43,7 +41,7 @@ describe('CLI', () => {
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(
-            'BROKER_SERVER_URL is required to connect to the broker server',
+            'No Filters found. A Broker requires filters to run. Shutting down.',
           ),
         );
       }
@@ -68,6 +66,7 @@ describe('CLI', () => {
 
     it.each(templates)('creates files from %p template', async (template) => {
       const templateDir = await dir({ unsafeCleanup: true });
+      const currentDir = process.cwd();
       process.chdir(templateDir.path);
       const init = await import('../../cli/init');
       await init.default(template);
@@ -84,6 +83,7 @@ describe('CLI', () => {
       expect(() =>
         JSON.parse(readFileSync('accept.json', { encoding: 'utf-8' })),
       ).not.toThrowError();
+      process.chdir(currentDir);
     });
   });
 });

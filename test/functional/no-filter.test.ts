@@ -1,5 +1,3 @@
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -17,6 +15,7 @@ import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const clientAccept = path.join(fixtures, 'client', 'filters.json');
+const emptyServerAccept = path.join(fixtures, 'server', 'empty_filters.json');
 
 describe('no filters broker', () => {
   let tws: TestWebServer;
@@ -25,9 +24,11 @@ describe('no filters broker', () => {
   let brokerToken: string;
 
   beforeAll(async () => {
+    const PORT = 9999;
+    process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
     tws = await createTestWebServer();
 
-    bs = await createBrokerServer({});
+    bs = await createBrokerServer({ filters: emptyServerAccept });
 
     bc = await createBrokerClient({
       brokerServerUrl: `http://localhost:${bs.port}`,

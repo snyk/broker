@@ -26,7 +26,7 @@ const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
 
 import { Writable } from 'stream';
 import { log } from '../../lib/logs/logger';
-import { loadBrokerConfig } from '../../lib/common/config';
+import { loadBrokerConfig } from '../../lib/common/config/config';
 
 describe('log', () => {
   beforeAll(() => {
