@@ -18,7 +18,6 @@ describe('proxy requests originating from behind the broker server', () => {
   let tws: TestWebServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
-  let brokerToken: string;
 
   const spyLogWarn = jest
     .spyOn(require('bunyan').prototype, 'warn')

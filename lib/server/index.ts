@@ -7,9 +7,10 @@ import { webserver } from '../common/http/webserver';
 import { serverStarting, serverStopping } from './infra/dispatcher';
 import { handlePostResponse } from './routesHandlers/postResponseHandler';
 import { connectionStatusHandler } from './routesHandlers/connectionStatusHandler';
-import { ServerOpts } from './types/http';
+import { ServerOpts } from '../common/types/options';
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from './routesHandlers/httpRequestHandler';
 import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
+import { loadAllFilters } from '../common/filter/filtersAsync';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'running in server mode');
@@ -17,6 +18,15 @@ export const main = async (serverOpts: ServerOpts) => {
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
   // Requires are done recursively, so this is here to avoid contaminating the Client
+
+  const LoadedServerOpts = {
+    loadedFilters: loadAllFilters(serverOpts.filters, serverOpts.config),
+    ...serverOpts,
+  };
+  if (!LoadedServerOpts.loadedFilters) {
+    logger.error({ serverOpts }, 'Unable to load filters');
+    throw new Error('Unable to load filters');
+  }
 
   const onSignal = async () => {
     logger.debug('received exit signal, closing server');
@@ -29,7 +39,7 @@ export const main = async (serverOpts: ServerOpts) => {
   await serverStarting();
 
   // bind the socket server to the web server
-  const { io } = bindSocketToWebserver(server, serverOpts);
+  const { websocket } = bindSocketToWebserver(server, LoadedServerOpts);
 
   if (!process.env.JEST_WORKER_ID) {
     app.use(applyPrometheusMiddleware());
@@ -52,11 +62,11 @@ export const main = async (serverOpts: ServerOpts) => {
   );
 
   return {
-    io,
+    websocket: websocket,
     close: (done) => {
       logger.info('server websocket is closing');
       server.close();
-      io.destroy(function () {
+      websocket.destroy(function () {
         logger.info('server websocket is closed');
         if (done) {
           return done();

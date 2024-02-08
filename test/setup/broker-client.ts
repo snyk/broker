@@ -2,7 +2,7 @@ import { app } from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
 import { DEFAULT_BROKER_CLIENT_PORT } from './constants';
-import { setTimeout } from 'timers/promises';
+// import { setTimeout } from 'timers/promises';
 
 const LOG = createTestLogger();
 
@@ -104,9 +104,53 @@ export const waitForBrokerServerConnection = async (
   return Promise.resolve(serverMetadata);
 };
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+interface ConnectionDetails {
+  brokertoken: string;
+  capabilities: Array<string>;
+  index: number;
+}
+
+export const waitForBrokerServerConnections = async (
+  brokerClient: BrokerClient,
+): Promise<Array<ConnectionDetails>> => {
+  let capabilities = brokerClient.client.websocketConnections.map(
+    (x, index) => {
+      return {
+        index: index,
+        capabilities: x.capabilities,
+        brokertoken: x.identifier,
+      };
+    },
+  );
+  let remainingConnectionsToWaitFor = capabilities
+    .filter((x) => !x.capabilities)
+    .map((x) => x.index);
+  do {
+    capabilities = brokerClient.client.websocketConnections.map((x, index) => {
+      return {
+        index: index,
+        capabilities: x.capabilities,
+        brokertoken: x.identifier,
+      };
+    });
+    remainingConnectionsToWaitFor = capabilities
+      .filter((x) => !x.capabilities)
+      .map((x) => x.index);
+    console.log('waiting for all connections...');
+
+    await sleep(200);
+  } while (remainingConnectionsToWaitFor.length > 0);
+
+  return Promise.resolve(capabilities);
+};
+
 export const closeBrokerClient = async (
   brokerClient: BrokerClient,
 ): Promise<void> => {
   await brokerClient.client?.close();
-  await setTimeout(100, 'wait 100ms after closing client');
+  await sleep(200);
 };

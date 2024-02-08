@@ -139,6 +139,7 @@ describe('body relay', () => {
       },
       config,
       port: 8001,
+      loadedFilters: dummyLoadedFilters,
     };
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 

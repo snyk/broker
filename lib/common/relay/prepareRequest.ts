@@ -1,5 +1,5 @@
 import { format, parse } from 'url';
-import { TestResult } from '../filter/filtersAsync';
+import { TestResult } from '../types/filter';
 import version from '../utils/version';
 import tryJSONParse from '../utils/try-json-parse';
 import { replace } from '../utils/replace-vars';

@@ -9,9 +9,9 @@ import url from 'url';
 import tunnel from 'tunnel';
 import https from 'https';
 
-import { config, loadBrokerConfig } from '../config';
+import { getConfig, loadBrokerConfig } from '../config/config';
 loadBrokerConfig();
-const brokerServer = url.parse(config.brokerServerUrl || '');
+const brokerServer = url.parse(getConfig().brokerServerUrl || '');
 brokerServer.port =
   brokerServer.port || brokerServer.protocol === 'https:' ? '443' : '80';
 
@@ -34,6 +34,7 @@ function parseNoProxyZone(zone) {
 }
 
 function uriInNoProxy(uri) {
+  const config = getConfig();
   const port = uri.port || (uri.protocol === 'https:' ? '443' : '80');
   const hostname = formatHostname(uri.hostname);
   const noProxyList = config.noProxy.split(',');
@@ -59,7 +60,7 @@ function shouldProxy(uri) {
   // respect NO_PROXY environment variables (see: http://lynx.isc.org/current/breakout/lynx_help/keystrokes/environments.html)
 
   // if no https proxy is defined - don't proxy
-
+  const config = getConfig();
   if (!config.httpsProxy) {
     return false;
   }
@@ -81,7 +82,8 @@ function shouldProxy(uri) {
 }
 
 // Entry point: To patch or not to patch?
-if (brokerServer.host && config.httpsProxy && shouldProxy(brokerServer)) {
+if (brokerServer.host && getConfig().httpsProxy && shouldProxy(brokerServer)) {
+  const config = getConfig();
   const { hostname, port } = url.parse(config.httpsProxy);
   const tunnelProxy = { host: hostname, port };
   if (config.proxyAuth) {

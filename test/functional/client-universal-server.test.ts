@@ -3,13 +3,13 @@ import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,
   closeBrokerClient,
-  waitForBrokerServerConnection,
+  waitForBrokerServerConnections,
 } from '../setup/broker-client';
 import {
   BrokerServer,
   closeBrokerServer,
   createBrokerServer,
-  waitForUniversalBrokerClientsConnection,
+  // waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
@@ -22,12 +22,9 @@ describe('proxy requests originating from behind the broker client', () => {
   let tws: TestWebServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
-  let brokerTokens: string[];
-  let serverMetadata: unknown;
 
   beforeAll(async () => {
     const PORT = 9999;
-
     tws = await createTestWebServer();
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
@@ -43,7 +40,6 @@ describe('proxy requests originating from behind the broker client', () => {
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
 
     bc = await createUniversalBrokerClient();
-    ({ brokerTokens } = await waitForUniversalBrokerClientsConnection(bs, 2));
   });
 
   afterAll(async () => {
@@ -57,14 +53,17 @@ describe('proxy requests originating from behind the broker client', () => {
   });
 
   it('server identifies self to client', async () => {
-    serverMetadata = await waitForBrokerServerConnection(bc);
-
-    expect(brokerTokens).toEqual(
+    // const connections = await waitForUniversalBrokerClientsConnection(bs, 2);
+    const serverMetadata = await waitForBrokerServerConnections(bc);
+    expect(serverMetadata.map((x) => x.brokertoken)).toEqual(
       expect.arrayContaining(['brokertoken1', 'brokertoken2']),
     );
-    expect(serverMetadata).toMatchObject({
-      capabilities: ['receive-post-streams'],
-    });
+    expect(serverMetadata.map((x) => x.capabilities)).toEqual(
+      expect.arrayContaining([
+        ['receive-post-streams'],
+        ['receive-post-streams'],
+      ]),
+    );
   });
 
   it('successfully broker POST', async () => {
@@ -259,7 +258,9 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toHaveProperty('x-broker-token');
-    expect(brokerTokens).toContain(response.data['x-broker-token']);
+    expect([process.env.BROKER_TOKEN_1, process.env.BROKER_TOKEN_2]).toContain(
+      response.data['x-broker-token'],
+    );
   });
 
   it('querystring parameters are brokered', async () => {

@@ -214,6 +214,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationAuthorizationHeader: 'tokenmagical_header_123',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 
@@ -276,6 +277,7 @@ describe('broker client systemcheck endpoint', () => {
       type: 'client',
       brokerClientValidationUrl: `http://localhost:${tws.port}/echo-headers/httpbin`,
       brokerClientValidationBasicAuth: 'use:pwd',
+      filters: clientAccept,
     });
     await waitForBrokerClientConnection(bs);
 

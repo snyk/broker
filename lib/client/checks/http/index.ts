@@ -28,16 +28,12 @@ const brokerServerStatusCheck = (config: Config): HttpCheck => {
 };
 
 const restApiStatusCheck = (config: Config): HttpCheck => {
-  const url =
-    config.API_BASE_URL || config.BROKER_SERVER_URL
-      ? config.BROKER_SERVER_URL.replace('//broker.', '//api.')
-      : 'https://api.snyk.io';
   return {
     id: 'rest-api-status',
     name: 'REST API Healthcheck',
     enabled: true,
 
-    url: `${url}/rest/openapi`,
+    url: `${config.API_BASE_URL}/rest/openapi`,
     method: 'GET',
     timeoutMs: defaultTimeoutMs,
     check: async function (): Promise<CheckResult> {

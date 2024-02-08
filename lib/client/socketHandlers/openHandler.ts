@@ -1,24 +1,41 @@
+import { LoadedClientOpts } from '../../common/types/options';
+import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../logs/logger';
-import { ClientOpts } from '../types/client';
+import { IdentifyingMetadata } from '../types/client';
 
-export const openHandler = (io, clientOps: ClientOpts, identifyingMetadata) => {
+export const openHandler = (
+  io,
+  clientOps: LoadedClientOpts,
+  identifyingMetadata: IdentifyingMetadata,
+) => {
   const metadata = {
     capabilities: identifyingMetadata.capabilities,
     clientId: identifyingMetadata.clientId,
+    identifier: identifyingMetadata.identifier
+      ? hashToken(identifyingMetadata.identifier)
+      : '****',
     preflightChecks: identifyingMetadata.preflightChecks,
     version: identifyingMetadata.version,
   };
+  if (clientOps.config.universalBrokerEnabled) {
+    metadata['supportedIntegrationType'] =
+      identifyingMetadata.supportedIntegrationType;
+  }
   logger.info(
     {
       url: clientOps.config.brokerServerUrl,
-      serverId: clientOps.config.serverId || '',
-      token: clientOps.config.brokerToken,
+      serverId: identifyingMetadata.serverId ?? clientOps.config.serverId ?? '',
+      token: clientOps.config.universalBrokerEnabled
+        ? identifyingMetadata.identifier
+        : clientOps.config.brokerToken,
       metadata,
     },
     'successfully established a websocket connection to the broker server',
   );
   const clientData = {
-    token: clientOps.config.brokerToken,
+    token: clientOps.config.universalBrokerEnabled
+      ? identifyingMetadata.identifier
+      : clientOps.config.brokerToken,
     metadata: identifyingMetadata,
   };
   io.send('identify', clientData);

@@ -51,6 +51,7 @@ describe('Dispatcher', () => {
           BROKER_TOKEN: 'abc',
           BROKER_CLIENT_LOCATION: 'random cluster',
         },
+        'abc',
         'random-client-id',
       );
       expect(serverId).toEqual('random cluster');

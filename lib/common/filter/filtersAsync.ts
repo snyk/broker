@@ -7,63 +7,69 @@ import { replace } from '../utils/replace-vars';
 import authHeader from '../utils/auth-header';
 import tryJSONParse from '../utils/try-json-parse';
 import { log as logger } from '../../logs/logger';
-import { config } from '../config';
 import { RequestPayload } from '../types/http';
+import {
+  LOADEDFILTERSET,
+  LOADEDFILTER,
+  FILTER,
+  FiltersType,
+  Rule,
+  TestResult,
+} from '../types/filter';
+import { validateHeaders } from './utils';
+import {
+  getConfigForType,
+  overloadConfigWithConnectionSpecificConfig,
+} from '../config/universal';
 
-interface AuthObject {
-  scheme: string;
-  username?: string;
-  password?: string;
-  token?: string;
-}
-interface ValidEntryObject {
-  path?: string;
-  value?: string;
-  queryParam?: string;
-  values?: Array<string>;
-  regex?: string;
-  header?: string;
-}
-export interface Rule {
-  method: string;
-  origin?: string;
-  path?: string;
-  url?: string;
-  valid?: ValidEntryObject[];
-  requiredCapabilities?: Array<string>;
-  stream?: boolean;
-  auth?: AuthObject;
-}
-
-export interface FiltersType {
-  private: Rule[];
-  public: Rule[];
-}
-
-export interface TestResult {
-  url: any;
-  auth: any;
-  stream: boolean | undefined;
-}
-
-const validateHeaders = (headerFilters, requestHeaders = []) => {
-  for (const filter of headerFilters) {
-    const headerValue = requestHeaders[filter.header];
-
-    if (!headerValue) {
-      return false;
+export const loadAllFilters = (
+  filters: Map<string, FiltersType> | FiltersType,
+  configFromApp,
+): Map<string, LOADEDFILTERSET> | LOADEDFILTERSET => {
+  const filtersKeys = Object.keys(filters);
+  if (filtersKeys.includes('public')) {
+    const classicFilters = filters as FiltersType;
+    return {
+      public: loadFilters(classicFilters.public, 'default', configFromApp),
+      private: loadFilters(classicFilters.private, 'default', configFromApp),
+    };
+  } else {
+    const filtersMap = new Map<string, LOADEDFILTERSET>();
+    for (let i = 0; i < filtersKeys.length; i++) {
+      logger.info(
+        { type: filtersKeys[i] },
+        `Loading ruleset (private + public rules) for ${filtersKeys[i]}`,
+      );
+      const loadedFilterSet = {
+        public: loadFilters(
+          filters[filtersKeys[i]].public,
+          filtersKeys[i],
+          configFromApp,
+        ),
+        private: loadFilters(
+          filters[filtersKeys[i]].private,
+          filtersKeys[i],
+          configFromApp,
+        ),
+      };
+      filtersMap.set(filtersKeys[i], loadedFilterSet);
+      logger.info(
+        { type: filtersKeys[i] },
+        `Loaded ${filters[filtersKeys[i]].private.length} private & ${
+          filters[filtersKeys[i]].public.length
+        } public rules`,
+      );
     }
-
-    if (!filter.values.includes(headerValue)) {
-      return false;
-    }
+    return filtersMap;
   }
-
-  return true;
 };
 
 // reads config that defines
-export const loadFilters = (ruleSource: Rule[]) => {
+export const loadFilters: LOADEDFILTER = (
+  ruleSource: Rule[],
+  type?: string,
+  configFromApp?,
+): FILTER => {
   let rules: Array<Rule> = [];
 
   // polymorphic support
@@ -76,7 +82,10 @@ export const loadFilters = (ruleSource: Rule[]) => {
     );
   }
 
-  logger.info({ rulesCount: rules.length }, 'loading new rules');
+  logger.debug(
+    { rulesCount: rules.length },
+    `loading new rules ${type ? 'for ' + type + '.' : '.'}`,
+  );
   // array of entries with
   const tests = rules.map((entry) => {
     const keys: pathRegexp.Key[] = [];
@@ -101,11 +110,15 @@ export const loadFilters = (ruleSource: Rule[]) => {
 
     // now track if there's any values that we need to interpolate later
     const fromConfig = {};
-
+    // load config from config.default.json based on type and config.universal.json based on token
+    let localConfig =
+      type && configFromApp?.universalBrokerEnabled
+        ? Object.assign({}, getConfigForType(type), configFromApp)
+        : configFromApp;
     // slightly bespoke version of replace-vars.js
     entryPath = (entryPath || '').replace(/(\${.*?})/g, (_, match) => {
       const key = match.slice(2, -1); // ditch the wrappers
-      fromConfig[key] = config[key] || '';
+      fromConfig[key] = localConfig[key] || '';
       return ':' + key;
     });
 
@@ -117,6 +130,17 @@ export const loadFilters = (ruleSource: Rule[]) => {
     const regexp = pathRegexp(entryPath, keys);
 
     return (req) => {
+      if (
+        configFromApp?.brokerType === 'client' &&
+        configFromApp?.universalBrokerEnabled &&
+        req.connectionIdentifier
+      ) {
+        localConfig = overloadConfigWithConnectionSpecificConfig(
+          req.connectionIdentifier,
+          localConfig,
+        );
+      }
+
       // check the request method
       if (req.method.toLowerCase() !== method && method !== 'any') {
         return false;
@@ -233,7 +257,7 @@ export const loadFilters = (ruleSource: Rule[]) => {
         }
       }
 
-      const origin = replace(baseOrigin, config);
+      const origin = replace(baseOrigin, localConfig);
       logger.debug(
         { path: entryPath, origin, url, querystring },
         'rule matched',

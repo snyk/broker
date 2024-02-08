@@ -4,7 +4,7 @@ import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
-import { config } from '../config';
+import { getConfig } from '../config/config';
 import { switchToInsecure } from './utils';
 export interface HttpResponse {
   headers: Object;
@@ -12,7 +12,7 @@ export interface HttpResponse {
   statusText?: string;
   body: any;
 }
-const MAX_RETRY = config.MAX_RETRY || 3;
+const MAX_RETRY = getConfig().MAX_RETRY || 3;
 
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
   process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
@@ -28,6 +28,7 @@ export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<HttpResponse> => {
+  const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
@@ -133,6 +134,7 @@ export const makeStreamingRequestToDownstream = (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<http.IncomingMessage> => {
+  const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
@@ -234,6 +236,7 @@ export const makeStreamingRequestToDownstream = (
 export const makeSingleRawRequestToDownstream = async (
   req: PostFilterPreparedRequest,
 ): Promise<HttpResponse> => {
+  const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
