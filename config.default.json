@@ -20,18 +20,19 @@
         "BROKER_SERVER_URL": "https://broker2.snyk.io",
         "BROKER_HEALTHCHECK_PATH": "/healthcheck"
       },
-      "required": {
-      }
+      "required": {}
     },
     "artifactory": {
-      "validations": [{
-        "url": "https://$ARTIFACTORY_URL/api/system/ping",
-        "auth": {
-          "type": "basic",
-          "username": "$ARTIFACTORY_USERNAME",
-          "password": "$ARTIFACTORY_PASSWORD"
+      "validations": [
+        {
+          "url": "https://$ARTIFACTORY_URL/api/system/ping",
+          "auth": {
+            "type": "basic",
+            "username": "$ARTIFACTORY_USERNAME",
+            "password": "$ARTIFACTORY_PASSWORD"
+          }
         }
-      }],
+      ],
       "default": {
         "BROKER_CLIENT_VALIDATION_URL": "https://$ARTIFACTORY_URL/api/system/ping"
       },
@@ -40,14 +41,16 @@
       }
     },
     "azure-repos": {
-      "validations": [{
-        "url":"https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
-        "auth": {
-          "type": "basic",
-          "username": "PAT",
-          "password": "$AZURE_REPOS_TOKEN"
+      "validations": [
+        {
+          "url": "https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
+          "auth": {
+            "type": "basic",
+            "username": "PAT",
+            "password": "$AZURE_REPOS_TOKEN"
+          }
         }
-      }],
+      ],
       "default": {
         "BROKER_CLIENT_VALIDATION_URL": "https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
         "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "PAT:$AZURE_REPOS_TOKEN",
@@ -63,14 +66,16 @@
       }
     },
     "bitbucket-server": {
-      "validations": [{
-        "url":"https://$BITBUCKET/rest/api/1.0/projects",
-        "auth": {
-          "type": "basic",
-          "username": "$BITBUCKET_USERNAME",
-          "password": "$BITBUCKET_PASSWORD"
+      "validations": [
+        {
+          "url": "https://$BITBUCKET/rest/api/1.0/projects",
+          "auth": {
+            "type": "basic",
+            "username": "$BITBUCKET_USERNAME",
+            "password": "$BITBUCKET_PASSWORD"
+          }
         }
-      }],
+      ],
       "default": {
         "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
         "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
@@ -94,13 +99,15 @@
       }
     },
     "github": {
-      "validations": [{
-        "url":"https://$GITHUB_API/user",
-        "auth": {
-          "type": "header",
-          "value": "token $GITHUB_TOKEN"
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/user",
+          "auth": {
+            "type": "header",
+            "value": "token $GITHUB_TOKEN"
+          }
         }
-      }],
+      ],
       "default": {
         "GITHUB": "github.com",
         "GITHUB_RAW": "raw.githubusercontent.com",
@@ -118,14 +125,16 @@
       }
     },
     "github-enterprise": {
-      "validations": [{
-        "url":"https://$GITHUB_API/user",
-        "auth": {
-          "type": "header",
-          "name": "Authorization",
-          "value": "token $GITHUB_TOKEN"
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/user",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "token $GITHUB_TOKEN"
+          }
         }
-      }],
+      ],
       "default": {
         "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_GRAPHQL": "$GITHUB/api",
@@ -142,14 +151,16 @@
       }
     },
     "github-server-app": {
-      "validations": [{
-        "url":"https://$GITHUB_API/user",
-        "auth": {
-          "type": "header",
-          "name": "Authorization",
-          "value": "token $GITHUB_TOKEN"
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/user",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "token $GITHUB_TOKEN"
+          }
         }
-      }],
+      ],
       "default": {
         "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_GRAPHQL": "$GITHUB/api",
@@ -165,14 +176,16 @@
       }
     },
     "gitlab": {
-      "validations": [{
-        "url":"https://$GITLAB/api/v3/user",
-        "auth": {
-          "type": "header",
-          "name": "private_token",
-          "value": "$GITLAB_TOKEN"
+      "validations": [
+        {
+          "url": "https://$GITLAB/api/v3/user",
+          "auth": {
+            "type": "header",
+            "name": "private_token",
+            "value": "$GITLAB_TOKEN"
+          }
         }
-      }],
+      ],
       "default": {
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN",
         "GIT_URL": "$GITLAB",
@@ -186,14 +199,16 @@
       }
     },
     "jira": {
-      "validations": [{
-        "url":"https://$JIRA_HOSTNAME/rest/api/2/myself",
-        "auth": {
-          "type": "basic",
-          "username": "$JIRA_USERNAME",
-          "password": "$JIRA_PASSWORD"
+      "validations": [
+        {
+          "url": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+          "auth": {
+            "type": "basic",
+            "username": "$JIRA_USERNAME",
+            "password": "$JIRA_PASSWORD"
+          }
         }
-      }],
+      ],
       "default": {
         "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
         "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$JIRA_USERNAME:$JIRA_PASSWORD"
@@ -205,14 +220,16 @@
       }
     },
     "jira-bearer-auth": {
-      "validations": [{
-        "url":"https://$JIRA_HOSTNAME/rest/api/2/myself",
-        "auth": {
-          "type": "header",
-          "name": "Authorization",
-          "value": "Bearer $JIRA_PAT"
+      "validations": [
+        {
+          "url": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $JIRA_PAT"
+          }
         }
-      }],
+      ],
       "default": {
         "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
         "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $JIRA_PAT"
@@ -223,14 +240,16 @@
       }
     },
     "nexus": {
-      "validations": [{
-        "url": "https://$BASE_NEXUS_URL/service/rest/v1/status/check/api/system/ping",
-        "auth": {
-          "type": "basic",
-          "username": "$NEXUS_USERNAME",
-          "password": "$NEXUS_PASSWORD"
+      "validations": [
+        {
+          "url": "https://$BASE_NEXUS_URL/service/rest/v1/status/check/api/system/ping",
+          "auth": {
+            "type": "basic",
+            "username": "$NEXUS_USERNAME",
+            "password": "$NEXUS_PASSWORD"
+          }
         }
-      }],
+      ],
       "default": {
         "NEXUS_URL": "$BASE_NEXUS_URL/repository",
         "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS_URL/service/rest/v1/status/check",
@@ -241,14 +260,16 @@
       }
     },
     "nexus2": {
-      "validations": [{
-        "url": "https://$BASE_NEXUS2_URL/nexus/service/local/status",
-        "auth": {
-          "type": "basic",
-          "username": "$NEXUS2_USERNAME",
-          "password": "$NEXUS2_PASSWORD"
+      "validations": [
+        {
+          "url": "https://$BASE_NEXUS2_URL/nexus/service/local/status",
+          "auth": {
+            "type": "basic",
+            "username": "$NEXUS2_USERNAME",
+            "password": "$NEXUS2_PASSWORD"
+          }
         }
-      }],
+      ],
       "default": {
         "NEXUS_URL": "$BASE_NEXUS2_URL/nexus/content",
         "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS2_URL/nexus/service/local/status"
@@ -396,6 +417,16 @@
       "name": "Nexus2 Private Registry",
       "type": "nexus2",
       "brokerType": "nexus2"
+    },
+    "jira": {
+      "name": "Jira",
+      "type": "jira",
+      "brokerType": "jira"
+    },
+    "jira-bearer-auth": {
+      "name": "Jira",
+      "type": "jira",
+      "brokerType": "jira-bearer-auth"
     }
   }
 }

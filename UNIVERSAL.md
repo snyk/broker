@@ -45,12 +45,17 @@ All the [system type settings specified in our docs](https://docs.snyk.io/enterp
     }
     }
     ```
+
+> :warning: **Case sensitive ! `type` and `identifier` must be lowercase**
+- `type` must be one of [supported types](#supported-types) 
+- All others must match the [required values](#required-values)
+
 3. Customize the default settings if you need to target a different Snyk environment or enable the high availability mode.
     > All common (meaning not specific to a connection) should be in the common default section.
     Note that overriding the config file values via environment variable is possible.
     >
     > As example, changing the BROKER_SERVER_URL above would simply require `export BROKER_SERVER_URL=https://broker.dev.snyk.io`.
-    > **Caution !**
+    > :warning:**Caution !**
     >
     > Some settings are only "global", like insecure downstream mode for instance. In other words, you cannot use insecure http call to "my github connection" only. Instead, all requests made to both github and gitlab will be taking place over http.
 4. Run the docker command as per this example, adjusting the settings to your needs:
@@ -77,9 +82,9 @@ Further development will bring better visibility of resource consumption out of 
 ### Connection details
 
 All connections must have the following fields at minimum:
-- `type`: Connection type, being on of the supported types listed below.
-- `identifier`: Your broker token for that connection
-- required values listed below for the corresponding type
+- `type`: Connection type, being on of the supported types listed [below](#supported-types).
+- `identifier`: Your broker token for that connection.
+- [required values listed below](#required-values) for the corresponding type.
 
 #### Supported types
 
@@ -96,7 +101,7 @@ Any connection must be of one of the following types:
 - nexus
 - nexus2
 
-The required values to be specified for each type can be found below, or in the config.default.json in the repo.
+The required values to be specified for each type can be found [below](#required-values), or in the config.default.json in the repo.
 
 #### Required values
 

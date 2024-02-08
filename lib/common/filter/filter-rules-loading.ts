@@ -32,7 +32,7 @@ function injectRulesAtRuntime(
   ruleType?,
 ) {
   const ACCEPT_IAC = process.env.ACCEPT_IAC || config.ACCEPT_IAC;
-  if (ACCEPT_IAC) {
+  if (ACCEPT_IAC && (!ruleType || CODE_SCM_ORIGINS.includes(ruleType))) {
     logger.info(
       { accept: ACCEPT_IAC },
       'Injecting Accept rules for IAC extensions - Possible values tf, yaml, yml, json, tpl',
