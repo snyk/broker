@@ -2,5 +2,35 @@
     "public": [
     ],
     "private": [
+      {
+        "//": "Authentication",
+        "method": "POST",
+        "path": "/cxrestapi/auth/identity/connect/token",
+        "origin": "https://${CHECKMARX}"
+      },
+      {
+        "//": "Get All Project Details",
+        "method": "GET",
+        "path": "/projects",
+        "origin": "https://${CHECKMARX}"
+      },
+      {
+        "//": "Get Remote Source Settings for GIT",
+        "method": "GET",
+        "path": "/projects/:id/sourceCode/remoteSettings/git",
+        "origin": "https://${CHECKMARX}"
+      },
+      {
+        "//": "Get All Scans for Project",
+        "method": "GET",
+        "path": "/sast/scans",
+        "origin": "https://${CHECKMARX}"
+      },
+      {
+        "//": "Get Statistic Results by Scan Id",
+        "method": "GET",
+        "path": "/sast/scans/:id/resultsStatistics",
+        "origin": "https://${CHECKMARX}"
+      }
     ]
   }
