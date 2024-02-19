@@ -44,7 +44,7 @@ export interface ConnectionValidation {
   method?: string;
   auth: ConnectionHeaderAuth | ConnectionBasicAuth;
   body?: any;
-  headers?: Record<string, string>
+  headers?: Record<string, string>;
 }
 
 export interface ConnectionHeaderAuth {
