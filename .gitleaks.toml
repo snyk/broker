@@ -11,4 +11,5 @@ commits = [
   # false positive for pgp prefix and suffix blocks
   "555fe920c97af38fa78a875fbb858d5588a6ec80",
   "a8335efefaa9f483294554c5086702457b735651",
+  "0701fce3412332ec79f777f29c93bd33c5e66791"
 ]
