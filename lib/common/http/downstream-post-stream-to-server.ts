@@ -14,11 +14,6 @@ const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
 const client = config.brokerServerUrl?.startsWith('https') ? https : http;
 
-const agent = new client.Agent({
-  keepAlive: true,
-  keepAliveMsecs: 600000,
-});
-
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
   process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
 }
@@ -81,11 +76,9 @@ class BrokerServerPostResponseHandler {
         headers: {
           'Snyk-Request-Id': `${this.#requestId}`,
           'Content-Type': BROKER_CONTENT_TYPE,
-          Connection: 'Keep-Alive',
-          'Keep-Alive': 'timeout=600000, max=1000000',
+          Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
         },
-        agent: agent,
         timeout: 600000,
       };
 
@@ -104,19 +97,9 @@ class BrokerServerPostResponseHandler {
             },
             'received error sending data via POST to Broker Server',
           );
-          this.#buffer.destroy(e);
+          this.#buffer.end(e);
         })
         .on('response', (r) => {
-          r.socket.on('error', (err) => {
-            logger.error(
-              {
-                errMsg: err.message,
-                errDetails: err,
-                stackTrace: new Error('stacktrace generator').stack,
-              },
-              'Stream Socket Response error in POST to Broker Server',
-            );
-          });
           r.on('error', (err) => {
             logger.error(
               {
@@ -141,23 +124,10 @@ class BrokerServerPostResponseHandler {
           }
         })
         .on('finish', () => {
-          logger.debug(
-            this.#logContext,
-            'Closing Post Request Handler - Removing all listeners',
-          );
-          this.#brokerSrvPostRequestHandler.removeAllListeners();
-          this.#brokerSrvPostRequestHandler.on('error', (e) => {
-            logger.error(
-              {
-                errMsg: e.message,
-                errDetails: e,
-                stackTrace: new Error('stacktrace generator').stack,
-              },
-              'received error sending data via POST to Broker Server (post finish event)',
-            );
-            this.#buffer.destroy(e);
-            this.#brokerSrvPostRequestHandler.removeAllListeners();
-          });
+          logger.debug(this.#logContext, 'Finish Post Request Handler Event');
+        })
+        .on('close', () => {
+          logger.debug(this.#logContext, 'Close Post Request Handler Event');
         });
 
       logger.debug(this.#logContext, 'POST Request Client setup');
@@ -194,28 +164,25 @@ class BrokerServerPostResponseHandler {
           error,
           stackTrace: new Error('stacktrace generator').stack,
         },
-        'received error from request while piping to Broker Server',
+        'received error from downstream request while streaming data to Broker Server',
       );
       // If we already have a buffer object, then we've already started sending data back to the original requestor,
       // so we have to destroy the stream and let that flow through the system
       // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
       // we will forward that directly to the Broker Server
-      if (this.#buffer) {
-        this.#buffer.destroy(error);
-      } else {
-        const body = JSON.stringify({ error: error });
-        this.#sendIoData(
-          JSON.stringify({
-            status: 500,
-            headers: {
-              'Content-Length': `${body.length}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-        );
-        this.#buffer.write(body);
-        this.#buffer.end();
-      }
+
+      const body = JSON.stringify({ error: error });
+      this.#sendIoData(
+        JSON.stringify({
+          status: 500,
+          headers: {
+            'Content-Length': `${body.length}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+      this.#buffer.write(body);
+      this.#buffer.end();
     };
   }
 
