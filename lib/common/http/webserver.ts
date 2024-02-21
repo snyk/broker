@@ -83,6 +83,10 @@ export const webserver = (config, altPort: number) => {
   server.requestTimeout = process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT
     ? parseInt(process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT)
     : 600000;
+  if (process.env.BROKER_TYPE === 'server') {
+    server.keepAliveTimeout =
+      config.BROKER_WEBSERVER_KEEPALIVE_TIMEOUT ?? 650000;
+  }
   server.listen(port);
   logger.info(
     { port, requestTimeout: server.requestTimeout },
