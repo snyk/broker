@@ -38,7 +38,7 @@
           },
           "method": "post",
           "headers": {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "x-broker-content-type": "application/x-www-form-urlencoded"
           }
         }
       ],
