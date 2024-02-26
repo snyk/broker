@@ -8,11 +8,11 @@ import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
-import { config } from '../config';
+import { getConfig } from '../config/config';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
-const client = config.brokerServerUrl?.startsWith('https') ? https : http;
+const client = getConfig().brokerServerUrl?.startsWith('https') ? https : http;
 
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
   process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
@@ -23,7 +23,7 @@ if (process.env.HTTPS_PROXY || process.env.https_proxy) {
 if (process.env.NP_PROXY || process.env.no_proxy) {
   process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
 }
-const proxyUri = getProxyForUrl(config.brokerServerUrl);
+const proxyUri = getProxyForUrl(getConfig().brokerServerUrl);
 if (proxyUri) {
   bootstrap({
     environmentVariableNamespace: '',
@@ -187,6 +187,7 @@ class BrokerServerPostResponseHandler {
   }
 
   async forwardRequest(response: http.IncomingMessage, streamingID) {
+    const config = getConfig();
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;

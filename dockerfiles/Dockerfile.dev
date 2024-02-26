@@ -36,6 +36,8 @@ ENV PATH=$PATH:/home/node/node_modules/.bin
 
 COPY --from=broker-builder /home/node/metadata.json /metadata.json
 COPY --from=broker-builder /home/node/node_modules /home/node/node_modules
+COPY config.default.json /home/node/config.default.json
+COPY defaultFilters /home/node/defaultFilters
 
 # Generate default accept filter
 RUN /home/node/node_modules/snyk-broker/dist/cli/index.js init $BROKER_TYPE

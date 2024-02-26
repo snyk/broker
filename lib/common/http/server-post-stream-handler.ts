@@ -2,11 +2,11 @@ import stream from 'stream';
 import { observeResponseSize } from '../utils/metrics';
 import { Response } from 'express';
 import NodeCache from 'node-cache';
-import { config } from '../config';
+import { getConfig } from '../config/config';
 
 export const streamsStore = new NodeCache({
-  stdTTL: parseInt(config.cacheExpiry) || 3600, // 1 hour
-  checkperiod: parseInt(config.cacheCheckPeriod) || 60, // 1 min
+  stdTTL: parseInt(getConfig().cacheExpiry) || 3600, // 1 hour
+  checkperiod: parseInt(getConfig().cacheCheckPeriod) || 60, // 1 min
   useClones: false,
 });
 

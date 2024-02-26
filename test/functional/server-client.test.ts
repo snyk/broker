@@ -1,5 +1,3 @@
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
@@ -28,6 +26,9 @@ describe('proxy requests originating from behind the broker server', () => {
   let metadata: unknown;
 
   beforeAll(async () => {
+    const PORT = 9999;
+    process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
+
     tws = await createTestWebServer();
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });

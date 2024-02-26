@@ -1,0 +1,26 @@
+{
+    "public": [
+      {
+        "method": "any",
+        "path": "/*",
+        "stream": true
+      }
+    ],
+    "private": [
+      {
+        "method": "HEAD",
+        "path": "/",
+        "origin": "${BASE_NEXUS_URL}"
+      },
+      {
+        "method": "GET",
+        "path": "/nexus/service/local/status",
+        "origin": "${BASE_NEXUS_URL}"
+      },
+      {
+        "method": "GET",
+        "path": "/*",
+        "origin": "${NEXUS_URL}"
+      }
+    ]
+  }

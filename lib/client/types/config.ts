@@ -34,3 +34,27 @@ export type Config = BackendAPI &
   CommitSigning &
   HighAvailabilityMode &
   Record<string, any>;
+
+export interface ConnectionValidations {
+  validations: ConnectionValidation[];
+}
+
+export interface ConnectionValidation {
+  url: string;
+  method?: string;
+  auth: ConnectionHeaderAuth | ConnectionBasicAuth;
+  body?: any;
+}
+
+export interface ConnectionHeaderAuth {
+  type: 'header';
+  value: string;
+}
+
+export interface ConnectionBasicAuth {
+  type: 'basic';
+  username: string;
+  password: string;
+}
+
+export type ConnectionConfig = Record<string, any> & ConnectionValidations;

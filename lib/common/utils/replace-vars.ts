@@ -11,7 +11,12 @@ export const replace = (input, source) => {
       poolIndex = key + 'PoolIdx';
     }
 
-    const pool = source[poolName];
+    const pool =
+      source[poolName] && source[poolName].includes(',')
+        ? source[poolName].split(',')
+        : source[poolName];
+
+    // const pool = source[poolName];
     let idx;
     if (pool) {
       idx = source[poolIndex] || 0;

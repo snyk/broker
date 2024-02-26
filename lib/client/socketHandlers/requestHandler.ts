@@ -1,15 +1,15 @@
 import { forwardWebSocketRequest } from '../../common/relay/forwardWebsocketRequest';
 import { RequestPayload } from '../../common/types/http';
-import { ClientOpts } from '../types/client';
+import { LoadedClientOpts } from '../../common/types/options';
 
 let initializedReqHandler: (
-  token: string,
+  webSocketIdentifier: string,
 ) => (payload: RequestPayload, emit: any) => void;
 
-export const initRequestHandler = (io, clientOps: ClientOpts) => {
-  initializedReqHandler = forwardWebSocketRequest(clientOps, io);
+export const initRequestHandler = (websocket, clientOps: LoadedClientOpts) => {
+  initializedReqHandler = forwardWebSocketRequest(clientOps, websocket);
 };
 
-export const requestHandler = (token) => {
-  return initializedReqHandler(token);
+export const requestHandler = (webSocketIdentifier) => {
+  return initializedReqHandler(webSocketIdentifier);
 };

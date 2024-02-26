@@ -1,0 +1,1580 @@
+{
+    "public": [
+      {
+        "//": "used for pushing up webhooks from gitlab",
+        "method": "POST",
+        "path": "/webhook/gitlab/:webhookId"
+      }
+    ],
+    "private": [
+      {
+        "//": "identify user",
+        "method": "GET",
+        "path": "/api/v4/user",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "list the user's projects",
+        "method": "GET",
+        "path": "/api/v4/projects",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "list the user's projects",
+        "method": "GET",
+        "path": "/api/v3/projects",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "list the user's visible projects",
+        "method": "GET",
+        "path": "/api/v3/projects/visible",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get a user's project",
+        "method": "GET",
+        "path": "/api/v3/projects/:project",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get a user's project",
+        "method": "GET",
+        "path": "/api/v4/projects/:project",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to search all manifest files",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/tree",
+        "origin": "https://${GITLAB}"
+      },
+  
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/package.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/package-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/pom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/requirements/*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Frequirements%2F*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Pipfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
+        "origin": "https://${GITLAB}"
+      },
+  
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Pipfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FPipfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fyarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/build.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Packages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FPackages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/build.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/packages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/project.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/vendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fvendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/composer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/composer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/project.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/go.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/go.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to check if there's any ignore rules or existing patches",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to check if there's any ignore rules or existing patches",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2F.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree for v3 protocol",
+        "method": "GET",
+        "path": "/api/v3/projects/:project/repository/files",
+        "origin": "https://${GITLAB}",
+        "valid": [
+          {
+            "queryParam": "file_path",
+            "values": [
+              "**/package.json",
+              "**%2Fpackage.json",
+              "**/yarn.lock",
+              "**%2Fyarn.lock",
+              "**/package-lock.json",
+              "**%2Fpackage-lock.json",
+              "**/Gemfile",
+              "**%2FGemfile",
+              "**/Gemfile.lock",
+              "**%2FGemfile.lock",
+              "**/pom.xml",
+              "**%2Fpom.xml",
+              "**/*req*.txt",
+              "**%2F*req*.txt",
+              "**/requirements/*.txt",
+              "**%2Frequirements%2F*.txt",
+              "**/pyproject.toml",
+              "**%2Fpyproject.toml",
+              "**/poetry.lock",
+              "**%2Fpoetry.lock",
+              "**/build.gradle",
+              "**%2Fbuild.gradle",
+              "**/gradle.lockfile",
+              "**%2Fgradle.lockfile",
+              "**/build.sbt",
+              "**%2Fbuild.sbt",
+              "**/.snyk",
+              "**%2F.snyk",
+              "**/packages.config",
+              "**%2Fpackages.config",
+              "**/*.csproj",
+              "**%2F*.csproj",
+              "**/*.vbproj",
+              "**%2F*.vbproj",
+              "**/*.fsproj",
+              "**%2F*.fsproj",
+              "**/project.json",
+              "**%2Fproject.json",
+              "**/Gopkg.toml",
+              "**%2FGopkg.toml",
+              "**/Gopkg.lock",
+              "**%2FGopkg.lock",
+              "**/vendor.json",
+              "**%2Fvendor.json",
+              "**/composer.lock",
+              "**%2Fcomposer.lock",
+              "**/composer.json",
+              "**%2Fcomposer.json",
+              "**/project.assets.json",
+              "**%2Fproject.assets.json",
+              "**/Podfile",
+              "**%2FPodfile",
+              "**/Podfile.lock",
+              "**%2FPodfile.lock",
+              "**/go.mod",
+              "**%2Fgo.mod",
+              "**/go.sum",
+              "**%2Fgo.sum"
+            ]
+          }
+        ]
+      },
+  
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/package.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/package-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/pom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fyarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/build.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Packages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FPackages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/build.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/packages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/project.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/vendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fvendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/composer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/composer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/project.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/go.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/go.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create Dockerfile",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create Dockerfile",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create ignore rules or patches",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create ignore rules or patches",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2F.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file for v3 protocol",
+        "method": "POST",
+        "path": "/api/v3/projects/:project/repository/files",
+        "origin": "https://${GITLAB}",
+        "valid": [
+          {
+            "queryParam": "file_path",
+            "values": [
+              "**/package.json",
+              "**%2Fpackage.json",
+              "**/yarn.lock",
+              "**%2Fyarn.lock",
+              "**/package-lock.json",
+              "**%2Fpackage-lock.json",
+              "**/Gemfile",
+              "**%2FGemfile",
+              "**/Gemfile.lock",
+              "**%2FGemfile.lock",
+              "**/pom.xml",
+              "**%2Fpom.xml",
+              "**/*req*.txt",
+              "**%2F*req*.txt",
+              "**/pyproject.toml",
+              "**%2Fpyproject.toml",
+              "**/poetry.lock",
+              "**%2Fpoetry.lock",
+              "**/build.gradle",
+              "**%2Fbuild.gradle",
+              "**/gradle.lockfile",
+              "**%2Fgradle.lockfile",
+              "**/build.sbt",
+              "**%2Fbuild.sbt",
+              "**/.snyk",
+              "**%2F.snyk",
+              "**/packages.config",
+              "**%2Fpackages.config",
+              "**/*.csproj",
+              "**%2F*.csproj",
+              "**/*.vbproj",
+              "**%2F*.vbproj",
+              "**/*.fsproj",
+              "**%2F*.fsproj",
+              "**/project.json",
+              "**%2Fproject.json",
+              "**/Gopkg.toml",
+              "**%2FGopkg.toml",
+              "**/Gopkg.lock",
+              "**%2FGopkg.lock",
+              "**/vendor.json",
+              "**%2Fvendor.json",
+              "**/composer.lock",
+              "**%2Fcomposer.lock",
+              "**/composer.json",
+              "**%2Fcomposer.json",
+              "**/project.assets.json",
+              "**%2Fproject.assets.json",
+              "**/Podfile",
+              "**%2FPodfile",
+              "**/Podfile.lock",
+              "**%2FPodfile.lock",
+              "**/go.mod",
+              "**%2Fgo.mod",
+              "**/go.sum",
+              "**%2Fgo.sum"
+            ]
+          }
+        ]
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/package.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/package-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Gemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FGemfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/pom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpom.xml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F*req*.txt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/pyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpyproject.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/poetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpoetry.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/yarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fyarn.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/build.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.gradle",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.lockfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/gradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgradle.properties",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.targets",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Directory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FDirectory.Build.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Packages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FPackages.props",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/build.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fbuild.sbt",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/packages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpackages.config",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.csproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.vbproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F*.fsproj",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/project.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.toml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Gopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FGopkg.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/vendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fvendor.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/composer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/composer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fcomposer.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/project.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fproject.assets.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/Podfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2FPodfile.lock",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/go.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.mod",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/go.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fgo.sum",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F*Dockerfile*",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update ignore rules or existing patches",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update ignore rules or existing patches",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2F.snyk",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file for v3 protocol",
+        "method": "PUT",
+        "path": "/api/v3/projects/:project/repository/files",
+        "origin": "https://${GITLAB}",
+        "valid": [
+          {
+            "queryParam": "file_path",
+            "values": [
+              "**/package.json",
+              "**%2Fpackage.json",
+              "**/yarn.lock",
+              "**%2Fyarn.lock",
+              "**/package-lock.json",
+              "**%2Fpackage-lock.json",
+              "**/Gemfile",
+              "**%2FGemfile",
+              "**/Gemfile.lock",
+              "**%2FGemfile.lock",
+              "**/pom.xml",
+              "**%2Fpom.xml",
+              "**/*req*.txt",
+              "**%2F*req*.txt",
+              "**/pyproject.toml",
+              "**%2Fpyproject.toml",
+              "**/poetry.lock",
+              "**%2Fpoetry.lock",
+              "**/build.gradle",
+              "**%2Fbuild.gradle",
+              "**/gradle.lockfile",
+              "**%2Fgradle.lockfile",
+              "**/build.sbt",
+              "**%2Fbuild.sbt",
+              "**/.snyk",
+              "**%2F.snyk",
+              "**/packages.config",
+              "**%2Fpackages.config",
+              "**/*.csproj",
+              "**%2F*.csproj",
+              "**/*.vbproj",
+              "**%2F*.vbproj",
+              "**/*.fsproj",
+              "**%2F*.fsproj",
+              "**/project.json",
+              "**%2Fproject.json",
+              "**/Gopkg.toml",
+              "**%2FGopkg.toml",
+              "**/Gopkg.lock",
+              "**%2FGopkg.lock",
+              "**/vendor.json",
+              "**%2Fvendor.json",
+              "**/composer.lock",
+              "**%2Fcomposer.lock",
+              "**/composer.json",
+              "**%2Fcomposer.json",
+              "**/project.assets.json",
+              "**%2Fproject.assets.json",
+              "**/Podfile",
+              "**%2FPodfile",
+              "**/Podfile.lock",
+              "**%2FPodfile.lock",
+              "**/go.mod",
+              "**%2Fgo.mod",
+              "**/go.sum",
+              "**%2Fgo.sum"
+            ]
+          }
+        ]
+      },
+  
+      {
+        "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/hooks",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+        "method": "DELETE",
+        "path": "/api/v4/projects/:project/hooks/:id",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create commit status messages",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/statuses/:sha",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create branch for fix merge request",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/branches",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create merge request for fix merge request",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/merge_requests",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to fetch fix merge request information",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/merge_requests",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "list the user's groups",
+        "method": "GET",
+        "path": "/api/v4/groups",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "list of projects in a group",
+        "method": "GET",
+        "path": "/api/v4/groups/:id/projects",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get current user. so we'll be able to fetch it's projects",
+        "method": "GET",
+        "path": "/api/v4/user",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get user's projects",
+        "method": "GET",
+        "path": "/api/v4/users/:user/projects",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get all users. so we'll be able to fetch projects that admin can access",
+        "method": "GET",
+        "path": "/api/v4/users",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to get repo's contributors list",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/commits",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get a specific commit identified by the commit hash or name of a branch or tag.",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/commits/:sha",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get merge base of two commits for given project.",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/merge_base",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to redirect requests to snyk git client",
+        "method": "any",
+        "path": "/snykgit/*",
+        "origin": "${GIT_CLIENT_URL}"
+      }
+    ]
+  }

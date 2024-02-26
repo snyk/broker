@@ -1,5 +1,3 @@
-const PORT = 9999;
-process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 import path from 'path';
 import version from '../../lib/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
@@ -123,6 +121,7 @@ describe('proxy requests originating from behind the broker client', () => {
     bc = await createBrokerClient({
       brokerServerUrl: 'http://no-such-server',
       brokerToken: '12345',
+      filters: clientAccept,
     });
 
     const response = await axiosClient.get(

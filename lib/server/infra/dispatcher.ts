@@ -1,6 +1,6 @@
 import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../logs/logger';
-import { config } from '../../common/config';
+import { getConfig } from '../../common/config/config';
 import { axiosInstance } from '../../common/http/axios';
 import { v4 as uuid } from 'uuid';
 
@@ -155,6 +155,8 @@ export let clientPinged;
 export let clientDisconnected;
 export let serverStarting;
 export let serverStopping;
+
+const config = getConfig();
 
 if (config.dispatcherUrl) {
   const kc = new DispatcherClient(
