@@ -481,6 +481,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts-cicd
+          trusted-branch: master
           <<: *filter-tags-only
 
       - build-and-save-docker-ubi-image:
@@ -906,6 +907,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts-cicd
+          trusted-branch: master
           filters:
             tags:
               only: /^v.*/
@@ -1318,7 +1320,7 @@ workflows:
       - build-and-save-docker-image:
           name: Build nexus2 image
           context:
-            snyk-bot-slack
+            - snyk-bot-slack
             - team-broker-snyk
           requires:
             - Push base image
@@ -1340,6 +1342,35 @@ workflows:
           image_name: snyk/broker
           image_tag: nexus2
           project_name: nexus2
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build universal image
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Push base image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base"
+          dockerfile: dockerfiles/Dockerfile-universal
+          project_name: universal
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push universal image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build universal image
+          image_name: snyk/broker
+          image_tag: universal
+          project_name: universal
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -1692,41 +1723,34 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
-      - build-and-push-dev-docker-image:
-          name: Build and push universal image
+      - build-and-save-docker-image:
+          name: Build universal image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
             - team-broker-snyk
           requires:
-            - universal-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base"
+            - Push base image (nlatest)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest"
           dockerfile: dockerfiles/Dockerfile-universal
-          image_name: snyk/broker
-          image_tag: universal
-          project_name: universal
+          project_name: universal-nlatest
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      - build-and-push-dev-docker-image:
-          name: Build and push universal-nlatest image
+      - tag-and-push-docker-image:
+          name: Push universal image (nlatest)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-broker-snyk
           requires:
-            - universal-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
-          dockerfile: dockerfiles/Dockerfile-universal
+            - Build universal image (nlatest)
           image_name: snyk/broker
           image_tag: universal-nlatest
           project_name: universal-nlatest
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-
 
       - approve-build-github-com-dev:
           name: github-com-dev image
