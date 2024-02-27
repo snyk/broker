@@ -438,6 +438,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts-cicd
+          trusted-branch: master
 
       - install-npm-packages:
           name: Install NPM packages
@@ -865,6 +866,35 @@ workflows:
           image_name: snyk/broker
           image_tag: rhel-ubi-nexus2
           project_name: rhel-ubi-nexus2
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build universal UBI image
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi"
+          dockerfile: dockerfiles/Dockerfile-universal.ubi
+          project_name: rhel-ubi-universal
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push universal UBI image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build universal UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-universal
+          project_name: rhel-ubi-universal
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -1662,6 +1692,42 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
+      - build-and-push-dev-docker-image:
+          name: Build and push universal image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - universal-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base"
+          dockerfile: dockerfiles/Dockerfile-universal
+          image_name: snyk/broker
+          image_tag: universal
+          project_name: universal
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - build-and-push-dev-docker-image:
+          name: Build and push universal-nlatest image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - universal-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
+          dockerfile: dockerfiles/Dockerfile-universal
+          image_name: snyk/broker
+          image_tag: universal-nlatest
+          project_name: universal-nlatest
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+
+
       - approve-build-github-com-dev:
           name: github-com-dev image
           type: approval
@@ -1829,7 +1895,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
-      
+
       - approve-build-universal-dev:
           name: universal-dev image
           type: approval
