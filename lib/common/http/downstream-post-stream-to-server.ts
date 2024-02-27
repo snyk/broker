@@ -170,19 +170,22 @@ class BrokerServerPostResponseHandler {
       // so we have to destroy the stream and let that flow through the system
       // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
       // we will forward that directly to the Broker Server
-
-      const body = JSON.stringify({ error: error });
-      this.#sendIoData(
-        JSON.stringify({
-          status: 500,
-          headers: {
-            'Content-Length': `${body.length}`,
-            'Content-Type': 'application/json',
-          },
-        }),
-      );
-      this.#buffer.write(body);
-      this.#buffer.end();
+      if (this.#buffer) {
+        this.#buffer.end(error);
+      } else {
+        const body = JSON.stringify({ error: error });
+        this.#sendIoData(
+          JSON.stringify({
+            status: 500,
+            headers: {
+              'Content-Length': `${body.length}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        );
+        this.#buffer.write(Buffer.from(body));
+        this.#buffer.end();
+      }
     };
   }
 
