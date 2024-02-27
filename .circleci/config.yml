@@ -438,6 +438,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts-cicd
+          trusted-branch: master
 
       - install-npm-packages:
           name: Install NPM packages
@@ -1894,7 +1895,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
-      
+
       - approve-build-universal-dev:
           name: universal-dev image
           type: approval
