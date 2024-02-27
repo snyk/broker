@@ -438,6 +438,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: broker-alerts-cicd
+          trusted-branch: master
 
       - install-npm-packages:
           name: Install NPM packages
