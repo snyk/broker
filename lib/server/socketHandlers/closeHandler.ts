@@ -17,7 +17,7 @@ export const handleConnectionCloseOnSocket = (
       const connections = getSocketConnections();
       const clientPool = connections
         .get(token)
-        .filter((_) => _.socket !== socket);
+        ?.filter((_) => _.socket !== socket);
       const filteredClientPool =
         clientPool?.filter((_) => _.socket !== socket) || '';
       logger.info(
@@ -29,7 +29,7 @@ export const handleConnectionCloseOnSocket = (
         },
         'client connection closed',
       );
-      if (filteredClientPool.length) {
+      if (filteredClientPool?.length) {
         connections.set(token, filteredClientPool);
       } else {
         logger.info({ maskedToken, hashedToken }, 'removing client');
