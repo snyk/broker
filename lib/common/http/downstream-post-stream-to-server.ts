@@ -97,7 +97,7 @@ class BrokerServerPostResponseHandler {
             },
             'received error sending data via POST to Broker Server',
           );
-          this.#buffer.end(e);
+          this.#buffer.end(e.message);
         })
         .on('response', (r) => {
           r.on('error', (err) => {
@@ -171,7 +171,7 @@ class BrokerServerPostResponseHandler {
       // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
       // we will forward that directly to the Broker Server
       if (this.#buffer) {
-        this.#buffer.end(error);
+        this.#buffer.end(error.message);
       } else {
         const body = JSON.stringify({ error: error });
         this.#sendIoData(
