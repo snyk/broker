@@ -11,6 +11,7 @@ import {
   signGitHubCommit,
   validateGitHubTreePayload,
 } from '../../client/scm';
+import { getConfigForIdentifier } from '../config/universal';
 
 export interface PostFilterPreparingRequestError {
   status: number;
@@ -87,7 +88,12 @@ export const prepareRequestFromFilterResult = async (
       logContext.bodyVarsSubstitution = parsedBody.BROKER_VAR_SUB;
       for (const path of parsedBody.BROKER_VAR_SUB) {
         let source = undefsafe(parsedBody, path); // get the value
-        source = replace(source, options.config); // replace the variables
+        source = replace(
+          source,
+          options.config.universalBrokerEnabled
+            ? getConfigForIdentifier(brokerToken, options.config)
+            : options.config,
+        ); // replace the variables
         undefsafe(parsedBody, path, source); // put it back in
       }
       payload.body = JSON.stringify(parsedBody);
@@ -103,7 +109,12 @@ export const prepareRequestFromFilterResult = async (
     logContext.headerVarsSubstitution = payload.headers['x-broker-var-sub'];
     for (const path of payload.headers['x-broker-var-sub'].split(',')) {
       let source = undefsafe(payload.headers, path.trim()); // get the value
-      source = replace(source, options.config); // replace the variables
+      source = replace(
+        source,
+        options.config.universalBrokerEnabled
+          ? getConfigForIdentifier(brokerToken, options.config)
+          : options.config,
+      ); // replace the variables
       undefsafe(payload.headers, path.trim(), source); // put it back in
     }
   }
@@ -173,17 +184,32 @@ export const prepareRequestFromFilterResult = async (
   }
 
   if (
-    gitHubCommitSigningEnabled(options.config, {
-      method: payload.method,
-      url: payload.url,
-    })
+    gitHubCommitSigningEnabled(
+      options.config.universalBrokerEnabled
+        ? getConfigForIdentifier(brokerToken, options.config)
+        : options.config,
+      {
+        method: payload.method,
+        url: payload.url,
+      },
+    )
   ) {
     try {
-      payload.body = await signGitHubCommit(options.config, payload.body);
+      payload.body = await signGitHubCommit(
+        options.config.universalBrokerEnabled
+          ? getConfigForIdentifier(brokerToken, options.config)
+          : options.config,
+        payload.body,
+      );
     } catch (error) {
       logger.error({ error }, 'error while signing github commit');
     }
   }
+  if (options.config && options.config.LOG_ENABLE_BODY === 'true') {
+    logContext.requestBody = payload.body;
+  }
+  logContext.requestHeaders = payload.headers;
+  logger.debug(logContext, 'Prepared request');
 
   const req = {
     url: result.url,
