@@ -1,5 +1,5 @@
 import { log as logger } from '../../logs/logger';
-import { ConnectionConfig } from '../../client/types/config';
+import { Config, ConnectionConfig } from '../../client/types/config';
 import { expandPlaceholderValuesInFlatList, getConfig } from './config';
 
 export const getConfigForType = (type: string) => {
@@ -65,14 +65,13 @@ export const getConfigForIdentifier = (identifier: string, config) => {
   }
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
-    ...(connectionKey
-      ? expandPlaceholderValuesInFlatList(
-          config.connections[connectionKey],
-          config.connections[connectionKey],
-        )
-      : {}),
+    ...(connectionKey ? config.connections[connectionKey] : {}),
   };
-  return configToOverload;
+  const configOverloaded = expandPlaceholderValuesInFlatList(
+    configToOverload,
+    configToOverload,
+  );
+  return configOverloaded as Config;
 };
 
 export const overloadConfigWithConnectionSpecificConfig = (
