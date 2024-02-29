@@ -1,6 +1,6 @@
 import { log as logger } from '../../logs/logger';
 import { ConnectionConfig } from '../../client/types/config';
-import { getConfig } from './config';
+import { expandPlaceholderValuesInFlatList, getConfig } from './config';
 
 export const getConfigForType = (type: string) => {
   const config = getConfig();
@@ -63,10 +63,16 @@ export const getConfigForIdentifier = (identifier: string, config) => {
     //   `Unable to find configuration type for ${identifier}. Please review config.`,
     // );
   }
-  return {
+  const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
-    ...(connectionKey ? config.connections[connectionKey] : {}),
+    ...(connectionKey
+      ? expandPlaceholderValuesInFlatList(
+          config.connections[connectionKey],
+          config.connections[connectionKey],
+        )
+      : {}),
   };
+  return configToOverload;
 };
 
 export const overloadConfigWithConnectionSpecificConfig = (
@@ -74,10 +80,18 @@ export const overloadConfigWithConnectionSpecificConfig = (
   localConfig,
 ) => {
   const config = getConfig();
-  return {
-    ...localConfig,
-    ...getConfigForIdentifier(connectionIdentifier, config),
-  };
+  let overloadedConfig = Object.assign(
+    {},
+    {
+      ...localConfig,
+      ...getConfigForIdentifier(connectionIdentifier, config),
+    },
+  );
+  overloadedConfig = expandPlaceholderValuesInFlatList(
+    overloadedConfig,
+    overloadedConfig,
+  );
+  return overloadedConfig;
 };
 
 const findConnectionWithIdentifier = (connections: Object, identifier) => {

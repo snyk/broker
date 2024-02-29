@@ -1,14 +1,17 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
-jest.mock('../../lib/common/http/request');
+jest.mock('../../lib/common/relay/requestsHelper');
 import { WebSocketConnection } from '../../lib/client/types/client';
-import { makeRequestToDownstream } from '../../lib/common/http/request';
+import { loadBrokerConfig } from '../../lib/common/config/config';
+import { loadAllFilters } from '../../lib/common/filter/filtersAsync';
+import { makeLegacyRequest } from '../../lib/common/relay/requestsHelper';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
+const mockedFn = makeLegacyRequest.mockImplementation((data, emit) => {
+  emit();
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return data;
@@ -37,20 +40,27 @@ const dummyWebsocketHandler: WebSocketConnection = {
   send: () => {},
   serverId: '0',
   socket: {},
-  supportedIntegrationType: 'github',
   transport: '',
   url: '',
   on: () => {},
   readyState: 3,
+  supportedIntegrationType: 'github',
 };
 
-const dummyLoadedFilters = {
-  private: () => {
-    return { url: '/', auth: '', stream: true };
-  },
-  public: () => {
-    return { url: '/', auth: '', stream: true };
-  },
+const dummyLoadedFilters = new Map();
+dummyLoadedFilters['github'] = {
+  private: [
+    {
+      method: 'any',
+      url: '/*',
+    },
+  ],
+  public: [
+    {
+      method: 'any',
+      url: '/*',
+    },
+  ],
 };
 
 describe('body relay', () => {
@@ -63,21 +73,33 @@ describe('body relay', () => {
     jest.clearAllMocks();
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
+  it('relay swaps body values found in BROKER_VAR_SUB', () => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
 
     const config = {
       universalBrokerEnabled: true,
+      brokerType: 'client',
       connections: {
         myconn: {
           identifier: brokerToken,
-          HOST: 'localhost',
+          HOST: '$HOST2',
           PORT: '8001',
+          HOST2: 'localhost',
+          type: 'github',
         },
       },
+      brokerClientConfiguration: {
+        common: {
+          default: {},
+          required: {},
+        },
+        github: { default: {} },
+      },
     };
+    loadBrokerConfig(config);
+
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
         private: [
@@ -90,16 +112,14 @@ describe('body relay', () => {
       },
       config,
       port: 8001,
-      loadedFilters: dummyLoadedFilters,
+      loadedFilters: loadAllFilters(dummyLoadedFilters, config),
     };
-
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-
     route(
       {
         url: '/',
@@ -110,34 +130,43 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        expect(makeLegacyRequest).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual(
-          `${config.connections.myconn.HOST}:${config.connections.myconn.PORT}/webhook`,
+        const url = JSON.parse(arg.body).url;
+        expect(url).toEqual(
+          `${config.connections.myconn.HOST2}:${config.connections.myconn.PORT}/webhook`,
         );
-
-        done();
       },
     );
   });
 
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
+  it('relay does NOT swaps body values found in BROKER_VAR_SUB if disable substition true', () => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
 
     const config = {
+      disableBodyVarsSubstitution: true,
       universalBrokerEnabled: true,
+      brokerType: 'client',
       connections: {
         myconn: {
           identifier: brokerToken,
-          HOST: 'localhost',
+          HOST: '$HOST2',
           PORT: '8001',
+          HOST2: 'localhost',
+          type: 'github',
         },
       },
-      disableBodyVarsSubstitution: true,
-      brokerServerUrl: 'http://localhost:8001',
+      brokerClientConfiguration: {
+        common: {
+          default: {},
+          required: {},
+        },
+        github: { default: {} },
+      },
     };
+    loadBrokerConfig(config);
 
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -151,7 +180,7 @@ describe('body relay', () => {
       },
       config,
       port: 8001,
-      loadedFilters: dummyLoadedFilters,
+      loadedFilters: loadAllFilters(dummyLoadedFilters, config),
     };
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
@@ -159,7 +188,6 @@ describe('body relay', () => {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-
     route(
       {
         url: '/',
@@ -170,11 +198,10 @@ describe('body relay', () => {
         headers: {},
       },
       () => {
-        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        expect(makeLegacyRequest).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
-
-        done();
+        const url = JSON.parse(arg.body).url;
+        expect(url).toEqual('${HOST}:${PORT}/webhook');
       },
     );
   });
