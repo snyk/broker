@@ -74,8 +74,8 @@ describe('config', () => {
       getConfig(),
     );
     expect(configData).toEqual({
-      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token $GITHUB_TOKEN',
-      BROKER_CLIENT_VALIDATION_URL: 'https://$GITHUB_API/user',
+      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
+      BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
       BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
@@ -85,8 +85,8 @@ describe('config', () => {
       GITHUB_GRAPHQL: 'api.github.com',
       GITHUB_RAW: 'raw.githubusercontent.com',
       GITHUB_TOKEN: '123',
-      GIT_PASSWORD: '$GITHUB_TOKEN',
-      GIT_URL: '$GITHUB',
+      GIT_PASSWORD: '123',
+      GIT_URL: 'github.com',
       GIT_USERNAME: 'x-access-token',
       identifier: 'dummyBrokerIdentifier',
       type: 'github',
@@ -114,8 +114,8 @@ describe('config', () => {
     );
     expect(configData).toEqual({
       BROKER_CLIENT_URL: 'dummy',
-      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token $GITHUB_TOKEN',
-      BROKER_CLIENT_VALIDATION_URL: 'https://$GITHUB_API/user',
+      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
+      BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
       BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
@@ -125,8 +125,8 @@ describe('config', () => {
       GITHUB_GRAPHQL: 'api.github.com',
       GITHUB_RAW: 'raw.githubusercontent.com',
       GITHUB_TOKEN: '123',
-      GIT_PASSWORD: '$GITHUB_TOKEN',
-      GIT_URL: '$GITHUB',
+      GIT_PASSWORD: '123',
+      GIT_URL: 'github.com',
       GIT_USERNAME: 'x-access-token',
       identifier: 'dummyBrokerIdentifier',
       type: 'github',
