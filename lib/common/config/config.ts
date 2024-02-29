@@ -34,12 +34,14 @@ export const findProjectRoot = (startDir: string): string | null => {
   return null;
 };
 
-export const loadBrokerConfig = () => {
+export const loadBrokerConfig = (localConfigForTest?) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
   try {
-    const localConfig = loadConfig(findProjectRoot(__dirname) ?? process.cwd());
+    const localConfig = localConfigForTest
+      ? localConfigForTest
+      : loadConfig(findProjectRoot(__dirname) ?? process.cwd());
     expand(process.env);
     config = Object.assign({}, camelify(localConfig), camelify(process.env));
     // for each in config.brokerClientConfiguration.common.default check if process env exist and if it does,
@@ -185,6 +187,22 @@ function expand(obj: Record<string, any>): Record<string, any> {
 
   return obj;
 }
+
+export const expandPlaceholderValuesInFlatList = (
+  objectToExpand: Object,
+  referenceConfig: Object,
+) => {
+  for (const key of Object.keys(objectToExpand)) {
+    if (
+      typeof objectToExpand[key] == 'string' &&
+      objectToExpand[key].startsWith('$')
+    ) {
+      objectToExpand[key] =
+        referenceConfig[objectToExpand[key].replace('$', '')];
+    }
+  }
+  return objectToExpand;
+};
 
 export const expandConfigObjectRecursively = (
   objToExpand: Object,
