@@ -84,7 +84,7 @@ describe('body relay', () => {
       connections: {
         myconn: {
           identifier: brokerToken,
-          HOST: '$HOST2',
+          HOST: 'http://$HOST2',
           PORT: '8001',
           HOST2: 'localhost',
           type: 'github',
@@ -134,7 +134,7 @@ describe('body relay', () => {
         const arg = mockedFn.mock.calls[0][0];
         const url = JSON.parse(arg.body).url;
         expect(url).toEqual(
-          `${config.connections.myconn.HOST2}:${config.connections.myconn.PORT}/webhook`,
+          `http://${config.connections.myconn.HOST2}:${config.connections.myconn.PORT}/webhook`,
         );
       },
     );
