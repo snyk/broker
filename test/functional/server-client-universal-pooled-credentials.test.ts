@@ -40,9 +40,12 @@ describe('proxy requests originating from behind the broker server with pooled c
     process.env.SERVICE_ENV = 'universaltestpool';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
     process.env.GITHUB_TOKEN_POOL = 'ghtoken1,ghtoken2';
     process.env.GITLAB_TOKEN = 'gltoken';
-
+    process.env.AZURE_REPOS_TOKEN = '123';
+    process.env.AZURE_REPOS_HOST = 'hostname';
+    process.env.AZURE_REPOS_ORG = 'org';
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
