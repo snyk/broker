@@ -28,6 +28,8 @@ describe('proxy requests originating from behind the broker server', () => {
   beforeAll(async () => {
     const PORT = 9999;
     process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
+    process.env.JIRAUSER = 'user';
+    process.env.PASS = 'pass';
 
     tws = await createTestWebServer();
 

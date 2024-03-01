@@ -5,7 +5,15 @@
       "method": "GET",
       "origin": "http://localhost:9000"
     },
-
+    {
+      "path": "/echo-param-with-auth/:param",
+      "method": "GET",
+      "origin": "http://localhost:9000",
+      "auth": {
+        "scheme": "basic",
+        "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+      }
+    },
     {
       "path": "/echo-body/:param?",
       "method": "POST",

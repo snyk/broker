@@ -12,6 +12,27 @@
     },
 
     {
+      "path": "/echo-auth-header-with-basic-auth/:data",
+      "method": "GET",
+      "origin": "http://localhost:9000",
+      "auth": {
+        "scheme": "basic",
+        "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+      }
+    },
+
+    {
+      "path": "/echo-auth-header-with-bearer-auth/:data",
+      "method": "GET",
+      "origin": "http://localhost:9000",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${JIRA_PAT}"
+      }
+    },
+    
+
+    {
       "path": "/echo-param/:param",
       "method": "GET",
       "origin": "http://localhost:9000"

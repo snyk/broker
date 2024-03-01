@@ -267,7 +267,7 @@ export const loadFilters: LOADEDFILTER = (
 
       return {
         url: origin + url + querystring,
-        auth: entry.auth && authHeader(entry.auth),
+        auth: entry.auth && authHeader(entry.auth, localConfig),
         stream,
       };
     };
