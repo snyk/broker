@@ -212,10 +212,7 @@ export const forwardHttpRequest = (
       return res.status(401).send({ message: 'blocked', reason, url: req.url });
     } else {
       incrementHttpRequestsTotal(false, 'inbound-request');
-      if (
-        filterResponse.stream ||
-        res?.locals?.capabilities?.includes('post-streams')
-      ) {
+      if (res?.locals?.capabilities?.includes('post-streams')) {
         makeWebsocketRequestWithStreamingResponse(filterResponse);
       } else {
         makeWebsocketRequestWithWebsocketResponse(filterResponse);
