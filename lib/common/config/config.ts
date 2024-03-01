@@ -197,14 +197,12 @@ export const expandPlaceholderValuesInFlatList = (
       typeof objectToExpand[key] == 'string' &&
       objectToExpand[key].indexOf('$') > -1
     ) {
-      const regex = /\$([a-zA-Z0-9_]+)/;
-      const match = regex.exec(objectToExpand[key]);
-      const extractedEnvVarName = match ? match[1] : '';
+      const regex = /\$([a-zA-Z0-9_]+)/g;
 
-      if (extractedEnvVarName) {
+      for (const match of objectToExpand[key].matchAll(regex)) {
         objectToExpand[key] = objectToExpand[key].replace(
-          `$${extractedEnvVarName}`,
-          referenceConfig[extractedEnvVarName],
+          `$${match[1]}`,
+          referenceConfig[match[1]],
         );
       }
     }

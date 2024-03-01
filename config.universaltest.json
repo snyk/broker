@@ -16,6 +16,11 @@
         "validations":[{
           "url": "https://snyk.io/no-such-url-ever"
         }]
+      },
+      "azure-repos": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
       }
     },
     "CONNECTIONS": {
@@ -29,6 +34,13 @@
         "identifier": "${BROKER_TOKEN_2}",
         "GITLAB_TOKEN": "${GITLAB_TOKEN}",
         "GITLAB":"gitlab.dev.snyk.io"
+      },
+      "my azure connection": {
+        "type": "azure-repos",
+        "identifier": "${BROKER_TOKEN_3}",
+        "AZURE_REPOS_TOKEN": "${AZURE_REPOS_TOKEN}",
+        "AZURE_REPOS_ORG":"${AZURE_REPOS_ORG}",
+        "AZURE_REPOS_HOST":"${AZURE_REPOS_HOST}"
       }
     }
   }

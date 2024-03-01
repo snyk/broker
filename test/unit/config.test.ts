@@ -61,6 +61,42 @@ describe('config', () => {
     });
   });
 
+  it('getConfigType with multiple replacements', () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest';
+    process.env.GITHUB_TOKEN = '123';
+    process.env.GITLAB_TOKEN = '123';
+    process.env.AZURE_REPOS_TOKEN = '123';
+    process.env.AZURE_REPOS_HOST = 'hostname';
+    process.env.AZURE_REPOS_ORG = 'org';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    loadBrokerConfig();
+    const configData = getConfigForIdentifier(
+      'dummyBrokerIdentifier3',
+      getConfig(),
+    );
+
+    expect(configData).toEqual({
+      AZURE_REPOS_HOST: 'hostname',
+      AZURE_REPOS_ORG: 'org',
+      AZURE_REPOS_TOKEN: '123',
+      BROKER_CLIENT_VALIDATION_BASIC_AUTH: 'PAT:123',
+      BROKER_CLIENT_VALIDATION_URL:
+        'https://hostname/org/_apis/git/repositories',
+      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_HA_MODE_ENABLED: 'false',
+      BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
+      BROKER_HEALTHCHECK_PATH: '/healthcheck',
+      GIT_PASSWORD: '123',
+      GIT_URL: 'hostname/org',
+      GIT_USERNAME: 'PAT',
+      identifier: 'dummyBrokerIdentifier3',
+      type: 'azure-repos',
+    });
+  });
+
   it('getConfigByidentifier', () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
@@ -68,6 +104,7 @@ describe('config', () => {
     process.env.GITLAB_TOKEN = '123';
     process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
     process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
     loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier',
@@ -97,6 +134,7 @@ describe('config', () => {
     delete process.env.GITLAB_TOKEN;
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
   });
 
   it('getConfigByidentifier with global BROKER_CLIENT_URL', () => {
@@ -107,6 +145,7 @@ describe('config', () => {
     process.env.GITLAB_TOKEN = '123';
     process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
     process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
     loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier',
@@ -138,6 +177,7 @@ describe('config', () => {
     delete process.env.GITLAB_TOKEN;
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
   });
 
   it('fails to load if missing env var', () => {

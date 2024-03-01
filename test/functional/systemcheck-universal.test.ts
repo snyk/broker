@@ -37,6 +37,7 @@ describe('broker client systemcheck endpoint', () => {
     delete process.env.SERVICE_ENV;
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
     delete process.env.GITHUB_TOKEN;
     delete process.env.GITLAB_TOKEN;
     delete process.env.BROKER_HEALTHCHECK_PATH;
@@ -53,9 +54,13 @@ describe('broker client systemcheck endpoint', () => {
     process.env.SERVICE_ENV = 'universaltest';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.BROKER_HEALTHCHECK_PATH = '/custom-systemcheck';
+    process.env.AZURE_REPOS_TOKEN = '123';
+    process.env.AZURE_REPOS_HOST = 'hostname';
+    process.env.AZURE_REPOS_ORG = 'org';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -372,8 +377,12 @@ describe('broker client systemcheck endpoint', () => {
     process.env.SERVICE_ENV = 'universaltest';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
+    process.env.AZURE_REPOS_TOKEN = '123';
+    process.env.AZURE_REPOS_HOST = 'hostname';
+    process.env.AZURE_REPOS_ORG = 'org';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -416,6 +425,19 @@ describe('broker client systemcheck endpoint', () => {
         message:
           'Validation failed, please review connection details for my gitlab connection',
       },
+      {
+        connectionName: 'my azure connection',
+        results: [
+          {
+            data: '/no-such-url-ever/',
+            statusCode: 308,
+            url: 'https://snyk.io/no-such-url-ever',
+          },
+        ],
+        validated: false,
+        message:
+          'Validation failed, please review connection details for my azure connection',
+      },
     ]);
   });
 
@@ -425,6 +447,7 @@ describe('broker client systemcheck endpoint', () => {
     process.env.SERVICE_ENV = 'universaltest2';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
 
