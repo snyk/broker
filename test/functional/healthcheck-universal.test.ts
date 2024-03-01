@@ -43,6 +43,9 @@ describe('proxy requests originating from behind the broker client', () => {
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.AZURE_REPOS_TOKEN = '123';
@@ -55,7 +58,7 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.data).toHaveLength(3);
+    expect(response.data).toHaveLength(4);
     expect(response.data[0]).toEqual(
       expect.objectContaining({
         brokerServerUrl: `http://localhost:${bs.port}/`,
@@ -86,11 +89,24 @@ describe('proxy requests originating from behind the broker client', () => {
         websocketConnectionOpen: true,
       }),
     );
+    expect(response.data[3]).toEqual(
+      expect.objectContaining({
+        brokerServerUrl: `http://localhost:${bs.port}/`,
+        friendlyName: 'my jira pat',
+        identifier: 'brok-...-ken4',
+        ok: true,
+        version: 'local',
+        websocketConnectionOpen: true,
+      }),
+    );
     delete process.env.UNIVERSAL_BROKER_ENABLED;
     delete process.env.SERVICE_ENV;
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
     delete process.env.BROKER_TOKEN_3;
+    delete process.env.BROKER_TOKEN_4;
+    delete process.env.JIRA_PAT;
+    delete process.env.JIRA_HOSTNAME;
     delete process.env.GITHUB_TOKEN;
     delete process.env.GITLAB_TOKEN;
     delete process.env.AZURE_REPOS_TOKEN;

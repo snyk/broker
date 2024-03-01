@@ -11,8 +11,11 @@ export const getEncodedBasicAuth = (username, password, config) => {
   ).toString('base64');
 };
 
-export default ({ scheme, token = '', username = '', password = '' }) => {
-  const config = getConfig();
+export default (
+  { scheme, token = '', username = '', password = '' },
+  connectionConfig?,
+) => {
+  const config = connectionConfig ?? getConfig();
   if (scheme === 'token') {
     return `Token ${replace(token, config)}`;
   }

@@ -72,6 +72,9 @@ describe('config', () => {
     process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
     process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
     process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier3',
@@ -105,6 +108,9 @@ describe('config', () => {
     process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
     process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
     process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier',

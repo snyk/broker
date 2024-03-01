@@ -38,6 +38,7 @@ describe('broker client systemcheck endpoint', () => {
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
     delete process.env.BROKER_TOKEN_3;
+    delete process.env.BROKER_TOKEN_4;
     delete process.env.GITHUB_TOKEN;
     delete process.env.GITLAB_TOKEN;
     delete process.env.BROKER_HEALTHCHECK_PATH;
@@ -55,6 +56,9 @@ describe('broker client systemcheck endpoint', () => {
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.BROKER_HEALTHCHECK_PATH = '/custom-systemcheck';
@@ -378,6 +382,9 @@ describe('broker client systemcheck endpoint', () => {
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.AZURE_REPOS_TOKEN = '123';
@@ -438,6 +445,19 @@ describe('broker client systemcheck endpoint', () => {
         message:
           'Validation failed, please review connection details for my azure connection',
       },
+      {
+        connectionName: 'my jira pat',
+        results: [
+          {
+            data: '/no-such-url-ever/',
+            statusCode: 308,
+            url: 'https://snyk.io/no-such-url-ever',
+          },
+        ],
+        validated: false,
+        message:
+          'Validation failed, please review connection details for my jira pat',
+      },
     ]);
   });
 
@@ -448,6 +468,9 @@ describe('broker client systemcheck endpoint', () => {
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'notexists.notexists';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
 

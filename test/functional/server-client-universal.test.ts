@@ -37,14 +37,20 @@ describe('proxy requests originating from behind the broker server', () => {
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.AZURE_REPOS_TOKEN = '123';
     process.env.AZURE_REPOS_HOST = 'hostname';
     process.env.AZURE_REPOS_ORG = 'org';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
+    process.env['SNYK_FILTER_RULES_PATHS__azure-repos'] = clientAccept;
+    process.env['SNYK_FILTER_RULES_PATHS__jira-bearer-auth'] = clientAccept;
+
     bc = await createUniversalBrokerClient();
     await waitForUniversalBrokerClientsConnection(bs, 2);
   });
@@ -71,10 +77,30 @@ describe('proxy requests originating from behind the broker server', () => {
       `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_2}/echo-param/xyz`,
     );
 
+    const response3 = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_3}/echo-auth-header-with-basic-auth/xyz`,
+    );
+
+    const response4 = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_4}/echo-auth-header-with-bearer-auth/xyz`,
+    );
+
+    // const response5 = await axiosClient.get(
+    //   `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_3}/echo-auth-header-with-token-auth/xyz`,
+    // );
+
     expect(response.status).toEqual(200);
     expect(response.data).toEqual('xyz');
     expect(response2.status).toEqual(200);
     expect(response2.data).toEqual('xyz');
+    expect(response3.status).toEqual(200);
+    expect(response3.data).toEqual(
+      `Basic ${Buffer.from('PAT:' + process.env.AZURE_REPOS_TOKEN).toString(
+        'base64',
+      )}`,
+    );
+    expect(response4.status).toEqual(200);
+    expect(response4.data).toEqual(`Bearer ${process.env.JIRA_PAT}`);
   });
 
   it('successfully warn logs requests without x-snyk-broker-type header', async () => {

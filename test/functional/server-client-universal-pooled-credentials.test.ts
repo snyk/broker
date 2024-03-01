@@ -41,6 +41,9 @@ describe('proxy requests originating from behind the broker server with pooled c
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
     process.env.BROKER_TOKEN_2 = 'brokertoken2';
     process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
     process.env.GITHUB_TOKEN_POOL = 'ghtoken1,ghtoken2';
     process.env.GITLAB_TOKEN = 'gltoken';
     process.env.AZURE_REPOS_TOKEN = '123';
@@ -49,6 +52,8 @@ describe('proxy requests originating from behind the broker server with pooled c
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
+    process.env['SNYK_FILTER_RULES_PATHS__azure-repos'] = clientAccept;
+    process.env['SNYK_FILTER_RULES_PATHS__jira-bearer-auth'] = clientAccept;
     bc = await createUniversalBrokerClient();
     ({ brokerTokens, metadataArray } =
       await waitForUniversalBrokerClientsConnection(bs, 2));

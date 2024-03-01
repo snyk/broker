@@ -21,6 +21,11 @@
         "validations":[{
           "url": "https://snyk.io/no-such-url-ever"
         }]
+      },
+      "jira-bearer-auth": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
       }
     },
     "CONNECTIONS": {
@@ -41,6 +46,12 @@
         "AZURE_REPOS_TOKEN": "${AZURE_REPOS_TOKEN}",
         "AZURE_REPOS_ORG":"${AZURE_REPOS_ORG}",
         "AZURE_REPOS_HOST":"${AZURE_REPOS_HOST}"
+      },
+      "my jira pat": {
+        "type": "jira-bearer-auth",
+        "identifier": "${BROKER_TOKEN_4}",
+        "JIRA_PAT": "${JIRA_PAT}",
+        "JIRA_HOSTNAME":"${JIRA_HOSTNAME}"
       }
     }
   }

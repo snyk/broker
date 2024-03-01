@@ -166,6 +166,19 @@ const applyEchoRoutes = (app: Express) => {
       resp.send(req.params.param);
     },
   );
+  echoRouter.get(
+    '/echo-auth-header-with-basic-auth/:param',
+    (req: express.Request, resp: express.Response) => {
+      resp.send(req.headers.authorization);
+    },
+  );
+
+  echoRouter.get(
+    '/echo-auth-header-with-bearer-auth/:param',
+    (req: express.Request, resp: express.Response) => {
+      resp.send(req.headers.authorization);
+    },
+  );
 
   echoRouter.get(
     '/echo-origin/:param',
