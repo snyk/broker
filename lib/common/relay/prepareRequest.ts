@@ -205,6 +205,22 @@ export const prepareRequestFromFilterResult = async (
       logger.error({ error }, 'error while signing github commit');
     }
   }
+  if (
+    payload.headers &&
+    payload.headers['x-broker-content-type'] ===
+      'application/x-www-form-urlencoded'
+  ) {
+    payload.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    if (payload.body) {
+      const jsonBody = JSON.parse(payload.body) as Record<string, any>;
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(jsonBody)) {
+        params.append(key, value.toString());
+      }
+      payload.body = params.toString();
+    }
+  }
+
   if (options.config && options.config.LOG_ENABLE_BODY === 'true') {
     logContext.requestBody = payload.body;
   }

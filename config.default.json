@@ -1,6 +1,7 @@
 {
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
+    "apprisk",
     "artifactory",
     "azure-repos",
     "bitbucket-server",
@@ -21,6 +22,37 @@
         "BROKER_HEALTHCHECK_PATH": "/healthcheck"
       },
       "required": {}
+    },
+    "apprisk": {
+      "validations": [
+        {
+          "url": "https://$CHECKMARX/cxrestapi/auth/identity/connect/token",
+          "body": {
+            "BROKER_VAR_SUB": ["username", "password"],
+            "username": "$CHECKMARX_USERNAME",
+            "password": "$CHECKMARX_PASSWORD",
+            "grant_type": "password",
+            "scope": "sast_rest_api",
+            "client_id": "resource_owner_client",
+            "client_secret": "014DF517-39D1-4453-B7B3-9930C563627C"
+          },
+          "method": "post",
+          "headers": {
+            "x-broker-content-type": "application/x-www-form-urlencoded"
+          }
+        }
+      ],
+      "default": {
+        "CHECKMARX": "$CHECKMARX",
+        "CHECKMARX_USERNAME": "$CHECKMARX_USERNAME",
+        "CHECKMARX_PASSWORD": "$CHECKMARX_PASSWORD"
+      },
+      "required": {
+        "CHECKMARX": "checkmarx.customer.com",
+        "CHECKMARX_USERNAME": "<username>",
+        "CHECKMARX_PASSWORD": "<password>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
     },
     "artifactory": {
       "validations": [
@@ -280,6 +312,7 @@
     }
   },
   "FILTER_RULES_PATHS": {
+    "apprisk": "defaultFilters/apprisk.json",
     "artifactory": "defaultFilters/artifactory.json",
     "azure-repos": "defaultFilters/azure-repos.json",
     "bitbucket-server": "defaultFilters/bitbucket-server.json",
@@ -427,6 +460,11 @@
       "name": "Jira",
       "type": "jira",
       "brokerType": "jira-bearer-auth"
+    },
+    "apprisk": {
+      "name": "Apprisk",
+      "type": "apprisk",
+      "brokerType": "apprisk"
     }
   }
 }

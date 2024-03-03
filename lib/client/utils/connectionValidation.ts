@@ -10,7 +10,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
     const validation = config.validations[i] ?? {};
     const method = validation?.method ?? 'GET';
     const { auth, url } = validation;
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = validation?.headers ?? {};
     headers['user-agent'] = `Snyk Broker client ${version}`;
     switch (auth?.type) {
       case 'basic':
