@@ -43,6 +43,9 @@ export const forwardWebSocketRequest = (
       hashedToken: hashToken(connectionIdentifier),
       transport:
         websocketConnectionHandler?.socket?.transport?.name ?? 'unknown',
+      responseMedium: payload.headers['x-broker-ws-response']
+        ? 'websocket'
+        : 'http',
     };
 
     if (!requestId) {
@@ -97,6 +100,13 @@ export const forwardWebSocketRequest = (
       responseData,
       isResponseFromRequestModule = false,
     ) => {
+      if (responseData) {
+        responseData['headers'] = responseData['headers'] ?? {};
+        responseData.headers['snyk-request-id'] = requestId;
+        responseData.headers['x-broker-ws-response'] =
+          responseData.headers['x-broker-ws-response'] ?? 'true';
+      }
+
       // Traffic over websockets
       if (payload.streamingID) {
         if (isResponseFromRequestModule) {
@@ -135,7 +145,10 @@ export const forwardWebSocketRequest = (
     };
 
     if (
-      websocketConnectionHandler?.capabilities?.includes('receive-post-streams')
+      websocketConnectionHandler?.capabilities?.includes(
+        'receive-post-streams',
+      ) &&
+      !emit
     ) {
       // Traffic over HTTP Post
       emit = postOverrideEmit;

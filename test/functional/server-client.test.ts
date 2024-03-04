@@ -93,11 +93,43 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(Buffer.from(response.data)).toEqual(body);
   });
 
+  it('successfully broker exact bytes of POST body with WS response', async () => {
+    // stringify the JSON unusually to ensure an unusual exact body
+    const body = Buffer.from(
+      JSON.stringify({ some: { example: 'json' } }, null, 5),
+    );
+    const response = await axiosClient.post(
+      `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
+      body,
+      {
+        headers: {
+          'content-type': 'application/json',
+          'x-broker-ws-response': 'whatever',
+        },
+
+        transformResponse: (r) => r,
+      },
+    );
+    expect(response.status).toEqual(200);
+    expect(Buffer.from(response.data)).toEqual(body);
+    expect(response.headers['x-broker-ws-response']).not.toBeNull();
+  });
   it('successfully broker GET', async () => {
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/xyz`,
     );
 
+    expect(response.headers['x-broker-ws-response']).not.toBeNull();
+    expect(response.status).toEqual(200);
+    expect(response.data).toEqual('xyz');
+  });
+
+  it('successfully broker GET with WS response', async () => {
+    const response = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/xyz`,
+      { headers: { 'x-broker-ws-response': 'whatever' } },
+    );
+    expect(response.headers['x-broker-ws-response']).not.toBeNull();
     expect(response.status).toEqual(200);
     expect(response.data).toEqual('xyz');
   });

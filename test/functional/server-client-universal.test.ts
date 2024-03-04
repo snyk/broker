@@ -85,7 +85,12 @@ describe('proxy requests originating from behind the broker server', () => {
       `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_4}/echo-auth-header-with-bearer-auth/xyz`,
     );
 
-    // const response5 = await axiosClient.get(
+    const response5 = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_4}/echo-auth-header-with-bearer-auth/xyz`,
+      { headers: { 'x-broker-ws-response': 'whatever' } },
+    );
+
+    // const response6 = await axiosClient.get(
     //   `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_3}/echo-auth-header-with-token-auth/xyz`,
     // );
 
@@ -101,6 +106,10 @@ describe('proxy requests originating from behind the broker server', () => {
     );
     expect(response4.status).toEqual(200);
     expect(response4.data).toEqual(`Bearer ${process.env.JIRA_PAT}`);
+
+    expect(response5.status).toEqual(200);
+    expect(response5.data).toEqual(`Bearer ${process.env.JIRA_PAT}`);
+    expect(response.headers['x-broker-ws-response']).not.toBeNull();
   });
 
   it('successfully warn logs requests without x-snyk-broker-type header', async () => {

@@ -24,4 +24,5 @@ export interface ExtendedLogContext extends LogContext {
   responseBodyType?: string;
   ioErrorType?: string;
   ioOriginalBodySize?: string;
+  responseMedium?: string;
 }

@@ -31,6 +31,9 @@ export const forwardHttpRequest = (
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
     // If this is the client, we will have to generate one
     req.headers['snyk-request-id'] ||= uuid();
+    const responseWantedOverWs = req.headers['x-broker-ws-response']
+      ? true
+      : false;
     const logContext: ExtendedLogContext = {
       url: req.url,
       requestMethod: req.method,
@@ -212,7 +215,10 @@ export const forwardHttpRequest = (
       return res.status(401).send({ message: 'blocked', reason, url: req.url });
     } else {
       incrementHttpRequestsTotal(false, 'inbound-request');
-      if (res?.locals?.capabilities?.includes('post-streams')) {
+      if (
+        res?.locals?.capabilities?.includes('post-streams') &&
+        !responseWantedOverWs
+      ) {
         makeWebsocketRequestWithStreamingResponse(filterResponse);
       } else {
         makeWebsocketRequestWithWebsocketResponse(filterResponse);
