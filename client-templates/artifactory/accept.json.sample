@@ -1,11 +1,5 @@
 {
-  "public": [
-    {
-      "method": "any",
-      "path": "/*",
-      "stream": true
-    }
-  ],
+  "public": [],
   "private": [
     {
       "method": "any",
