@@ -25,7 +25,7 @@ export const handleConnectionCloseOnSocket = (
           closeReason,
           maskedToken,
           hashedToken,
-          remainingConnectionsCount: clientPool.length,
+          remainingConnectionsCount: clientPool?.length || 0,
         },
         'client connection closed',
       );
