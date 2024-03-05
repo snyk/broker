@@ -12,8 +12,8 @@ export const processStartUpHooks = async (
 ): Promise<HookResults> => {
   try {
     clientOpts.config.API_BASE_URL =
-      clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
       clientOpts.config.API_BASE_URL ??
+      clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
       clientOpts.config.BROKER_SERVER_URL?.replace(
         '//broker.',
         '//api.',

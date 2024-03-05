@@ -6,6 +6,10 @@
     {
       "path": "/webhook/github/:webhookId",
       "method": "POST"
+    },
+    {
+      "path": "/webhook/gitlab/:webhookId",
+      "method": "POST"
     }
   ]
 }
