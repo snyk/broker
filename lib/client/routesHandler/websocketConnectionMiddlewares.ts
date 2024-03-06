@@ -15,19 +15,34 @@ export const websocketConnectionSelectorMiddleware = (
   } else {
     const websocketConnections = res.locals
       .websocketConnections as WebSocketConnection[];
+    const availableConnectionsTypes = websocketConnections.map(
+      (x) => x.supportedIntegrationType,
+    );
     let inboundRequestType = '';
-    //config.supportedBrokerTypes
 
     // 2 cases: webhooks/TYPE, /v[1-2] Container registry.
     if (req.path.startsWith('/webhook')) {
       const splitUrl = req.path.split('/');
+
       if (
         splitUrl.length > 2 &&
-        config.supportedBrokerTypes.includes(splitUrl[2])
+        availableConnectionsTypes.includes(splitUrl[2])
       ) {
         inboundRequestType = req.path.split('/')[2];
+      } else if (
+        splitUrl.length > 2 &&
+        splitUrl[2] == 'github' &&
+        availableConnectionsTypes.includes('github-enterprise')
+      ) {
+        inboundRequestType = 'github-enterprise';
       } else {
         logger.warn({ url: req.path }, 'Unexpected type in webhook request');
+        res
+          .status(401)
+          .send(
+            'Unexpected type in webhook request, unable to forward to server.',
+          );
+        return;
       }
     } else if (
       req.path.startsWith('/api/v1/') ||
