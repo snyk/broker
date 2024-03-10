@@ -150,7 +150,6 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({
-      BROKER_VAR_SUB: ['swap.me'],
       swap: { me: 'client:broker-token-12345' },
     });
   });

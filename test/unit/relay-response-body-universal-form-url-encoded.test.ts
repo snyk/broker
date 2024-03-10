@@ -116,11 +116,11 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
 
-        expect(arg.headers['Content-Type']).toEqual(
+        expect(arg.headers['content-type']).toEqual(
           'application/x-www-form-urlencoded',
         );
         expect(arg.body).toEqual(
-          `BROKER_VAR_SUB=url&url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
+          `url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
         );
 
         done();

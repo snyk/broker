@@ -110,7 +110,7 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
         expect(arg.body).toEqual(
-          `BROKER_VAR_SUB=url&url=${config.HOST}%3A${config.PORT}%2Fwebhook`,
+          `url=${config.HOST}%3A${config.PORT}%2Fwebhook`,
         );
 
         done();

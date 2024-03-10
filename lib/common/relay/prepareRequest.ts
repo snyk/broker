@@ -96,6 +96,8 @@ export const prepareRequestFromFilterResult = async (
         ); // replace the variables
         undefsafe(parsedBody, path, source); // put it back in
       }
+      //Remove the BROKER_VAR_SUB for the request body
+      delete parsedBody.BROKER_VAR_SUB;
       payload.body = JSON.stringify(parsedBody);
     }
   }
@@ -210,7 +212,7 @@ export const prepareRequestFromFilterResult = async (
     payload.headers['x-broker-content-type'] ===
       'application/x-www-form-urlencoded'
   ) {
-    payload.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    payload.headers['content-type'] = 'application/x-www-form-urlencoded';
     if (payload.body) {
       const jsonBody = JSON.parse(payload.body) as Record<string, any>;
       const params = new URLSearchParams();
