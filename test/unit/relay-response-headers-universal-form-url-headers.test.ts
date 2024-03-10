@@ -93,6 +93,7 @@ describe('header relay', () => {
 
     const headers = {
       'x-broker-content-type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
       'x-broker-var-sub': 'private-token,replaceme',
       donttouch: 'not to be changed ${VALUE}',
       'private-token': 'Bearer ${SECRET_TOKEN}',
@@ -108,6 +109,7 @@ describe('header relay', () => {
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['Content-Type']).toBeUndefined();
         expect(arg.headers['content-type']).toEqual(
           'application/x-www-form-urlencoded',
         );
