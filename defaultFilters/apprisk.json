@@ -11,25 +11,25 @@
       {
         "//": "Get All Project Details",
         "method": "GET",
-        "path": "/projects",
+        "path": "/cxrestapi/projects",
         "origin": "https://${CHECKMARX}"
       },
       {
         "//": "Get Remote Source Settings for GIT",
         "method": "GET",
-        "path": "/projects/:id/sourceCode/remoteSettings/git",
+        "path": "/cxrestapi/projects/:id/sourceCode/remoteSettings/git",
         "origin": "https://${CHECKMARX}"
       },
       {
         "//": "Get All Scans for Project",
         "method": "GET",
-        "path": "/sast/scans",
+        "path": "/cxrestapi/sast/scans",
         "origin": "https://${CHECKMARX}"
       },
       {
         "//": "Get Statistic Results by Scan Id",
         "method": "GET",
-        "path": "/sast/scans/:id/resultsStatistics",
+        "path": "/cxrestapi/sast/scans/:id/resultsStatistics",
         "origin": "https://${CHECKMARX}"
       }
     ]

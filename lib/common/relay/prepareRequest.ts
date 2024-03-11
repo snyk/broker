@@ -96,6 +96,8 @@ export const prepareRequestFromFilterResult = async (
         ); // replace the variables
         undefsafe(parsedBody, path, source); // put it back in
       }
+      //Remove the BROKER_VAR_SUB for the request body
+      delete parsedBody.BROKER_VAR_SUB;
       payload.body = JSON.stringify(parsedBody);
     }
   }
@@ -205,12 +207,19 @@ export const prepareRequestFromFilterResult = async (
       logger.error({ error }, 'error while signing github commit');
     }
   }
+  const urlencoded = 'application/x-www-form-urlencoded';
   if (
     payload.headers &&
-    payload.headers['x-broker-content-type'] ===
-      'application/x-www-form-urlencoded'
+    payload.headers['x-broker-content-type'] === urlencoded
   ) {
-    payload.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    const contentTypeHeader = 'content-type';
+    //avoid duplication for content-type headers
+    Object.keys(payload.headers).forEach((header) => {
+      if (header.toLowerCase() === contentTypeHeader) {
+        delete payload.headers[header];
+      }
+    });
+    payload.headers[contentTypeHeader] = urlencoded;
     if (payload.body) {
       const jsonBody = JSON.parse(payload.body) as Record<string, any>;
       const params = new URLSearchParams();
@@ -218,6 +227,11 @@ export const prepareRequestFromFilterResult = async (
         params.append(key, value.toString());
       }
       payload.body = params.toString();
+
+      //updating the content length after converting the body
+      const encoder = new TextEncoder();
+      const byteArray = encoder.encode(payload.body);
+      payload.headers['Content-length'] = byteArray.length;
     }
   }
 

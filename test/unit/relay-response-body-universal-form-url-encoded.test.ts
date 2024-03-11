@@ -116,11 +116,11 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
 
-        expect(arg.headers['Content-Type']).toEqual(
+        expect(arg.headers['content-type']).toEqual(
           'application/x-www-form-urlencoded',
         );
         expect(arg.body).toEqual(
-          `BROKER_VAR_SUB=url&url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
+          `url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
         );
 
         done();
@@ -180,6 +180,66 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
         expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+
+        done();
+      },
+    );
+  });
+
+  it('calculate content type after converting request body', (done) => {
+    expect.hasAssertions();
+
+    const brokerToken = 'test-broker';
+
+    const config = {
+      universalBrokerEnabled: true,
+      connections: {
+        myconn: {
+          identifier: brokerToken,
+          HOST: 'localhost',
+          PORT: '8001',
+        },
+      },
+    };
+    const options: LoadedClientOpts | LoadedServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
+      config,
+      port: 8001,
+      loadedFilters: dummyLoadedFilters,
+    };
+
+    const route = relay(options, dummyWebsocketHandler)(brokerToken);
+
+    const body = {
+      BROKER_VAR_SUB: ['url'],
+      url: '${HOST}:${PORT}/webhook',
+    };
+    const headers = {
+      'x-broker-content-type': 'application/x-www-form-urlencoded',
+    };
+
+    route(
+      {
+        url: '/',
+        method: 'POST',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        body: Buffer.from(JSON.stringify(body)),
+        headers: headers,
+      },
+      () => {
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
+
+        expect(arg.headers['Content-length']).toEqual(arg.body.length);
 
         done();
       },
