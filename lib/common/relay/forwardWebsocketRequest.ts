@@ -161,7 +161,7 @@ export const forwardWebSocketRequest = (
     logger.info(
       simplifiedContext,
       `[Websocket Flow] Received request from ${
-        process.env.BROKER_TYPE == 'client' ? 'server' : 'client'
+        process.env.BROKER_TYPE == 'client' ? 'client' : 'server'
       }`,
     );
 
