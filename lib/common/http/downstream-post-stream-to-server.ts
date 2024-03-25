@@ -79,7 +79,9 @@ class BrokerServerPostResponseHandler {
           Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
         },
-        timeout: 600000,
+        timeout: this.#config.brokerClientPostTimeout
+          ? parseInt(this.#config.brokerClientPostTimeout)
+          : 1200000,
       };
 
       this.#brokerSrvPostRequestHandler = client.request(
