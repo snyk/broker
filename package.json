@@ -66,7 +66,7 @@
     "ejson": "^2.2.0",
     "engine.io": "^6.5.4",
     "engine.io-client": "^5.2.0",
-    "express": "^4.17.1",
+    "express": "^4.18.3",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
     "js-yaml": "^3.13.1",
