@@ -16,6 +16,8 @@ export const openHandler = (
       : '****',
     preflightChecks: identifyingMetadata.preflightChecks,
     version: identifyingMetadata.version,
+    clientConfig: identifyingMetadata.clientConfig,
+    filters: identifyingMetadata.filters ?? {},
   };
   if (clientOps.config.universalBrokerEnabled) {
     metadata['supportedIntegrationType'] =
@@ -36,7 +38,7 @@ export const openHandler = (
     token: clientOps.config.universalBrokerEnabled
       ? identifyingMetadata.identifier
       : clientOps.config.brokerToken,
-    metadata: identifyingMetadata,
+    metadata: metadata,
   };
   io.send('identify', clientData);
 };

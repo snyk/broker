@@ -98,6 +98,7 @@ export const createWebSocket = (
     websocket.serverId = serverId || '';
     websocket.friendlyName = identifyingMetadata.friendlyName || '';
   }
+  websocket.clientConfig = identifyingMetadata.clientConfig;
 
   logger.info(
     {

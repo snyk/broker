@@ -5,6 +5,19 @@ export interface HookResults {
   preflightCheckResults?: CheckResult[];
 }
 
+export interface ConfigMetadata {
+  haMode: boolean;
+  debugMode: boolean;
+  bodyLogMode: boolean;
+  credPooling: boolean;
+  privateCa: boolean;
+  tlsReject: boolean;
+  proxy: boolean;
+  customAccept: boolean;
+  insecureDownstream: boolean;
+  universalBroker: boolean;
+}
+
 export interface IdentifyingMetadata {
   capabilities: string[];
   clientId: string;
@@ -17,6 +30,7 @@ export interface IdentifyingMetadata {
   socketVersion?: number;
   socketType?: string;
   friendlyName?: string;
+  clientConfig: ConfigMetadata;
 }
 
 export interface ConnectionMetadata {
@@ -40,6 +54,7 @@ export interface WebSocketConnection {
   socketVersion?: any;
   socketType?: string;
   identifier?: string;
+  clientConfig?: any;
   friendlyName?: string;
   supportedIntegrationType: string;
   serverId: string;

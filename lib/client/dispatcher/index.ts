@@ -1,26 +1,7 @@
 import { log as logger } from '../../logs/logger';
-import { Config } from '../types/config';
 import { hashToken } from '../../common/utils/token';
 import { HttpDispatcherServiceClient } from './client/api';
 import { ServerId, getServerIdFromDispatcher } from './dispatcher-service';
-
-export function highAvailabilityModeEnabled(config: any): boolean {
-  // high availability mode is disabled per default
-  let highAvailabilityModeEnabled = false;
-
-  const highAvailabilityModeEnabledValue = (config as Config)
-    .BROKER_HA_MODE_ENABLED;
-
-  if (typeof highAvailabilityModeEnabledValue !== 'undefined') {
-    highAvailabilityModeEnabled =
-      highAvailabilityModeEnabledValue.toLowerCase() === 'true' ||
-      highAvailabilityModeEnabledValue.toLowerCase() === 'yes';
-  }
-
-  logger.info({ enabled: highAvailabilityModeEnabled }, 'checking for HA mode');
-
-  return highAvailabilityModeEnabled;
-}
 
 export async function getServerId(
   config: any,
