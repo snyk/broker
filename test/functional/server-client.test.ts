@@ -58,6 +58,19 @@ describe('proxy requests originating from behind the broker server', () => {
       filters: expect.any(Object),
       clientId: expect.any(String),
       version: version,
+      clientConfig: {
+        bodyLogMode: false,
+        credPooling: true, //client sets a PASSWORD_POOL
+        customAccept: true,
+        debugMode: false,
+        haMode: false,
+        insecureDownstream: false,
+        privateCa: false,
+        proxy: false,
+        tlsReject: false,
+        universalBroker: false,
+      },
+      identifier: '****',
     });
   });
 

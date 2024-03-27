@@ -1,10 +1,11 @@
-import { getServerId, highAvailabilityModeEnabled } from '../../dispatcher';
+import { getServerId } from '../../dispatcher';
 import { log as logger } from '../../../logs/logger';
 import { executePreflightChecks, preflightChecksEnabled } from '../../checks';
 import { commitSigningEnabled, commitSigningFilterRules } from '../../scm';
 import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
+import { highAvailabilityModeEnabled } from '../../utils/configHelpers';
 
 export const processStartUpHooks = async (
   clientOpts: ClientOpts,

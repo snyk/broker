@@ -4,5 +4,6 @@ export const metadataWithoutFilters = (metadataWithFilters) => {
     clientId: metadataWithFilters.clientId,
     preflightChecks: metadataWithFilters.preflightChecks,
     version: metadataWithFilters.version,
+    clientConfig: metadataWithFilters.clientConfig ?? {},
   };
 };
