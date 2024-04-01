@@ -42,6 +42,7 @@ export const healthCheckHandler =
       }
       data.push(tunnelData);
       if (statusesMap.get(tunnelData['identifier']) !== 200) {
+        //return healthy if at least one tunnel is open for identifier
         statusesMap.set(tunnelData['identifier'], isConnOpen ? 200 : 500);
       }
     }

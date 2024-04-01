@@ -45,7 +45,10 @@ export const createWebSockets = (
     socketIdentifyingMetadata.serverId =
       clientOpts.config.connections[`${integrationsKeys[i]}`].serverId ?? '';
     websocketConnections.push(
-      createWebSocket(clientOpts, socketIdentifyingMetadata),
+      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
+    );
+    websocketConnections.push(
+      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
     );
   }
   return websocketConnections;
