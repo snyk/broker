@@ -12,8 +12,12 @@ export const handleSocketConnection = (socket) => {
     .replaceAll(/\/primus\/([^/]+)\//g, '$1')
     .toLowerCase();
 
+  const role = socket.request.uri.pathname
+    .replaceAll(/\/primus\/([^/]+)\/([^/]+)\//g, '$2')
+    .toLowerCase();
+
   const desensitizedToken = getDesensitizedToken(token);
-  logger.info({ desensitizedToken }, 'new client connection');
+  logger.info({ desensitizedToken, role }, 'new client connection');
 
   socket.send('identify', { capabilities: ['receive-post-streams'] });
 

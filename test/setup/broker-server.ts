@@ -76,6 +76,44 @@ export const waitForBrokerClientConnection = async (
   return { brokerToken, metadata };
 };
 
+export const waitForBrokerClientConnections = async (
+  brokerServer: BrokerServer,
+  numberOfConnectionsExpected = 1,
+): Promise<{
+  brokerTokens: string[];
+  metadataArray: Object[];
+}> => {
+  const brokerTokens: string[] = [];
+  const metadataArray: Object[] = [];
+
+  await new Promise<void>((resolve) => {
+    brokerServer.server.websocket.on('connection', (spark) => {
+      LOG.debug(
+        {
+          spark_id: spark.id,
+          spark_headers: spark.headers,
+          spark_address: spark.address,
+        },
+        'on connection event for broker server',
+      );
+
+      spark.on('identify', (clientData) => {
+        LOG.debug({ clientData }, 'on identify event for broker server');
+
+        const brokerToken = clientData?.token;
+        brokerTokens.push(brokerToken);
+        const metadata = clientData?.metadata;
+        metadataArray.push(metadata);
+        if (brokerTokens.length >= numberOfConnectionsExpected) {
+          resolve();
+        }
+      });
+    });
+  });
+
+  return { brokerTokens, metadataArray };
+};
+
 export const waitForUniversalBrokerClientsConnection = async (
   brokerServer: BrokerServer,
   numberOfConnectionsExpected = 1,

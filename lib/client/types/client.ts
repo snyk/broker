@@ -31,8 +31,13 @@ export interface IdentifyingMetadata {
   socketType?: string;
   friendlyName?: string;
   clientConfig: ConfigMetadata;
+  role: Role;
 }
 
+export enum Role {
+  primary = 'primary',
+  secondary = 'secondary',
+}
 export interface ConnectionMetadata {
   identifier?: string;
   supportedIntegrationType?: string;
@@ -55,6 +60,7 @@ export interface WebSocketConnection {
   socketType?: string;
   identifier?: string;
   clientConfig?: any;
+  role: Role;
   friendlyName?: string;
   supportedIntegrationType: string;
   serverId: string;
@@ -66,6 +72,7 @@ export interface WebSocketConnection {
   capabilities?: any;
   on: (string, any) => any;
   readyState: any;
+  end: () => any;
 }
 // export interface WebSocketConnection {
 //   websocket: Connection;

@@ -11,13 +11,14 @@ import { identifyHandler } from './socketHandlers/identifyHandler';
 import { errorHandler } from './socketHandlers/errorHandler';
 import { openHandler } from './socketHandlers/openHandler';
 import { closeHandler } from './socketHandlers/closeHandler';
-import { IdentifyingMetadata, WebSocketConnection } from './types/client';
+import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
 import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
 import { LoadedClientOpts } from '../common/types/options';
 import { translateIntegrationTypeToBrokerIntegrationType } from './utils/integrations';
+import { maskToken } from '../common/utils/token';
 
 export const createWebSockets = (
   clientOpts: LoadedClientOpts,
@@ -52,9 +53,14 @@ export const createWebSockets = (
 
 export const createWebSocket = (
   clientOpts: LoadedClientOpts,
-  identifyingMetadata: IdentifyingMetadata,
+  originalIdentifyingMetadata: IdentifyingMetadata,
+  role?: Role,
 ): WebSocketConnection => {
+  const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
+  identifyingMetadata.role = role ?? Role.primary;
   const localClientOps = Object.assign({}, clientOpts);
+  identifyingMetadata.identifier =
+    identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -97,15 +103,18 @@ export const createWebSocket = (
       identifyingMetadata.supportedIntegrationType || '';
     websocket.serverId = serverId || '';
     websocket.friendlyName = identifyingMetadata.friendlyName || '';
+  } else {
+    websocket.identifier = maskToken(identifyingMetadata.identifier);
   }
   websocket.clientConfig = identifyingMetadata.clientConfig;
+  websocket.role = identifyingMetadata.role;
 
   logger.info(
     {
       url: localClientOps.config.brokerServerUrlForSocket,
       serverId: serverId,
     },
-    'broker client is connecting to broker server',
+    `broker client is connecting to broker server ${role}`,
   );
   initializeSocketHandlers(websocket, localClientOps);
 
@@ -148,5 +157,13 @@ export const createWebSocket = (
 
   // only required if we're manually opening the connection
   // websocket.open();
+  // process.on('SIGTERM', () => {
+  //   logger.info('Termination signal, closing websocket connection')
+  //   websocket.end();
+  // })
+  // process.on('SIGINT', () => {
+  //   logger.info('Interruption signal, closing websocket connection')
+  //   websocket.end();
+  // })
   return websocket;
 };
