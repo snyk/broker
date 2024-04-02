@@ -75,13 +75,18 @@ export const createWebSocket = (
       : `/primus/${localClientOps.config.brokerToken}`,
   });
 
-  const urlWithServerId = new URL(localClientOps.config.brokerServerUrl);
+  const urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
   const serverId =
     localClientOps.config.serverId ?? identifyingMetadata.serverId;
   if (serverId && serverId > -1) {
-    urlWithServerId.searchParams.append('server_id', serverId);
+    urlWithServerIdAndRole.searchParams.append('server_id', serverId);
   }
-  localClientOps.config.brokerServerUrlForSocket = urlWithServerId.toString();
+  urlWithServerIdAndRole.searchParams.append(
+    'connection_role',
+    role ?? Role.primary,
+  );
+  localClientOps.config.brokerServerUrlForSocket =
+    urlWithServerIdAndRole.toString();
 
   // Will exponentially back-off from 0.5 seconds to a maximum of 20 minutes
   // Retry for a total period of around 4.5 hours
@@ -160,13 +165,5 @@ export const createWebSocket = (
 
   // only required if we're manually opening the connection
   // websocket.open();
-  // process.on('SIGTERM', () => {
-  //   logger.info('Termination signal, closing websocket connection')
-  //   websocket.end();
-  // })
-  // process.on('SIGINT', () => {
-  //   logger.info('Interruption signal, closing websocket connection')
-  //   websocket.end();
-  // })
   return websocket;
 };

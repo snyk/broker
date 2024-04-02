@@ -70,13 +70,13 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.status).toEqual(200);
     expect(response.data).toMatchObject([
       {
-        brokerServerUrl: `http://localhost:${bs.port}/`,
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
         ok: true,
         websocketConnectionOpen: true,
         version: version,
       },
       {
-        brokerServerUrl: `http://localhost:${bs.port}/`,
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
         ok: true,
         websocketConnectionOpen: true,
         version: version,
@@ -139,14 +139,14 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.status).toEqual(500);
     expect(response.data).toStrictEqual([
       {
-        brokerServerUrl: 'http://no-such-server/',
+        brokerServerUrl: 'http://no-such-server/?connection_role=primary',
         ok: false,
         transport: expect.any(String),
         version: version,
         websocketConnectionOpen: false,
       },
       {
-        brokerServerUrl: 'http://no-such-server/',
+        brokerServerUrl: 'http://no-such-server/?connection_role=secondary',
         ok: false,
         transport: expect.any(String),
         version: version,

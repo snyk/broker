@@ -80,7 +80,7 @@ describe('broker client systemcheck endpoint', () => {
     expect(response.status).toEqual(200);
     expect(systemCheckBody).toEqual(
       expect.objectContaining({
-        brokerServerUrl: 'http://localhost:9500/',
+        brokerServerUrl: 'http://localhost:9500/?connection_role=primary',
         friendlyName: 'my github connection',
         identifier: 'brok-...-ken1',
         ok: true,
