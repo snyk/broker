@@ -2,7 +2,7 @@ const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
 jest.mock('../../lib/common/relay/requestsHelper');
-import { WebSocketConnection } from '../../lib/client/types/client';
+import { Role, WebSocketConnection } from '../../lib/client/types/client';
 import { loadBrokerConfig } from '../../lib/common/config/config';
 import { loadAllFilters } from '../../lib/common/filter/filtersAsync';
 import { makeLegacyRequest } from '../../lib/common/relay/requestsHelper';
@@ -43,6 +43,8 @@ const dummyWebsocketHandler: WebSocketConnection = {
   transport: '',
   url: '',
   on: () => {},
+  end: () => {},
+  role: Role.primary,
   readyState: 3,
   supportedIntegrationType: 'github',
 };

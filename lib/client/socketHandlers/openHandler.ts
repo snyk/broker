@@ -18,6 +18,7 @@ export const openHandler = (
     version: identifyingMetadata.version,
     clientConfig: identifyingMetadata.clientConfig,
     filters: identifyingMetadata.filters ?? {},
+    role: identifyingMetadata.role,
   };
   if (clientOps.config.universalBrokerEnabled) {
     metadata['supportedIntegrationType'] =

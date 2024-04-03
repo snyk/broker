@@ -58,10 +58,10 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.data).toHaveLength(4);
+    expect(response.data).toHaveLength(8);
     expect(response.data[0]).toEqual(
       expect.objectContaining({
-        brokerServerUrl: `http://localhost:${bs.port}/`,
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
         friendlyName: 'my github connection',
         identifier: 'brok-...-ken1',
         ok: true,
@@ -71,9 +71,9 @@ describe('proxy requests originating from behind the broker client', () => {
     );
     expect(response.data[1]).toEqual(
       expect.objectContaining({
-        brokerServerUrl: `http://localhost:${bs.port}/`,
-        friendlyName: 'my gitlab connection',
-        identifier: 'brok-...-ken2',
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
+        friendlyName: 'my github connection',
+        identifier: 'brok-...-ken1',
         ok: true,
         version: 'local',
         websocketConnectionOpen: true,
@@ -81,9 +81,9 @@ describe('proxy requests originating from behind the broker client', () => {
     );
     expect(response.data[2]).toEqual(
       expect.objectContaining({
-        brokerServerUrl: `http://localhost:${bs.port}/`,
-        friendlyName: 'my azure connection',
-        identifier: 'brok-...-ken3',
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
+        friendlyName: 'my gitlab connection',
+        identifier: 'brok-...-ken2',
         ok: true,
         version: 'local',
         websocketConnectionOpen: true,
@@ -91,7 +91,47 @@ describe('proxy requests originating from behind the broker client', () => {
     );
     expect(response.data[3]).toEqual(
       expect.objectContaining({
-        brokerServerUrl: `http://localhost:${bs.port}/`,
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
+        friendlyName: 'my gitlab connection',
+        identifier: 'brok-...-ken2',
+        ok: true,
+        version: 'local',
+        websocketConnectionOpen: true,
+      }),
+    );
+    expect(response.data[4]).toEqual(
+      expect.objectContaining({
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
+        friendlyName: 'my azure connection',
+        identifier: 'brok-...-ken3',
+        ok: true,
+        version: 'local',
+        websocketConnectionOpen: true,
+      }),
+    );
+    expect(response.data[5]).toEqual(
+      expect.objectContaining({
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
+        friendlyName: 'my azure connection',
+        identifier: 'brok-...-ken3',
+        ok: true,
+        version: 'local',
+        websocketConnectionOpen: true,
+      }),
+    );
+    expect(response.data[6]).toEqual(
+      expect.objectContaining({
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
+        friendlyName: 'my jira pat',
+        identifier: 'brok-...-ken4',
+        ok: true,
+        version: 'local',
+        websocketConnectionOpen: true,
+      }),
+    );
+    expect(response.data[7]).toEqual(
+      expect.objectContaining({
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
         friendlyName: 'my jira pat',
         identifier: 'brok-...-ken4',
         ok: true,

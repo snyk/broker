@@ -11,13 +11,14 @@ import { identifyHandler } from './socketHandlers/identifyHandler';
 import { errorHandler } from './socketHandlers/errorHandler';
 import { openHandler } from './socketHandlers/openHandler';
 import { closeHandler } from './socketHandlers/closeHandler';
-import { IdentifyingMetadata, WebSocketConnection } from './types/client';
+import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
 import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
 import { LoadedClientOpts } from '../common/types/options';
 import { translateIntegrationTypeToBrokerIntegrationType } from './utils/integrations';
+import { maskToken } from '../common/utils/token';
 
 export const createWebSockets = (
   clientOpts: LoadedClientOpts,
@@ -44,7 +45,10 @@ export const createWebSockets = (
     socketIdentifyingMetadata.serverId =
       clientOpts.config.connections[`${integrationsKeys[i]}`].serverId ?? '';
     websocketConnections.push(
-      createWebSocket(clientOpts, socketIdentifyingMetadata),
+      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
+    );
+    websocketConnections.push(
+      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
     );
   }
   return websocketConnections;
@@ -52,9 +56,14 @@ export const createWebSockets = (
 
 export const createWebSocket = (
   clientOpts: LoadedClientOpts,
-  identifyingMetadata: IdentifyingMetadata,
+  originalIdentifyingMetadata: IdentifyingMetadata,
+  role?: Role,
 ): WebSocketConnection => {
+  const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
+  identifyingMetadata.role = role ?? Role.primary;
   const localClientOps = Object.assign({}, clientOpts);
+  identifyingMetadata.identifier =
+    identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -66,13 +75,18 @@ export const createWebSocket = (
       : `/primus/${localClientOps.config.brokerToken}`,
   });
 
-  const urlWithServerId = new URL(localClientOps.config.brokerServerUrl);
+  const urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
   const serverId =
     localClientOps.config.serverId ?? identifyingMetadata.serverId;
   if (serverId && serverId > -1) {
-    urlWithServerId.searchParams.append('server_id', serverId);
+    urlWithServerIdAndRole.searchParams.append('server_id', serverId);
   }
-  localClientOps.config.brokerServerUrlForSocket = urlWithServerId.toString();
+  urlWithServerIdAndRole.searchParams.append(
+    'connection_role',
+    role ?? Role.primary,
+  );
+  localClientOps.config.brokerServerUrlForSocket =
+    urlWithServerIdAndRole.toString();
 
   // Will exponentially back-off from 0.5 seconds to a maximum of 20 minutes
   // Retry for a total period of around 4.5 hours
@@ -97,15 +111,18 @@ export const createWebSocket = (
       identifyingMetadata.supportedIntegrationType || '';
     websocket.serverId = serverId || '';
     websocket.friendlyName = identifyingMetadata.friendlyName || '';
+  } else {
+    websocket.identifier = maskToken(identifyingMetadata.identifier);
   }
   websocket.clientConfig = identifyingMetadata.clientConfig;
+  websocket.role = identifyingMetadata.role;
 
   logger.info(
     {
       url: localClientOps.config.brokerServerUrlForSocket,
       serverId: serverId,
     },
-    'broker client is connecting to broker server',
+    `broker client is connecting to broker server ${role}`,
   );
   initializeSocketHandlers(websocket, localClientOps);
 

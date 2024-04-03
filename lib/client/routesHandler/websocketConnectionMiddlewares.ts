@@ -2,6 +2,7 @@ import { log as logger } from '../../logs/logger';
 import { getConfig } from '../../common/config/config';
 import { NextFunction, Request, Response } from 'express';
 import { WebSocketConnection } from '../types/client';
+import { isWebsocketConnOpen } from '../utils/socketHelpers';
 
 export const websocketConnectionSelectorMiddleware = (
   req: Request,
@@ -10,7 +11,11 @@ export const websocketConnectionSelectorMiddleware = (
 ) => {
   const config = getConfig();
   if (!config.universalBrokerEnabled) {
-    res.locals.websocket = res.locals.websocketConnections[0];
+    res.locals.websocket = isWebsocketConnOpen(
+      res.locals.websocketConnections[0],
+    )
+      ? res.locals.websocketConnections[0]
+      : res.locals.websocketConnections[1];
     next();
   } else {
     const websocketConnections = res.locals

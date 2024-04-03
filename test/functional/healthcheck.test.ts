@@ -11,6 +11,7 @@ import {
   closeBrokerServer,
   createBrokerServer,
   waitForBrokerClientConnection,
+  waitForBrokerClientConnections,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
@@ -67,12 +68,20 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.data).toMatchObject({
-      brokerServerUrl: `http://localhost:${bs.port}/`,
-      ok: true,
-      websocketConnectionOpen: true,
-      version: version,
-    });
+    expect(response.data).toMatchObject([
+      {
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=primary`,
+        ok: true,
+        websocketConnectionOpen: true,
+        version: version,
+      },
+      {
+        brokerServerUrl: `http://localhost:${bs.port}/?connection_role=secondary`,
+        ok: true,
+        websocketConnectionOpen: true,
+        version: version,
+      },
+    ]);
   });
 
   it('check connection-status with connected client', async () => {
@@ -107,13 +116,12 @@ describe('proxy requests originating from behind the broker client', () => {
       brokerToken: '12345',
       filters: clientAccept,
     });
-    await waitForBrokerClientConnection(bs);
+    await waitForBrokerClientConnections(bs, 2);
     await closeBrokerClient(bc);
 
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/connection-status/12345`,
     );
-
     expect(response.status).toEqual(404);
   });
 
@@ -129,13 +137,22 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(500);
-    expect(response.data).toStrictEqual({
-      brokerServerUrl: 'http://no-such-server/',
-      ok: false,
-      transport: expect.any(String),
-      version: version,
-      websocketConnectionOpen: false,
-    });
+    expect(response.data).toStrictEqual([
+      {
+        brokerServerUrl: 'http://no-such-server/?connection_role=primary',
+        ok: false,
+        transport: expect.any(String),
+        version: version,
+        websocketConnectionOpen: false,
+      },
+      {
+        brokerServerUrl: 'http://no-such-server/?connection_role=secondary',
+        ok: false,
+        transport: expect.any(String),
+        version: version,
+        websocketConnectionOpen: false,
+      },
+    ]);
   });
 
   it('custom healthcheck endpoint', async () => {
@@ -152,9 +169,15 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.data).toMatchObject({
-      ok: true,
-      version: version,
-    });
+    expect(response.data).toMatchObject([
+      {
+        ok: true,
+        version: version,
+      },
+      {
+        ok: true,
+        version: version,
+      },
+    ]);
   });
 });

@@ -76,6 +76,7 @@ export const forwardWebSocketRequest = (
             ? websocketConnectionHandler?.serverId
             : options.config.serverId,
           requestId,
+          websocketConnectionHandler.role,
         );
         if (isResponseFromRequestModule) {
           logger.debug(

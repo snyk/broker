@@ -10,7 +10,7 @@ import {
   BrokerServer,
   closeBrokerServer,
   createBrokerServer,
-  waitForBrokerClientConnection,
+  waitForBrokerClientConnections,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
@@ -24,6 +24,8 @@ describe('proxy requests originating from behind the broker server', () => {
   let bc: BrokerClient;
   let brokerToken: string;
   let metadata: unknown;
+  let brokerToken2: string;
+  let metadata2: unknown;
 
   beforeAll(async () => {
     const PORT = 9999;
@@ -41,7 +43,14 @@ describe('proxy requests originating from behind the broker server', () => {
       filters: clientAccept,
       type: 'client',
     });
-    ({ brokerToken, metadata } = await waitForBrokerClientConnection(bs));
+    const connData = await waitForBrokerClientConnections(bs, 2);
+    const primaryIndex = connData.metadataArray[0]['role'] == 'primary' ? 0 : 1;
+    const secondaryIndex =
+      connData.metadataArray[1]['role'] == 'secondary' ? 1 : 0;
+    brokerToken = connData.brokerTokens[primaryIndex];
+    brokerToken2 = connData.brokerTokens[secondaryIndex];
+    metadata = connData.metadataArray[primaryIndex];
+    metadata2 = connData.metadataArray[secondaryIndex];
   });
 
   afterAll(async () => {
@@ -58,6 +67,7 @@ describe('proxy requests originating from behind the broker server', () => {
       filters: expect.any(Object),
       clientId: expect.any(String),
       version: version,
+      role: 'primary',
       clientConfig: {
         bodyLogMode: false,
         credPooling: true, //client sets a PASSWORD_POOL
@@ -70,7 +80,30 @@ describe('proxy requests originating from behind the broker server', () => {
         tlsReject: false,
         universalBroker: false,
       },
-      identifier: '****',
+      identifier:
+        '67f47824f806ee9c2fe6c7cc5849269fc1bc599c18e401ee2e2aea422bab6128',
+    });
+    expect(brokerToken2).toEqual('broker-token-12345');
+    expect(metadata2).toStrictEqual({
+      capabilities: ['post-streams'],
+      filters: expect.any(Object),
+      clientId: expect.any(String),
+      version: version,
+      role: 'secondary',
+      clientConfig: {
+        bodyLogMode: false,
+        credPooling: true, //client sets a PASSWORD_POOL
+        customAccept: true,
+        debugMode: false,
+        haMode: false,
+        insecureDownstream: false,
+        privateCa: false,
+        proxy: false,
+        tlsReject: false,
+        universalBroker: false,
+      },
+      identifier:
+        '67f47824f806ee9c2fe6c7cc5849269fc1bc599c18e401ee2e2aea422bab6128',
     });
   });
 

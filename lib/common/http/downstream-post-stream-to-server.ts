@@ -37,14 +37,16 @@ class BrokerServerPostResponseHandler {
   #brokerToken;
   #streamingId;
   #serverId;
+  #role;
   #requestId;
   #brokerSrvPostRequestHandler;
 
-  constructor(logContext, config, brokerToken, serverId, requestId) {
+  constructor(logContext, config, brokerToken, serverId, requestId, role) {
     this.#logContext = logContext;
     this.#config = config;
     this.#brokerToken = brokerToken;
     this.#serverId = serverId;
+    this.#role = role;
     this.#requestId = requestId;
     this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 });
     this.#buffer.on('error', (e) =>
@@ -68,6 +70,9 @@ class BrokerServerPostResponseHandler {
       );
       if (this.#serverId) {
         url.searchParams.append('server_id', this.#serverId);
+      }
+      if (this.#role) {
+        url.searchParams.append('connection_role', this.#role);
       }
       const brokerServerPostRequestUrl = url.toString();
 

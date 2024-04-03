@@ -10,7 +10,7 @@ import {
 } from './checks/api/checks-handler';
 import { healthCheckHandler } from './routesHandler/healthcheckHandler';
 import { systemCheckHandler } from './routesHandler/systemCheckHandler';
-import { IdentifyingMetadata, WebSocketConnection } from './types/client';
+import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
 import { processStartUpHooks } from './hooks/startup/processHooks';
 import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
 import { isWebsocketConnOpen } from './utils/socketHelpers';
@@ -61,6 +61,7 @@ export const main = async (clientOpts: ClientOpts) => {
       preflightChecks: hookResults.preflightCheckResults,
       version,
       clientConfig: getClientConfigMetadata(clientOpts.config),
+      role: Role.primary,
     };
 
     let websocketConnections: WebSocketConnection[] = [];
@@ -71,7 +72,18 @@ export const main = async (clientOpts: ClientOpts) => {
       );
     } else {
       websocketConnections.push(
-        createWebSocket(loadedClientOpts, globalIdentifyingMetadata),
+        createWebSocket(
+          loadedClientOpts,
+          globalIdentifyingMetadata,
+          Role.primary,
+        ),
+      );
+      websocketConnections.push(
+        createWebSocket(
+          loadedClientOpts,
+          globalIdentifyingMetadata,
+          Role.secondary,
+        ),
       );
     }
 

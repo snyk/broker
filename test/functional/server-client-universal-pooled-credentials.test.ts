@@ -89,7 +89,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   it('successfully broker on endpoint that forwards requests with basic auth, using first credential', async () => {
     const url = `http://localhost:${bs.port}/broker/${brokerTokens[0]}/basic-auth`;
 
-    const response = await axiosClient.get(url, {});
+    const response = await axiosClient.get(url, { timeout: 5000 });
     const status = response.status;
     expect(status).toEqual(200);
 

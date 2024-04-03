@@ -10,7 +10,8 @@ import {
   BrokerServer,
   closeBrokerServer,
   createBrokerServer,
-  waitForBrokerClientConnection,
+  // waitForBrokerClientConnection,
+  waitForBrokerClientConnections,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 
@@ -39,7 +40,10 @@ describe('proxy requests originating from behind the broker client', () => {
       filters: clientAccept,
       type: 'client',
     });
-    ({ brokerToken } = await waitForBrokerClientConnection(bs));
+    const connData = await waitForBrokerClientConnections(bs, 2);
+    const primaryIndex = connData.metadataArray[0]['role'] == 'primary' ? 0 : 1;
+    brokerToken = connData.brokerTokens[primaryIndex];
+    serverMetadata = connData.metadataArray[primaryIndex];
   });
 
   afterAll(async () => {
