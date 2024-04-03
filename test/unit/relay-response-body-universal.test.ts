@@ -45,6 +45,8 @@ const dummyWebsocketHandler: WebSocketConnection = {
   on: () => {},
   end: () => {},
   role: Role.primary,
+  open: () => {},
+  emit: () => {},
   readyState: 3,
   supportedIntegrationType: 'github',
 };

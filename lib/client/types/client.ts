@@ -69,10 +69,12 @@ export interface WebSocketConnection {
   socket: any;
   destroy: any;
   send: any;
+  end: any;
+  open: any;
+  emit: any;
   capabilities?: any;
   on: (string, any) => any;
   readyState: any;
-  end: () => any;
 }
 // export interface WebSocketConnection {
 //   websocket: Connection;

@@ -23,6 +23,8 @@ describe('proxy requests originating from behind the broker client', () => {
     tws = await createTestWebServer();
     bs = await createBrokerServer({ filters: serverAccept });
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
   });
 
   afterAll(async () => {
@@ -31,6 +33,8 @@ describe('proxy requests originating from behind the broker client', () => {
     delete process.env.BROKER_SERVER_URL;
     delete process.env
       .SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
   afterEach(async () => {

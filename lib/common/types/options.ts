@@ -6,6 +6,14 @@ export interface ClientOpts {
   filters: FiltersType | Map<string, FiltersType>;
   serverId?: string;
   connections?: Record<string, any>;
+  oauth?: {
+    clientId: string;
+    clientSecret: string;
+  };
+  accessToken?: {
+    authHeader: string;
+    expiresIn: number;
+  };
 }
 
 export interface ServerOpts {
