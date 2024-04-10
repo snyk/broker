@@ -39,11 +39,6 @@ LABEL org.opencontainers.image.authors="team-broker" \
 
 ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin/:/opt/app-root/src/bin:/opt/app-root/bin:${PATH}"
 
-COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
-COPY --from=node-base /tmp/node/bin/node /usr/bin/node
-COPY config.default.json /home/node/config.default.json
-COPY defaultFilters /home/node/defaultFilters
-
 RUN <<EOF
     set -ex
     yum upgrade --assumeyes
@@ -51,7 +46,7 @@ RUN <<EOF
     rm -rf /var/cache/yum
     # create default user and group
     groupadd --gid 10001 snyk
-    useradd --gid 10001 --no-create-home --shell /sbin/nologin --uid 10001 snyk
+    useradd --gid 10001 --shell /sbin/nologin --uid 10001 snyk
     # remove non-used OS packages
     rpm --erase --nodeps curl
     rpm --erase --nodeps python3-urllib3
@@ -94,4 +89,10 @@ RUN <<EOF
     rpm --erase --nodeps rpm-libs
 EOF
 
+COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
+COPY --from=node-base /tmp/node/bin/node /usr/bin/node
+COPY --chown=snyk:snyk config.default.json /home/snyk/config.default.json
+COPY --chown=snyk:snyk defaultFilters /home/snyk/defaultFilters
+
+WORKDIR /home/snyk
 USER snyk

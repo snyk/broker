@@ -8,7 +8,6 @@ ARG BROKER_TYPE
 ENV BROKER_TYPE=${BROKER_TYPE}
 
 # Generate default accept filter
-USER root
 RUN broker init $BROKER_TYPE
 
 USER snyk
