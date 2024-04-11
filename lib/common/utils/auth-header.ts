@@ -31,4 +31,8 @@ export default (
 
     return `Basic ${basicAuth}`;
   }
+
+  if (scheme === 'raw') {
+    return '${token}';
+  }
 };
