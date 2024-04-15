@@ -7006,6 +7006,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/groups",
     },
+    Object {
+      "//": "get metadata",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/metadata",
+    },
   ],
   "public": Array [
     Object {
