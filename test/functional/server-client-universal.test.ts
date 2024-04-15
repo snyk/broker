@@ -44,6 +44,7 @@ describe('proxy requests originating from behind the broker server', () => {
     process.env.AZURE_REPOS_HOST = 'hostname';
     process.env.AZURE_REPOS_ORG = 'org';
     process.env.JIRA_PAT = 'jirapat';
+    process.env.RAW_AUTH = 'CustomScheme CustomToken'
     process.env.JIRA_HOSTNAME = 'hostname';
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -90,6 +91,10 @@ describe('proxy requests originating from behind the broker server', () => {
       { headers: { 'x-broker-ws-response': 'whatever' } },
     );
 
+    const response6 = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_4}/echo-auth-header-with-raw-auth/xyz`,
+    );
+
     // const response6 = await axiosClient.get(
     //   `http://localhost:${bs.port}/broker/${process.env.BROKER_TOKEN_3}/echo-auth-header-with-token-auth/xyz`,
     // );
@@ -109,6 +114,10 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response5.status).toEqual(200);
     expect(response5.data).toEqual(`Bearer ${process.env.JIRA_PAT}`);
+
+    expect(response6.status).toEqual(200);
+    expect(response6.data).toEqual(`${process.env.RAW_AUTH}`);
+
     expect(response.headers['x-broker-ws-response']).not.toBeNull();
   });
 

@@ -33,6 +33,6 @@ export default (
   }
 
   if (scheme === 'raw') {
-    return '${token}';
+    return `${replace(token, config)}`;
   }
 };
