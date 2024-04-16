@@ -1,8 +1,7 @@
 ARG BROKER_VERSION=latest
-ARG NODE_VERSION=20.11.0
+ARG NODE_VERSION=20.12.1
 
-
-FROM registry.access.redhat.com/ubi8/nodejs-18 as node-base
+FROM registry.access.redhat.com/ubi9/nodejs-20 as node-base
 
 ARG NODE_VERSION
 ENV NODE_VERSION=${NODE_VERSION}
@@ -10,8 +9,6 @@ ENV NODE_VERSION=${NODE_VERSION}
 RUN mkdir -p /tmp/node && \
     curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" && \
     tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /tmp/node --strip-components=1
-
-
 
 FROM node-base as broker-builder
 
@@ -23,9 +20,7 @@ RUN npm install --global snyk-broker@${BROKER_VERSION}
 # removing non-used (transitive) dependencies to fix vulnerabilities
 RUN rm -rf /opt/app-root/src/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
 
-
-
-FROM registry.access.redhat.com/ubi8/ubi
+FROM registry.access.redhat.com/ubi9/nodejs-20-minimal
 
 ARG BROKER_VERSION
 
@@ -39,53 +34,34 @@ LABEL org.opencontainers.image.authors="team-broker" \
 
 ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin/:/opt/app-root/src/bin:/opt/app-root/bin:${PATH}"
 
+USER root
+
 RUN <<EOF
     set -ex
-    yum upgrade --assumeyes
-    yum clean all
+    microdnf upgrade -y
+    microdnf clean all
     rm -rf /var/cache/yum
+    microdnf install shadow-utils -y
     # create default user and group
     groupadd --gid 10001 snyk
     useradd --gid 10001 --shell /sbin/nologin --uid 10001 snyk
+    microdnf remove shadow-utils -y
     # remove non-used OS packages
-    rpm --erase --nodeps curl
-    rpm --erase --nodeps python3-urllib3
-    rpm --erase --nodeps python3-requests
-    rpm --erase --nodeps dnf-plugin-subscription-manager
-    rpm --erase --nodeps gdb-gdbserver
+    rpm --erase --nodeps curl-minimal
     rpm --erase --nodeps glibc-common
     rpm --erase --nodeps glibc-minimal-langpack
     rpm --erase --nodeps gnutls
     rpm --erase --nodeps libarchive
-    rpm --erase --nodeps libcurl
+    rpm --erase --nodeps libcurl-minimal
     rpm --erase --nodeps libsolv
-    rpm --erase --nodeps libssh
-    rpm --erase --nodeps libssh-config
     rpm --erase --nodeps libnghttp2
     rpm --erase --nodeps libtasn1
     rpm --erase --nodeps libxml2
     rpm --erase --nodeps lz4-libs
     rpm --erase --nodeps ncurses-base
     rpm --erase --nodeps openldap
-    rpm --erase --nodeps platform-python
-    rpm --erase --nodeps platform-python-setuptools
-    rpm --erase --nodeps python3-cloud-what
-    rpm --erase --nodeps python3-gpg
-    rpm --erase --nodeps python3-libs
-    rpm --erase --nodeps python3-pip-wheel
-    rpm --erase --nodeps python3-rpm
-    rpm --erase --nodeps python3-setuptools-wheel
-    rpm --erase --nodeps python3-subscription-manager-rhsm
-    rpm --erase --nodeps python3-syspurpose
-    rpm --erase --nodeps subscription-manager
-    rpm --erase --nodeps subscription-manager-rhsm-certificates
-    rpm --erase --nodeps systemd
     rpm --erase --nodeps systemd-libs
-    rpm --erase --nodeps systemd-pam
     rpm --erase --nodeps tar
-    rpm --erase --nodeps tpm2-tss
-    rpm --erase --nodeps vim-minimal
-    rpm --erase --nodeps rpm-build-libs
     rpm --erase --nodeps rpm-libs
 EOF
 
