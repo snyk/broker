@@ -31,6 +31,15 @@
       }
     },
     
+    {
+      "path": "/echo-auth-header-with-raw-auth/:data",
+      "method": "GET",
+      "origin": "http://localhost:9000",
+      "auth": {
+        "scheme": "raw",
+        "token": "${RAW_AUTH}"
+      }
+    },
 
     {
       "path": "/echo-param/:param",

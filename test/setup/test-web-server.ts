@@ -188,6 +188,13 @@ const applyEchoRoutes = (app: Express) => {
   );
 
   echoRouter.get(
+    '/echo-auth-header-with-raw-auth/:param',
+    (req: express.Request, resp: express.Response) => {
+      resp.send(req.headers.authorization);
+    },
+  );
+
+  echoRouter.get(
     '/echo-origin/:param',
     (req: express.Request, resp: express.Response) => {
       resp.send(req.headers.authorization);
