@@ -13,7 +13,7 @@ import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 
 export const main = async (serverOpts: ServerOpts) => {
-  logger.info({ version }, 'running in server mode');
+  logger.info({ version }, 'Broker starting in server mode');
 
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
