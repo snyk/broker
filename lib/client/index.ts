@@ -38,7 +38,7 @@ process.on('uncaughtException', (error) => {
 
 export const main = async (clientOpts: ClientOpts) => {
   try {
-    logger.info({ version }, 'running in client mode');
+    logger.info({ version }, 'Broker starting in client mode');
 
     const brokerClientId = uuidv4();
     logger.info({ brokerClientId }, 'generated broker client id');
