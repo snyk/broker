@@ -55,7 +55,7 @@ describe('Broker Server Dispatcher API interaction', () => {
     try {
       process.env.DISPATCHER_URL = `${serverUrl}`;
       process.env.hostname = '0';
-      loadBrokerConfig();
+      await loadBrokerConfig();
       const dispatcher = require('../../lib/server/infra/dispatcher');
       await expect(
         dispatcher.clientConnected(token, clientId, clientVersion),
@@ -88,7 +88,7 @@ describe('Broker Server Dispatcher API interaction', () => {
 
     process.env.DISPATCHER_URL = `${serverUrl}`;
     process.env.hostname = '0';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const dispatcher = require('../../lib/dispatcher');
     await expect(
       dispatcher.clientPinged(

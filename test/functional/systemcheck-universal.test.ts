@@ -22,12 +22,14 @@ describe('broker client systemcheck endpoint', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
     bs = await createBrokerServer({ filters: serverAccept });
+    process.env.SKIP_REMOTE_CONFIG = 'true';
   });
 
   afterAll(async () => {
     await tws.server.close();
     await closeBrokerServer(bs);
     delete process.env.BROKER_SERVER_URL;
+    delete process.env.SKIP_REMOTE_CONFIG;
   });
 
   afterEach(async () => {

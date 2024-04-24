@@ -46,8 +46,10 @@ export const aConfig = (fields: Partial<Config>): Config => {
 /**
  * Config with all features disabled.
  */
-export const aUniversalDefaultConfig = (fields: Partial<Config>): Config => {
-  loadBrokerConfig();
+export const aUniversalDefaultConfig = async (
+  fields: Partial<Config>,
+): Promise<Config> => {
+  await loadBrokerConfig();
   const config = { ...getConfig(), ...fields };
   return config as Config;
 };

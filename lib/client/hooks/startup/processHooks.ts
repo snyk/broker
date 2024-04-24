@@ -5,53 +5,48 @@ import { commitSigningEnabled, commitSigningFilterRules } from '../../scm';
 import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
-import { highAvailabilityModeEnabled } from '../../utils/configHelpers';
+import { highAvailabilityModeEnabled } from '../../config/configHelpers';
+
+export const validateMinimalConfig = async (
+  clientOpts: ClientOpts,
+): Promise<void> => {
+  if (
+    !clientOpts.config.brokerToken &&
+    !clientOpts.config.universalBrokerEnabled
+  ) {
+    const brokerToken = clientOpts.config.brokerToken;
+    // null, undefined, empty, etc.
+    logger.error(
+      { brokerToken },
+      '[MISSING_BROKER_TOKEN] BROKER_TOKEN is required to successfully identify itself to the server',
+    );
+    const error = new ReferenceError(
+      'BROKER_TOKEN is required to successfully identify itself to the server',
+    );
+    error['code'] = 'MISSING_BROKER_TOKEN';
+    throw error;
+  }
+
+  if (!clientOpts.config.brokerServerUrl) {
+    const brokerServerUrl = clientOpts.config.brokerServerUrl;
+    // null, undefined, empty, etc.
+    logger.error(
+      { brokerServerUrl },
+      '[MISSING_BROKER_SERVER_URL] BROKER_SERVER_URL is required to connect to the broker server',
+    );
+    const error = new ReferenceError(
+      'BROKER_SERVER_URL is required to connect to the broker server',
+    );
+    error['code'] = 'MISSING_BROKER_SERVER_URL';
+    throw error;
+  }
+};
 
 export const processStartUpHooks = async (
   clientOpts: ClientOpts,
   brokerClientId: string,
 ): Promise<HookResults> => {
   try {
-    clientOpts.config.API_BASE_URL =
-      clientOpts.config.API_BASE_URL ??
-      clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
-      clientOpts.config.BROKER_SERVER_URL?.replace(
-        '//broker.',
-        '//api.',
-      ).replace('//broker2.', '//api.') ??
-      'https://api.snyk.io';
-
-    if (
-      !clientOpts.config.brokerToken &&
-      !clientOpts.config.universalBrokerEnabled
-    ) {
-      const brokerToken = clientOpts.config.brokerToken;
-      // null, undefined, empty, etc.
-      logger.error(
-        { brokerToken },
-        '[MISSING_BROKER_TOKEN] BROKER_TOKEN is required to successfully identify itself to the server',
-      );
-      const error = new ReferenceError(
-        'BROKER_TOKEN is required to successfully identify itself to the server',
-      );
-      error['code'] = 'MISSING_BROKER_TOKEN';
-      throw error;
-    }
-
-    if (!clientOpts.config.brokerServerUrl) {
-      const brokerServerUrl = clientOpts.config.brokerServerUrl;
-      // null, undefined, empty, etc.
-      logger.error(
-        { brokerServerUrl },
-        '[MISSING_BROKER_SERVER_URL] BROKER_SERVER_URL is required to connect to the broker server',
-      );
-      const error = new ReferenceError(
-        'BROKER_SERVER_URL is required to connect to the broker server',
-      );
-      error['code'] = 'MISSING_BROKER_SERVER_URL';
-      throw error;
-    }
-
     // if (!clientOpts.config.BROKER_CLIENT_URL) {
     //   const proto =
     //     !clientOpts.config.key && !clientOpts.config.cert ? 'http' : 'https';

@@ -1,4 +1,5 @@
 {
+  "API_VERSION":"2024-02-08~experimental",
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
     "apprisk",

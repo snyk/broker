@@ -38,7 +38,7 @@ export const app = async ({ port = 7341, client = false, config }) => {
   }
 
   // loading it "manually" simplifies lot testing
-  loadBrokerConfig();
+  await loadBrokerConfig();
   const globalConfig = getConfig();
   const localConfig = Object.assign({}, globalConfig, config) as Record<
     string,
