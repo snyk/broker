@@ -29,8 +29,8 @@ import { log } from '../../lib/logs/logger';
 import { loadBrokerConfig } from '../../lib/common/config/config';
 
 describe('log', () => {
-  beforeAll(() => {
-    loadBrokerConfig();
+  beforeAll(async () => {
+    await loadBrokerConfig();
   });
   it('sanitizes log data', () => {
     const sensitiveInfo = [

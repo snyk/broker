@@ -34,7 +34,7 @@ export const findProjectRoot = (startDir: string): string | null => {
   return null;
 };
 
-export const loadBrokerConfig = (localConfigForTest?) => {
+export const loadBrokerConfig = async (localConfigForTest?) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
@@ -71,6 +71,7 @@ export const loadBrokerConfig = (localConfigForTest?) => {
       config[key] = value.split(',').map((s) => s.trim());
     }
   }
+  return;
 };
 
 const getConsolidatedConfigForUniversalBroker = (configToConsolidate) => {

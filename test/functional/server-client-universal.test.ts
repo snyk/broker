@@ -53,6 +53,7 @@ describe('proxy requests originating from behind the broker server', () => {
     process.env['SNYK_FILTER_RULES_PATHS__jira-bearer-auth'] = clientAccept;
     process.env.CLIENT_ID = 'clienid';
     process.env.CLIENT_SECRET = 'clientsecret';
+    process.env.SKIP_REMOTE_CONFIG = 'true';
 
     bc = await createUniversalBrokerClient();
     await waitForUniversalBrokerClientsConnection(bs, 2);
@@ -72,6 +73,7 @@ describe('proxy requests originating from behind the broker server', () => {
       .SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL;
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
+    delete process.env.SKIP_REMOTE_CONFIG;
   });
 
   it('successfully broker GET', async () => {

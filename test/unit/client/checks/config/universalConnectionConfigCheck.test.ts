@@ -4,9 +4,9 @@ import { aUniversalDefaultConfig } from '../../../../helpers/test-factories';
 
 describe('client/checks/config', () => {
   describe('validateBrokerClientUrl()', () => {
-    it('should return error check result if no connection configured', () => {
+    it('should return error check result if no connection configured', async () => {
       const id = `check_${Date.now()}`;
-      const config = aUniversalDefaultConfig({});
+      const config = await aUniversalDefaultConfig({});
       const checkResult = validateUniversalConnectionsConfig(
         { id: id, name: id },
         config,
@@ -15,9 +15,9 @@ describe('client/checks/config', () => {
       expect(checkResult.output).toContain('Missing connections in config');
     });
 
-    it('should return error check result if no connection type', () => {
+    it('should return error check result if no connection type', async () => {
       const id = `check_${Date.now()}`;
-      const config = aUniversalDefaultConfig({
+      const config = await aUniversalDefaultConfig({
         connections: {
           'my github connection': {
             identifier: '123',
@@ -35,9 +35,9 @@ describe('client/checks/config', () => {
       );
     });
 
-    it('should return error check result if unsupported connection type', () => {
+    it('should return error check result if unsupported connection type', async () => {
       const id = `check_${Date.now()}`;
-      const config = aUniversalDefaultConfig({
+      const config = await aUniversalDefaultConfig({
         connections: {
           'my github connection': {
             type: 'invalid_type',
@@ -56,9 +56,9 @@ describe('client/checks/config', () => {
       );
     });
 
-    it('should return error check result if missing required element for connection type', () => {
+    it('should return error check result if missing required element for connection type', async () => {
       const id = `check_${Date.now()}`;
-      const config = aUniversalDefaultConfig({
+      const config = await aUniversalDefaultConfig({
         connections: {
           'my github connection': {
             type: 'github',
@@ -77,9 +77,9 @@ describe('client/checks/config', () => {
       );
     });
 
-    it('should return passing check result if all required elements present for connection type', () => {
+    it('should return passing check result if all required elements present for connection type', async () => {
       const id = `check_${Date.now()}`;
-      const config = aUniversalDefaultConfig({
+      const config = await aUniversalDefaultConfig({
         connections: {
           'my github connection': {
             type: 'github',
@@ -97,11 +97,11 @@ describe('client/checks/config', () => {
       expect(checkResult.output).toContain('connections config check: ok');
     });
 
-    it('should return passing check result if all required elements present for connection type with client url from env var', () => {
+    it('should return passing check result if all required elements present for connection type with client url from env var', async () => {
       const id = `check_${Date.now()}`;
       process.env.BROKER_CLIENT_URL = 'dummy';
       process.env.UNIVERSAL_BROKER_ENABLED = 'true';
-      const config = aUniversalDefaultConfig({
+      const config = await aUniversalDefaultConfig({
         connections: {
           'my github connection': {
             type: 'github',

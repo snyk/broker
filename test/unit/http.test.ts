@@ -121,7 +121,7 @@ describe('Test HTTP request helpers', () => {
 
   it('INSECURE DOWNSTREAM overrides https to http', async () => {
     process.env.INSECURE_DOWNSTREAM = 'true';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const response = await makeRequestToDownstream({
       url: `${httpsServerUrl}/test`,
       headers: {},
@@ -133,7 +133,7 @@ describe('Test HTTP request helpers', () => {
 
   it('INSECURE DOWNSTREAM does NOT override https to http for Snyk calls', async () => {
     process.env.INSECURE_DOWNSTREAM = 'true';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const response = await makeRequestToDownstream({
       url: `${httpsSnykServerUrl}/snyk`,
       headers: {},
@@ -144,7 +144,7 @@ describe('Test HTTP request helpers', () => {
   });
   it('INSECURE DOWNSTREAM overrides https to http streaming requests', async () => {
     process.env.INSECURE_DOWNSTREAM = 'true';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const response = await makeStreamingRequestToDownstream({
       url: `${httpsServerUrl}/test`,
       headers: {},
@@ -155,7 +155,7 @@ describe('Test HTTP request helpers', () => {
   });
   it('INSECURE DOWNSTREAM overrides https to http single raw request', async () => {
     process.env.INSECURE_DOWNSTREAM = 'true';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const response = await makeSingleRawRequestToDownstream({
       url: `${httpsServerUrl}/test`,
       headers: {},
