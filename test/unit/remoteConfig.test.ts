@@ -22,7 +22,7 @@ describe('Remote config helpers', () => {
                 id: 'BROKER_TOKEN_1',
                 type: 'broker_connection',
                 attributes: {
-                  connection_name: 'my github connection',
+                  name: 'my github connection',
                   type: 'github',
                   configuration: {
                     default: {},

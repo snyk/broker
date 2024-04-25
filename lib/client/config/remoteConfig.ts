@@ -33,16 +33,16 @@ export const retrieveConnectionsForDeployment = async (
     const connectionsObjectForFile = { CONNECTIONS: {} };
     for (let i = 0; i < connections.length; i++) {
       connectionsObjectForFile.CONNECTIONS[
-        `${connections[i].attributes.connection_name}`
+        `${connections[i].attributes.name}`
       ] = {
         ...connections[i].attributes.configuration.default,
         ...connections[i].attributes.configuration.required,
       };
       connectionsObjectForFile.CONNECTIONS[
-        `${connections[i].attributes.connection_name}`
+        `${connections[i].attributes.name}`
       ].type = connections[i].attributes.type;
       connectionsObjectForFile.CONNECTIONS[
-        `${connections[i].attributes.connection_name}`
+        `${connections[i].attributes.name}`
       ].identifier = connections[i].id;
     }
     const universalConfigFileBuffer = readFileSync(universalFilePath);

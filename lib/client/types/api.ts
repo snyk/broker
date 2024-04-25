@@ -11,7 +11,7 @@ export interface BrokerConnectionAttributes {
     required: {};
     validations: Array<ConnectionValidation>;
   };
-  connection_name: string;
+  name: string;
   deployment_id: string;
   secrets?: {
     primary: {
