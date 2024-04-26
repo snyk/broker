@@ -22,6 +22,17 @@
     }
   },
   {
+    "//": "used to retrieve organization context from catalog-info.yaml",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/raw/catalog-info.yaml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "basic",
+      "username": "${BITBUCKET_USERNAME}",
+      "password": "${BITBUCKET_PASSWORD}"
+    }
+  },
+  {
     "//": "list commit for a given repo",
     "method": "GET",
     "path": "/:workspace/:repo/commits",
