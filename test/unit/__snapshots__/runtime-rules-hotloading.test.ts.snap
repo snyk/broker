@@ -1704,6 +1704,17 @@ Object {
       "path": "/projects/:projectKey/repos/:repo/commits/:commit/diff",
     },
     Object {
+      "//": "used to retrieve organization context from catalog-info.yaml",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:projectKey/repos/:repo/raw/catalog-info.yaml",
+    },
+    Object {
       "//": "list commit for a given repo",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
