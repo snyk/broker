@@ -6,6 +6,7 @@
     "artifactory",
     "azure-repos",
     "bitbucket-server",
+    "bitbucket-server-bearer-auth",
     "container-registry-agent",
     "github-enterprise",
     "github-server-app",
@@ -120,6 +121,31 @@
       "required": {
         "BITBUCKET_USERNAME": "<username>",
         "BITBUCKET_PASSWORD": "<password>",
+        "BITBUCKET": "bitbucket.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "bitbucket-server-bearer-auth": {
+      "validations": [
+        {
+          "url": "https://$BITBUCKET/rest/api/1.0/projects",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $BITBUCKET_PAT"
+          }
+        }
+      ],
+      "default": {
+        "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $BITBUCKET_PAT",
+        "GIT_URL": "$BITBUCKET",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$BITBUCKET_PAT"
+      },
+      "required": {
+        "BITBUCKET_PAT": "<bitbucket-pat>",
         "BITBUCKET": "bitbucket.yourdomain.com",
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
@@ -317,6 +343,7 @@
     "artifactory": "defaultFilters/artifactory.json",
     "azure-repos": "defaultFilters/azure-repos.json",
     "bitbucket-server": "defaultFilters/bitbucket-server.json",
+    "bitbucket-server-bearer-auth": "defaultFilters/bitbucket-server-bearer-auth.json",
     "container-registry-agent": "defaultFilters/container-registry-agent.json",
     "github-enterprise": "defaultFilters/github-enterprise.json",
     "github-server-app": "defaultFilters/github-server-app.json",
@@ -339,6 +366,12 @@
       "name": "Bitbucket Server",
       "type": "bitbucket-server",
       "brokerType": "bitbucket-server"
+    },
+    "bitbucket-server-bearer-auth": {
+      "publicId": "87c79724-9555-4959-b811-08aa22635614",
+      "name": "Bitbucket Server",
+      "type": "bitbucket-server",
+      "brokerType": "bitbucket-server-bearer-auth"
     },
     "github-enterprise": {
       "publicId": "219fbe9f-2fb3-4919-b69c-afd6fab25d54",
