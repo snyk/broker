@@ -1,0 +1,142 @@
+[
+  {
+    "//": "used to get repo's commits",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/commits",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get specific commit",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/commits/:commit/diff",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to retrieve organization context from catalog-info.yaml",
+    "method": "GET",
+    "path": "/projects/:projectKey/repos/:repo/raw/catalog-info.yaml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "list commit for a given repo",
+    "method": "GET",
+    "path": "/:workspace/:repo/commits",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "get a specific commit diff stats identified by the commit hash or name of a branch",
+    "method": "GET",
+    "path": "/:workspace/:repo/diffstat/commits/:sha",
+    "origin": "https://${BITBUCKET}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "list the user's workspaces",
+    "method": "GET",
+    "path": "/workspaces",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "list the user's projects",
+    "method": "GET",
+    "path": "/projects",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get groups",
+    "method": "GET",
+    "path": "/admin/groups",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get group's members",
+    "method": "GET",
+    "path": "/admin/groups/more-members",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get repositories for a given workspace",
+    "method": "GET",
+    "path": "/repositories/:workspace",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get repository",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "used to get pull requests for a given repo",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo/pullrequests",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "list commits for a given repo",
+    "method": "GET",
+    "path": "/repositories/:workspace/:repo/commits",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  },
+  {
+    "//": "list members for a given workspace",
+    "method": "GET",
+    "path": "/workspaces/:workspace/members",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+      "scheme": "bearer",
+      "token": "${BITBUCKET_PAT}"
+    }
+  }
+]
