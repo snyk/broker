@@ -130,6 +130,24 @@
     }
   },
   {
+    "//": "used to retrieve organization context from catalog-info.yaml",
+    "method": "GET",
+    "path": "/:org/:project/_apis/git/repositories/:repo/files",
+    "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    },
+    "valid": [
+      {
+        "queryParam": "path",
+        "values": [
+          "catalog-info.yaml"
+        ]
+      }
+    ]
+  },
+  {
     "//": "get list of team's members",
     "method": "GET",
     "path": "/:org/_apis/projects/:project/teams/:team/members",

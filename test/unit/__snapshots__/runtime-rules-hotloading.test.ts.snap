@@ -512,6 +512,24 @@ Object {
       "path": "/:org/:project/_apis/git/repositories/:repo/commits",
     },
     Object {
+      "//": "used to retrieve organization context from catalog-info.yaml",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/:org/:project/_apis/git/repositories/:repo/files",
+      "valid": Array [
+        Object {
+          "queryParam": "path",
+          "values": Array [
+            "catalog-info.yaml",
+          ],
+        },
+      ],
+    },
+    Object {
       "//": "get list of team's members",
       "auth": Object {
         "scheme": "basic",
@@ -3698,6 +3716,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:owner/:repo/contributors",
+    },
+    Object {
+      "//": "used to retrieve organization context from catalog-info.yaml",
+      "method": "GET",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/contents/catalog-info.yaml",
     },
     Object {
       "//": "used to get repo's languages",
@@ -7071,6 +7095,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/groups",
+    },
+    Object {
+      "//": "used to retrieve organization context from catalog-info.yaml",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/repository/files/catalog-info.yaml/raw",
     },
     Object {
       "//": "get metadata",
