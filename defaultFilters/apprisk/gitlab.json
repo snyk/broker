@@ -28,5 +28,5 @@
     "method": "GET",
     "path": "/api/v4/metadata",
     "origin": "https://${GITLAB}"
-  },
+  }
 ]
