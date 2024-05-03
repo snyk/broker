@@ -1,12 +1,14 @@
 import type { Config } from '../../types/config';
 import type { Check, CheckResult } from '../types';
 import { validateBrokerClientUrl } from './brokerClientUrlCheck';
+import { validateAcceptFlagsConfig } from './customAcceptFile';
 import { validateUniversalConnectionsConfig } from './universalConnectionConfigCheck';
 
 export function getConfigChecks(config: Config): Check[] {
   return [
     brokerClientUrlCheck(config),
     universalBrokerConnectionsCheck(config),
+    acceptFlagsConfigurationCheck(config),
   ];
 }
 
@@ -32,6 +34,20 @@ const universalBrokerConnectionsCheck = (config: Config): Check => {
     enabled: config.universalBrokerEnabled,
     check: function (): CheckResult {
       return validateUniversalConnectionsConfig(
+        { id: this.id, name: this.name },
+        config,
+      );
+    },
+  } satisfies Check;
+};
+
+const acceptFlagsConfigurationCheck = (config: Config): Check => {
+  return {
+    id: 'accept-flags-config-validation',
+    name: 'Accept flags Configuration Check',
+    enabled: true,
+    check: function (): CheckResult {
+      return validateAcceptFlagsConfig(
         { id: this.id, name: this.name },
         config,
       );
