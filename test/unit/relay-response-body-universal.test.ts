@@ -84,6 +84,7 @@ describe('body relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       brokerType: 'client',
       connections: {
         myconn: {
@@ -152,6 +153,7 @@ describe('body relay', () => {
     const config = {
       disableBodyVarsSubstitution: true,
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       brokerType: 'client',
       connections: {
         myconn: {

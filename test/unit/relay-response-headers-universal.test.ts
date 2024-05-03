@@ -71,6 +71,7 @@ describe('header relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       connections: {
         myconn: {
           identifier: brokerToken,
@@ -130,6 +131,7 @@ describe('header relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       connections: {
         myconn: {
           identifier: brokerToken,

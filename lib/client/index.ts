@@ -24,12 +24,14 @@ import { getClientConfigMetadata } from './config/configHelpers';
 import { fetchJwt } from './auth/oauth';
 import {
   CONFIGURATION,
+  findProjectRoot,
   getConfig,
   loadBrokerConfig,
 } from '../common/config/config';
 import { retrieveConnectionsForDeployment } from './config/remoteConfig';
 import { handleTerminationSignal } from '../common/utils/signals';
 import { cleanUpUniversalFile } from './utils/cleanup';
+import { loadPlugins } from './brokerClientPlugins/pluginManager';
 
 process.on('uncaughtException', (error) => {
   if (error.message == 'read ECONNRESET') {
@@ -62,6 +64,15 @@ export const main = async (clientOpts: ClientOpts) => {
       'https://api.snyk.io';
 
     await validateMinimalConfig(clientOpts);
+    if (clientOpts.config.universalBrokerEnabled) {
+      const pluginsFolderPath = `${findProjectRoot(
+        __dirname,
+      )}/dist/lib/client/brokerClientPlugins/plugins`;
+      clientOpts.config.plugins = await loadPlugins(
+        pluginsFolderPath,
+        clientOpts,
+      );
+    }
 
     if (
       clientOpts.config.brokerClientConfiguration.common.oauth?.clientId &&
@@ -75,7 +86,7 @@ export const main = async (clientOpts: ClientOpts) => {
       );
       await retrieveConnectionsForDeployment(
         clientOpts,
-        `${__dirname}/../../../../config.universal.json`,
+        `${findProjectRoot(process.cwd())}/config.universal.json`,
       );
       // Reload config with connection
       await loadBrokerConfig();
@@ -87,6 +98,11 @@ export const main = async (clientOpts: ClientOpts) => {
       ) as Record<string, any> as CONFIGURATION;
       handleTerminationSignal(cleanUpUniversalFile);
     }
+
+    const brokerClientId = uuidv4();
+    logger.info({ brokerClientId }, 'generated broker client id');
+    const hookResults = await processStartUpHooks(clientOpts, brokerClientId);
+
     const loadedClientOpts: LoadedClientOpts = {
       loadedFilters: loadAllFilters(clientOpts.filters, clientOpts.config),
       ...clientOpts,
@@ -96,10 +112,6 @@ export const main = async (clientOpts: ClientOpts) => {
       logger.error({ clientOpts }, 'Unable to load filters');
       throw new Error('Unable to load filters');
     }
-
-    const brokerClientId = uuidv4();
-    logger.info({ brokerClientId }, 'generated broker client id');
-    const hookResults = await processStartUpHooks(clientOpts, brokerClientId);
 
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
