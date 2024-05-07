@@ -49,6 +49,7 @@
     "jest-mock-server": "^0.1.0",
     "nock": "^13.3.0",
     "prettier": "^2.0.5",
+    "supertest": "^7.0.0",
     "tmp-promise": "^3.0.2",
     "ts-jest": "29.1.2",
     "ts-node": "^10.9.1",
