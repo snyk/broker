@@ -344,6 +344,7 @@ jobs:
       - load-docker-image:
           project_name: <<parameters.project_name>>
       - snyk/scan:
+          additional-arguments: --policy-path=.snyk
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
           organization: platform-broker
@@ -1112,7 +1113,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build bitbucket-server-bearer-auth image
           context:
@@ -1518,7 +1519,7 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
-      
+
       - build-and-save-docker-image:
           name: Build bitbucket-server-bearer-auth image (nlatest)
           context:
