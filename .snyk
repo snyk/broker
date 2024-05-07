@@ -1,13 +1,23 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.12.0
+version: v1.25.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:debug:20170905':
     - primus > setheader > debug:
         reason: Not vulnerable as `primus` doesn't run in debug mode
         expires: '2024-02-09T12:00:00.000Z'
-  'SNYK-JS-PREDEFINE-1054935':
+  SNYK-JS-PREDEFINE-1054935:
     - primus > fusing > predefine:
-        reason: Fixed in https://github.com/snyk/broker/pull/336
+        reason: 'Fixed in https://github.com/snyk/broker/pull/336'
         expires: '2023-07-06T09:47:29.283Z'
+  SNYK-RHEL8-GLIBC-6656573:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2024-05-14T11:13:02.169Z
+        created: 2024-05-07T11:13:02.174Z
+  SNYK-RHEL8-GLIBC-6684409:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2024-05-14T11:13:13.154Z
+        created: 2024-05-07T11:13:13.157Z
 patch: {}
