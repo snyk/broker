@@ -2,7 +2,7 @@ ARG BROKER_VERSION=latest
 ARG NODE_VERSION=20.11.0
 
 
-FROM registry.access.redhat.com/ubi8/nodejs-18 as node-base
+FROM registry.access.redhat.com/ubi8/nodejs-20 as node-base
 
 ARG NODE_VERSION
 ENV NODE_VERSION=${NODE_VERSION}
