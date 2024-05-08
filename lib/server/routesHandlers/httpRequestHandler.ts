@@ -4,8 +4,10 @@ import { getDesensitizedToken } from '../utils/token';
 import { getSocketConnections } from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
+import { makeStreamingRequestToDownstream } from '../../common/http/request';
+import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 
-export const overloadHttpRequestWithConnectionDetailsMiddleware = (
+export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -25,10 +27,27 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = (
       localHostname.endsWith('-1') &&
       localHostname.match(regex)
     ) {
-      logger.debug({}, 'redirecting to primary');
-      const url = new URL(`http://${req.host}${req.url}`);
+      const url = new URL(`http://${req.hostname}${req.url}`);
       url.searchParams.append('connection_role', 'primary');
-      return res.redirect(url.toString());
+      logger.debug({}, 'Making request to primary');
+      const postFilterPreparedRequest: PostFilterPreparedRequest = {
+        url: url.toString(),
+        headers: req.headers,
+        method: req.method,
+      };
+      if (req.body) {
+        postFilterPreparedRequest.body = JSON.stringify(req.body);
+      }
+      try {
+        const httpResponse = await makeStreamingRequestToDownstream(
+          postFilterPreparedRequest,
+        );
+        res.writeHead(httpResponse.statusCode ?? 500, httpResponse.headers);
+        return httpResponse.pipe(res);
+      } catch (err) {
+        logger.error({ err }, `Error in HTTP middleware: ${err}`);
+        res.status(500).send('Error forwarding request to primary');
+      }
     } else {
       logger.warn({ desensitizedToken }, 'no matching connection found');
       return res.status(404).json({ ok: false });
