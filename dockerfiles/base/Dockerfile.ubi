@@ -54,9 +54,6 @@ RUN <<EOF
     rpm --erase --nodeps dnf-plugin-subscription-manager
     rpm --erase --nodeps gdb-gdbserver
     rpm --erase --nodeps glibc-common
-    rpm --erase --nodeps glibc-gconv-extra
-    rpm --erase --nodeps glibc-langpack-en
-    rpm --erase --nodeps glibc-minimal-langpack
     rpm --erase --nodeps gnutls
     rpm --erase --nodeps libarchive
     rpm --erase --nodeps libcurl
