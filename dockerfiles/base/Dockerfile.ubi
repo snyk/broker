@@ -53,6 +53,7 @@ RUN <<EOF
     rpm --erase --nodeps python3-requests
     rpm --erase --nodeps dnf-plugin-subscription-manager
     rpm --erase --nodeps gdb-gdbserver
+    rpm --erase --nodeps glibc-minimal-langpack
     rpm --erase --nodeps glibc-common
     rpm --erase --nodeps gnutls
     rpm --erase --nodeps libarchive
