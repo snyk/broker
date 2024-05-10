@@ -7,7 +7,7 @@ export const validateBrokerClientVersionAgainstServer = async (
   checkOptions: CheckOptions,
   config,
 ) => {
-  const clientVersion = version();
+  const clientVersion = `${version}`;
   if (clientVersion != 'local') {
     const req: PostFilterPreparedRequest = {
       url: `${config.BROKER_SERVER_URL}/healthcheck`,
