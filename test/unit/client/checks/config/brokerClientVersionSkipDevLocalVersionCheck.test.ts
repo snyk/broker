@@ -12,9 +12,7 @@ jest.mock('../../../../../lib/common/utils/version', () => {
   return {
     __esModule: true,
     ...originalModule,
-    default: () => {
-      return 'local';
-    },
+    default: 'local',
   };
 });
 

@@ -14,9 +14,7 @@ jest.mock('../../../../../lib/common/utils/version', () => {
   return {
     __esModule: true,
     ...originalModule,
-    default: () => {
-      return '4.180.0';
-    },
+    default: '4.180.0',
   };
 });
 
