@@ -27,14 +27,14 @@ jest.mock('node:os', () => {
     __esModule: true,
     ...originalModule,
     hostname: () => {
-      return 'broker-snyk-server-v2-10-1';
+      return 'my-server-name-10-1';
     },
   };
 });
 
 describe('Testing older clients specific logic', () => {
   it('Testing the old client redirected to primary from secondary pods', async () => {
-    nock(`http://my-server-name`)
+    nock(`http://my-server-name.default.svc.cluster`)
       .persist()
       .get(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
@@ -51,13 +51,13 @@ describe('Testing older clients specific logic', () => {
 
     const response = await request(app)
       .get('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path')
-      .set('Host', 'my-server-name-1');
+      .set('Host', 'my-server-name-1.default.svc.cluster');
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ test: 'value' });
   });
   it('Testing the old client redirected to primary from secondary pods - POST request', async () => {
-    nock(`http://my-server-name`)
+    nock(`http://my-server-name.default.svc.cluster`)
       .persist()
       .post(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
@@ -74,7 +74,7 @@ describe('Testing older clients specific logic', () => {
 
     const response = await request(app)
       .post('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path')
-      .set('Host', 'my-server-name-1')
+      .set('Host', 'my-server-name-1.default.svc.cluster')
       .send({ test: 'value2' });
 
     expect(response.status).toEqual(200);
@@ -84,7 +84,7 @@ describe('Testing older clients specific logic', () => {
     const fileJson = JSON.parse(
       readFileSync(`${fixtures}/accept/ghe.json`).toString(),
     );
-    nock(`http://my-server-name`)
+    nock(`http://my-server-name.default.svc.cluster`)
       .persist()
       .get(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file?connection_role=primary',
@@ -101,7 +101,7 @@ describe('Testing older clients specific logic', () => {
 
     const response = await request(app)
       .get('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file')
-      .set('Host', 'my-server-name-1');
+      .set('Host', 'my-server-name-1.default.svc.cluster');
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(fileJson);
