@@ -28,6 +28,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       localHostname.match(regex)
     ) {
       const url = new URL(`http://${req.hostname}${req.url}`);
+      url.hostname = req.hostname.replace(/-[0-9]{1,2}$/, '');
       url.searchParams.append('connection_role', 'primary');
       logger.debug({}, 'Making request to primary');
       const postFilterPreparedRequest: PostFilterPreparedRequest = {
