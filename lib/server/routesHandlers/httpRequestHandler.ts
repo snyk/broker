@@ -6,6 +6,7 @@ import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
 import { makeStreamingRequestToDownstream } from '../../common/http/request';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { URL, URLSearchParams } from 'node:url';
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req: Request,
@@ -63,10 +64,18 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req['locals'] = {};
   req['locals']['capabilities'] =
     connections.get(token)[0].metadata.capabilities;
-
   // strip the leading url
   req.url = req.url.slice(`/broker/${token}`.length);
-  logger.debug({ url: req.url }, 'request');
+  if (req.url.includes('connection_role')) {
+    const urlParts = req.url.split('?');
+    if (urlParts.length > 1) {
+      const params = new URLSearchParams(urlParts[1]);
+      params.delete('connection_role');
+      req.url =
+        params.size > 0 ? `${urlParts[0]}?${params.toString()}` : urlParts[0];
+    }
+  }
 
+  logger.debug({ url: req.url }, 'request');
   next();
 };

@@ -15,7 +15,12 @@ jest.mock('../../lib/server/socket', () => {
     __esModule: true,
     ...originalModule,
     getSocketConnections: () => {
-      return new Map();
+      const map = new Map();
+
+      map.set('7fe7a57b-aa0d-416a-97fc-472061737e24', [
+        { socket: {}, socketVersion: '1', metadata: { capabilities: {} } },
+      ]);
+      return map;
     },
   };
 });
