@@ -48,7 +48,14 @@ describe('Testing older clients specific logic', () => {
         return [200, { test: 'value' }];
       });
     const app = express();
-    app.use(bodyParser.json());
+    app.use(
+      bodyParser.raw({
+        type: (req) =>
+          req.headers['content-type'] !==
+          'application/vnd.broker.stream+octet-stream',
+        limit: '10mb',
+      }),
+    );
     app.all(
       '/broker/:token/*',
       overloadHttpRequestWithConnectionDetailsMiddleware,
@@ -71,7 +78,14 @@ describe('Testing older clients specific logic', () => {
         return [200, requestBody];
       });
     const app = express();
-    app.use(bodyParser.json());
+    app.use(
+      bodyParser.raw({
+        type: (req) =>
+          req.headers['content-type'] !==
+          'application/vnd.broker.stream+octet-stream',
+        limit: '10mb',
+      }),
+    );
     app.all(
       '/broker/:token/*',
       overloadHttpRequestWithConnectionDetailsMiddleware,
@@ -98,7 +112,14 @@ describe('Testing older clients specific logic', () => {
         return [200, fileJson];
       });
     const app = express();
-    app.use(bodyParser.json());
+    app.use(
+      bodyParser.raw({
+        type: (req) =>
+          req.headers['content-type'] !==
+          'application/vnd.broker.stream+octet-stream',
+        limit: '10mb',
+      }),
+    );
     app.all(
       '/broker/:token/*',
       overloadHttpRequestWithConnectionDetailsMiddleware,

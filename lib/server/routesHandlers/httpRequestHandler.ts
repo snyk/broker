@@ -37,8 +37,12 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         headers: req.headers,
         method: req.method,
       };
-      if (req.body) {
-        postFilterPreparedRequest.body = JSON.stringify(req.body);
+      if (
+        req.method == 'POST' ||
+        req.method == 'PUT' ||
+        req.method == 'PATCH'
+      ) {
+        postFilterPreparedRequest.body = req.body;
       }
       try {
         const httpResponse = await makeStreamingRequestToDownstream(
