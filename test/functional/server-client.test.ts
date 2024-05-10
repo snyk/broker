@@ -582,4 +582,12 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({ proxyMe: 'please' });
   });
+
+  it('successfully broker POST removing connection_role QS', async () => {
+    const response = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${brokerToken}/echo-query?connection_role=primary&test=value&test2=value2`,
+    );
+    expect(response.status).toEqual(200);
+    expect(response.data).toStrictEqual({ test: 'value', test2: 'value2' });
+  });
 });
