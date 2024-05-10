@@ -34,7 +34,7 @@ jest.mock('node:os', () => {
 
 describe('Testing older clients specific logic', () => {
   it('Testing the old client redirected to primary from secondary pods', async () => {
-    nock(`http://127.0.0.1`)
+    nock(`http://my-server-name`)
       .persist()
       .get(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
@@ -49,14 +49,15 @@ describe('Testing older clients specific logic', () => {
       overloadHttpRequestWithConnectionDetailsMiddleware,
     );
 
-    const response = await request(app).get(
-      '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path',
-    );
+    const response = await request(app)
+      .get('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path')
+      .set('Host', 'my-server-name-1');
+
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ test: 'value' });
   });
   it('Testing the old client redirected to primary from secondary pods - POST request', async () => {
-    nock(`http://127.0.0.1`)
+    nock(`http://my-server-name`)
       .persist()
       .post(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
@@ -73,6 +74,7 @@ describe('Testing older clients specific logic', () => {
 
     const response = await request(app)
       .post('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path')
+      .set('Host', 'my-server-name-1')
       .send({ test: 'value2' });
 
     expect(response.status).toEqual(200);
@@ -82,7 +84,7 @@ describe('Testing older clients specific logic', () => {
     const fileJson = JSON.parse(
       readFileSync(`${fixtures}/accept/ghe.json`).toString(),
     );
-    nock(`http://127.0.0.1`)
+    nock(`http://my-server-name`)
       .persist()
       .get(
         '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file?connection_role=primary',
@@ -97,9 +99,9 @@ describe('Testing older clients specific logic', () => {
       overloadHttpRequestWithConnectionDetailsMiddleware,
     );
 
-    const response = await request(app).get(
-      '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file',
-    );
+    const response = await request(app)
+      .get('/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file')
+      .set('Host', 'my-server-name-1');
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(fileJson);
