@@ -31,15 +31,23 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       const url = new URL(`http://${req.hostname}${req.url}`);
       url.hostname = req.hostname.replace(/-[0-9]{1,2}\./, '.');
       url.searchParams.append('connection_role', 'primary');
-      logger.debug({}, 'Making request to primary');
+
       const postFilterPreparedRequest: PostFilterPreparedRequest = {
         url: url.toString(),
         headers: req.headers,
         method: req.method,
       };
-      if (req.body) {
-        postFilterPreparedRequest.body = JSON.stringify(req.body);
+      if (
+        req.method == 'POST' ||
+        req.method == 'PUT' ||
+        req.method == 'PATCH'
+      ) {
+        postFilterPreparedRequest.body = req.body;
       }
+      logger.debug(
+        { url: req.url, method: req.method },
+        'Making request to primary',
+      );
       try {
         const httpResponse = await makeStreamingRequestToDownstream(
           postFilterPreparedRequest,
