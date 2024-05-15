@@ -139,10 +139,10 @@ export const createWebSocket = (
         clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
       );
 
-      websocket.transport.extraHeaders['Authorization'] =
-        clientOpts.accessToken!.authHeader;
-      websocket.end();
-      websocket.open();
+      // websocket.transport.extraHeaders['Authorization'] =
+      //   clientOpts.accessToken!.authHeader;
+      // websocket.end();
+      // websocket.open();
       timeoutHandlerId = setTimeout(
         timeoutHandler,
         (clientOpts.accessToken!.expiresIn - 60) * 1000,

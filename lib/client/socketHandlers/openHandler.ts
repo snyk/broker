@@ -24,7 +24,7 @@ export const openHandler = (
     metadata['supportedIntegrationType'] =
       identifyingMetadata.supportedIntegrationType;
   }
-  logger.info(
+  logger.debug(
     {
       url: clientOps.config.brokerServerUrl,
       serverId: identifyingMetadata.serverId ?? clientOps.config.serverId ?? '',
