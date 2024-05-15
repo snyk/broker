@@ -61,7 +61,10 @@ export const runStartupPlugins = async (clientOpts) => {
     string,
     BrokerPlugin[]
   >;
-  const connectionsKeys = Object.keys(clientOpts.config.connections);
+
+  const connectionsKeys = clientOpts.config.connections
+    ? Object.keys(clientOpts.config.connections)
+    : [];
 
   for (const connectionKey of connectionsKeys) {
     if (
