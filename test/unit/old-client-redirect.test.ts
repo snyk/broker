@@ -5,6 +5,7 @@ import request from 'supertest';
 import nock from 'nock';
 import path from 'path';
 import { readFileSync } from 'node:fs';
+import { connectionStatusHandler } from '../../lib/server/routesHandlers/connectionStatusHandler';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 
@@ -20,6 +21,9 @@ jest.mock('../../lib/server/socket', () => {
       map.set('7fe7a57b-aa0d-416a-97fc-472061737e24', [
         { socket: {}, socketVersion: '1', metadata: { capabilities: {} } },
       ]);
+      // map.set('7fe7a57b-aa0d-416a-97fc-472061737e26', [
+      //   { metadata: {version: '123', filter: {}} },
+      // ]);
       return map;
     },
   };
@@ -131,5 +135,33 @@ describe('Testing older clients specific logic', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(fileJson);
+  });
+
+  it('Testing the connection-status old client redirected to primary from secondary pods', async () => {
+    nock(`http://my-server-name.default.svc.cluster`)
+      .persist()
+      .get(
+        '/connection-status/7fe7a57b-aa0d-416a-97fc-472061737e26?connection_role=primary',
+      )
+      .reply(() => {
+        return [200, { test: 'value' }];
+      });
+    const app = express();
+    app.use(
+      bodyParser.raw({
+        type: (req) =>
+          req.headers['content-type'] !==
+          'application/vnd.broker.stream+octet-stream',
+        limit: '10mb',
+      }),
+    );
+    app.all('/connection-status/:token', connectionStatusHandler);
+
+    const response = await request(app)
+      .get('/connection-status/7fe7a57b-aa0d-416a-97fc-472061737e26')
+      .set('Host', 'my-server-name-1.default.svc.cluster');
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ test: 'value' });
   });
 });
