@@ -43,7 +43,10 @@ export const retrieveConnectionsForDeployment = async (
       ].type = connections[i].attributes.type;
       connectionsObjectForFile.CONNECTIONS[
         `${connections[i].attributes.name}`
-      ].identifier = connections[i].id;
+      ].identifier = connections[i].identifier;
+      connectionsObjectForFile.CONNECTIONS[
+        `${connections[i].attributes.name}`
+      ].id = connections[i].id;
     }
     const universalConfigFileBuffer = readFileSync(universalFilePath);
     const universalConfigFile = JSON.parse(
