@@ -1,0 +1,22 @@
+[
+  {
+    "//": "used to get custom pull request template",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*/snyk_pull_request_template.yaml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+  },
+  {
+    "//": "used to get custom pull request template",
+    "method": "GET",
+    "path": "/projects/:project/repos/:repo/browse*%2Fsnyk_pull_request_template.yaml",
+    "origin": "https://${BITBUCKET_API}",
+    "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+  }
+]
