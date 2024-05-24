@@ -16,6 +16,7 @@ import {
 } from './requestsHelper';
 import { LOADEDFILTERSET } from '../types/filter';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
+import { runPreRequestPlugins } from '../../client/brokerClientPlugins/pluginManager';
 
 export const forwardWebSocketRequest = (
   options: LoadedClientOpts | LoadedServerOpts,
@@ -209,6 +210,14 @@ export const forwardWebSocketRequest = (
         connectionIdentifier,
         websocketConnectionHandler?.socketType,
       );
+      if (options.config.universalBrokerEnabled) {
+        preparedRequest.req = await runPreRequestPlugins(
+          options,
+          connectionIdentifier,
+          preparedRequest.req,
+        );
+      }
+
       incrementHttpRequestsTotal(false, 'outbound-request');
       payload.streamingID
         ? await makePostStreamingRequest(preparedRequest.req, emit, logContext)

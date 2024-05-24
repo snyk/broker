@@ -300,6 +300,16 @@
     ],
     "private": [
       {
+        "//": "look up repositories installation can access",
+        "method": "GET",
+        "path": "/installation/repositories",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${ACCESS_TOKEN}"
+        }
+      },
+      {
         "//": "search for user's repos",
         "method": "GET",
         "path": "/search/repositories",
@@ -1287,7 +1297,11 @@
         "//": "get details of the repo",
         "method": "GET",
         "path": "/repos/:name/:repo",
-        "origin": "https://${GITHUB_API}"
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${ACCESS_TOKEN}"
+        }
       },
       {
         "//": "get the details of the commit to determine its SHA",

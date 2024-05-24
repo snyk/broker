@@ -14,6 +14,7 @@ export interface ClientOpts {
     authHeader: string;
     expiresIn: number;
   };
+  plugins?: Map<string, any>;
 }
 
 export interface ServerOpts {

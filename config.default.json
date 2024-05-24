@@ -231,6 +231,10 @@
       },
       "required": {
         "GITHUB": "ghe.yourdomain.com",
+        "GITHUB_APP_ID": "APP_ID",
+        "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
+        "GITHUB_APP_CLIENT_ID": "123",
+        "GITHUB_APP_INSTALLATION_ID": "123",
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     },

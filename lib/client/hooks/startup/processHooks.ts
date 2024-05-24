@@ -6,6 +6,7 @@ import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
 import { highAvailabilityModeEnabled } from '../../config/configHelpers';
+import { runStartupPlugins } from '../../brokerClientPlugins/pluginManager';
 
 export const validateMinimalConfig = async (
   clientOpts: ClientOpts,
@@ -132,6 +133,10 @@ export const processStartUpHooks = async (
         {},
         'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted',
       );
+    }
+
+    if (clientOpts.config.universalBrokerEnabled) {
+      await runStartupPlugins(clientOpts);
     }
 
     return {
