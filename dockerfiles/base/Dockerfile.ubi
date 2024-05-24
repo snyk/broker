@@ -89,8 +89,8 @@ EOF
 
 COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
 COPY --from=node-base /tmp/node/bin/node /usr/bin/node
-COPY --chown=snyk:root config.default.json /home/snyk/config.default.json
-COPY --chown=snyk:root defaultFilters /home/snyk/defaultFilters
-RUN chgrp -R 0 /home/snyk && chmod -R 775 /home/snyk
+COPY --chown=snyk:snyk config.default.json /home/snyk/config.default.json
+COPY --chown=snyk:snyk defaultFilters /home/snyk/defaultFilters
 
 WORKDIR /home/snyk
+USER snyk
