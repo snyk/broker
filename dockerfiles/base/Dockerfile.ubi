@@ -11,8 +11,6 @@ RUN mkdir -p /tmp/node && \
     curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" && \
     tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /tmp/node --strip-components=1
 
-
-
 FROM node-base as broker-builder
 
 ARG BROKER_VERSION
@@ -93,7 +91,6 @@ COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-
 COPY --from=node-base /tmp/node/bin/node /usr/bin/node
 COPY --chown=snyk:root config.default.json /home/snyk/config.default.json
 COPY --chown=snyk:root defaultFilters /home/snyk/defaultFilters
-RUN chown -R snyk:root /home/snyk
+RUN chgrp -R 0 /home/snyk && chmod -R 775 /home/snyk
 
 WORKDIR /home/snyk
-USER snyk
