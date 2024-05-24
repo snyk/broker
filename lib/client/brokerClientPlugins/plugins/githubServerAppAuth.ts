@@ -1,5 +1,5 @@
 // import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { createPrivateKey } from 'node:crypto';
 import { sign } from 'jsonwebtoken';
@@ -34,6 +34,25 @@ export class Plugin extends BrokerPlugin {
         { plugin: this.pluginCode, config: connectionConfig },
         'Connection Config passed to the plugin',
       );
+      if (
+        connectionConfig &&
+        (!connectionConfig.GITHUB_APP_CLIENT_ID ||
+          !connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH ||
+          !connectionConfig.GITHUB_APP_INSTALLATION_ID)
+      ) {
+        throw new Error(
+          `Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)`,
+        );
+      }
+      if (
+        connectionConfig &&
+        connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH &&
+        !existsSync(connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH)
+      ) {
+        throw new Error(
+          `Pem file path is invalid ${connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH}`,
+        );
+      }
 
       // Generate the JWT
       const now = Date.now();
@@ -55,11 +74,11 @@ export class Plugin extends BrokerPlugin {
 
       this._setAccessTokenLifecycleHandler(connectionConfig);
     } catch (err) {
-      this.logger.err(
+      this.logger.error(
         { err },
         `Error in ${this.pluginName}-${this.pluginCode} startup.`,
       );
-      throw Error(
+      throw new Error(
         `Error in ${this.pluginName}-${this.pluginCode} startup. ${err}`,
       );
     }
@@ -114,7 +133,7 @@ export class Plugin extends BrokerPlugin {
               { plugin: this.pluginCode, err },
               `Error refreshing JWT`,
             );
-            throw new Error(`${err}`);
+            throw err;
           }
         };
 
@@ -129,7 +148,7 @@ export class Plugin extends BrokerPlugin {
         { plugin: this.pluginCode, err },
         `Error setting JWT lifecycle handler.`,
       );
-      throw new Error(`${err}`);
+      throw err;
     }
   }
 
@@ -199,7 +218,7 @@ export class Plugin extends BrokerPlugin {
             { plugin: this.pluginCode, err },
             `Error setting Access Token lifecycle handler.`,
           );
-          throw new Error(`${err}`);
+          throw err;
         }
       };
       timeoutHandlerId = setTimeout(

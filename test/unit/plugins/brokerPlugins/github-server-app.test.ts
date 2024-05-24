@@ -20,6 +20,45 @@ describe('Github Server App Plugin', () => {
     expect(plugin.applicableBrokerTypes).toEqual(['github-server-app']);
   });
 
+  it('startUp plugin method errors if missing env vars', async () => {
+    const config = {};
+    const plugin = new Plugin(config);
+
+    try {
+      await plugin.startUp({});
+
+      //we shouldn't hit here
+      expect(true).toBeFalsy();
+    } catch (err) {
+      expect(err).toEqual(
+        Error(
+          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)',
+        ),
+      );
+    }
+  });
+
+  it('startUp plugin method errors if invalid pem path', async () => {
+    const config = {
+      GITHUB_APP_CLIENT_ID: '123',
+      GITHUB_APP_INSTALLATION_ID: '123',
+      GITHUB_APP_PRIVATE_PEM_PATH: '/invalid/path',
+    };
+    const plugin = new Plugin(config);
+
+    try {
+      await plugin.startUp(config);
+      // we shouldn't hit here
+      expect(true).toBeFalsy();
+    } catch (err) {
+      expect(err).toEqual(
+        Error(
+          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: Pem file path is invalid /invalid/path',
+        ),
+      );
+    }
+  });
+
   it('GetJWT method', () => {
     const dummyPrivateKeyPath = `${pluginsFixturesFolderPath}/dummy.pem`;
     const dummyAppClientId = '1324567';
