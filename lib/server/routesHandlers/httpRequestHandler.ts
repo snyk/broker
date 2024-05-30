@@ -56,7 +56,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         return httpResponse.pipe(res);
       } catch (err) {
         logger.error({ err }, `Error in HTTP middleware: ${err}`);
-        res.status(500).send('Error forwarding request to primary');
+        return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
       logger.warn({ desensitizedToken }, 'no matching connection found');
