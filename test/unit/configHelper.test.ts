@@ -1,10 +1,10 @@
-import { getClientConfigMetadata } from '../../lib/client/utils/configHelpers';
+import { getClientConfigMetadata } from '../../lib/client/config/configHelpers';
 import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
 import { LoadedClientOpts } from '../../lib/common/types/options';
 
 describe('config', () => {
-  beforeAll(() => {
-    loadBrokerConfig();
+  beforeAll(async () => {
+    await loadBrokerConfig();
   });
   afterEach(() => {
     delete process.env.LOG_LEVEL;
@@ -31,8 +31,8 @@ describe('config', () => {
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
     delete process.env.UNIVERSAL_BROKER_ENABLED;
   });
-  it('everything is false for empty config', () => {
-    loadBrokerConfig();
+  it('everything is false for empty config', async () => {
+    await loadBrokerConfig();
     const config = getConfig();
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: false,
@@ -48,7 +48,7 @@ describe('config', () => {
     });
   });
 
-  it('everything is true for everything enabled in config', () => {
+  it('everything is true for everything enabled in config', async () => {
     process.env.LOG_LEVEL = 'debug';
     process.env.LOG_ENABLE_BODY = 'true';
     process.env.GITHUB_TOKEN_POOL = '123,456';
@@ -59,7 +59,7 @@ describe('config', () => {
     process.env.ACCEPT = 'my/path';
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const config = getConfig();
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: true,
@@ -75,12 +75,12 @@ describe('config', () => {
     });
   });
 
-  it('everything is false for everything disabled in config', () => {
+  it('everything is false for everything disabled in config', async () => {
     process.env.LOG_LEVEL = 'info';
     process.env.GITHUB_TOKEN = '456';
     process.env.BROKER_HA_MODE_ENABLED = 'false';
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
-    loadBrokerConfig();
+    await loadBrokerConfig();
     const config = getConfig();
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: false,

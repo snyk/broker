@@ -1,0 +1,17 @@
+[
+  {
+    "//": "get file content. restrict by file types",
+    "method": "GET",
+    "path": "/:owner/_apis/git/repositories/:repo/items",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "valid": [
+      {
+        "queryParam": "path",
+        "values": [
+          "**/.azuredevops/snyk_pull_request_template.yaml",
+          "**%2F.azuredevops%2Fsnyk_pull_request_template.yaml"
+        ]
+      }
+    ]
+  }
+]

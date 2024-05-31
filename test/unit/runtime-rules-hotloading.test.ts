@@ -6,6 +6,7 @@ import camelcase from 'camelcase';
 const scmRulesToTest = [
   'azure-repos',
   'bitbucket-server',
+  'bitbucket-server-bearer-auth',
   'github',
   'github-enterprise',
   'gitlab',
@@ -201,6 +202,31 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_APPRISK;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+      delete process.env.ACCEPT;
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'true';
+      process.env.ACCEPT = 'accept.json';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPath: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_CUSTOM_PR_TEMPLATES;
       delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
       delete process.env.ACCEPT;
     },

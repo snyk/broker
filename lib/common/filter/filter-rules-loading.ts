@@ -249,6 +249,45 @@ function injectRulesAtRuntime(
       filters.private.push(...appRiskRules);
     }
   }
+
+  const ACCEPT_CUSTOM_PR_TEMPLATES =
+    process.env.ACCEPT_CUSTOM_PR_TEMPLATES || config.ACCEPT_CUSTOM_PR_TEMPLATES;
+  if (ACCEPT_CUSTOM_PR_TEMPLATES) {
+    logger.debug(
+      { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
+      `Injecting Accept rules for Custom PR Templates`,
+    );
+    const type =
+      ruleType ??
+      config.supportedBrokerTypes.find(
+        (type) =>
+          config[
+            camelcase(`BROKER_DOWNSTREAM_TYPE_${type.toLocaleUpperCase()}`)
+          ] == 'true',
+      );
+    if (
+      type &&
+      fs.existsSync(`defaultFilters/customPrTemplates/${type}.json`)
+    ) {
+      logger.info(
+        { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
+        `Injecting additional ${type} Accept rules for Custom PR Templates`,
+      );
+      const customPRTemplatesRules = require(path.join(
+        findProjectRoot(__dirname) ?? process.cwd(),
+        `defaultFilters/customPrTemplates/${type}.json`,
+      )) as Rule[];
+      // rm entry from filters.private if matching uri in appRiskRules which takes precedence
+      const customPRTemplatesRulesPathPattern = customPRTemplatesRules.map(
+        (x) => x.path,
+      );
+      filters.private = filters.private.filter(
+        (x) => !customPRTemplatesRulesPathPattern.includes(x.path),
+      );
+      filters.private.push(...customPRTemplatesRules);
+    }
+  }
+
   return filters;
 }
 

@@ -241,11 +241,13 @@ export const prepareRequestFromFilterResult = async (
   logContext.requestHeaders = payload.headers;
   logger.debug(logContext, 'Prepared request');
 
-  const req = {
+  const req: PostFilterPreparedRequest = {
     url: result.url,
     headers: payload.headers,
     method: payload.method,
-    body: payload.body,
   };
+  if (payload.body) {
+    req.body = payload.body;
+  }
   return { req, error: errorPreparing };
 };

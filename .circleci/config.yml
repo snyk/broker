@@ -344,6 +344,7 @@ jobs:
       - load-docker-image:
           project_name: <<parameters.project_name>>
       - snyk/scan:
+          additional-arguments: --policy-path=.snyk
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
           organization: platform-broker
@@ -606,6 +607,34 @@ workflows:
           image_name: snyk/broker
           image_tag: rhel-ubi-bitbucket-server
           project_name: rhel-ubi-bitbucket-server
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - build-and-save-docker-image:
+          name: Build bitbucket-server-bearer-auth UBI image
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Push base UBI image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
+          dockerfile: dockerfiles/Dockerfile.ubi
+          project_name: rhel-ubi-bitbucket-server-bearer-auth
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push bitbucket-server-bearer-auth UBI image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build bitbucket-server-bearer-auth UBI image
+          image_name: snyk/broker
+          image_tag: rhel-ubi-bitbucket-server-bearer-auth
+          project_name: rhel-ubi-bitbucket-server-bearer-auth
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -1086,6 +1115,35 @@ workflows:
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
+          name: Build bitbucket-server-bearer-auth image
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Push base image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: bitbucket-server-bearer-auth
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push bitbucket-server-bearer-auth image
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build bitbucket-server-bearer-auth image
+          image_name: snyk/broker
+          image_tag: bitbucket-server-bearer-auth
+          project_name: bitbucket-server-bearer-auth
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
           name: Build container-registry-agent image
           context:
             - snyk-bot-slack
@@ -1458,6 +1516,35 @@ workflows:
           image_name: snyk/broker
           image_tag: bitbucket-server-nlatest
           project_name: bitbucket-server-nlatest
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+
+      - build-and-save-docker-image:
+          name: Build bitbucket-server-bearer-auth image (nlatest)
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Push base image (nlatest)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
+          dockerfile: dockerfiles/Dockerfile
+          project_name: bitbucket-server-bearer-auth-nlatest
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-tags-only
+      - tag-and-push-docker-image:
+          name: Push bitbucket-server-bearer-auth image (nlatest)
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-broker-snyk
+          requires:
+            - Build bitbucket-server-bearer-auth image (nlatest)
+          image_name: snyk/broker
+          image_tag: bitbucket-server-bearer-auth-nlatest
+          project_name: bitbucket-server-bearer-auth-nlatest
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only

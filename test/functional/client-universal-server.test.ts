@@ -45,7 +45,9 @@ describe('proxy requests originating from behind the broker client', () => {
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
-
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    process.env.SKIP_REMOTE_CONFIG = 'true';
     bc = await createUniversalBrokerClient();
   });
 
@@ -57,6 +59,9 @@ describe('proxy requests originating from behind the broker client', () => {
     delete process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED;
     delete process.env
       .SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+    delete process.env.SKIP_REMOTE_CONFIG;
   });
 
   it('server identifies self to client', async () => {

@@ -11,13 +11,27 @@ import {
 import { healthCheckHandler } from './routesHandler/healthcheckHandler';
 import { systemCheckHandler } from './routesHandler/systemCheckHandler';
 import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
-import { processStartUpHooks } from './hooks/startup/processHooks';
+import {
+  processStartUpHooks,
+  validateMinimalConfig,
+} from './hooks/startup/processHooks';
 import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
 import { isWebsocketConnOpen } from './utils/socketHelpers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 import { ClientOpts, LoadedClientOpts } from '../common/types/options';
 import { websocketConnectionSelectorMiddleware } from './routesHandler/websocketConnectionMiddlewares';
-import { getClientConfigMetadata } from './utils/configHelpers';
+import { getClientConfigMetadata } from './config/configHelpers';
+import { fetchJwt } from './auth/oauth';
+import {
+  CONFIGURATION,
+  findProjectRoot,
+  getConfig,
+  loadBrokerConfig,
+} from '../common/config/config';
+import { retrieveConnectionsForDeployment } from './config/remoteConfig';
+import { handleTerminationSignal } from '../common/utils/signals';
+import { cleanUpUniversalFile } from './utils/cleanup';
+import { loadPlugins } from './brokerClientPlugins/pluginManager';
 
 process.on('uncaughtException', (error) => {
   if (error.message == 'read ECONNRESET') {
@@ -40,6 +54,51 @@ export const main = async (clientOpts: ClientOpts) => {
   try {
     logger.info({ version }, 'Broker starting in client mode');
 
+    clientOpts.config.API_BASE_URL =
+      clientOpts.config.API_BASE_URL ??
+      clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
+      clientOpts.config.BROKER_SERVER_URL?.replace(
+        '//broker.',
+        '//api.',
+      ).replace('//broker2.', '//api.') ??
+      'https://api.snyk.io';
+
+    await validateMinimalConfig(clientOpts);
+    if (clientOpts.config.universalBrokerEnabled) {
+      const pluginsFolderPath = `${findProjectRoot(
+        __dirname,
+      )}/dist/lib/client/brokerClientPlugins/plugins`;
+      clientOpts.config.plugins = await loadPlugins(
+        pluginsFolderPath,
+        clientOpts,
+      );
+    }
+
+    if (
+      clientOpts.config.brokerClientConfiguration.common.oauth?.clientId &&
+      clientOpts.config.brokerClientConfiguration.common.oauth?.clientSecret &&
+      !process.env.SKIP_REMOTE_CONFIG
+    ) {
+      clientOpts.accessToken = await fetchJwt(
+        clientOpts.config.API_BASE_URL,
+        clientOpts.config.brokerClientConfiguration.common.oauth.clientId,
+        clientOpts.config.brokerClientConfiguration.common.oauth.clientSecret,
+      );
+      await retrieveConnectionsForDeployment(
+        clientOpts,
+        `${findProjectRoot(process.cwd())}/config.universal.json`,
+      );
+      // Reload config with connection
+      await loadBrokerConfig();
+      const globalConfig = { config: getConfig() };
+      clientOpts.config = Object.assign(
+        {},
+        clientOpts.config,
+        globalConfig.config,
+      ) as Record<string, any> as CONFIGURATION;
+      handleTerminationSignal(cleanUpUniversalFile);
+    }
+
     const brokerClientId = uuidv4();
     logger.info({ brokerClientId }, 'generated broker client id');
     const hookResults = await processStartUpHooks(clientOpts, brokerClientId);
@@ -57,7 +116,7 @@ export const main = async (clientOpts: ClientOpts) => {
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
       clientId: brokerClientId,
-      filters: clientOpts.filters,
+      filters: loadedClientOpts.filters,
       preflightChecks: hookResults.preflightCheckResults,
       version,
       clientConfig: getClientConfigMetadata(clientOpts.config),
@@ -65,11 +124,22 @@ export const main = async (clientOpts: ClientOpts) => {
     };
 
     let websocketConnections: WebSocketConnection[] = [];
-    if (clientOpts.config.universalBrokerEnabled) {
-      websocketConnections = createWebSockets(
-        loadedClientOpts,
-        globalIdentifyingMetadata,
-      );
+    if (loadedClientOpts.config.universalBrokerEnabled) {
+      const integrationsKeys = loadedClientOpts.config.connections
+        ? Object.keys(loadedClientOpts.config.connections)
+        : [];
+
+      if (integrationsKeys.length < 1) {
+        logger.error(
+          {},
+          `No connection found. Please add connections to config.${process.env.SERVICE_ENV}.json.`,
+        );
+      } else {
+        websocketConnections = createWebSockets(
+          loadedClientOpts,
+          globalIdentifyingMetadata,
+        );
+      }
     } else {
       websocketConnections.push(
         createWebSocket(
@@ -88,19 +158,25 @@ export const main = async (clientOpts: ClientOpts) => {
     }
 
     // start the local webserver to listen for relay requests
-    const { app, server } = webserver(clientOpts.config, clientOpts.port);
+    const { app, server } = webserver(
+      loadedClientOpts.config,
+      loadedClientOpts.port,
+    );
 
     const httpToWsForwarder = forwardHttpRequest(loadedClientOpts);
     const httpToAPIForwarder = forwardHttpRequestOverHttp(
       loadedClientOpts,
-      clientOpts.config,
+      loadedClientOpts.config,
     );
     // IMPORTANT: defined before relay (`app.all('/*', ...`)
-    app.get('/health/checks', handleChecksRoute(clientOpts.config));
-    app.get('/health/checks/:checkId', handleCheckIdsRoutes(clientOpts.config));
+    app.get('/health/checks', handleChecksRoute(loadedClientOpts.config));
+    app.get(
+      '/health/checks/:checkId',
+      handleCheckIdsRoutes(loadedClientOpts.config),
+    );
 
     app.get(
-      clientOpts.config.brokerHealthcheckPath || '/healthcheck',
+      loadedClientOpts.config.brokerHealthcheckPath || '/healthcheck',
       (req, res, next) => {
         res.locals.websocketConnections = websocketConnections;
         next();
@@ -113,7 +189,7 @@ export const main = async (clientOpts: ClientOpts) => {
     });
 
     app.get(
-      clientOpts.config.brokerSystemcheckPath || '/systemcheck',
+      loadedClientOpts.config.brokerSystemcheckPath || '/systemcheck',
       (req, res, next) => {
         res.locals.clientOpts = loadedClientOpts;
         next();

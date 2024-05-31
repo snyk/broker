@@ -43,6 +43,8 @@ const dummyWebsocketHandler: WebSocketConnection = {
   on: () => {},
   end: () => {},
   role: Role.primary,
+  open: () => {},
+  emit: () => {},
   readyState: 3,
 };
 
@@ -72,6 +74,7 @@ describe('body relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       connections: {
         myconn: {
           identifier: brokerToken,
@@ -137,6 +140,7 @@ describe('body relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       connections: {
         myconn: {
           identifier: brokerToken,
@@ -195,6 +199,7 @@ describe('body relay', () => {
 
     const config = {
       universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
       connections: {
         myconn: {
           identifier: brokerToken,

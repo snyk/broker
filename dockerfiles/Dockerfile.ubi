@@ -10,6 +10,9 @@ ENV BROKER_TYPE=${BROKER_TYPE}
 # Generate default accept filter
 RUN broker init $BROKER_TYPE
 
+# Ensure OpenShift compatibility
+USER root
+RUN chgrp -R 0 /home/snyk && chmod -R 755 /home/snyk
 USER snyk
 
 CMD ["broker", "--verbose"]

@@ -12,6 +12,7 @@ interface BrokerClient {
 
 interface BrokerServer {
   BROKER_SERVER_URL: string;
+  BROKER_SERVER_MANDATORY_AUTH_ENABLED?: boolean;
 }
 
 /**

@@ -1,0 +1,15 @@
+{
+  "BROKER_CLIENT_CONFIGURATION": {
+    "common": {
+      "default": {
+        "BROKER_SERVER_URL": "https://broker.pre-prod.snyk.io",
+        "BROKER_HA_MODE_ENABLED": "false",
+        "BROKER_DISPATCHER_BASE_URL": "https://api.pre-prod.snyk.io"
+      },
+      "oauth": {
+        "clientId": "${CLIENT_ID}",
+        "clientSecret": "${CLIENT_SECRET}"
+      }
+    }
+  }
+}

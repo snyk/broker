@@ -22,12 +22,14 @@ describe('broker client systemcheck endpoint', () => {
   beforeAll(async () => {
     tws = await createTestWebServer();
     bs = await createBrokerServer({ filters: serverAccept });
+    process.env.SKIP_REMOTE_CONFIG = 'true';
   });
 
   afterAll(async () => {
     await tws.server.close();
     await closeBrokerServer(bs);
     delete process.env.BROKER_SERVER_URL;
+    delete process.env.SKIP_REMOTE_CONFIG;
   });
 
   afterEach(async () => {
@@ -65,6 +67,8 @@ describe('broker client systemcheck endpoint', () => {
     process.env.AZURE_REPOS_TOKEN = '123';
     process.env.AZURE_REPOS_HOST = 'hostname';
     process.env.AZURE_REPOS_ORG = 'org';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -88,6 +92,8 @@ describe('broker client systemcheck endpoint', () => {
         websocketConnectionOpen: true,
       }),
     );
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
   // it('good validation url, custom endpoint, no authorization, no json response', async () => {
@@ -390,6 +396,8 @@ describe('broker client systemcheck endpoint', () => {
     process.env.AZURE_REPOS_TOKEN = '123';
     process.env.AZURE_REPOS_HOST = 'hostname';
     process.env.AZURE_REPOS_ORG = 'org';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -459,6 +467,8 @@ describe('broker client systemcheck endpoint', () => {
           'Validation failed, please review connection details for my jira pat',
       },
     ]);
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
   it('invalid validation url', async () => {
@@ -473,6 +483,8 @@ describe('broker client systemcheck endpoint', () => {
     process.env.JIRA_HOSTNAME = 'notexists.notexists';
     process.env.GITHUB_TOKEN = 'ghtoken';
     process.env.GITLAB_TOKEN = 'gltoken';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__github = clientAccept;
@@ -524,5 +536,7 @@ describe('broker client systemcheck endpoint', () => {
           'Validation failed, please review connection details for my gitlab connection',
       },
     ]);
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 });

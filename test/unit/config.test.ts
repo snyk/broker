@@ -15,16 +15,17 @@ import {
 } from '../../lib/common/config/universal';
 
 describe('config', () => {
-  beforeAll(() => {
-    loadBrokerConfig();
+  beforeAll(async () => {
+    await loadBrokerConfig();
   });
-  it('contain application config', () => {
+  it('contain application config', async () => {
     const foo = process.env.FOO;
     const token = process.env.BROKER_TOKEN;
     const bitbucketTokens = ['1234', '5678'];
     const githubTokens = ['9012', '3456'];
     const complexToken = process.env.COMPLEX_TOKEN;
-    loadBrokerConfig();
+
+    await loadBrokerConfig();
     const config = getConfig();
 
     expect(config.foo).toEqual(foo);
@@ -42,8 +43,8 @@ describe('config', () => {
     ]);
   });
 
-  it('getConfigType', () => {
-    loadBrokerConfig();
+  it('getConfigType', async () => {
+    await loadBrokerConfig();
     const configData = getConfigForType('github');
 
     expect(configData).toEqual({
@@ -61,7 +62,7 @@ describe('config', () => {
     });
   });
 
-  it('getConfigType with multiple replacements', () => {
+  it('getConfigType with multiple replacements', async () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
     process.env.GITHUB_TOKEN = '123';
@@ -75,7 +76,10 @@ describe('config', () => {
     process.env.BROKER_TOKEN_4 = 'brokertoken4';
     process.env.JIRA_PAT = 'jirapat';
     process.env.JIRA_HOSTNAME = 'hostname';
-    loadBrokerConfig();
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+
+    await loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier3',
       getConfig(),
@@ -98,9 +102,11 @@ describe('config', () => {
       identifier: 'dummyBrokerIdentifier3',
       type: 'azure-repos',
     });
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
-  it('getConfigByidentifier', () => {
+  it('getConfigByidentifier', async () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
     process.env.GITHUB_TOKEN = '123';
@@ -111,7 +117,9 @@ describe('config', () => {
     process.env.BROKER_TOKEN_4 = 'brokertoken4';
     process.env.JIRA_PAT = 'jirapat';
     process.env.JIRA_HOSTNAME = 'hostname';
-    loadBrokerConfig();
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier',
       getConfig(),
@@ -141,9 +149,11 @@ describe('config', () => {
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
     delete process.env.BROKER_TOKEN_3;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
-  it('getConfigByidentifier with global BROKER_CLIENT_URL', () => {
+  it('getConfigByidentifier with global BROKER_CLIENT_URL', async () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.BROKER_CLIENT_URL = 'dummy';
     process.env.SERVICE_ENV = 'universaltest';
@@ -152,7 +162,9 @@ describe('config', () => {
     process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
     process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
     process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
-    loadBrokerConfig();
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
     const configData = getConfigForIdentifier(
       'dummyBrokerIdentifier',
       getConfig(),
@@ -184,13 +196,15 @@ describe('config', () => {
     delete process.env.BROKER_TOKEN_1;
     delete process.env.BROKER_TOKEN_2;
     delete process.env.BROKER_TOKEN_3;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
   });
 
-  it('fails to load if missing env var', () => {
+  it('fails to load if missing env var', async () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
     try {
-      loadBrokerConfig();
+      await loadBrokerConfig();
       expect(false).toBeTruthy();
     } catch (err: any) {
       expect(err).toBeInstanceOf(Error);

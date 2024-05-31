@@ -50,6 +50,7 @@ RUN <<EOF
     rpm --erase --nodeps curl-minimal
     rpm --erase --nodeps glibc-common
     rpm --erase --nodeps glibc-minimal-langpack
+    rpm --erase --nodeps glibc-common
     rpm --erase --nodeps gnutls
     rpm --erase --nodeps libarchive
     rpm --erase --nodeps libcurl-minimal
