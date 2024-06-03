@@ -41,9 +41,9 @@ ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin
 
 RUN <<EOF
     set -ex
-    yum upgrade --assumeyes
-    yum clean all
-    rm -rf /var/cache/yum
+    dnf upgrade --assumeyes --best --setopt=install_weak_deps=False
+    dnf clean all
+    rm -rf /var/cache/dnf
     # create default user and group
     groupadd --gid 10001 snyk
     useradd --gid 10001 --shell /sbin/nologin --uid 10001 snyk
