@@ -29,11 +29,23 @@ interface CommitSigning {
   GPG_PRIVATE_KEY: string;
 }
 
+interface SourceTypes {
+  sourceTypes: {
+    [key: string]: {
+      publicId?: string;
+      name: string;
+      type: string;
+      brokerType: string;
+    };
+  };
+}
+
 export type Config = BackendAPI &
   BrokerClient &
   BrokerServer &
   CommitSigning &
   HighAvailabilityMode &
+  SourceTypes &
   Record<string, any>;
 
 export interface ConnectionValidations {

@@ -271,8 +271,15 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  echoRouter.post(
+    '/api/v2/import/done',
+    (req: express.Request, resp: express.Response) => {
+      resp.status(200).send('OK');
+    },
+  );
+
   echoRouter.all('*', (_: express.Request, resp: express.Response) => {
-    resp.send(false);
+    resp.status(400).send(false);
   });
 
   app.use(['/snykgit', '/'], echoRouter);

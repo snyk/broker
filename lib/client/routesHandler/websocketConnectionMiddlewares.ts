@@ -55,7 +55,22 @@ export const websocketConnectionSelectorMiddleware = (
       req.path.startsWith('/v1/') ||
       req.path.startsWith('/v2/')
     ) {
-      inboundRequestType = 'container-registry-agent';
+      const connections = Object.values(config.connections) as Record<
+        string,
+        string
+      >[];
+      const craCompatibleAvailableTypes =
+        connections.filter((x) => x.craCompatible).map((x) => x.type) ?? [];
+      if (craCompatibleAvailableTypes.length > 0) {
+        inboundRequestType = craCompatibleAvailableTypes[0];
+      } else {
+        res
+          .status(505)
+          .send(
+            'Current Broker Client configuration does not support this flow. Missing container registry agent compatible connection.',
+          );
+        return;
+      }
     } else {
       logger.error(
         { url: req.path },
@@ -75,7 +90,6 @@ export const websocketConnectionSelectorMiddleware = (
         return;
       }
     }
-
     const selectedWebsocketConnection = websocketConnections.find(
       (conn) => conn.supportedIntegrationType == inboundRequestType,
     );

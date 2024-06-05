@@ -17,7 +17,6 @@ import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
 import { LoadedClientOpts } from '../common/types/options';
-import { translateIntegrationTypeToBrokerIntegrationType } from './utils/integrations';
 import { maskToken } from '../common/utils/token';
 import { fetchJwt } from './auth/oauth';
 
@@ -40,9 +39,8 @@ export const createWebSockets = (
     const integrationType =
       clientOpts.config.connections[`${integrationsKeys[i]}`].type;
 
-    // This type is different for broker, ECR/ACR/DockeHub/etc are all container-registry-agent type for broker
-    socketIdentifyingMetadata.supportedIntegrationType =
-      translateIntegrationTypeToBrokerIntegrationType(integrationType);
+    socketIdentifyingMetadata.supportedIntegrationType = integrationType;
+
     socketIdentifyingMetadata.serverId =
       clientOpts.config.connections[`${integrationsKeys[i]}`].serverId ?? '';
     websocketConnections.push(

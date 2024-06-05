@@ -1,0 +1,12 @@
+{
+  "private": [
+    {
+      "path": "/api/v2*",
+      "method": "POST",
+      "origin": "http://localhost:9000"
+    }
+  ],
+  "public": [
+
+  ]
+}

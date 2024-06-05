@@ -15,7 +15,19 @@
     "jira-bearer-auth",
     "jira",
     "nexus",
-    "nexus2"
+    "nexus2",
+    "docker-hub",
+    "ecr",
+    "acr",
+    "gcr",
+    "artifactory-cr",
+    "harbor-cr",
+    "quay-cr",
+    "github-cr",
+    "nexus-cr",
+    "digitalocean-cr",
+    "gitlab-cr",
+    "google-artifact-cr"
   ],
   "BROKER_CLIENT_CONFIGURATION": {
     "common": {
@@ -356,7 +368,19 @@
     "jira": "defaultFilters/jira.json",
     "jira-bearer-auth": "defaultFilters/jira-bearer-auth.json",
     "nexus": "defaultFilters/nexus.json",
-    "nexus2": "defaultFilters/nexus2.json"
+    "nexus2": "defaultFilters/nexus2.json",
+    "docker-hub":"defaultFilters/container-registry-agent.json",
+    "ecr":"defaultFilters/container-registry-agent.json",
+    "acr":"defaultFilters/container-registry-agent.json",
+    "gcr":"defaultFilters/container-registry-agent.json",
+    "artifactory-cr":"defaultFilters/container-registry-agent.json",
+    "harbor-cr":"defaultFilters/container-registry-agent.json",
+    "quay-cr":"defaultFilters/container-registry-agent.json",
+    "github-cr":"defaultFilters/container-registry-agent.json",
+    "nexus-cr":"defaultFilters/container-registry-agent.json",
+    "digitalocean-cr":"defaultFilters/container-registry-agent.json",
+    "gitlab-cr":"defaultFilters/container-registry-agent.json",
+    "google-artifact-cr":"defaultFilters/container-registry-agent.json"
   },
   "SOURCE_TYPES": {
     "github": {
