@@ -88,6 +88,8 @@ RUN apt update && \
     apt install --assume-yes ca-certificates
 RUN npm install --global snyk-broker
 
+COPY ./dockerfiles/base/docker-entrypoint.sh /docker-entrypoint.sh
+
 # removing non-used (transitive) dependencies to fix vulnerabilities
 RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
 
@@ -106,9 +108,12 @@ LABEL org.opencontainers.image.authors="team-broker" \
       io.snyk.containers.image.dockerfile="/dockerfiles/base/Dockerfile"
 
 COPY --from=broker-builder /home/node/.npm-global /home/node/.npm-global
+COPY --from=broker-builder /docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY --from=broker-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY config.default.json /home/node/config.default.json
 COPY defaultFilters /home/node/defaultFilters
 
 WORKDIR /home/node
 USER node
+
+ENTRYPOINT ["docker-entrypoint.sh"]
