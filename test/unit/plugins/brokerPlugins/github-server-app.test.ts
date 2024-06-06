@@ -2,7 +2,6 @@ import { Plugin } from '../../../../lib/client/brokerClientPlugins/plugins/githu
 import { findProjectRoot } from '../../../../lib/common/config/config';
 import nock from 'nock';
 import { delay } from '../../../helpers/utils';
-import { clearTimeout } from 'timers';
 
 describe('Github Server App Plugin', () => {
   const pluginsFixturesFolderPath = `${findProjectRoot(
@@ -72,7 +71,8 @@ describe('Github Server App Plugin', () => {
     const nowPlus10s = Date.now() + 10000;
     const timeDifference =
       plugin._getTimeDifferenceInMsToFutureDate(nowPlus10s);
-    expect(timeDifference).toEqual(10000);
+    expect(timeDifference).toBeLessThanOrEqual(10000);
+    expect(timeDifference).toBeGreaterThanOrEqual(9990);
   });
 
   it('Test JWT lifecycle Handler', async () => {

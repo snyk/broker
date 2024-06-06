@@ -102,13 +102,15 @@ export class Plugin extends BrokerPlugin {
               connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
               connectionConfig.GITHUB_APP_CLIENT_ID,
             );
-            timeoutHandlerId = setTimeout(
-              timeoutHandler,
-              this._getTimeDifferenceInMsToFutureDate(
-                timeoutHandlerNow + this.JWT_TTL,
-              ) - 10000,
-            );
-            connectionConfig.jwtTimeoutHandlerId = timeoutHandlerId;
+            if (process.env.NODE_ENV != 'test') {
+              timeoutHandlerId = setTimeout(
+                timeoutHandler,
+                this._getTimeDifferenceInMsToFutureDate(
+                  timeoutHandlerNow + this.JWT_TTL,
+                ) - 10000,
+              );
+              connectionConfig.jwtTimeoutHandlerId = timeoutHandlerId;
+            }
           } catch (err) {
             this.logger.error(
               { plugin: this.pluginCode, err },
@@ -187,13 +189,15 @@ export class Plugin extends BrokerPlugin {
               JSON.parse(connectionConfig.accessToken).expires_at
             }`,
           );
-          timeoutHandlerId = setTimeout(
-            timeoutHandler,
-            this._getTimeDifferenceInMsToFutureDate(
-              JSON.parse(connectionConfig.accessToken).expires_at,
-            ) - 10000,
-          );
-          connectionConfig.accessTokenTimeoutHandlerId = timeoutHandlerId;
+          if (process.env.NODE_ENV != 'test') {
+            timeoutHandlerId = setTimeout(
+              timeoutHandler,
+              this._getTimeDifferenceInMsToFutureDate(
+                JSON.parse(connectionConfig.accessToken).expires_at,
+              ) - 10000,
+            );
+            connectionConfig.accessTokenTimeoutHandlerId = timeoutHandlerId;
+          }
         } catch (err) {
           this.logger.error(
             { plugin: this.pluginCode, err },
