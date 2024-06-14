@@ -130,6 +130,15 @@ export const prepareRequestFromFilterResult = async (
     'host',
     'accept-encoding',
     'content-encoding',
+    'x-forwarded-host',
+    'x-forwarded-port',
+    'snyk-acting-group-public-id',
+    'snyk-acting-org-public-id',
+    'snyk-acting-user-public-id',
+    'snyk-flow-name',
+    'snyk-product-line',
+    'snyk-project-type',
+    'snyk-integration-type',
   ].map((_) => delete payload.headers[_]);
 
   if (options.config.removeXForwardedHeaders === 'true') {
@@ -154,16 +163,6 @@ export const prepareRequestFromFilterResult = async (
   // Unsure why - possibly Primus?
   if (payload.body?.type === 'Buffer')
     payload.body = Buffer.of(payload.body.data);
-
-  // Request library is buggy and will throw an error if we're POST'ing an empty body without an explicit Content-Length header
-  if (!payload.body || payload.body.length === 0) {
-    payload.headers['Content-Length'] = '0';
-  } else {
-    payload.headers['Content-length'] = payload.body.length;
-  }
-
-  payload.headers['connection'] = 'Keep-Alive';
-  payload.headers['Keep-Alive'] = 'timeout=60, max=1000';
 
   if (
     gitHubTreeCheckNeeded(options.config, {
@@ -207,6 +206,17 @@ export const prepareRequestFromFilterResult = async (
       logger.error({ error }, 'error while signing github commit');
     }
   }
+
+  // Request library is buggy and will throw an error if we're POST'ing an empty body without an explicit Content-Length header
+  if (!payload.body || payload.body.length === 0) {
+    payload.headers['Content-Length'] = '0';
+  } else {
+    payload.headers['Content-length'] = payload.body.length;
+  }
+
+  payload.headers['connection'] = 'Keep-Alive';
+  payload.headers['Keep-Alive'] = 'timeout=60, max=1000';
+
   const urlencoded = 'application/x-www-form-urlencoded';
   if (
     payload.headers &&
