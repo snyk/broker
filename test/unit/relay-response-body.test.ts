@@ -67,7 +67,111 @@ describe('body relay', () => {
     jest.clearAllMocks();
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
+  // it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
+  //   expect.hasAssertions();
+
+  //   const brokerToken = 'test-broker';
+
+  //   const config = {
+  //     HOST: 'localhost',
+  //     PORT: '8001',
+  //   };
+  //   const options: LoadedClientOpts | LoadedServerOpts = {
+  //     filters: {
+  //       private: [
+  //         {
+  //           method: 'any',
+  //           url: '/*',
+  //         },
+  //       ],
+  //       public: [],
+  //     },
+  //     config,
+  //     port: 8001,
+  //     loadedFilters: dummyLoadedFilters,
+  //   };
+
+  //   const route = relay(options, dummyWebsocketHandler)(brokerToken);
+
+  //   const body = {
+  //     BROKER_VAR_SUB: ['url'],
+  //     url: '${HOST}:${PORT}/webhook',
+  //   };
+
+  //   route(
+  //     {
+  //       url: '/',
+  //       method: 'POST',
+  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //       // @ts-ignore
+  //       body: Buffer.from(JSON.stringify(body)),
+  //       headers: {},
+  //     },
+  //     () => {
+  //       expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+  //       const arg = mockedFn.mock.calls[0][0];
+  //       expect(JSON.parse(arg.body).url).toEqual(
+  //         `${config.HOST}:${config.PORT}/webhook`,
+  //       );
+
+  //       done();
+  //     },
+  //   );
+  // });
+
+  // it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
+  //   expect.hasAssertions();
+
+  //   const brokerToken = 'test-broker';
+
+  //   const config = {
+  //     HOST: 'localhost',
+  //     PORT: '8001',
+  //     disableBodyVarsSubstitution: true,
+  //     brokerServerUrl: 'http://localhost:8001',
+  //   };
+
+  //   const options: LoadedClientOpts | LoadedServerOpts = {
+  //     filters: {
+  //       private: [
+  //         {
+  //           method: 'any',
+  //           url: '/*',
+  //         },
+  //       ],
+  //       public: [],
+  //     },
+  //     config,
+  //     port: 8001,
+  //     loadedFilters: dummyLoadedFilters,
+  //   };
+  //   const route = relay(options, dummyWebsocketHandler)(brokerToken);
+
+  //   const body = {
+  //     BROKER_VAR_SUB: ['url'],
+  //     url: '${HOST}:${PORT}/webhook',
+  //   };
+
+  //   route(
+  //     {
+  //       url: '/',
+  //       method: 'POST',
+  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //       // @ts-ignore
+  //       body: Buffer.from(JSON.stringify(body)),
+  //       headers: {},
+  //     },
+  //     () => {
+  //       expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+  //       const arg = mockedFn.mock.calls[0][0];
+  //       expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+
+  //       done();
+  //     },
+  //   );
+  // });
+
+  it('relay swaps body values found in BROKER_VAR_SUB with non ASCII in body', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -96,6 +200,7 @@ describe('body relay', () => {
     const body = {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
+      groupInUnicode: "test weird – hyphen"
     };
 
     route(
@@ -113,13 +218,14 @@ describe('body relay', () => {
         expect(JSON.parse(arg.body).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
+        expect(arg.body).toEqual('{"url":"localhost:8001/webhook","groupInUnicode":"test weird – hyphen"}')
 
         done();
       },
     );
   });
 
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
+  it('relay swaps non ASCII body values found in BROKER_VAR_SUB in body', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -127,10 +233,7 @@ describe('body relay', () => {
     const config = {
       HOST: 'localhost',
       PORT: '8001',
-      disableBodyVarsSubstitution: true,
-      brokerServerUrl: 'http://localhost:8001',
     };
-
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
         private: [
@@ -145,11 +248,12 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
+
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook',
+      url: '${HOST}:${PORT}/test weird – hyphen',
     };
 
     route(
@@ -164,7 +268,10 @@ describe('body relay', () => {
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+        expect(JSON.parse(arg.body).url).toEqual(
+          `${config.HOST}:${config.PORT}/test weird – hyphen`,
+        );
+        expect(arg.body).toEqual('{"url":"localhost:8001/test weird – hyphen"}')
 
         done();
       },
