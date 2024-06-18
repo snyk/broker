@@ -16,7 +16,6 @@ import { streamsStore } from '../http/server-post-stream-handler';
 import { ExtendedLogContext } from '../types/log';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
 import { LOADEDFILTERSET } from '../types/filter';
-import { translateIntegrationTypeToBrokerIntegrationType } from '../../client/utils/integrations';
 
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
@@ -63,12 +62,7 @@ export const forwardHttpRequest = (
       >;
       filterResponse =
         loadedFilters
-          .get(
-            translateIntegrationTypeToBrokerIntegrationType(
-              res.locals.websocket.supportedIntegrationType,
-              options.config,
-            ),
-          ) // The chosen type is determined by websocket connect middlwr
+          .get(res.locals.websocket.supportedIntegrationType) // The chosen type is determined by websocket connect middlwr
           ?.public(req) || false;
     } else {
       const loadedFilters = options.loadedFilters as LOADEDFILTERSET;

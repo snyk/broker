@@ -12,7 +12,6 @@
     "azure-repos",
     "bitbucket-server",
     "bitbucket-server-bearer-auth",
-    "container-registry-agent",
     "github-enterprise",
     "github-server-app",
     "github",
@@ -365,7 +364,6 @@
     "azure-repos": "defaultFilters/azure-repos.json",
     "bitbucket-server": "defaultFilters/bitbucket-server.json",
     "bitbucket-server-bearer-auth": "defaultFilters/bitbucket-server-bearer-auth.json",
-    "container-registry-agent": "defaultFilters/container-registry-agent.json",
     "github-enterprise": "defaultFilters/github-enterprise.json",
     "github-server-app": "defaultFilters/github-server-app.json",
     "github": "defaultFilters/github.json",
@@ -386,152 +384,5 @@
     "digitalocean-cr":"defaultFilters/container-registry-agent.json",
     "gitlab-cr":"defaultFilters/container-registry-agent.json",
     "google-artifact-cr":"defaultFilters/container-registry-agent.json"
-  },
-  "SOURCE_TYPES": {
-    "github": {
-      "publicId": "9a3e5d90-b782-468a-a042-9a2073736f0b",
-      "name": "GitHub",
-      "type": "github",
-      "brokerType": "github"
-    },
-    "bitbucket-server": {
-      "publicId": "87c79724-9555-4959-b811-08aa22635614",
-      "name": "Bitbucket Server",
-      "type": "bitbucket-server",
-      "brokerType": "bitbucket-server"
-    },
-    "bitbucket-server-bearer-auth": {
-      "publicId": "87c79724-9555-4959-b811-08aa22635614",
-      "name": "Bitbucket Server",
-      "type": "bitbucket-server",
-      "brokerType": "bitbucket-server-bearer-auth"
-    },
-    "github-enterprise": {
-      "publicId": "219fbe9f-2fb3-4919-b69c-afd6fab25d54",
-      "name": "GitHub Enterprise",
-      "type": "github-enterprise",
-      "brokerType": "github-enterprise"
-    },
-    "github-server-app": {
-      "publicId": "d79079c2-c675-4e9f-91bd-04d977fc0c9c",
-      "name": "GitHub Server App",
-      "type": "github-server-app",
-      "brokerType": "github-server-app"
-    },
-    "gitlab": {
-      "publicId": "6F37586C-ED9C-47BB-9D95-A2C93698836D",
-      "name": "GitLab",
-      "type": "gitlab",
-      "brokerType": "gitlab"
-    },
-    "docker-hub": {
-      "publicId": "7a4b3f39-eb1c-4a6e-9960-025f783b45c9",
-      "name": "Docker Hub",
-      "type": "docker-hub",
-      "brokerType": "container-registry-agent"
-    },
-    "ecr": {
-      "publicId": "850ff1ce-8bad-f00d-fee1-d00d00caca00",
-      "name": "ECR",
-      "type": "ecr",
-      "brokerType": "container-registry-agent"
-    },
-    "acr": {
-      "publicId": "75831964-2f5d-4c74-a798-0f3839b6ac00",
-      "name": "ACR",
-      "type": "acr",
-      "brokerType": "container-registry-agent"
-    },
-    "gcr": {
-      "publicId": "8a2cf306-50ae-4b3f-b98e-5a819c0ba9b6",
-      "name": "GCR",
-      "type": "gcr",
-      "brokerType": "container-registry-agent"
-    },
-    "artifactory-cr": {
-      "publicId": "66831964-2f5d-4c74-a798-0f3839b6ac00",
-      "name": "Artifactory",
-      "type": "artifactory-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "harbor-cr": {
-      "publicId": "62b98e6e-0c70-47c1-9bc3-f6e7005d1069",
-      "name": "Harbor",
-      "type": "harbor-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "quay-cr": {
-      "publicId": "3e82698b-2563-461f-921a-e41c483e3daf",
-      "name": "Quay",
-      "type": "quay-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "github-cr": {
-      "publicId": "86e781e7-a8f9-40ed-b5b5-e442cc3037de",
-      "name": "GitHub Container Registry",
-      "type": "github-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "nexus-cr": {
-      "publicId": "bc5dc4b4-530e-4dff-b494-b927dbab568f",
-      "name": "Nexus",
-      "type": "nexus-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "digitalocean-cr": {
-      "publicId": "465c35cf-7155-4173-bf59-b2c404ad4867",
-      "name": "DigitalOcean",
-      "type": "digitalocean-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "gitlab-cr": {
-      "publicId": "872fe239-fdc8-4d39-9e88-4fb99a2d5f7e",
-      "name": "GitLab Container Registry",
-      "type": "gitlab-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "google-artifact-cr": {
-      "publicId": "481b389f-e23b-4255-a045-f245d425cef0",
-      "uri": "http://docker-registry-agent",
-      "name": "Google Artifact Registry",
-      "type": "google-artifact-cr",
-      "brokerType": "container-registry-agent"
-    },
-    "azure-repos": {
-      "publicId": "92ff53a7-366d-4639-b75d-d762b5e840b4",
-      "name": "Azure Repos",
-      "type": "azure-repos",
-      "brokerType": "azure-repos"
-    },
-    "artifactory": {
-      "name": "Artifactory Private Registry",
-      "type": "artifactory",
-      "brokerType": "artifactory"
-    },
-    "nexus": {
-      "name": "Nexus Private Registry",
-      "type": "nexus",
-      "brokerType": "nexus"
-    },
-    "nexus2": {
-      "name": "Nexus2 Private Registry",
-      "type": "nexus2",
-      "brokerType": "nexus2"
-    },
-    "jira": {
-      "name": "Jira",
-      "type": "jira",
-      "brokerType": "jira"
-    },
-    "jira-bearer-auth": {
-      "name": "Jira",
-      "type": "jira",
-      "brokerType": "jira-bearer-auth"
-    },
-    "apprisk": {
-      "name": "Apprisk",
-      "type": "apprisk",
-      "brokerType": "apprisk"
-    }
   }
 }
