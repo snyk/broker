@@ -102,6 +102,14 @@ describe('body relay', () => {
         },
         github: { default: {} },
       },
+      sourceTypes: {
+        github: {
+          publicId: '9a3e5d90-b782-468a-a042-9a2073736f0b',
+          name: 'GitHub',
+          type: 'github',
+          brokerType: 'github',
+        },
+      },
     };
     loadBrokerConfig(config);
 
@@ -170,6 +178,14 @@ describe('body relay', () => {
           required: {},
         },
         github: { default: {} },
+      },
+      sourceTypes: {
+        github: {
+          publicId: '9a3e5d90-b782-468a-a042-9a2073736f0b',
+          name: 'GitHub',
+          type: 'github',
+          brokerType: 'github',
+        },
       },
     };
     loadBrokerConfig(config);
