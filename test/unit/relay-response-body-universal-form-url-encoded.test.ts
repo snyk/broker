@@ -246,7 +246,7 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
 
-        expect(arg.headers['Content-length']).toEqual(arg.body.length);
+        expect(arg.headers['Content-Length']).toEqual(arg.body.length);
 
         done();
       },

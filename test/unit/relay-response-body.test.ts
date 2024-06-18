@@ -98,6 +98,15 @@ describe('body relay', () => {
       url: '${HOST}:${PORT}/webhook',
     };
 
+    const expectedBody = {
+      url: `${config.HOST}:${config.PORT}/webhook`,
+    };
+
+    const bodyLengthBytes = Buffer.byteLength(
+      JSON.stringify(expectedBody),
+      'utf8',
+    );
+
     route(
       {
         url: '/',
@@ -113,7 +122,7 @@ describe('body relay', () => {
         expect(JSON.parse(arg.body).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
-
+        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
         done();
       },
     );
@@ -152,6 +161,8 @@ describe('body relay', () => {
       url: '${HOST}:${PORT}/webhook',
     };
 
+    const bodyLengthBytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
+
     route(
       {
         url: '/',
@@ -165,7 +176,62 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
         expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
+        done();
+      },
+    );
+  });
 
+  it('handles characters outside of [a-zA-Z0-9]', (done) => {
+    expect.hasAssertions();
+
+    const brokerToken = 'test-broker';
+
+    const config = {
+      HOST: 'localhost',
+      PORT: '8001',
+      disableBodyVarsSubstitution: true,
+      brokerServerUrl: 'http://localhost:8001',
+    };
+
+    const options: LoadedClientOpts | LoadedServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
+      config,
+      port: 8001,
+      loadedFilters: dummyLoadedFilters,
+    };
+    const route = relay(options, dummyWebsocketHandler)(brokerToken);
+
+    const body = {
+      BROKER_VAR_SUB: ['url'],
+      url: '${HOST}:${PORT}/webhook',
+      data: 'data–with–u+2013–dashes',
+    };
+
+    const bodyLengthBytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
+
+    route(
+      {
+        url: '/',
+        method: 'POST',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        body: Buffer.from(JSON.stringify(body)),
+        headers: {},
+      },
+      () => {
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
+        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
+        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
         done();
       },
     );
