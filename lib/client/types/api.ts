@@ -10,6 +10,7 @@ export interface BrokerConnectionAttributes {
     default: {};
     required: {};
     validations: Array<ConnectionValidation>;
+    type: string;
   };
   name: string;
   identifier: string;
@@ -26,5 +27,4 @@ export interface BrokerConnectionAttributes {
       nonce: string;
     };
   };
-  type: string;
 }

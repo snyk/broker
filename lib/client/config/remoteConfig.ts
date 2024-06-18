@@ -49,7 +49,7 @@ export const retrieveConnectionsForDeployment = async (
       };
     connectionsObjectForFile.CONNECTIONS[
       `${connections[i].attributes.name}`
-    ].type = connections[i].attributes.type;
+    ].type = connections[i].attributes.configuration.type;
     connectionsObjectForFile.CONNECTIONS[
       `${connections[i].attributes.name}`
     ].identifier = connections[i].attributes.identifier;

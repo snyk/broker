@@ -23,12 +23,12 @@ describe('Remote config helpers', () => {
                 type: 'broker_connection',
                 attributes: {
                   name: 'my github connection',
-                  type: 'github',
                   configuration: {
                     default: {},
                     required: {
                       github_token: 'GITHUB_TOKEN_XYZ',
                     },
+                    type: 'github',
                   },
                   identifier: 'BROKER_TOKEN_1',
                   deployment_id: '67890',
@@ -51,12 +51,12 @@ describe('Remote config helpers', () => {
                 type: 'broker_connection',
                 attributes: {
                   name: 'my github connection',
-                  type: 'github',
                   configuration: {
                     default: {},
                     required: {
                       github_token: 'GITHUB_TOKEN_XYZ',
                     },
+                    type: 'github',
                   },
                   deployment_id: '67890',
                 },
