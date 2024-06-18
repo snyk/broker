@@ -2,7 +2,6 @@ import { ConnectionValidation } from './config';
 
 export interface BrokerConnectionApiResponse {
   id: string;
-  identifier: string;
   type: string;
   attributes: BrokerConnectionAttributes;
 }
@@ -13,6 +12,7 @@ export interface BrokerConnectionAttributes {
     validations: Array<ConnectionValidation>;
   };
   name: string;
+  identifier: string;
   deployment_id: string;
   secrets?: {
     primary: {

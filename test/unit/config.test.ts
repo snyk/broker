@@ -99,6 +99,7 @@ describe('config', () => {
       GIT_PASSWORD: '123',
       GIT_URL: 'hostname/org',
       GIT_USERNAME: 'PAT',
+      id: '3',
       identifier: 'dummyBrokerIdentifier3',
       type: 'azure-repos',
     });
@@ -139,6 +140,7 @@ describe('config', () => {
       GIT_PASSWORD: '123',
       GIT_URL: 'github.com',
       GIT_USERNAME: 'x-access-token',
+      id: '1',
       identifier: 'dummyBrokerIdentifier',
       type: 'github',
     });
@@ -185,6 +187,7 @@ describe('config', () => {
       GIT_PASSWORD: '123',
       GIT_URL: 'github.com',
       GIT_USERNAME: 'x-access-token',
+      id: '1',
       identifier: 'dummyBrokerIdentifier',
       type: 'github',
     });

@@ -1,4 +1,7 @@
-import { getClientConfigMetadata } from '../../lib/client/config/configHelpers';
+import {
+  getClientConfigMetadata,
+  reloadConfig,
+} from '../../lib/client/config/configHelpers';
 import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
 import { LoadedClientOpts } from '../../lib/common/types/options';
 
@@ -94,5 +97,14 @@ describe('config', () => {
       insecureDownstream: false,
       universalBroker: false,
     });
+  });
+
+  it('reloadConfig reloads config', async () => {
+    let config = getConfig();
+    expect(config['TEST']).toBeUndefined();
+    process.env.TEST = 'value';
+    await reloadConfig(config);
+    config = getConfig();
+    expect(config['TEST']).toEqual('value');
   });
 });

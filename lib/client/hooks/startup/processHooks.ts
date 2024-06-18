@@ -6,7 +6,6 @@ import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
 import { highAvailabilityModeEnabled } from '../../config/configHelpers';
-import { runStartupPlugins } from '../../brokerClientPlugins/pluginManager';
 
 export const validateMinimalConfig = async (
   clientOpts: ClientOpts,
@@ -66,26 +65,7 @@ export const processStartUpHooks = async (
     }
     let serverId;
     if (highAvailabilityModeEnabled(clientOpts.config)) {
-      if (clientOpts.config.universalBrokerEnabled) {
-        for (const key in clientOpts.config.connections) {
-          serverId = await getServerId(
-            clientOpts.config,
-            clientOpts.config.connections[key].identifier,
-            brokerClientId,
-          );
-
-          if (serverId === null) {
-            logger.warn(
-              {},
-              'could not receive server id from Broker Dispatcher',
-            );
-            serverId = '';
-          } else {
-            logger.info({ serverId }, 'received server id');
-            clientOpts.config.connections[key].serverId = serverId;
-          }
-        }
-      } else {
+      if (!clientOpts.config.universalBrokerEnabled) {
         serverId = await getServerId(
           clientOpts.config,
           clientOpts.config.brokerToken,
@@ -133,10 +113,6 @@ export const processStartUpHooks = async (
         {},
         'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted',
       );
-    }
-
-    if (clientOpts.config.universalBrokerEnabled) {
-      await runStartupPlugins(clientOpts);
     }
 
     return {

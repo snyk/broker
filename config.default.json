@@ -1,5 +1,10 @@
 {
   "API_VERSION":"2024-02-08~experimental",
+  "CONNECTIONS_MANAGER": {
+    "watcher": {
+      "interval": 60000
+    }
+  },
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
     "apprisk",

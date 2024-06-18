@@ -35,17 +35,20 @@
     "CONNECTIONS": {
       "my github connection": {
         "type": "github",
+        "id": "1",
         "identifier": "${BROKER_TOKEN_1}",
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       },
       "my gitlab connection": {
         "type": "gitlab",
+        "id": "2",
         "identifier": "${BROKER_TOKEN_2}",
         "GITLAB_TOKEN": "${GITLAB_TOKEN}",
         "GITLAB":"gitlab.dev.snyk.io"
       },
       "my azure connection": {
         "type": "azure-repos",
+        "id": "3",
         "identifier": "${BROKER_TOKEN_3}",
         "AZURE_REPOS_TOKEN": "${AZURE_REPOS_TOKEN}",
         "AZURE_REPOS_ORG":"${AZURE_REPOS_ORG}",
@@ -53,6 +56,7 @@
       },
       "my jira pat": {
         "type": "jira-bearer-auth",
+        "id": "4",
         "identifier": "${BROKER_TOKEN_4}",
         "JIRA_PAT": "${JIRA_PAT}",
         "JIRA_HOSTNAME":"${JIRA_HOSTNAME}"

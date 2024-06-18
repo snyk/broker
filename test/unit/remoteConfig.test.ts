@@ -20,7 +20,6 @@ describe('Remote config helpers', () => {
             data: [
               {
                 id: 'CONNECTION_ID_1',
-                identifier: 'BROKER_TOKEN_1',
                 type: 'broker_connection',
                 attributes: {
                   name: 'my github connection',
@@ -28,11 +27,12 @@ describe('Remote config helpers', () => {
                   configuration: {
                     default: {},
                     required: {
-                      GITHUB_TOKEN: 'GITHUB_TOKEN_XYZ',
+                      github_token: 'GITHUB_TOKEN_XYZ',
                     },
                   },
+                  identifier: 'BROKER_TOKEN_1',
+                  deployment_id: '67890',
                 },
-                deployment_id: '67890',
               },
             ],
           },
@@ -55,11 +55,11 @@ describe('Remote config helpers', () => {
                   configuration: {
                     default: {},
                     required: {
-                      GITHUB_TOKEN: 'GITHUB_TOKEN_XYZ',
+                      github_token: 'GITHUB_TOKEN_XYZ',
                     },
                   },
+                  deployment_id: '67890',
                 },
-                deployment_id: '67890',
               },
             ],
           },
@@ -105,11 +105,11 @@ describe('Remote config helpers', () => {
     );
     await loadBrokerConfig();
     config = getConfig();
-
     expect(config.connections).toEqual({
       'my github connection': {
         GITHUB_TOKEN: 'GITHUB_TOKEN_XYZ',
         identifier: 'BROKER_TOKEN_1',
+        friendlyName: 'my github connection',
         id: 'CONNECTION_ID_1',
         type: 'github',
       },
@@ -150,6 +150,7 @@ describe('Remote config helpers', () => {
     expect(config.connections).toEqual({
       'my github connection': {
         GITHUB_TOKEN: 'GITHUB_TOKEN_XYZ',
+        friendlyName: 'my github connection',
         id: 'CONNECTION_ID_1',
         type: 'github',
       },

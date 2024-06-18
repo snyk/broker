@@ -26,6 +26,8 @@ export interface IdentifyingMetadata {
   version: string;
   serverId?: string;
   identifier?: string;
+  id: string;
+  isDisabled: boolean;
   supportedIntegrationType?: string;
   socketVersion?: number;
   socketType?: string;

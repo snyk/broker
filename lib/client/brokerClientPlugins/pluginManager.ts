@@ -56,31 +56,31 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
   }
 };
 
-export const runStartupPlugins = async (clientOpts) => {
+export const runStartupPlugins = async (clientOpts, connectionKey) => {
   const loadedPlugins = clientOpts.config.plugins as Map<
     string,
     BrokerPlugin[]
   >;
 
-  const connectionsKeys = clientOpts.config.connections
-    ? Object.keys(clientOpts.config.connections)
-    : [];
+  // const connectionsKeys = clientOpts.config.connections
+  //   ? Object.keys(clientOpts.config.connections)
+  //   : [];
 
-  for (const connectionKey of connectionsKeys) {
-    if (
-      loadedPlugins.has(`${clientOpts.config.connections[connectionKey].type}`)
-    ) {
-      const pluginInstances =
-        loadedPlugins.get(
-          `${clientOpts.config.connections[connectionKey].type}`,
-        ) ?? [];
-      for (let i = 0; i < pluginInstances.length; i++) {
-        await pluginInstances[i].startUp(
-          clientOpts.config.connections[connectionKey],
-        );
-      }
+  // for (const connectionKey of connectionsKeys) {
+  if (
+    loadedPlugins.has(`${clientOpts.config.connections[connectionKey].type}`)
+  ) {
+    const pluginInstances =
+      loadedPlugins.get(
+        `${clientOpts.config.connections[connectionKey].type}`,
+      ) ?? [];
+    for (let i = 0; i < pluginInstances.length; i++) {
+      await pluginInstances[i].startUp(
+        clientOpts.config.connections[connectionKey],
+      );
     }
   }
+  // }
 };
 
 export const runPreRequestPlugins = async (
