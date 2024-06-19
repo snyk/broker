@@ -123,7 +123,7 @@ export const prepareRequestFromFilterResult = async (
 
   // remove headers that we don't want to relay
   // (because they corrupt the request)
-  [
+  const headersToRemove = [
     'x-forwarded-for',
     'x-forwarded-proto',
     'content-length',
@@ -139,7 +139,12 @@ export const prepareRequestFromFilterResult = async (
     'snyk-product-line',
     'snyk-project-type',
     'snyk-integration-type',
-  ].map((_) => delete payload.headers[_]);
+  ];
+  Object.keys(payload.headers).map((header) => {
+    if (headersToRemove.includes(header.toLowerCase())) {
+      delete payload.headers[header];
+    }
+  });
 
   if (options.config.removeXForwardedHeaders === 'true') {
     for (const key in payload.headers) {
@@ -211,7 +216,7 @@ export const prepareRequestFromFilterResult = async (
   if (!payload.body || payload.body.length === 0) {
     payload.headers['Content-Length'] = '0';
   } else {
-    payload.headers['Content-length'] = payload.body.length;
+    payload.headers['Content-Length'] = Buffer.byteLength(payload.body, 'utf8');
   }
 
   payload.headers['connection'] = 'Keep-Alive';
@@ -241,7 +246,7 @@ export const prepareRequestFromFilterResult = async (
       //updating the content length after converting the body
       const encoder = new TextEncoder();
       const byteArray = encoder.encode(payload.body);
-      payload.headers['Content-length'] = byteArray.length;
+      payload.headers['Content-Length'] = byteArray.length;
     }
   }
 
