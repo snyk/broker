@@ -12,6 +12,12 @@ import {
   validateGitHubTreePayload,
 } from '../../client/scm';
 import { getConfigForIdentifier } from '../config/universal';
+import { computeContentLength } from '../utils/content-length';
+import {
+  contentLengthHeader,
+  contentTypeHeader,
+  urlencoded,
+} from '../utils/headers-value-constants';
 
 export interface PostFilterPreparingRequestError {
   status: number;
@@ -211,23 +217,12 @@ export const prepareRequestFromFilterResult = async (
       logger.error({ error }, 'error while signing github commit');
     }
   }
-
-  // Request library is buggy and will throw an error if we're POST'ing an empty body without an explicit Content-Length header
-  if (!payload.body || payload.body.length === 0) {
-    payload.headers['Content-Length'] = '0';
-  } else {
-    payload.headers['Content-Length'] = Buffer.byteLength(payload.body, 'utf8');
-  }
-
   payload.headers['connection'] = 'Keep-Alive';
   payload.headers['Keep-Alive'] = 'timeout=60, max=1000';
-
-  const urlencoded = 'application/x-www-form-urlencoded';
   if (
     payload.headers &&
     payload.headers['x-broker-content-type'] === urlencoded
   ) {
-    const contentTypeHeader = 'content-type';
     //avoid duplication for content-type headers
     Object.keys(payload.headers).forEach((header) => {
       if (header.toLowerCase() === contentTypeHeader) {
@@ -242,13 +237,10 @@ export const prepareRequestFromFilterResult = async (
         params.append(key, value.toString());
       }
       payload.body = params.toString();
-
-      //updating the content length after converting the body
-      const encoder = new TextEncoder();
-      const byteArray = encoder.encode(payload.body);
-      payload.headers['Content-Length'] = byteArray.length;
     }
   }
+
+  payload.headers[contentLengthHeader] = computeContentLength(payload);
 
   if (options.config && options.config.LOG_ENABLE_BODY === 'true') {
     logContext.requestBody = payload.body;
