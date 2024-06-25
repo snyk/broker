@@ -20,7 +20,6 @@ import { runPreRequestPlugins } from '../../client/brokerClientPlugins/pluginMan
 import { computeContentLength } from '../utils/content-length';
 import { contentLengthHeader } from '../utils/headers-value-constants';
 
-
 export const forwardWebSocketRequest = (
   options: LoadedClientOpts | LoadedServerOpts,
   websocketConnectionHandler: WebSocketConnection,
