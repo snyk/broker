@@ -18,6 +18,11 @@
       },
       {
         "method": "GET",
+        "path": "/nexus/service/local/status",
+        "origin": "${BASE_NEXUS_URL}"
+      },
+      {
+        "method": "GET",
         "path": "/*",
         "origin": "${NEXUS_URL}"
       }
