@@ -6,7 +6,6 @@ import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
 import { highAvailabilityModeEnabled } from '../../config/configHelpers';
-import { runStartupPlugins } from '../../brokerClientPlugins/pluginManager';
 
 export const validateMinimalConfig = async (
   clientOpts: ClientOpts,
@@ -41,6 +40,21 @@ export const validateMinimalConfig = async (
     error['code'] = 'MISSING_BROKER_SERVER_URL';
     throw error;
   }
+  if (
+    clientOpts.config.universalBrokerEnabled &&
+    !clientOpts.config.SKIP_REMOTE_CONFIG &&
+    (!clientOpts.config.clientId || !clientOpts.config.clientSecret)
+  ) {
+    logger.error(
+      {},
+      '[MISSING_CREDENTIALS] ClientId and ClientSecret are required for Universal Broker usage.',
+    );
+    const error = new ReferenceError(
+      'ClientId + ClientSecret are required for Universal Broker usage.',
+    );
+    error['code'] = 'MISSING_CREDENTIALS';
+    throw error;
+  }
 };
 
 export const processStartUpHooks = async (
@@ -66,26 +80,7 @@ export const processStartUpHooks = async (
     }
     let serverId;
     if (highAvailabilityModeEnabled(clientOpts.config)) {
-      if (clientOpts.config.universalBrokerEnabled) {
-        for (const key in clientOpts.config.connections) {
-          serverId = await getServerId(
-            clientOpts.config,
-            clientOpts.config.connections[key].identifier,
-            brokerClientId,
-          );
-
-          if (serverId === null) {
-            logger.warn(
-              {},
-              'could not receive server id from Broker Dispatcher',
-            );
-            serverId = '';
-          } else {
-            logger.info({ serverId }, 'received server id');
-            clientOpts.config.connections[key].serverId = serverId;
-          }
-        }
-      } else {
+      if (!clientOpts.config.universalBrokerEnabled) {
         serverId = await getServerId(
           clientOpts.config,
           clientOpts.config.brokerToken,
@@ -133,10 +128,6 @@ export const processStartUpHooks = async (
         {},
         'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted',
       );
-    }
-
-    if (clientOpts.config.universalBrokerEnabled) {
-      await runStartupPlugins(clientOpts);
     }
 
     return {

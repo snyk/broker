@@ -1,6 +1,22 @@
 import { ConfigMetadata } from '../types/client';
 import { Config } from '../types/config';
 import { log as logger } from '../../logs/logger';
+import {
+  CONFIGURATION,
+  getConfig,
+  loadBrokerConfig,
+} from '../../common/config/config';
+
+export const reloadConfig = async (clientOpts) => {
+  // Reload config with connection
+  await loadBrokerConfig();
+  const globalConfig = { config: getConfig() };
+  clientOpts.config = Object.assign(
+    {},
+    clientOpts.config,
+    globalConfig.config,
+  ) as Record<string, any> as CONFIGURATION;
+};
 
 export const getClientConfigMetadata = (
   clientConfig: Record<string, any>,

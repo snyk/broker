@@ -19,38 +19,59 @@ import { initializeSocketHandlers } from './socketHandlers/init';
 import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
 import { fetchJwt } from './auth/oauth';
+import { getServerId } from './dispatcher';
 
-export const createWebSockets = (
+export const createWebSocketConnectionPairs = async (
+  websocketConnections: WebSocketConnection[],
   clientOpts: LoadedClientOpts,
   globalIdentifyingMetadata: IdentifyingMetadata,
-): WebSocketConnection[] => {
-  const integrationsKeys = clientOpts.config.connections
-    ? Object.keys(clientOpts.config.connections)
-    : [];
-  const websocketConnections: WebSocketConnection[] = [];
-  for (let i = 0; i < integrationsKeys.length; i++) {
-    const socketIdentifyingMetadata = Object.assign(
-      {},
-      globalIdentifyingMetadata,
-    );
-    socketIdentifyingMetadata.friendlyName = integrationsKeys[i];
-    socketIdentifyingMetadata.identifier =
-      clientOpts.config.connections[`${integrationsKeys[i]}`]['identifier'];
-    const integrationType =
-      clientOpts.config.connections[`${integrationsKeys[i]}`].type;
+  connectionKey,
+) => {
+  const socketIdentifyingMetadata = structuredClone(globalIdentifyingMetadata);
+  socketIdentifyingMetadata.friendlyName = connectionKey;
+  socketIdentifyingMetadata.id =
+    clientOpts.config.connections[`${connectionKey}`].id;
+  socketIdentifyingMetadata.identifier =
+    clientOpts.config.connections[`${connectionKey}`]['identifier'];
+  socketIdentifyingMetadata.isDisabled =
+    clientOpts.config.connections[`${connectionKey}`].isDisabled ?? false;
+  const integrationType =
+    clientOpts.config.connections[`${connectionKey}`].type;
 
-    socketIdentifyingMetadata.supportedIntegrationType = integrationType;
+  socketIdentifyingMetadata.supportedIntegrationType = integrationType;
 
-    socketIdentifyingMetadata.serverId =
-      clientOpts.config.connections[`${integrationsKeys[i]}`].serverId ?? '';
-    websocketConnections.push(
-      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
-    );
-    websocketConnections.push(
-      createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
+  if (!socketIdentifyingMetadata.identifier) {
+    throw new Error(
+      `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier`,
     );
   }
-  return websocketConnections;
+  let serverId: string | null = null;
+  if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
+    serverId = await getServerId(
+      clientOpts.config,
+      socketIdentifyingMetadata.identifier,
+      socketIdentifyingMetadata.clientId,
+    );
+  }
+  if (serverId === null) {
+    logger.warn({}, 'could not receive server id from Broker Dispatcher');
+    serverId = '';
+  } else {
+    logger.info({ serverId }, 'received server id');
+    clientOpts.config.connections[
+      `${socketIdentifyingMetadata.friendlyName}`
+    ].serverId = serverId;
+  }
+  socketIdentifyingMetadata.serverId =
+    clientOpts.config.connections[`${socketIdentifyingMetadata.friendlyName}`]
+      .serverId ?? '';
+
+  websocketConnections.push(
+    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
+  );
+  websocketConnections.push(
+    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
+  );
 };
 
 export const createWebSocket = (

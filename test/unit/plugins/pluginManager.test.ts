@@ -73,7 +73,7 @@ describe('Plugin Manager', () => {
       expect(plugins.get('dummy').length).toBeGreaterThanOrEqual(1);
       expect(plugins.get('dummy')[0].pluginName).toEqual('Dummy Plugin');
 
-      await runStartupPlugins(clientOpts);
+      await runStartupPlugins(clientOpts, 'my connection');
       expect(
         clientOpts.config.connections['my connection'][
           'NEW_VAR_ADDED_TO_CONNECTION'
@@ -101,7 +101,7 @@ describe('Plugin Manager', () => {
       expect(plugins.get('dummy').length).toBeGreaterThanOrEqual(1);
       expect(plugins.get('dummy')[0].pluginName).toEqual('Dummy Plugin');
 
-      await runStartupPlugins(clientOpts);
+      await runStartupPlugins(clientOpts, 'my connection');
       expect(
         clientOpts.config.connections['my connection'][
           'NEW_VAR_ADDED_TO_CONNECTION'
@@ -147,7 +147,7 @@ describe('Plugin Manager', () => {
       expect(plugins.get('dummy2').length).toBeGreaterThanOrEqual(1);
       expect(plugins.get('dummy2')[0].pluginName).toEqual('Dummy Plugin 2');
 
-      await runStartupPlugins(clientOpts);
+      await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
         clientOpts.config.connections['my connection 2'][
           'NEW_VAR_ADDED_TO_CONNECTION_2'
@@ -193,12 +193,13 @@ describe('Plugin Manager', () => {
       expect(plugins.get('dummy2').length).toBeGreaterThanOrEqual(1);
       expect(plugins.get('dummy2')[0].pluginName).toEqual('Dummy Plugin 2');
 
-      await runStartupPlugins(clientOpts);
+      await runStartupPlugins(clientOpts, 'my connection');
       expect(
         clientOpts.config.connections['my connection'][
           'NEW_VAR_ADDED_TO_CONNECTION'
         ],
       ).toEqual('access-token');
+      await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
         clientOpts.config.connections['my connection 2'][
           'NEW_VAR_ADDED_TO_CONNECTION_2'
@@ -274,17 +275,19 @@ describe('Plugin Manager', () => {
         'Second Dummy 3 Plugin',
       );
 
-      await runStartupPlugins(clientOpts);
+      await runStartupPlugins(clientOpts, 'my connection');
       expect(
         clientOpts.config.connections['my connection'][
           'NEW_VAR_ADDED_TO_CONNECTION'
         ],
       ).toEqual('access-token');
+      await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
         clientOpts.config.connections['my connection 2'][
           'NEW_VAR_ADDED_TO_CONNECTION_2'
         ],
       ).toEqual('access-token');
+      await runStartupPlugins(clientOpts, 'my connection 3');
       expect(
         clientOpts.config.connections['my connection 3'][
           'NEW_VAR_ADDED_TO_CONNECTION_FROM_DUMMY3_PLUGIN'

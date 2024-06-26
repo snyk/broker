@@ -52,9 +52,11 @@ export const loadBrokerConfig = async (localConfigForTest?) => {
     }
   } catch (error) {
     logger.error({ error }, 'Error loading configuration');
-    const refError = new ReferenceError('Error loading configuration');
+    const refError = new ReferenceError(
+      `Error loading configuration. ${error}`,
+    );
     refError['code'] = 'UNABLE_TO_LOAD_CONFIGURATION';
-    throw error;
+    throw refError;
   }
 
   if (config.caCert) {

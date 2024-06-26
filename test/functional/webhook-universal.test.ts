@@ -28,6 +28,7 @@ describe('proxy requests originating from behind the broker client', () => {
   process.env.API_BASE_URL = `http://localhost:${DEFAULT_TEST_WEB_SERVER_PORT}`;
 
   beforeAll(async () => {
+    process.env.SKIP_REMOTE_CONFIG = 'true';
     tws = await createTestWebServer();
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });

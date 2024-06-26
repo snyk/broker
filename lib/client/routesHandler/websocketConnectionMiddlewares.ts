@@ -59,6 +59,7 @@ export const websocketConnectionSelectorMiddleware = (
         string,
         string
       >[];
+
       const craCompatibleAvailableTypes =
         connections.filter((x) => x.craCompatible).map((x) => x.type) ?? [];
       if (craCompatibleAvailableTypes.length > 0) {

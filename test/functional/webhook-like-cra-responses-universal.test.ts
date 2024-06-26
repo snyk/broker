@@ -31,6 +31,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
+    process.env.SKIP_REMOTE_CONFIG = 'true';
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest4';

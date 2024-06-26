@@ -23,6 +23,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   let metadataArray: unknown[];
 
   beforeAll(async () => {
+    process.env.SKIP_REMOTE_CONFIG = 'true';
     delete process.env.BROKER_SERVER_URL;
     delete process.env.GITHUB_TOKEN;
     delete process.env.GITHUB_TOKEN_POOL;

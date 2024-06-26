@@ -24,16 +24,22 @@ export const openHandler = (
     metadata['supportedIntegrationType'] =
       identifyingMetadata.supportedIntegrationType;
   }
-  logger.debug(
+  logger.info(
     {
       url: clientOps.config.brokerServerUrl,
       serverId: identifyingMetadata.serverId ?? clientOps.config.serverId ?? '',
       token: clientOps.config.universalBrokerEnabled
         ? identifyingMetadata.identifier
         : clientOps.config.brokerToken,
-      metadata,
+      // metadata,
     },
     'successfully established a websocket connection to the broker server',
+  );
+  logger.debug(
+    {
+      metadata,
+    },
+    'Loaded rules',
   );
   const clientData = {
     token: clientOps.config.universalBrokerEnabled

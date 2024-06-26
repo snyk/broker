@@ -33,9 +33,9 @@ const brokerClientUrlCheck = (config: Config): Check => {
 
 const universalBrokerConnectionsCheck = (config: Config): Check => {
   return {
-    id: 'universal-broker-connections-config-validation',
-    name: 'Universal Broker Client Connections Configuration Check',
-    enabled: config.universalBrokerEnabled,
+    id: 'local-universal-broker-connections-config-validation',
+    name: 'Local Universal Broker Client Connections Configuration Check',
+    enabled: config.universalBrokerEnabled && config.SKIP_REMOTE_CONFIG,
     check: function (): CheckResult {
       return validateUniversalConnectionsConfig(
         { id: this.id, name: this.name },
