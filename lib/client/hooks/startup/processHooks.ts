@@ -40,6 +40,21 @@ export const validateMinimalConfig = async (
     error['code'] = 'MISSING_BROKER_SERVER_URL';
     throw error;
   }
+  if (
+    clientOpts.config.universalBrokerEnabled &&
+    !clientOpts.config.SKIP_REMOTE_CONFIG &&
+    (!clientOpts.config.clientId || !clientOpts.config.clientSecret)
+  ) {
+    logger.error(
+      {},
+      '[MISSING_CREDENTIALS] ClientId and ClientSecret are required for Universal Broker usage.',
+    );
+    const error = new ReferenceError(
+      'ClientId + ClientSecret are required for Universal Broker usage.',
+    );
+    error['code'] = 'MISSING_CREDENTIALS';
+    throw error;
+  }
 };
 
 export const processStartUpHooks = async (
