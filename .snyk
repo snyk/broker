@@ -12,4 +12,9 @@ ignore:
         reason: No fix from RHEL available
         expires: 2024-05-14T11:13:13.154Z
         created: 2024-05-07T11:13:13.157Z
+  SNYK-JS-WS-7266574:
+    - '*':
+        reason: Mitigated in code
+        expires: 2024-07-26T21:59:20.738Z
+        created: 2024-06-26T21:59:20.744Z
 patch: {}

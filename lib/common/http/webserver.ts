@@ -80,6 +80,7 @@ export const webserver = (config, altPort: number) => {
         },
         app,
       );
+  server.maxHeadersCount = 0; // fix https://security.snyk.io/vuln/SNYK-JS-WS-7266574
   server.requestTimeout = process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT
     ? parseInt(process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT)
     : 600000;
