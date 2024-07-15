@@ -34,6 +34,30 @@ export const findProjectRoot = (startDir: string): string | null => {
   return null;
 };
 
+export const findPluginFolder = async (
+  dirPath: string,
+  targetFolder: string,
+): Promise<string | null> => {
+  const files = await fs.promises.readdir(dirPath);
+
+  for (const file of files) {
+    const filePath = path.join(dirPath, file);
+    const stat = await fs.promises.stat(filePath);
+
+    if (stat.isDirectory()) {
+      if (file === targetFolder) {
+        return filePath;
+      }
+      const result = await findPluginFolder(filePath, targetFolder);
+      if (result) {
+        return result;
+      }
+    }
+  }
+
+  return null;
+};
+
 export const loadBrokerConfig = async (localConfigForTest?) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),

@@ -26,9 +26,9 @@ import { loadAllFilters } from '../common/filter/filtersAsync';
 import { ClientOpts, LoadedClientOpts } from '../common/types/options';
 import { websocketConnectionSelectorMiddleware } from './routesHandler/websocketConnectionMiddlewares';
 import { getClientConfigMetadata } from './config/configHelpers';
-import { findProjectRoot } from '../common/config/config';
 import { loadPlugins } from './brokerClientPlugins/pluginManager';
 import { manageWebsocketConnections } from './connectionsManager/manager';
+import { findPluginFolder } from '../common/config/config';
 
 process.on('uncaughtException', (error) => {
   if (error.message == 'read ECONNRESET') {
@@ -65,11 +65,16 @@ export const main = async (clientOpts: ClientOpts) => {
 
     await validateMinimalConfig(clientOpts);
     if (clientOpts.config.universalBrokerEnabled) {
-      const pluginsFolderPath = `${findProjectRoot(
-        __dirname,
-      )}/dist/lib/client/brokerClientPlugins/plugins`;
+      const pluginsFolderPath = await findPluginFolder(
+        __dirname ?? process.cwd(),
+        'brokerClientPlugins',
+      );
+      if (!pluginsFolderPath) {
+        throw new Error('Unable to load plugins - plugins folder not found.');
+      }
+
       clientOpts.config.plugins = await loadPlugins(
-        pluginsFolderPath,
+        `${pluginsFolderPath}/plugins`,
         clientOpts,
       );
     } else {

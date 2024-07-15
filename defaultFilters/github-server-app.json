@@ -355,7 +355,7 @@
         "//": "rate limit check",
         "method": "GET",
         "path": "/rate_limit",
-        "origin": "https://${GITHUB_API}"
+        "origin": "https://x-access-token:${ACCESS_TOKEN}@${GITHUB_API}"
       },
       {
         "//": "allow meta lookup on the api version",

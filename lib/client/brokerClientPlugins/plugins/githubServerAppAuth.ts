@@ -38,7 +38,8 @@ export class Plugin extends BrokerPlugin {
         connectionConfig &&
         (!connectionConfig.GITHUB_APP_CLIENT_ID ||
           !connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH ||
-          !connectionConfig.GITHUB_APP_INSTALLATION_ID)
+          !connectionConfig.GITHUB_APP_INSTALLATION_ID ||
+          !connectionConfig.GITHUB_APP_ID)
       ) {
         throw new Error(
           `Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)`,
@@ -59,7 +60,7 @@ export class Plugin extends BrokerPlugin {
       connectionConfig.JWT_TOKEN = this._getJWT(
         Math.floor(now / 1000), // Current time in seconds
         connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
-        connectionConfig.GITHUB_APP_CLIENT_ID,
+        connectionConfig.GITHUB_APP_ID,
       );
       this._setJWTLifecycleHandler(now, connectionConfig);
 
@@ -71,8 +72,9 @@ export class Plugin extends BrokerPlugin {
       connectionConfig.ACCESS_TOKEN = JSON.parse(
         connectionConfig.accessToken,
       ).token;
-
-      this._setAccessTokenLifecycleHandler(connectionConfig);
+      if (connectionConfig.ACCESS_TOKEN) {
+        this._setAccessTokenLifecycleHandler(connectionConfig);
+      }
     } catch (err) {
       this.logger.error(
         { err },
@@ -87,7 +89,7 @@ export class Plugin extends BrokerPlugin {
   _getJWT(
     nowInSeconds: number,
     privatePemPath: string,
-    githubAppClientId: string,
+    githubAppId: string,
   ): string {
     // Read the contents of the PEM file
     const privatePem = readFileSync(privatePemPath, 'utf8');
@@ -96,9 +98,8 @@ export class Plugin extends BrokerPlugin {
     const payload = {
       iat: nowInSeconds - 60, // Issued at time (60 seconds in the past)
       exp: nowInSeconds + this.JWT_TTL / 1000, // Expiration time (10 minutes from now)
-      iss: githubAppClientId, // GitHub App's client ID
+      iss: githubAppId, // GitHub App's ID
     };
-
     // Generate the JWT
     return sign(payload, privateKey, { algorithm: 'RS256' });
   }
@@ -119,7 +120,7 @@ export class Plugin extends BrokerPlugin {
             connectionConfig.JWT_TOKEN = await this._getJWT(
               Math.floor(timeoutHandlerNow / 1000),
               connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
-              connectionConfig.GITHUB_APP_CLIENT_ID,
+              connectionConfig.GITHUB_APP_ID,
             );
             if (process.env.NODE_ENV != 'test') {
               timeoutHandlerId = setTimeout(
@@ -172,6 +173,11 @@ export class Plugin extends BrokerPlugin {
       };
 
       const oauthResponse = await makeRequestToDownstream(request);
+      if (oauthResponse.statusCode && oauthResponse.statusCode > 299) {
+        throw new Error(
+          `Unexpected error code ${oauthResponse.statusCode}: ${oauthResponse.body}`,
+        );
+      }
       const accessToken = oauthResponse.body ?? '';
       return accessToken;
     } catch (err) {

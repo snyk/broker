@@ -39,6 +39,7 @@ describe('Github Server App Plugin', () => {
 
   it('startUp plugin method errors if invalid pem path', async () => {
     const config = {
+      GITHUB_APP_ID: '123',
       GITHUB_APP_CLIENT_ID: '123',
       GITHUB_APP_INSTALLATION_ID: '123',
       GITHUB_APP_PRIVATE_PEM_PATH: '/invalid/path',

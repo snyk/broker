@@ -10,6 +10,7 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
     clientOpts.config.plugins.set(type, []);
   });
   try {
+    logger.debug({}, `Loading plugins from ${pluginsFolderPath}`);
     if (existsSync(pluginsFolderPath)) {
       const pluginsFiles = await readdir(pluginsFolderPath);
       for (const pluginFile of pluginsFiles.filter((filename) =>
