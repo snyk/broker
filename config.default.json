@@ -31,7 +31,8 @@
     "nexus-cr",
     "digitalocean-cr",
     "gitlab-cr",
-    "google-artifact-cr"
+    "google-artifact-cr",
+    "workload"
   ],
   "BROKER_CLIENT_CONFIGURATION": {
     "common": {
@@ -440,6 +441,15 @@
         "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
+    },
+    "workload": {
+      "validations": [
+      ],
+      "default": {
+      },
+      "required": {
+        "WORKLOAD_INTERNAL_URI": "http://workload-internal-uri"
+      }
     }
   },
   "FILTER_RULES_PATHS": {
@@ -467,6 +477,7 @@
     "nexus-cr":"defaultFilters/container-registry-agent.json",
     "digitalocean-cr":"defaultFilters/container-registry-agent.json",
     "gitlab-cr":"defaultFilters/container-registry-agent.json",
-    "google-artifact-cr":"defaultFilters/container-registry-agent.json"
+    "google-artifact-cr":"defaultFilters/container-registry-agent.json",
+    "workload":"defaultFilters/workload.json"
   }
 }
