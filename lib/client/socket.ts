@@ -54,10 +54,18 @@ export const createWebSocketConnectionPairs = async (
     );
   }
   if (serverId === null) {
-    logger.warn({}, 'could not receive server id from Broker Dispatcher');
+    if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
+      logger.warn({}, 'could not receive server id from Broker Dispatcher');
+    }
     serverId = '';
   } else {
-    logger.info({ serverId }, 'received server id');
+    logger.info(
+      {
+        connection: socketIdentifyingMetadata.friendlyName,
+        serverId: serverId,
+      },
+      'received server id',
+    );
     clientOpts.config.connections[
       `${socketIdentifyingMetadata.friendlyName}`
     ].serverId = serverId;
