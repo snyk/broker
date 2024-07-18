@@ -41,6 +41,13 @@
       },
       "required": {}
     },
+    "acr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
     "apprisk": {
       "validations": [
         {
@@ -88,6 +95,13 @@
       },
       "required": {
         "ARTIFACTORY_URL": "<username>:<password>@<yourdomain.artifactory.com>/artifactory"
+      }
+    },
+    "artifactory-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     },
     "azure-repos": {
@@ -173,6 +187,34 @@
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     },
+    "digitalocean-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "docker-hub": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "ecr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "gcr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
     "github": {
       "validations": [
         {
@@ -196,6 +238,13 @@
       },
       "required": {
         "GITHUB_TOKEN": "<github-token>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     },
@@ -277,6 +326,27 @@
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     },
+    "gitlab-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "google-artifact-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "harbor-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
     "jira": {
       "validations": [
         {
@@ -355,6 +425,20 @@
       },
       "required": {
         "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+      }
+    },
+    "nexus-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "quay-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
       }
     }
   },
