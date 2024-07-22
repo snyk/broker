@@ -278,11 +278,11 @@
     "github-server-app": {
       "validations": [
         {
-          "url": "https://$GITHUB_API/user",
+          "url": "https://$GITHUB_API/installation/repositories?per_page=1&page=1",
           "auth": {
             "type": "header",
             "name": "Authorization",
-            "value": "token $GITHUB_TOKEN"
+            "value": "Bearer $ACCESS_TOKEN"
           }
         }
       ],
