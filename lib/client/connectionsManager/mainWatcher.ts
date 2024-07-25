@@ -5,6 +5,7 @@ import { log as logger } from '../../logs/logger';
 import { createWebSocketConnectionPairs } from '../socket';
 import { runStartupPlugins } from '../brokerClientPlugins/pluginManager';
 import { addTimerToTerminalHandlers } from '../../common/utils/signals';
+import { shutDownConnectionPair } from './connectionHelpers';
 export const setMainWatcher = async (
   clientOpts: LoadedClientOpts,
   websocketConnections: WebSocketConnection[],
@@ -50,16 +51,7 @@ export const setMainWatcher = async (
             },
             `Shutting down unused connection`,
           );
-          websocketConnections[currentWebsocketConnectionIndex].end();
-          websocketConnections[currentWebsocketConnectionIndex].destroy();
-          websocketConnections.splice(currentWebsocketConnectionIndex, 1);
-          const secondTunnelIndex = websocketConnections.findIndex(
-            (websocketConnection) =>
-              websocketConnection.friendlyName == integrationsKeys[i],
-          );
-          websocketConnections[secondTunnelIndex].end();
-          websocketConnections[secondTunnelIndex].destroy();
-          websocketConnections.splice(secondTunnelIndex, 1);
+          shutDownConnectionPair(websocketConnections, i);
         } else {
           logger.info(
             {
@@ -79,6 +71,28 @@ export const setMainWatcher = async (
             { connectionName: integrationsKeys[i] },
             'Creating configured connection.',
           );
+          await runStartupPlugins(clientOpts, integrationsKeys[i]);
+
+          await createWebSocketConnectionPairs(
+            websocketConnections,
+            clientOpts,
+            globalIdentifyingMetadata,
+            integrationsKeys[i],
+          );
+        } else if (
+          // Token rotation for the connection at hand
+          clientOpts.config.connections[`${integrationsKeys[i]}`].identifier !=
+          websocketConnections[currentWebsocketConnectionIndex].identifier
+        ) {
+          logger.info(
+            { connectionName: integrationsKeys[i] },
+            'Updating configured connection for new identifier.',
+          );
+          // shut down previous tunnels
+          shutDownConnectionPair(websocketConnections, i);
+
+          // setup new tunnels
+
           await runStartupPlugins(clientOpts, integrationsKeys[i]);
 
           await createWebSocketConnectionPairs(

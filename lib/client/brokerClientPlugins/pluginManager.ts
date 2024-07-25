@@ -62,12 +62,6 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
     string,
     BrokerPlugin[]
   >;
-
-  // const connectionsKeys = clientOpts.config.connections
-  //   ? Object.keys(clientOpts.config.connections)
-  //   : [];
-
-  // for (const connectionKey of connectionsKeys) {
   if (
     loadedPlugins.has(`${clientOpts.config.connections[connectionKey].type}`)
   ) {
@@ -81,7 +75,6 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
       );
     }
   }
-  // }
 };
 
 export const runPreRequestPlugins = async (
