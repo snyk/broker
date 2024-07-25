@@ -287,6 +287,7 @@
         }
       ],
       "default": {
+        "enableUrlVarsSubstitution": true,
         "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_GRAPHQL": "$GITHUB/api",
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",

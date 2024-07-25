@@ -127,6 +127,23 @@ export const prepareRequestFromFilterResult = async (
     }
   }
 
+  const connectionConfig = options.config.universalBrokerEnabled
+    ? getConfigForIdentifier(brokerToken, options.config)
+    : options.config;
+  if (connectionConfig.enableUrlVarsSubstitution) {
+    const regexPattern = /\$[A-Za-z0-9_%]+/g;
+    const matches = result.url.match(regexPattern);
+    if (matches) {
+      for (const pathPart of matches) {
+        const source = replace(
+          `${pathPart.replace('$', '${')}}`,
+          connectionConfig,
+        ); // replace the variables
+        result.url = result.url.replace(pathPart, source);
+      }
+    }
+  }
+
   // remove headers that we don't want to relay
   // (because they corrupt the request)
   const headersToRemove = [
