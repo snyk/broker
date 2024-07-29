@@ -15,6 +15,6 @@ ignore:
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
-        expires: 2024-07-26T21:59:20.738Z
+        expires: 2024-08-26T21:59:20.738Z
         created: 2024-06-26T21:59:20.744Z
 patch: {}
