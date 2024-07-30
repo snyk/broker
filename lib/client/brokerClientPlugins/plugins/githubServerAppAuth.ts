@@ -5,6 +5,7 @@ import { createPrivateKey } from 'node:crypto';
 import { sign } from 'jsonwebtoken';
 import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
 import { makeRequestToDownstream } from '../../../common/http/request';
+import { maskSCMToken } from '../../../common/utils/token';
 export class Plugin extends BrokerPlugin {
   // Plugin Code and Name must be unique across all plugins.
   pluginCode = 'GITHUB_SERVER_APP_PLUGIN';
@@ -62,6 +63,9 @@ export class Plugin extends BrokerPlugin {
         connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
         connectionConfig.GITHUB_APP_ID,
       );
+      if (!connectionConfig.JWT_TOKEN) {
+        throw new Error(`GHSA Plugin Error: could not get JWT.`);
+      }
       this._setJWTLifecycleHandler(now, connectionConfig);
 
       connectionConfig.accessToken = await this._getAccessToken(
@@ -69,11 +73,16 @@ export class Plugin extends BrokerPlugin {
         connectionConfig.GITHUB_APP_INSTALLATION_ID,
         connectionConfig.JWT_TOKEN,
       );
+      if (!connectionConfig.accessToken) {
+        throw new Error(`GHSA Plugin Error: could not get Access Token.`);
+      }
       connectionConfig.ACCESS_TOKEN = JSON.parse(
         connectionConfig.accessToken,
       ).token;
       if (connectionConfig.ACCESS_TOKEN) {
         this._setAccessTokenLifecycleHandler(connectionConfig);
+      } else {
+        throw new Error(`GHSA Plugin Error: could not extract access token.`);
       }
     } catch (err) {
       this.logger.error(
@@ -122,6 +131,9 @@ export class Plugin extends BrokerPlugin {
               connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
               connectionConfig.GITHUB_APP_ID,
             );
+            if (!connectionConfig.JWT_TOKEN) {
+              throw new Error(`GHSA Plugin Error: could not  refreshed JWT.`);
+            }
             if (process.env.NODE_ENV != 'test') {
               timeoutHandlerId = setTimeout(
                 timeoutHandler,
@@ -208,6 +220,17 @@ export class Plugin extends BrokerPlugin {
           connectionConfig.ACCESS_TOKEN = JSON.parse(
             connectionConfig.accessToken,
           ).token;
+
+          if (!connectionConfig.accessToken) {
+            throw new Error(
+              `GHSA Plugin Error: could not get refreshed Access Token.`,
+            );
+          } else {
+            this.logger.debug(
+              { accessToken: maskSCMToken(connectionConfig.accessToken) },
+              `Access token renewed!`,
+            );
+          }
           this.logger.debug(
             { plugin: this.pluginCode },
             `Refreshed access token expires at ${
