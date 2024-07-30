@@ -3,7 +3,7 @@
       {
         "//": "used for pushing up webhooks from github",
         "method": "POST",
-        "path": "/webhook/github",
+        "path": "/webhook/github-server-app",
         "valid": [
           {
             "//": "accept all pull request state changes (these don't have files in them)",
@@ -295,7 +295,7 @@
       {
         "//": "used for pushing up webhooks from github",
         "method": "POST",
-        "path": "/webhook/github/:webhookId"
+        "path": "/webhook/github-server-app/:webhookId"
       }
     ],
     "private": [
