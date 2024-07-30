@@ -13,7 +13,7 @@ export interface BrokerConnectionAttributes {
     type: string;
   };
   name: string;
-  identifier: string;
+  identifier: string | null;
   deployment_id: string;
   secrets?: {
     primary: {
