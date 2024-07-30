@@ -3,6 +3,7 @@ import { findProjectRoot } from '../../../../lib/common/config/config';
 import nock from 'nock';
 import { delay } from '../../../helpers/utils';
 import { getConfig } from '../../../../lib/common/config/config';
+import { PostFilterPreparedRequest } from '../../../../lib/common/relay/prepareRequest';
 
 describe('Github Server App Plugin', () => {
   const pluginsFixturesFolderPath = `${findProjectRoot(
@@ -179,5 +180,25 @@ describe('Github Server App Plugin', () => {
     await delay(100);
     expect(JSON.parse(config.accessToken)).toEqual(renewedDummyAccessToken);
     clearTimeout(config['accessTokenTimeoutHandlerId']);
+  });
+
+  it('Test Prerequest url var interpolation', async () => {
+    const config = {};
+    const plugin = new Plugin(config);
+    const postFilterPreparedRequest: PostFilterPreparedRequest = {
+      url: 'https://hostname/path/test/with/installationid/$GITHUB_INSTALLATION_ID/rest/of/path',
+      headers: {},
+      method: '',
+    };
+
+    const preequest = await plugin.preRequest(
+      { GITHUB_INSTALLATION_ID: '123' },
+      postFilterPreparedRequest,
+    );
+    expect(preequest).toStrictEqual({
+      url: 'https://hostname/path/test/with/installationid/123/rest/of/path',
+      headers: {},
+      method: '',
+    });
   });
 });
