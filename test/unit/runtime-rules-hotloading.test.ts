@@ -11,6 +11,15 @@ const scmRulesToTest = [
   'github-enterprise',
   'gitlab',
 ];
+const scmUniversalRulesToTest = [
+  'azure-repos',
+  'bitbucket-server',
+  'bitbucket-server-bearer-auth',
+  'github',
+  'github-enterprise',
+  'github-server-app',
+  'gitlab',
+];
 
 describe('filter Rules Loading', () => {
   test.each(scmRulesToTest)(
@@ -22,7 +31,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -42,7 +51,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -63,7 +72,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -84,7 +93,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -105,7 +114,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -126,7 +135,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -148,7 +157,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -170,7 +179,7 @@ describe('filter Rules Loading', () => {
           brokerType: 'client',
           supportedBrokerTypes: [],
           accept: 'accept.json.sample',
-          filterRulesPath: {},
+          filterRulesPaths: {},
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -192,7 +201,7 @@ describe('filter Rules Loading', () => {
         brokerType: 'client',
         supportedBrokerTypes: scmRulesToTest,
         accept: 'accept.json.sample',
-        filterRulesPath: {},
+        filterRulesPaths: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
       const loadedRules = loadFilterRules(
@@ -217,7 +226,7 @@ describe('filter Rules Loading', () => {
         brokerType: 'client',
         supportedBrokerTypes: scmRulesToTest,
         accept: 'accept.json.sample',
-        filterRulesPath: {},
+        filterRulesPaths: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
       const loadedRules = loadFilterRules(
@@ -228,6 +237,44 @@ describe('filter Rules Loading', () => {
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_CUSTOM_PR_TEMPLATES;
       delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+      delete process.env.ACCEPT;
+    },
+  );
+
+  test.each(scmUniversalRulesToTest)(
+    'Injection of valid Git rules - Universal Broker - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_GIT = 'true';
+      process.env.ACCEPT = 'accept.json';
+      const filterRulesPath = {};
+      for (const type of scmUniversalRulesToTest) {
+        filterRulesPath[`${type}`] = `defaultFilters/${type}.json`;
+      }
+      const loadedRules = loadFilterRules({
+        brokerType: 'client',
+        supportedBrokerTypes: scmUniversalRulesToTest,
+        filterRulesPaths: filterRulesPath,
+        universalBrokerEnabled: true,
+      });
+      expect(
+        loadedRules[folder].private.filter((x) =>
+          x.path.includes('*/git-upload-pack'),
+        ),
+      ).toHaveLength(1);
+      if (folder == 'github-server-app') {
+        expect(
+          loadedRules[folder].private.filter((x) =>
+            x.origin.includes('x-access-token'),
+          ),
+        ).toHaveLength(2);
+        expect(
+          loadedRules[folder].private.filter(
+            (x) => x.origin.includes('x-access-token') && x.auth,
+          ),
+        ).toHaveLength(0);
+      }
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_GIT;
       delete process.env.ACCEPT;
     },
   );
