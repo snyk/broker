@@ -86,7 +86,7 @@
     "primus-emitter": "^3.1.1",
     "prom-client": "^11.5.3",
     "proxy-from-env": "^1.1.0",
-    "qs": "^6.12.2",
+    "qs": "^6.12.3",
     "snyk-config": "^4.0.0",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
