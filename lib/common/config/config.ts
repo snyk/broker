@@ -10,7 +10,7 @@ let config: Record<string, any> = {};
 export interface CONFIG {
   supportedBrokerTypes: string[];
   brokerType: 'client' | 'server';
-  filterRulesPath: { [key: string]: string };
+  filterRulesPaths: { [key: string]: string };
 }
 
 export const getConfig = () => {

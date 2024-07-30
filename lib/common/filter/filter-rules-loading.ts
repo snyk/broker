@@ -164,6 +164,17 @@ function injectRulesAtRuntime(
           'https://${GITLAB}',
           'https://oauth2:${GITLAB_TOKEN}@${GITLAB}',
         );
+      if (
+        templateGET.origin == 'https://${GITHUB}' &&
+        templateGET.auth.token == '${ACCESS_TOKEN}'
+      ) {
+        // GHSA case
+        templateGET.origin = templateGET.origin.replace(
+          'https://${GITHUB}',
+          'https://x-access-token:${ACCESS_TOKEN}@${GITHUB}',
+        );
+        delete templateGET.auth;
+      }
       const templatePOST = nestedCopy(templateGET);
 
       templatePOST.method = 'POST';
@@ -303,7 +314,6 @@ export default (
   if (config.universalBrokerEnabled) {
     filters = new Map();
     const supportedBrokerTypes = config.supportedBrokerTypes;
-
     supportedBrokerTypes.forEach((type) => {
       filters[type] = yaml.safeLoad(
         fs.readFileSync(

@@ -46811,6 +46811,20 @@ Object {
 }
 `;
 
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing azure-repos 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing bitbucket-server 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing bitbucket-server-bearer-auth 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github-enterprise 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github-server-app 1`] = `Map {}`;
+
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing gitlab 1`] = `Map {}`;
+
 exports[`filter Rules Loading Injection of valid IAC extensions - Testing azure-repos 1`] = `
 Object {
   "private": Array [
