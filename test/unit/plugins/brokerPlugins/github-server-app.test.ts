@@ -2,6 +2,7 @@ import { Plugin } from '../../../../lib/client/brokerClientPlugins/plugins/githu
 import { findProjectRoot } from '../../../../lib/common/config/config';
 import nock from 'nock';
 import { delay } from '../../../helpers/utils';
+import { getConfig } from '../../../../lib/common/config/config';
 
 describe('Github Server App Plugin', () => {
   const pluginsFixturesFolderPath = `${findProjectRoot(
@@ -125,6 +126,8 @@ describe('Github Server App Plugin', () => {
       GITHUB_APP_CLIENT_ID: dummyAppClientId,
       JWT_TOKEN: `${jwt}`,
     };
+    const globalConfig = getConfig();
+    globalConfig['connections'] = { 'test connection': {} };
     const plugin = new Plugin(config);
     plugin.JWT_TTL = 10; // overriding for testing
     const now = Date.now();
@@ -169,6 +172,8 @@ describe('Github Server App Plugin', () => {
       GITHUB_APP_INSTALLATION_ID: dummyAppInstallId,
       JWT_TOKEN: `${jwt}`,
     };
+    const globalConfig = getConfig();
+    globalConfig['connections'] = { 'test connection': {} };
     const plugin = new Plugin(config);
     plugin._setAccessTokenLifecycleHandler(config);
     await delay(100);
