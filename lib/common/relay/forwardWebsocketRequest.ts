@@ -160,7 +160,7 @@ export const forwardWebSocketRequest = (
       emit = legacyOverrideEmit;
     }
 
-    const simplifiedContext = logContext;
+    const simplifiedContext = structuredClone(logContext);
     delete simplifiedContext.requestHeaders;
     logger.info(
       simplifiedContext,
