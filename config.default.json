@@ -297,6 +297,7 @@
       },
       "required": {
         "GITHUB": "ghe.yourdomain.com",
+        "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_APP_ID": "APP_ID",
         "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
         "GITHUB_APP_CLIENT_ID": "123",

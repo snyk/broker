@@ -3,6 +3,7 @@ import { log as logger } from '../../logs/logger';
 import BrokerPlugin from './abstractBrokerPlugin';
 import { existsSync } from 'fs';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { getPluginsConfig } from '../../common/config/pluginsConfig';
 
 export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
   clientOpts.config['plugins'] = new Map<string, unknown>();
@@ -62,6 +63,7 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
     string,
     BrokerPlugin[]
   >;
+  const pluginsConfig = getPluginsConfig();
   if (
     loadedPlugins.has(`${clientOpts.config.connections[connectionKey].type}`)
   ) {
@@ -70,8 +72,10 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
         `${clientOpts.config.connections[connectionKey].type}`,
       ) ?? [];
     for (let i = 0; i < pluginInstances.length; i++) {
+      pluginsConfig[connectionKey] = {};
       await pluginInstances[i].startUp(
         clientOpts.config.connections[connectionKey],
+        pluginsConfig[connectionKey],
       );
     }
   }
@@ -87,6 +91,7 @@ export const runPreRequestPlugins = async (
     string,
     BrokerPlugin[]
   >;
+  const pluginsConfig = getPluginsConfig();
   const connectionsKeys = Object.keys(clientOpts.config.connections);
   let connectionKey;
   for (let i = 0; i < connectionsKeys.length; i++) {
@@ -115,6 +120,7 @@ export const runPreRequestPlugins = async (
       preRequest = await pluginInstances[i].preRequest(
         clientOpts.config.connections[connectionKey],
         preRequest,
+        pluginsConfig[connectionKey] ?? {},
       );
     }
   }
