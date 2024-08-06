@@ -1,0 +1,25 @@
+{
+    repository(owner: "test-org", name: "test-repo") {
+        pullRequest(number: 1) {
+        reviewThreads(first: 10) {
+            nodes {
+            id,
+            comments(first:1) {
+                nodes {
+                    id,
+                    pullRequestReview {
+                        id
+                    }
+                }
+            }
+            },
+            pageInfo {
+                hasNextPage,
+                hasPreviousPage,
+                endCursor,
+                startCursor
+            }
+        }
+        }
+    }
+}
