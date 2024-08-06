@@ -2118,6 +2118,48 @@
         "method": "POST",
         "path": "/graphql",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_GRAPHQL}"
+      },
+      {
+        "//": "create a general pull request comment",
+        "method": "POST",
+        "path": "/pull-request/:pullRef/comments",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "update a general pull request comment",
+        "method": "PUT",
+        "path": "/pull-request/:pullRef/comments/:commentId",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "create a pull request review",
+        "method": "POST",
+        "path": "/pull-request/:pullRef/reviews",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "get the review threads of a pull request",
+        "method": "GET",
+        "path": "/pull-request/:pullRef/threads",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "resolve a pull request review thread",
+        "method": "POST",
+        "path": "/pull-request/:pullRef/threads/:threadId/resolve",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "get the files and lines that are within a pull request diff",
+        "method": "GET",
+        "path": "/pull-request/:pullRef/commentable-lines",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "create a pull request file comment",
+        "method": "POST",
+        "path": "/pull-request/:pullRef/file-comment",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       }
     ]
   }
