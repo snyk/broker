@@ -166,12 +166,12 @@ function injectRulesAtRuntime(
         );
       if (
         templateGET.origin == 'https://${GITHUB}' &&
-        templateGET.auth.token == '${ACCESS_TOKEN}'
+        templateGET.auth.token == '${GHSA_ACCESS_TOKEN}'
       ) {
         // GHSA case
         templateGET.origin = templateGET.origin.replace(
           'https://${GITHUB}',
-          'https://x-access-token:${ACCESS_TOKEN}@${GITHUB}',
+          'https://x-access-token:${GHSA_ACCESS_TOKEN}@${GITHUB}',
         );
         delete templateGET.auth;
       }
