@@ -100,6 +100,11 @@
   "bugs": {
     "url": "https://github.com/snyk/broker/issues"
   },
+  "overrides": {
+    "engine.io-client": {
+      "ws": "7.5.10"
+    }
+  },
   "homepage": "https://github.com/snyk/broker#readme",
   "snyk": true,
   "pkg": {
