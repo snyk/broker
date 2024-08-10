@@ -186,8 +186,10 @@ function injectRulesAtRuntime(
         filters.private.filter(
           (entry) =>
             entry.method === 'GET' &&
-            SNIPPETS_CODE_SCM_ORIGINS.filter((origin) =>
-              entry.origin?.includes(`{${origin}}`),
+            SNIPPETS_CODE_SCM_ORIGINS.filter(
+              (origin) =>
+                entry.origin?.includes(`{${origin}}`) &&
+                entry.auth?.token != '${JWT_TOKEN}',
             ).length > 0,
         )[0],
       );
@@ -204,6 +206,9 @@ function injectRulesAtRuntime(
           templateGET.path = '*/info/refs*';
           templateGETForSnippets.path = '/repos/:name/:repo/contents/:path';
           templatePOST.path = '*/git-upload-pack';
+          // if(templateGETForSnippets.auth && templateGETForSnippets.auth.token && templateGETForSnippets.auth.token === '${JWT_TOKEN}'){
+          //   templateGETForSnippets.auth.token === '${GHSA_ACCESS_TOKEN}'
+          // }
           break;
         case 'GITLAB':
           templateGET.path = '*/info/refs*';
