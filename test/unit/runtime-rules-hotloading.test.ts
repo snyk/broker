@@ -272,6 +272,13 @@ describe('filter Rules Loading', () => {
             (x) => x.origin.includes('x-access-token') && x.auth,
           ),
         ).toHaveLength(0);
+        expect(
+          loadedRules[folder].private.filter(
+            (x) =>
+              x.auth?.token === '${JWT_TOKEN}' &&
+              x['//'] === 'needed to load code snippets',
+          ),
+        ).toHaveLength(0);
       }
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_GIT;
