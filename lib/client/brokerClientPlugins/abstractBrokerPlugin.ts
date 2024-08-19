@@ -1,3 +1,4 @@
+import { getPluginsConfig } from '../../common/config/pluginsConfig';
 import {
   HttpResponse,
   makeRequestToDownstream,
@@ -13,6 +14,8 @@ export default abstract class BrokerPlugin {
   abstract applicableBrokerTypes: Array<string>;
   logger;
   brokerClientConfiguration: Record<string, any>;
+  pluginsConfig: Record<string, any>;
+
   makeRequestToDownstream: (
     req: PostFilterPreparedRequest,
     retries?: any,
@@ -23,6 +26,7 @@ export default abstract class BrokerPlugin {
     this.logger = logger;
     this.brokerClientConfiguration = brokerClientCfg;
     this.makeRequestToDownstream = makeRequestToDownstream;
+    this.pluginsConfig = getPluginsConfig();
   }
 
   getApplicableTypes(): Array<string> {
@@ -46,12 +50,23 @@ export default abstract class BrokerPlugin {
   }
   abstract isPluginActive(): boolean;
 
-  abstract startUp(connectionConfiguration: Record<string, any>): Promise<void>;
+  abstract startUp(
+    connectionConfiguration: Record<string, any>,
+    pluginsConfig?: Record<any, string>,
+  ): Promise<void>;
 
   async preRequest(
     connectionConfiguration: Record<string, any>,
     postFilterPreparedRequest: PostFilterPreparedRequest,
+    pluginsConfig?: Record<any, string>,
   ): Promise<PostFilterPreparedRequest> {
+    logger.trace(
+      {
+        connectionConfig: connectionConfiguration,
+        pluginsConfig: pluginsConfig,
+      },
+      'Abstract preRequest Plugin',
+    );
     return postFilterPreparedRequest;
   }
 }
