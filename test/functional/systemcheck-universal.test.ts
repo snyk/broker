@@ -409,9 +409,6 @@ describe('broker client systemcheck endpoint', () => {
       `http://localhost:${bc.port}/systemcheck`,
       {
         timeout: 10_000,
-        headers: {
-          'Content-Type': 'application/json',
-        },
       },
     );
 
