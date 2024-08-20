@@ -407,7 +407,9 @@ describe('broker client systemcheck endpoint', () => {
 
     const response = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
-      { timeout: 10_000 },
+      {
+        timeout: 10_000,
+      },
     );
 
     expect(response.data).toBeInstanceOf(Array);
