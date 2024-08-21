@@ -31,7 +31,7 @@ const restApiStatusCheck = (config: Config): HttpCheck => {
   return {
     id: 'rest-api-status',
     name: 'REST API Healthcheck',
-    enabled: true,
+    enabled: config.BROKER_HA_MODE_ENABLED === 'true',
 
     url: `${config.API_BASE_URL}/rest/openapi`,
     method: 'GET',
