@@ -40,7 +40,7 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       }
       validationResults.push(result);
     }
-    res.status(isValidationPassing ? 200 : 500).send(validationResults);
+    res.status(isValidationPassing ? 200 : 500).json(validationResults);
   } else {
     const brokerClientValidationMethod =
       clientOpts.config.brokerClientValidationMethod || 'GET';
