@@ -1992,6 +1992,36 @@
           "scheme": "bearer",
           "token": "${GHSA_ACCESS_TOKEN}"
         }
+      },
+      {
+        "//": "create a general pull request comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "update a general pull request comment",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/issues/comments/:commentId",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "create a pull request review",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
       }
     ]
   }

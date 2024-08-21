@@ -45,6 +45,42 @@ describe('filters', () => {
         });
         expect(filterResponse).toBeFalsy();
       });
+
+      it('should allow creating a general pull request comment', () => {
+        const url = '/repos/test-org/test-repo/issues/1/comments';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating a general pull request comment', () => {
+        const url = '/repos/test-org/test-repo/issues/comments/12345';
+
+        const filterResponse = filter({
+          url,
+          method: 'PATCH',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow creating a pull request review', () => {
+        const url = '/repos/test-org/test-repo/pulls/:pullRef/reviews';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
   });
 
@@ -237,6 +273,36 @@ describe('filters', () => {
             query: readFileSync(
               __dirname +
                 '/../fixtures/client/github/graphql/find-pull-requests-closed.txt',
+            ).toString('utf-8'),
+          }),
+        });
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toEqual('/graphql');
+      });
+
+      it('find pull request threads', () => {
+        const filterResponse = filter({
+          url: '/graphql',
+          method: 'POST',
+          body: jsonBuffer({
+            query: readFileSync(
+              __dirname +
+                '/../fixtures/client/github/graphql/find-pull-request-threads.txt',
+            ).toString('utf-8'),
+          }),
+        });
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toEqual('/graphql');
+      });
+
+      it('resolve pull request thread', () => {
+        const filterResponse = filter({
+          url: '/graphql',
+          method: 'POST',
+          body: jsonBuffer({
+            query: readFileSync(
+              __dirname +
+                '/../fixtures/client/github/graphql/resolve-pull-request-thread.txt',
             ).toString('utf-8'),
           }),
         });

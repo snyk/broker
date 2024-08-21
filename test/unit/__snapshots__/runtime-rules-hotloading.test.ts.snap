@@ -4212,6 +4212,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -5628,6 +5646,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to get custom pull request template",
@@ -12183,6 +12219,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to get repo's teams list",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -13647,6 +13701,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to get repo's teams list",
@@ -19997,6 +20069,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to get given manifest file",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -21407,6 +21497,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to get given manifest file",
@@ -27766,6 +27874,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
@@ -29188,6 +29314,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -35623,6 +35767,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -37057,6 +37219,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to scan IAC files",
@@ -43470,6 +43650,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
@@ -44892,6 +45090,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -54077,6 +54293,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -56263,6 +56497,24 @@ Object {
       "path": "/graphql",
     },
     Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -57691,6 +57943,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to scan IAC files",
@@ -59157,6 +59427,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
       "//": "used to scan IAC files",
@@ -67103,6 +67391,24 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
     },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
   ],
   "public": Array [
     Object {
@@ -68508,6 +68814,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
   ],
   "public": Array [
@@ -74767,6 +75091,24 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
     },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
   ],
   "public": Array [
     Object {
@@ -76172,6 +76514,24 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_GRAPHQL}",
       "path": "/graphql",
+    },
+    Object {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+    },
+    Object {
+      "//": "update a general pull request comment",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/comments/:commentId",
+    },
+    Object {
+      "//": "create a pull request review",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
   ],
   "public": Array [

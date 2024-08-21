@@ -1,0 +1,12 @@
+mutation
+    {
+        resolveReviewThread(input: { threadId: "thread_id" }) {
+        thread {
+            comments(first: 1) {
+            nodes {
+                id
+            }
+            }
+        }
+        }
+    }
