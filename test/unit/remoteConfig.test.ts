@@ -11,7 +11,7 @@ describe('Remote config helpers', () => {
     nock('http://restapihostname')
       .persist()
       .get(
-        `/rest/tenants/12345/brokers/installs/12345/deployments/67890/connections?version=2024-04-02~experimental`,
+        `/hidden/brokers/deployments/67890/connections?version=2024-04-02~experimental`,
       )
       .reply(() => {
         return [
@@ -39,7 +39,7 @@ describe('Remote config helpers', () => {
         ];
       })
       .get(
-        `/rest/tenants/12345/brokers/installs/12345/deployments/67891/connections?version=2024-04-02~experimental`,
+        `/hidden/brokers/deployments/67891/connections?version=2024-04-02~experimental`,
       )
       .reply(() => {
         return [
@@ -75,17 +75,13 @@ describe('Remote config helpers', () => {
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
   });
-  it('Retrieve connections from install ID and deployment ID', async () => {
+  it('Retrieve connections from deployment ID', async () => {
     await loadBrokerConfig();
     let config = getConfig();
 
-    const installId = '12345';
-    const tenantId = '12345';
     const deploymentId = '67890';
     const apiVersion = '2024-04-02~experimental';
     const apiBaseUrl = 'http://restapihostname';
-    config.tenantId = tenantId;
-    config.installId = installId;
     config.deploymentId = deploymentId;
     config.apiVersion = apiVersion;
     config.API_BASE_URL = apiBaseUrl;
@@ -120,13 +116,9 @@ describe('Remote config helpers', () => {
     await loadBrokerConfig();
     let config = getConfig();
 
-    const installId = '12345';
-    const tenantId = '12345';
     const deploymentId = '67891';
     const apiVersion = '2024-04-02~experimental';
     const apiBaseUrl = 'http://restapihostname';
-    config.tenantId = tenantId;
-    config.installId = installId;
     config.deploymentId = deploymentId;
     config.apiVersion = apiVersion;
     config.API_BASE_URL = apiBaseUrl;

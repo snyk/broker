@@ -9,12 +9,10 @@ export const retrieveConnectionsForDeployment = async (
   clientOpts: ClientOpts,
   universalFilePath: string,
 ) => {
-  const tenantId = clientOpts.config.tenantId;
-  const installId = clientOpts.config.installId;
   const deploymentId = clientOpts.config.deploymentId;
   const apiVersion = clientOpts.config.apiVersion;
   const request: PostFilterPreparedRequest = {
-    url: `${clientOpts.config.API_BASE_URL}/rest/tenants/${tenantId}/brokers/installs/${installId}/deployments/${deploymentId}/connections?version=${apiVersion}`,
+    url: `${clientOpts.config.API_BASE_URL}/hidden/brokers/deployments/${deploymentId}/connections?version=${apiVersion}`,
     headers: {
       'Content-Type': 'application/vnd.api+json',
       Authorization: `${clientOpts.accessToken?.authHeader}`,
@@ -25,7 +23,7 @@ export const retrieveConnectionsForDeployment = async (
   if (connectionsResponse.statusCode != 200) {
     if (connectionsResponse.statusCode == 404) {
       throw new Error(
-        `No deployment found for tenant ${tenantId} install ${installId}. You must create a deployment first.`,
+        `No deployment found. You must create a deployment first.`,
       );
     } else {
       const errorBody = JSON.parse(connectionsResponse.body);
