@@ -29,6 +29,7 @@ export interface PostFilterPreparedRequest {
   headers: Object;
   method: string;
   body?: any;
+  timeoutMs?: number;
 }
 
 export const prepareRequestFromFilterResult = async (
