@@ -2,7 +2,7 @@ import { executeHttpRequest } from './http-executor';
 import type { CheckResult, HttpCheck } from '../types';
 import type { Config } from '../../types/config';
 
-const defaultTimeoutMs = 1_000;
+const defaultTimeoutMs = 5_000;
 
 export function getHttpChecks(config: Config): HttpCheck[] {
   return [brokerServerStatusCheck(config), restApiStatusCheck(config)];
@@ -26,7 +26,7 @@ const brokerServerStatusCheck = (config: Config): HttpCheck => {
     },
   } satisfies HttpCheck;
 };
-console.log ("here now")
+
 const restApiStatusCheck = (config: Config): HttpCheck => {
   return {
     id: 'rest-api-status',
