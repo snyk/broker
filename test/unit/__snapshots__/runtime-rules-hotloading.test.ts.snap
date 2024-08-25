@@ -47035,6 +47035,8 @@ exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - 
 
 exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github 1`] = `Map {}`;
 
+exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github-cloud-app 1`] = `Map {}`;
+
 exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github-enterprise 1`] = `Map {}`;
 
 exports[`filter Rules Loading Injection of valid Git rules - Universal Broker - Testing github-server-app 1`] = `Map {}`;

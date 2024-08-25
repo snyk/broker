@@ -17,7 +17,7 @@ export class Plugin extends BrokerPlugin {
     Plugin to retrieve and manage credentials for Brokered Github Server App installs
     `;
   version = '0.1';
-  applicableBrokerTypes = ['github-server-app']; // Must match broker types
+  applicableBrokerTypes = ['github-server-app', 'github-cloud-app']; // Must match broker types
   JWT_TTL = 10 * 60 * 1000;
 
   // Provide a way to include specific conditional logic to execute

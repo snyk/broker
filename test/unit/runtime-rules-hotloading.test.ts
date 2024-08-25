@@ -18,6 +18,7 @@ const scmUniversalRulesToTest = [
   'github',
   'github-enterprise',
   'github-server-app',
+  'github-cloud-app',
   'gitlab',
 ];
 
@@ -261,7 +262,7 @@ describe('filter Rules Loading', () => {
           x.path.includes('*/git-upload-pack'),
         ),
       ).toHaveLength(1);
-      if (folder == 'github-server-app') {
+      if (['github-server-app', 'github-cloud-app'].includes(folder)) {
         expect(
           loadedRules[folder].private.filter((x) =>
             x.origin.includes('x-access-token'),

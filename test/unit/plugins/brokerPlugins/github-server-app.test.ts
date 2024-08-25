@@ -17,7 +17,10 @@ describe('Github Server App Plugin', () => {
       'Github Server App Authentication Plugin',
     );
     expect(plugin.pluginCode).toEqual('GITHUB_SERVER_APP_PLUGIN');
-    expect(plugin.applicableBrokerTypes).toEqual(['github-server-app']);
+    expect(plugin.applicableBrokerTypes).toEqual([
+      'github-server-app',
+      'github-cloud-app',
+    ]);
   });
 
   it('startUp plugin method errors if missing env vars', async () => {

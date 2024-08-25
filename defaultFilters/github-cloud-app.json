@@ -1,0 +1,2027 @@
+{
+    "public": [
+      {
+        "//": "used for pushing up webhooks from github",
+        "method": "POST",
+        "path": "/webhook/github",
+        "valid": [
+          {
+            "//": "accept all pull request state changes (these don't have files in them)",
+            "path": "pull_request.state",
+            "value": "open"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "package.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "package.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "package-lock.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "package-lock.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Gemfile.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "*req*.txt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "*req*.txt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "requirements%2F*.txt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "requirements%2F*.txt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "requirements/*.txt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "requirements/*.txt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "pyproject.toml"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "pyproject.toml"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "poetry.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "poetry.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Pipfile"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Pipfile"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Pipfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Pipfile.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "pom.xml"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.gradle"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "gradle.lockfile"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "gradle.lockfile"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "gradle.properties"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Directory.Build.targets"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Directory.Build.targets"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Packages.props"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Packages.props"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Directory.Build.props"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Directory.Build.props"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "build.sbt"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "yarn.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": ".snyk"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": ".snyk"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "packages.config"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "packages.config"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "*.csproj"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "*.csproj"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "*.vbproj"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "*.vbproj"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "*.fsproj"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "*.fsproj"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "project.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "project.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Gopkg.toml"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Gopkg.toml"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Gopkg.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Gopkg.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "vendor.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "vendor.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "composer.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "composer.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "composer.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "composer.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "project.assets.json"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "project.assets.json"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Podfile"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Podfile"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "Podfile.lock"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "Podfile.lock"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "go.mod"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "go.mod"
+          },
+          {
+            "path": "commits.*.added.*",
+            "value": "go.sum"
+          },
+          {
+            "path": "commits.*.modified.*",
+            "value": "go.sum"
+          }
+        ]
+      },
+      {
+        "//": "used for pushing up webhooks from github",
+        "method": "POST",
+        "path": "/webhook/github/:webhookId"
+      }
+    ],
+    "private": [
+      {
+        "//": "List installations for the authenticated app",
+        "method": "GET",
+        "path": "/app/installations/:installationId",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${JWT_TOKEN}"
+        }
+      },
+      {
+        "//": "look up repositories installation can access",
+        "method": "GET",
+        "path": "/installation/repositories",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "search for user's repos",
+        "method": "GET",
+        "path": "/search/repositories",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "list a user's repos",
+        "method": "GET",
+        "path": "/users/:username/repos",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "list an orgs's repos",
+        "method": "GET",
+        "path": "/orgs/:username/repos",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get a user's repo",
+        "method": "GET",
+        "path": "/repos/:user/:repo",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "rate limit check",
+        "method": "GET",
+        "path": "/rate_limit",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "allow meta lookup on the api version",
+        "method": "GET",
+        "path": "/",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
+        "method": "POST",
+        "path": "/repos/:user/:repo/hooks",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "allow webhooks to be deleted, used to cleanup when a user deactivates or deletes a project",
+        "method": "DELETE",
+        "path": "/repos/:owner/:repo/hooks/:id",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to create commit status messages",
+        "method": "POST",
+        "path": "/repos/:user/:repo/statuses/:sha",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to list branches on a repo",
+        "method": "GET",
+        "path": "/repos/:user/:repo/branches",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to get branch info",
+        "method": "GET",
+        "path": "/repos/:user/:repo/branches/:branch",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to get status checks on a branch",
+        "method": "GET",
+        "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to create status checks on a branch",
+        "method": "POST",
+        "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to delete status checks on a branch",
+        "method": "DELETE",
+        "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "check if repo is public",
+        "method": "GET",
+        "path": "/:user/:repo",
+        "origin": "https://${GITHUB}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/package.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackage.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/package-lock.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackage-lock.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Gemfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FGemfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Gemfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FGemfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/pom.xml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpom.xml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/*req*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F*req*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/requirements/*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Frequirements%2F*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/pyproject.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpyproject.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/poetry.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpoetry.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/yarn.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fyarn.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/build.gradle",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fbuild.gradle",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/gradle.lockfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgradle.lockfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/gradle.properties",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgradle.properties",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Packages.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FPackages.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Directory.Build.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Directory.Build.targets",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.targets",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/build.sbt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fbuild.sbt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/packages.config",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackages.config",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/*.csproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.csproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/*.fsproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.fsproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/*.vbproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.vbproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/project.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fproject.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Gopkg.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FGopkg.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Gopkg.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FGopkg.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/vendor.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fvendor.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/composer.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fcomposer.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/composer.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fcomposer.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/project.assets.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fproject.assets.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Podfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FPodfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/Podfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2FPodfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/go.mod",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgo.mod",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/go.sum",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgo.sum",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/*Dockerfile*",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F*Dockerfile*",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/package.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackage.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/package-lock.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackage-lock.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Gemfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FGemfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Gemfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FGemfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/pom.xml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpom.xml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/*req*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F*req*.txt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/pyproject.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpyproject.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/poetry.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpoetry.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/yarn.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fyarn.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/build.gradle",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fbuild.gradle",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/gradle.lockfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgradle.lockfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/gradle.properties",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgradle.properties",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Packages.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FPackages.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Directory.Build.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.props",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Directory.Build.targets",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FDirectory.Build.targets",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/build.sbt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fbuild.sbt",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/packages.config",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpackages.config",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/*.csproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.csproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/*.fsproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.fsproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/*.vbproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F*.vbproj",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/project.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fproject.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Gopkg.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FGopkg.toml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Gopkg.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FGopkg.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/vendor.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fvendor.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/composer.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fcomposer.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/composer.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fcomposer.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/project.assets.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fproject.assets.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Podfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FPodfile",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/Podfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2FPodfile.lock",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/go.mod",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgo.mod",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/go.sum",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fgo.sum",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to write or update ignore rules or existing patches",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/.snyk",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to write or update ignore rules or existing patches",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F.snyk",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/*Dockerfile*",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2F*Dockerfile*",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to check if there's any ignore rules or existing patches",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/.snyk",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to check if there's any ignore rules or existing patches",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2F.snyk",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get details of the repo",
+        "method": "GET",
+        "path": "/repos/:name/:repo",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get the details of the commit to determine its SHA",
+        "method": "GET",
+        "path": "/repos/:name/:repo/commits/:ref",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        },
+        "valid": [
+          {
+            "header": "accept",
+            "values": [
+              "application/vnd.github.v4.sha"
+            ]
+          }
+        ]
+      },
+      {
+        "//": "get a list of all the refs to match find whether an existing PR is open",
+        "method": "GET",
+        "path": "/repos/:name/:repo/git/refs",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get the head commit of an individual ref",
+        "method": "GET",
+        "path": "/repos/:name/:repo/git/refs/heads/:ref",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get the details of an individual ref",
+        "method": "GET",
+        "path": "/repos/:name/:repo/git/refs/:ref",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "compares two commits against each other",
+        "method": "GET",
+        "path": "/repos/:name/:repo/compare/:base...:head",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "search for open snyk pull requests",
+        "method": "GET",
+        "path": "/repos/:name/:repo/pulls",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get pull request data for getting merge sha and tracking PR processing state",
+        "method": "GET",
+        "path": "/repos/:name/:repo/pulls/:pull_number",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get pull request file names",
+        "method": "GET",
+        "path": "/repos/:name/:repo/pulls/:pull_number/files",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "add commit data for new PR",
+        "method": "POST",
+        "path": "/repos/:name/:repo/git/refs",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "create the pull request",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "add pull request assignees",
+        "method": "POST",
+        "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "update ref",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/git/refs/:sha",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "update ref head",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/git/refs/heads/:ref",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "get list of all files in a repo",
+        "method": "GET",
+        "path": "/repos/:name/:repo/git/trees/:ref",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to get repo's contributors list",
+        "method": "GET",
+        "path": "/repos/:owner/:repo/commits",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to redirect requests to snyk git client",
+        "method": "any",
+        "path": "/snykgit/*",
+        "origin": "${GIT_CLIENT_URL}"
+      },
+      {
+        "//": "query graphql",
+        "method": "POST",
+        "path": "/graphql",
+        "origin": "https://${GITHUB_GRAPHQL}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "create a general pull request comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/issues/:issueNumber/comments",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "update a general pull request comment",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/issues/comments/:commentId",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "create a pull request review",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHSA_ACCESS_TOKEN}"
+        }
+      }
+    ]
+  }
