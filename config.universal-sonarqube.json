@@ -1,0 +1,24 @@
+{
+  "BROKER_CLIENT_CONFIGURATION":
+  {
+    "common":
+    {
+      "default":
+      {
+        "BROKER_SERVER_URL": "https://broker.snyk.io",
+        "BROKER_HA_MODE_ENABLED": "false"
+      }
+    }
+  },
+  "CONNECTIONS":
+  {
+    "apprisk-sonarqube connection":
+    {
+      "type": "apprisk-sonarqube",
+      "identifier": "${BROKER_TOKEN}",
+      "SONAR_QUBE_HOST_URL": "${SONAR_QUBE_HOST_URL}",
+      "SONAR_QUBE_API_TOKEN": "${SONAR_QUBE_API_TOKEN}",
+      "BROKER_CLIENT_URL": "http://my.broker.client.dns.hostname"
+    }
+  }
+}

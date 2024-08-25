@@ -1,5 +1,5 @@
 {
-  "API_VERSION":"2024-02-08~experimental",
+  "API_VERSION": "2024-02-08~experimental",
   "CONNECTIONS_MANAGER": {
     "watcher": {
       "interval": 60000
@@ -54,7 +54,10 @@
         {
           "url": "https://$CHECKMARX/cxrestapi/auth/identity/connect/token",
           "body": {
-            "BROKER_VAR_SUB": ["username", "password"],
+            "BROKER_VAR_SUB": [
+              "username",
+              "password"
+            ],
             "username": "$CHECKMARX_USERNAME",
             "password": "$CHECKMARX_PASSWORD",
             "grant_type": "password",
@@ -78,6 +81,24 @@
         "CHECKMARX_USERNAME": "<username>",
         "CHECKMARX_PASSWORD": "<password>",
         "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "apprisk-sonarqube": {
+      "validations": [
+        {
+          "url": "https://$SONAR_QUBE_HOST_URL/system/ping",
+          "method": "GET",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $SONAR_QUBE_API_TOKEN"
+          }
+        }
+      ],
+      "default": {},
+      "required": {
+        "SONAR_QUBE_HOST_URL": "<sonarqube-host-url>",
+        "SONAR_QUBE_API_TOKEN": "<sonarqube-api-token>"
       }
     },
     "artifactory": {
@@ -467,18 +488,18 @@
     "jira-bearer-auth": "defaultFilters/jira-bearer-auth.json",
     "nexus": "defaultFilters/nexus.json",
     "nexus2": "defaultFilters/nexus2.json",
-    "docker-hub":"defaultFilters/container-registry-agent.json",
-    "ecr":"defaultFilters/container-registry-agent.json",
-    "acr":"defaultFilters/container-registry-agent.json",
-    "gcr":"defaultFilters/container-registry-agent.json",
-    "artifactory-cr":"defaultFilters/container-registry-agent.json",
-    "harbor-cr":"defaultFilters/container-registry-agent.json",
-    "quay-cr":"defaultFilters/container-registry-agent.json",
-    "github-cr":"defaultFilters/container-registry-agent.json",
-    "nexus-cr":"defaultFilters/container-registry-agent.json",
-    "digitalocean-cr":"defaultFilters/container-registry-agent.json",
-    "gitlab-cr":"defaultFilters/container-registry-agent.json",
-    "google-artifact-cr":"defaultFilters/container-registry-agent.json",
-    "workload":"defaultFilters/workload.json"
+    "docker-hub": "defaultFilters/container-registry-agent.json",
+    "ecr": "defaultFilters/container-registry-agent.json",
+    "acr": "defaultFilters/container-registry-agent.json",
+    "gcr": "defaultFilters/container-registry-agent.json",
+    "artifactory-cr": "defaultFilters/container-registry-agent.json",
+    "harbor-cr": "defaultFilters/container-registry-agent.json",
+    "quay-cr": "defaultFilters/container-registry-agent.json",
+    "github-cr": "defaultFilters/container-registry-agent.json",
+    "nexus-cr": "defaultFilters/container-registry-agent.json",
+    "digitalocean-cr": "defaultFilters/container-registry-agent.json",
+    "gitlab-cr": "defaultFilters/container-registry-agent.json",
+    "google-artifact-cr": "defaultFilters/container-registry-agent.json",
+    "workload": "defaultFilters/workload.json"
   }
 }
