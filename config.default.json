@@ -283,7 +283,7 @@
           "auth": {
             "type": "header",
             "name": "Authorization",
-            "value": "Bearer $GHSA_ACCESS_TOKEN"
+            "value": "Bearer $GHA_ACCESS_TOKEN"
           }
         }
       ],
@@ -291,10 +291,10 @@
         "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_GRAPHQL": "$GITHUB/api",
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
-        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHSA_ACCESS_TOKEN",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
         "GIT_URL": "$GITHUB",
         "GIT_USERNAME": "x-access-token",
-        "GIT_PASSWORD": "$GHSA_ACCESS_TOKEN"
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
       },
       "required": {
         "GITHUB": "ghe.yourdomain.com",
@@ -313,22 +313,22 @@
           "auth": {
             "type": "header",
             "name": "Authorization",
-            "value": "Bearer $GHSA_ACCESS_TOKEN"
+            "value": "Bearer $GHA_ACCESS_TOKEN"
           }
         }
       ],
       "default": {
-        "GITHUB_API": "$GITHUB/api/v3",
-        "GITHUB_GRAPHQL": "$GITHUB/api",
+        "GITHUB_API": "api.github.com",
+        "GITHUB_GRAPHQL": "$GITHUB_API",
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
-        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHSA_ACCESS_TOKEN",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
         "GIT_URL": "$GITHUB",
         "GIT_USERNAME": "x-access-token",
-        "GIT_PASSWORD": "$GHSA_ACCESS_TOKEN"
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
       },
       "required": {
         "GITHUB": "github.com",
-        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_API": "api.github.com",
         "GITHUB_APP_ID": "APP_ID",
         "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
         "GITHUB_APP_CLIENT_ID": "123",

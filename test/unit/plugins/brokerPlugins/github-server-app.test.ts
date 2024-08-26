@@ -102,12 +102,12 @@ describe('Github Server App Plugin', () => {
 
     const plugin = new Plugin(config);
 
-    const ghsaAccessToken = await plugin._getAccessToken(
+    const ghaAccessToken = await plugin._getAccessToken(
       'dummyendpoint',
       dummyAppInstallId,
       dummyJwt,
     );
-    expect(JSON.parse(ghsaAccessToken)).toEqual(dummyAccessToken);
+    expect(JSON.parse(ghaAccessToken)).toEqual(dummyAccessToken);
   });
 
   it('Test time difference util method', () => {
@@ -170,7 +170,7 @@ describe('Github Server App Plugin', () => {
         return [200, renewedDummyAccessToken];
       });
     const config = {
-      ghsaAccessToken: JSON.stringify(dummyAccessToken),
+      ghaAccessToken: JSON.stringify(dummyAccessToken),
       GITHUB_API: 'dummyendpoint',
       GITHUB_APP_INSTALLATION_ID: dummyAppInstallId,
       JWT_TOKEN: `${jwt}`,
@@ -180,7 +180,7 @@ describe('Github Server App Plugin', () => {
     const plugin = new Plugin(config);
     plugin._setAccessTokenLifecycleHandler(config);
     await delay(100);
-    expect(JSON.parse(config.ghsaAccessToken)).toEqual(renewedDummyAccessToken);
-    clearTimeout(config['ghsaAccessTokenTimeoutHandlerId']);
+    expect(JSON.parse(config.ghaAccessToken)).toEqual(renewedDummyAccessToken);
+    clearTimeout(config['ghaAccessTokenTimeoutHandlerId']);
   });
 });
