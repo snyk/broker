@@ -166,12 +166,12 @@ function injectRulesAtRuntime(
         );
       if (
         templateGET.origin == 'https://${GITHUB}' &&
-        templateGET.auth.token == '${GHSA_ACCESS_TOKEN}'
+        templateGET.auth.token == '${GHA_ACCESS_TOKEN}'
       ) {
-        // GHSA case
+        // Github app  case
         templateGET.origin = templateGET.origin.replace(
           'https://${GITHUB}',
-          'https://x-access-token:${GHSA_ACCESS_TOKEN}@${GITHUB}',
+          'https://x-access-token:${GHA_ACCESS_TOKEN}@${GITHUB}',
         );
         delete templateGET.auth;
       }
@@ -207,7 +207,7 @@ function injectRulesAtRuntime(
           templateGETForSnippets.path = '/repos/:name/:repo/contents/:path';
           templatePOST.path = '*/git-upload-pack';
           // if(templateGETForSnippets.auth && templateGETForSnippets.auth.token && templateGETForSnippets.auth.token === '${JWT_TOKEN}'){
-          //   templateGETForSnippets.auth.token === '${GHSA_ACCESS_TOKEN}'
+          //   templateGETForSnippets.auth.token === '${GHA_ACCESS_TOKEN}'
           // }
           break;
         case 'GITLAB':
