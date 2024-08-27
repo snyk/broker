@@ -29,6 +29,7 @@ export async function executeHttpRequest(
         'Content-Type': 'application/json',
         'User-Agent': `broker client/${version} (http check service)`,
       },
+      timeoutMs: httpOptions.timeoutMs,
     };
     const response: HttpResponse = await retry<HttpResponse>(
       () => makeSingleRawRequestToDownstream(request),

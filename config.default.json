@@ -14,6 +14,7 @@
     "bitbucket-server-bearer-auth",
     "github-enterprise",
     "github-server-app",
+    "github-cloud-app",
     "github",
     "gitlab",
     "jira-bearer-auth",
@@ -303,7 +304,7 @@
           "auth": {
             "type": "header",
             "name": "Authorization",
-            "value": "Bearer $ACCESS_TOKEN"
+            "value": "Bearer $GHA_ACCESS_TOKEN"
           }
         }
       ],
@@ -311,14 +312,44 @@
         "GITHUB_API": "$GITHUB/api/v3",
         "GITHUB_GRAPHQL": "$GITHUB/api",
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
-        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
         "GIT_URL": "$GITHUB",
         "GIT_USERNAME": "x-access-token",
-        "GIT_PASSWORD": "$GITHUB_TOKEN"
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
       },
       "required": {
         "GITHUB": "ghe.yourdomain.com",
         "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_APP_ID": "APP_ID",
+        "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
+        "GITHUB_APP_CLIENT_ID": "123",
+        "GITHUB_APP_INSTALLATION_ID": "123",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-cloud-app": {
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/installation/repositories?per_page=1&page=1",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $GHA_ACCESS_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "GITHUB_API": "api.github.com",
+        "GITHUB_GRAPHQL": "$GITHUB_API",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
+      },
+      "required": {
+        "GITHUB": "github.com",
+        "GITHUB_API": "api.github.com",
         "GITHUB_APP_ID": "APP_ID",
         "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
         "GITHUB_APP_CLIENT_ID": "123",
@@ -482,6 +513,7 @@
     "bitbucket-server-bearer-auth": "defaultFilters/bitbucket-server-bearer-auth.json",
     "github-enterprise": "defaultFilters/github-enterprise.json",
     "github-server-app": "defaultFilters/github-server-app.json",
+    "github-cloud-app": "defaultFilters/github-cloud-app.json",
     "github": "defaultFilters/github.json",
     "gitlab": "defaultFilters/gitlab.json",
     "jira": "defaultFilters/jira.json",

@@ -248,11 +248,12 @@ export const makeSingleRawRequestToDownstream = async (
     });
   }
   const httpClient = localRequest.url.startsWith('https') ? https : http;
+  const timeoutMs = req.timeoutMs ?? 0;
   const options: http.RequestOptions = {
     method: localRequest.method,
     headers: localRequest.headers as any,
+    timeout: timeoutMs,
   };
-
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
       const request = httpClient.request(
@@ -275,7 +276,6 @@ export const makeSingleRawRequestToDownstream = async (
               body: data,
             });
           });
-
           // An error occurred while fetching.
           response.on('error', (error) => {
             logger.error({ error }, 'Error making request to downstream.');
@@ -286,6 +286,11 @@ export const makeSingleRawRequestToDownstream = async (
       request.on('error', (error) => {
         logger.error({ error }, 'Error making request to downstream.');
         reject(error);
+      });
+      request.on('timeout', () => {
+        request.destroy(); // Abort the request if it times out
+        logger.info(`Request to URI ${localRequest.url} timed out.`);
+        reject(new Error(`Request to URI ${localRequest.url} timed out.`));
       });
       if (localRequest.body) {
         request.write(localRequest.body);
