@@ -22,3 +22,4 @@ Please do not log security concerns as GitHub issues, as that could alert attack
 | [CVE-2020-7652](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570611) | < 4.80.0 | Allows arbitrary file reads by renaming files to match whitelisted paths | Wing Chan of The Hut Group |
 | [CVE-2020-7653](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570612) | < 4.80.0 | Allows arbitrary file reads by creating symlinks to match whitelisted paths | Wing Chan of The Hut Group |
 | [CVE-2020-7654](https://snyk.io/vuln/SNYK-JS-SNYKBROKER-570613) | <= 4.73.0 | Logs private keys if logging level is set to DEBUG | Wing Chan of The Hut Group |
+| [CVE-2024-37890](https://security.snyk.io/vuln/SNYK-JS-WS-7266574) | <= 4.191.0 | Denial of Service negligible risk for Broker use case. Mitigated from 4.191.1 | Ryan LaPointe |
