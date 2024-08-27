@@ -14,7 +14,7 @@
   {
     "apprisk-sonarqube connection":
     {
-      "type": "apprisk-sonarqube",
+      "type": "apprisk",
       "identifier": "${BROKER_TOKEN}",
       "SONAR_QUBE_HOST_URL": "${SONAR_QUBE_HOST_URL}",
       "SONAR_QUBE_API_TOKEN": "${SONAR_QUBE_API_TOKEN}",
