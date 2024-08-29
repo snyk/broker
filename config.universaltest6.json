@@ -1,0 +1,27 @@
+{
+    "BROKER_CLIENT_CONFIGURATION": {
+      "common": {
+        "default": {
+          "BROKER_SERVER_URL": "https://broker2.dev.snyk.io",
+          "BROKER_HA_MODE_ENABLED": "false",
+          "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+        }
+      },
+      "github": {
+        "validations":[{
+          "url": "https://notexists.notexists/no-such-url-ever"
+        }]
+      },
+      "gitlab": {
+        "validations":[{
+          "url": "https://notexists.notexists/no-such-url-ever"
+        }]
+      }
+    },
+    "CONNECTIONS": {
+      "my github connection": {
+        "type": "github-cloud-app",
+        "identifier": "${BROKER_TOKEN_1}"
+      }
+    }
+  }
