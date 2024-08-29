@@ -232,7 +232,8 @@
       {
         "queryParam": "path",
         "values": [
-          "catalog-info.yaml"
+          "*.yaml",
+          "*.json"
         ]
       }
     ]
@@ -250,7 +251,8 @@
       {
         "queryParam": "path",
         "values": [
-          "catalog-info.yaml"
+          "*.yaml",
+          "*.json"
         ]
       }
     ]
