@@ -232,8 +232,8 @@
       {
         "queryParam": "path",
         "values": [
-          "*.yaml",
-          "*.json"
+          "**/*.json",
+          "**%2F*.json"
         ]
       }
     ]
@@ -251,8 +251,8 @@
       {
         "queryParam": "path",
         "values": [
-          "*.yaml",
-          "*.json"
+          "**/*.json",
+          "**%2F*.json"
         ]
       }
     ]
