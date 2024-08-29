@@ -40,6 +40,18 @@ export const websocketConnectionSelectorMiddleware = (
         availableConnectionsTypes.includes('github-enterprise')
       ) {
         inboundRequestType = 'github-enterprise';
+      } else if (
+        splitUrl.length > 2 &&
+        splitUrl[2] == 'github' &&
+        availableConnectionsTypes.includes('github-server-app')
+      ) {
+        inboundRequestType = 'github-server-app';
+      } else if (
+        splitUrl.length > 2 &&
+        splitUrl[2] == 'github' &&
+        availableConnectionsTypes.includes('github-cloud-app')
+      ) {
+        inboundRequestType = 'github-cloud-app';
       } else {
         logger.warn({ url: req.path }, 'Unexpected type in webhook request');
         res
