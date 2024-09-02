@@ -69,12 +69,12 @@
           }
         },
         {
-          "url": "https://$SONAR_QUBE_HOST_URL/system/ping",
+          "url": "https://$SONARQUBE_HOST_URL/system/ping",
           "method": "GET",
           "auth": {
             "type": "header",
             "name": "Authorization",
-            "value": "Bearer $SONAR_QUBE_API_TOKEN"
+            "value": "Bearer $SONARQUBE_API_TOKEN"
           }
         }
       ],
@@ -82,15 +82,15 @@
         "CHECKMARX": "$CHECKMARX",
         "CHECKMARX_USERNAME": "$CHECKMARX_USERNAME",
         "CHECKMARX_PASSWORD": "$CHECKMARX_PASSWORD",
-        "SONAR_QUBE_HOST_URL": "$SONAR_QUBE_HOST_URL",
-        "SONAR_QUBE_API_TOKEN": "$SONAR_QUBE_API_TOKEN"
+        "SONARQUBE_HOST_URL": "$SONARQUBE_HOST_URL",
+        "SONARQUBE_API_TOKEN": "$SONARQUBE_API_TOKEN"
       },
       "required": {
         "CHECKMARX": "checkmarx.customer.com",
         "CHECKMARX_USERNAME": "<username>",
         "CHECKMARX_PASSWORD": "<password>",
-        "SONAR_QUBE_HOST_URL": "<sonarqube-host-url>",
-        "SONAR_QUBE_API_TOKEN": "<sonarqube-api-token>"
+        "SONARQUBE_HOST_URL": "<sonarqube-host-url>",
+        "SONARQUBE_API_TOKEN": "<sonarqube-api-token>"
       }
     },
     "artifactory": {

@@ -36,55 +36,55 @@
         "//": "Provide health status of SonarQube",
         "method": "GET",
         "path": "/api/system/ping",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Search for components",
         "method": "GET",
         "path": "/api/components/search",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Search for issues",
         "method": "GET",
         "path": "/api/issues/search",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Get DevOps Platform binding of a given project",
         "method": "GET",
         "path": "/api/alm_settings/get_binding",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "List links of a project",
         "method": "GET",
         "path": "/api/project_links/search",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "List the branches of a project or application",
         "method": "GET",
         "path": "/api/project_branches/list",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Search for Security Hotpots",
         "method": "GET",
         "path": "/api/hotspots/search",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Provides the details of a Security Hotspot",
         "method": "GET",
         "path": "/api/hotspots/show",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       },
       {
         "//": "Search for a collection of relevant rules matching a specified query",
         "method": "GET",
         "path": "/api/rules/search",
-        "origin": "https://${SONAR_QUBE_HOST_URL}"
+        "origin": "https://${SONARQUBE_HOST_URL}"
       }
     ]
   }
