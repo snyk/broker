@@ -66,18 +66,30 @@
           "headers": {
             "x-broker-content-type": "application/x-www-form-urlencoded"
           }
+        },
+        {
+          "url": "https://$SONARQUBE_HOST_URL/system/ping",
+          "method": "GET",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $SONARQUBE_API_TOKEN"
+          }
         }
       ],
       "default": {
         "CHECKMARX": "$CHECKMARX",
         "CHECKMARX_USERNAME": "$CHECKMARX_USERNAME",
-        "CHECKMARX_PASSWORD": "$CHECKMARX_PASSWORD"
+        "CHECKMARX_PASSWORD": "$CHECKMARX_PASSWORD",
+        "SONARQUBE_HOST_URL": "$SONARQUBE_HOST_URL",
+        "SONARQUBE_API_TOKEN": "$SONARQUBE_API_TOKEN"
       },
       "required": {
         "CHECKMARX": "checkmarx.customer.com",
         "CHECKMARX_USERNAME": "<username>",
         "CHECKMARX_PASSWORD": "<password>",
-        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+        "SONARQUBE_HOST_URL": "<sonarqube-host-url>",
+        "SONARQUBE_API_TOKEN": "<sonarqube-api-token>"
       }
     },
     "artifactory": {
