@@ -1022,6 +1022,36 @@
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
       }
+    },
+    {
+      "//": "create a general pull request comment",
+      "method": "POST",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+    },
+    {
+      "//": "update a general pull request comment",
+      "method": "PUT",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+    },
+    {
+      "//": "get a general pull request comment",
+      "method": "GET",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+      "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
     }
   ]
 }
