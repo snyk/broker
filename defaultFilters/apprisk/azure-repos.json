@@ -10,6 +10,16 @@
     }
   },
   {
+    "//": "get core api's location for sanity check without org",
+    "method": "OPTIONS",
+    "path": "/_apis/Location",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
     "//": "get resource access for sanity check",
     "method": "GET",
     "path": "/:org/_apis/ResourceAreas",
@@ -20,19 +30,19 @@
     }
   },
   {
-    "//": "get specific repository for given organisation",
+    "//": "get resource access for sanity check without org",
     "method": "GET",
-    "path": "/:org/_apis/git/repositories/:repo",
-    "origin": "https://${AZURE_REPOS_HOST}",
+    "path": "/_apis/ResourceAreas",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
     }
   },
   {
-    "//": "get list of refs",
+    "//": "get specific repository for given organisation",
     "method": "GET",
-    "path": "/:org/_apis/git/repositories/:repo/refs",
+    "path": "/:org/_apis/git/repositories/:repo",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -70,10 +80,30 @@
     }
   },
   {
+    "//": "get api's connection status without org",
+    "method": "GET",
+    "path": "/_apis/connectionData",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
     "//": "get core",
     "method": "OPTIONS",
     "path": "/:org/_apis/core",
     "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get core without org",
+    "method": "OPTIONS",
+    "path": "/_apis/core",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
@@ -90,10 +120,50 @@
     }
   },
   {
+    "//": "get git without org",
+    "method": "OPTIONS",
+    "path": "/_apis/git",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get user entitlements",
+    "method": "GET",
+    "path": "/:org/_apis/userentitlements",
+    "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get user entitlements without org",
+    "method": "GET",
+    "path": "/_apis/userentitlements",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
     "//": "get list of repositories for given organisation",
     "method": "GET",
     "path": "/:org/:project/_apis/git/repositories",
     "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get list of repositories for given organisation without org",
+    "method": "GET",
+    "path": "/:project/_apis/git/repositories",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
@@ -120,6 +190,16 @@
     }
   },
   {
+    "//": "pull teams without org",
+    "method": "GET",
+    "path": "/_apis/projects/:repo/teams",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
     "//": "get list of commits for given repository",
     "method": "GET",
     "path": "/:org/:project/_apis/git/repositories/:repo/commits",
@@ -130,9 +210,19 @@
     }
   },
   {
-    "//": "used to retrieve organization context from catalog-info.yaml",
+    "//": "get list of commits for given repository without org",
     "method": "GET",
-    "path": "/:org/:project/_apis/git/repositories/:repo/files",
+    "path": "/:project/_apis/git/repositories/:repo/commits",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get organization context from file",
+    "method": "GET",
+    "path": "/:org/_apis/git/repositories/:repo/items",
     "origin": "https://${AZURE_REPOS_HOST}",
     "auth": {
       "scheme": "basic",
@@ -142,7 +232,27 @@
       {
         "queryParam": "path",
         "values": [
-          "catalog-info.yaml"
+          "**/*.json",
+          "**%2F*.json"
+        ]
+      }
+    ]
+  },
+  {
+    "//": "get organization context from file without org",
+    "method": "GET",
+    "path": "/_apis/git/repositories/:repo/items",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    },
+    "valid": [
+      {
+        "queryParam": "path",
+        "values": [
+          "**/*.json",
+          "**%2F*.json"
         ]
       }
     ]
@@ -152,6 +262,16 @@
     "method": "GET",
     "path": "/:org/_apis/projects/:project/teams/:team/members",
     "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "get list of team's members without org",
+    "method": "GET",
+    "path": "/_apis/projects/:project/teams/:team/members",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
@@ -168,10 +288,30 @@
     }
   },
   {
+    "//": "get list project's languages without org",
+    "method": "OPTIONS",
+    "path": "/_apis/projectanalysis",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
     "//": "pull project's languages metrics",
     "method": "OPTIONS",
     "path": "/:org/:project/_apis/projectanalysis/languagemetrics",
     "origin": "https://${AZURE_REPOS_HOST}",
+    "auth": {
+      "scheme": "basic",
+      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+    }
+  },
+  {
+    "//": "pull project's languages metrics without org",
+    "method": "OPTIONS",
+    "path": "/:project/_apis/projectanalysis/languagemetrics",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
@@ -186,15 +326,15 @@
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
     }
-  }, {
-    "//": "get releases",
-    "method": "OPTIONS",
-    "path": "/:org/_apis/Release",
-    "origin": "https://${AZURE_REPOS_HOST}",
+  },
+  {
+    "//": "expend team without org",
+    "method": "GET",
+    "path": "/_apis/projects/:project/teams/:team",
+    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
     }
   }
-
 ]
