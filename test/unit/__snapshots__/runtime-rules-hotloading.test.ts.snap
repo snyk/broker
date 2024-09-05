@@ -1306,39 +1306,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "used to get custom pull request template",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -2389,36 +2356,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to get custom pull request template",
@@ -7832,6 +7769,16 @@ Object {
       "path": "/:org/_apis/Location",
     },
     Object {
+      "//": "get core api's location for sanity check without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/Location",
+    },
+    Object {
       "//": "get resource access for sanity check",
       "auth": Object {
         "scheme": "basic",
@@ -7842,6 +7789,16 @@ Object {
       "path": "/:org/_apis/ResourceAreas",
     },
     Object {
+      "//": "get resource access for sanity check without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/ResourceAreas",
+    },
+    Object {
       "//": "get specific repository for given organisation",
       "auth": Object {
         "scheme": "basic",
@@ -7850,16 +7807,6 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
       "path": "/:org/_apis/git/repositories/:repo",
-    },
-    Object {
-      "//": "get list of refs",
-      "auth": Object {
-        "scheme": "basic",
-        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
-      },
-      "method": "GET",
-      "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/:org/_apis/git/repositories/:repo/refs",
     },
     Object {
       "//": "pull teams",
@@ -7892,6 +7839,16 @@ Object {
       "path": "/:org/_apis/connectionData",
     },
     Object {
+      "//": "get api's connection status without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/connectionData",
+    },
+    Object {
       "//": "get core",
       "auth": Object {
         "scheme": "basic",
@@ -7900,6 +7857,16 @@ Object {
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
       "path": "/:org/_apis/core",
+    },
+    Object {
+      "//": "get core without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/core",
     },
     Object {
       "//": "get git",
@@ -7912,6 +7879,36 @@ Object {
       "path": "/:org/_apis/git",
     },
     Object {
+      "//": "get git without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/git",
+    },
+    Object {
+      "//": "get user entitlements",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}",
+      "path": "/:org/_apis/userentitlements",
+    },
+    Object {
+      "//": "get user entitlements without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/userentitlements",
+    },
+    Object {
       "//": "get list of repositories for given organisation",
       "auth": Object {
         "scheme": "basic",
@@ -7920,6 +7917,16 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
       "path": "/:org/:project/_apis/git/repositories",
+    },
+    Object {
+      "//": "get list of repositories for given organisation without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:project/_apis/git/repositories",
     },
     Object {
       "//": "get list of projects for given organisation",
@@ -7942,6 +7949,16 @@ Object {
       "path": "/:org/_apis/projects/:repo/teams",
     },
     Object {
+      "//": "pull teams without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/projects/:repo/teams",
+    },
+    Object {
       "//": "get list of commits for given repository",
       "auth": Object {
         "scheme": "basic",
@@ -7952,19 +7969,49 @@ Object {
       "path": "/:org/:project/_apis/git/repositories/:repo/commits",
     },
     Object {
-      "//": "used to retrieve organization context from catalog-info.yaml",
+      "//": "get list of commits for given repository without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:project/_apis/git/repositories/:repo/commits",
+    },
+    Object {
+      "//": "get organization context from file",
       "auth": Object {
         "scheme": "basic",
         "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
       },
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/:org/:project/_apis/git/repositories/:repo/files",
+      "path": "/:org/_apis/git/repositories/:repo/items",
       "valid": Array [
         Object {
           "queryParam": "path",
           "values": Array [
-            "catalog-info.yaml",
+            "**/*.json",
+            "**%2F*.json",
+          ],
+        },
+      ],
+    },
+    Object {
+      "//": "get organization context from file without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/git/repositories/:repo/items",
+      "valid": Array [
+        Object {
+          "queryParam": "path",
+          "values": Array [
+            "**/*.json",
+            "**%2F*.json",
           ],
         },
       ],
@@ -7980,6 +8027,16 @@ Object {
       "path": "/:org/_apis/projects/:project/teams/:team/members",
     },
     Object {
+      "//": "get list of team's members without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/projects/:project/teams/:team/members",
+    },
+    Object {
       "//": "get list project's languages",
       "auth": Object {
         "scheme": "basic",
@@ -7988,6 +8045,16 @@ Object {
       "method": "OPTIONS",
       "origin": "https://\${AZURE_REPOS_HOST}",
       "path": "/:org/_apis/projectanalysis",
+    },
+    Object {
+      "//": "get list project's languages without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/projectanalysis",
     },
     Object {
       "//": "pull project's languages metrics",
@@ -8000,6 +8067,16 @@ Object {
       "path": "/:org/:project/_apis/projectanalysis/languagemetrics",
     },
     Object {
+      "//": "pull project's languages metrics without org",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "OPTIONS",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:project/_apis/projectanalysis/languagemetrics",
+    },
+    Object {
       "//": "expend team",
       "auth": Object {
         "scheme": "basic",
@@ -8010,14 +8087,14 @@ Object {
       "path": "/:org/_apis/projects/:project/teams/:team",
     },
     Object {
-      "//": "get releases",
+      "//": "expend team without org",
       "auth": Object {
         "scheme": "basic",
         "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
       },
-      "method": "OPTIONS",
-      "origin": "https://\${AZURE_REPOS_HOST}",
-      "path": "/:org/_apis/Release",
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/projects/:project/teams/:team",
     },
   ],
   "public": Array [
@@ -9138,39 +9215,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to get repo's commits",
@@ -10345,36 +10389,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to get repo's commits",
@@ -17330,39 +17344,6 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
   ],
   "public": Array [
     Object {
@@ -18392,36 +18373,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
   ],
   "public": Array [
@@ -25136,39 +25087,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -26230,36 +26148,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -33050,39 +32938,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34166,36 +34021,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -41038,39 +40863,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -42132,36 +41924,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -49354,39 +49116,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -50628,39 +50357,6 @@ Object {
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
     Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -51733,36 +51429,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -52893,36 +52559,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -65033,39 +64669,6 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
   ],
   "public": Array [
     Object {
@@ -66095,36 +65698,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
   ],
   "public": Array [
@@ -72796,39 +72369,6 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
     },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "password": "\${BITBUCKET_PASSWORD}",
-        "scheme": "basic",
-        "username": "\${BITBUCKET_USERNAME}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
   ],
   "public": Array [
     Object {
@@ -73858,36 +73398,6 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/default-reviewers/1.0/projects/:projectKey/repos/:repo/reviewers",
-    },
-    Object {
-      "//": "create a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "POST",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-    },
-    Object {
-      "//": "update a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "PUT",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-    },
-    Object {
-      "//": "get a general pull request comment",
-      "auth": Object {
-        "scheme": "bearer",
-        "token": "\${BITBUCKET_PAT}",
-      },
-      "method": "GET",
-      "origin": "https://\${BITBUCKET_API}",
-      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
   ],
   "public": Array [
