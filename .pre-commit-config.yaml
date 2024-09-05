@@ -4,3 +4,10 @@ repos:
     hooks:
       - id: gitleaks
         stages: [ commit ]
+  - repo: local
+    language: system
+    stages: [pre-commit]
+    pass_filenames: true
+    name: npm lint
+    id: npm-lint
+    entry: prettier --check
