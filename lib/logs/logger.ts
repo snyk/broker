@@ -2,6 +2,10 @@ import bunyan from 'bunyan';
 import escapeRegExp from 'lodash.escaperegexp';
 import mapValues from 'lodash.mapvalues';
 import { getConfig } from '../common/config/config';
+import {
+  getPluginsConfig,
+  getPluginsConfigByConnectionKey,
+} from '../common/config/pluginsConfig';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
@@ -17,6 +21,35 @@ const sanitiseConfigVariables = (raw, variable) => {
     );
   }
 
+  return raw;
+};
+
+const sanitiseConnectionConfigVariables = (
+  raw,
+  variable,
+  connections,
+  connectionKey,
+) => {
+  for (const cfgVar of Object.keys(connections[connectionKey])) {
+    if (cfgVar == variable) {
+      raw = raw.replace(
+        new RegExp(escapeRegExp(connections[connectionKey][cfgVar]), 'igm'),
+        '${' + variable + '}',
+      );
+    }
+  }
+  return raw;
+};
+
+const sanitisePluginsConfigVariables = (raw, variable, pluginConfig) => {
+  for (const cfgVar of Object.keys(pluginConfig)) {
+    if (cfgVar == variable) {
+      raw = raw.replace(
+        new RegExp(escapeRegExp(pluginConfig[cfgVar]), 'igm'),
+        '${' + variable + '}',
+      );
+    }
+  }
   return raw;
 };
 
@@ -46,9 +79,11 @@ export const sanitise = (raw) => {
     'GITHUB_TOKEN_POOL',
     'BITBUCKET_USERNAME',
     'BITBUCKET_PASSWORD',
+    'BITBUCKET_PAT',
     'GITLAB_TOKEN',
     'JIRA_USERNAME',
     'JIRA_PASSWORD',
+    'JIRA_PAT',
     'AZURE_REPOS_TOKEN',
     'ARTIFACTORY_URL',
     'CR_CREDENTIALS',
@@ -65,7 +100,14 @@ export const sanitise = (raw) => {
     'GIT_CLIENT_URL',
     'NEXUS_URL',
     'BASE_NEXUS_URL',
+    'CHECKMARX_PASSWORD',
+    'SONARQUBE_API_TOKEN',
   ];
+  const universalBrokerConnectionsVariables = [
+    ...variables,
+    'GITHUB_APP_CLIENT_ID',
+  ];
+  const universalBrokerPluginsVariables = ['GHA_ACCESS_TOKEN', 'JWT_TOKEN'];
 
   for (const variable of variables) {
     // Copies original `raw`, doesn't mutate it.
@@ -80,12 +122,41 @@ export const sanitise = (raw) => {
       raw = sanitiseConfigVariables(raw, pool);
     }
   }
+  if (config.universalBrokerEnabled) {
+    for (const variable of universalBrokerConnectionsVariables) {
+      for (const connectionKey of Object.keys(config.connections)) {
+        raw = sanitiseConnectionConfigVariables(
+          raw,
+          variable,
+          config.connections,
+          connectionKey,
+        );
+      }
+    }
+    for (const variable of universalBrokerPluginsVariables) {
+      for (const connectionKey of Object.keys(getPluginsConfig())) {
+        raw = sanitisePluginsConfigVariables(
+          raw,
+          variable,
+          getPluginsConfigByConnectionKey(connectionKey),
+        );
+      }
+    }
+  }
 
   return raw;
 };
 
 function sanitiseObject(obj) {
   return mapValues(obj, (v) => sanitise(v));
+}
+function sanitiseConnection(connection) {
+  const connectionObj = JSON.parse(JSON.stringify(connection));
+  return sanitiseObject(connectionObj);
+}
+function sanitisePlugins(pluginData) {
+  const pluginObj = JSON.parse(JSON.stringify(pluginData));
+  return sanitiseObject(pluginObj);
 }
 
 function sanitiseHeaders(headers) {
@@ -132,8 +203,10 @@ export const log = bunyan.createLogger({
     headers: sanitiseHeaders,
     responseHeaders: sanitiseHeaders,
     requestHeaders: sanitiseHeaders,
+    connection: sanitiseConnection,
     err: serialiseError,
     error: serialiseError,
+    accessToken: sanitisePlugins,
   },
 });
 type LogLevels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
