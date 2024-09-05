@@ -6,6 +6,7 @@ import {
   getConfig,
   loadBrokerConfig,
 } from '../../common/config/config';
+import version from '../../common/utils/version';
 
 export const reloadConfig = async (clientOpts) => {
   // Reload config with connection
@@ -22,6 +23,8 @@ export const getClientConfigMetadata = (
   clientConfig: Record<string, any>,
 ): ConfigMetadata => {
   const configMetadata: ConfigMetadata = {
+    brokerClientId: clientConfig.brokerClientId,
+    version: `${version}`,
     haMode: highAvailabilityModeEnabled(clientConfig),
     debugMode: clientConfig.logLevel === 'debug' ? true : false,
     bodyLogMode: clientConfig.logEnableBody ? true : false,
