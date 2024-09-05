@@ -30,15 +30,9 @@ export default abstract class BrokerPlugin {
   }
 
   getApplicableTypes(): Array<string> {
-    const applicableTypes: Array<string> = [];
-    if (
-      this.applicableBrokerTypes.every((type) =>
-        this.brokerClientConfiguration.supportedBrokerTypes.includes(type),
-      )
-    ) {
-      applicableTypes.push(...this.applicableBrokerTypes);
-    }
-    return applicableTypes;
+    return this.applicableBrokerTypes.filter((type) =>
+      this.brokerClientConfiguration.supportedBrokerTypes.includes(type),
+    );
   }
   isDisabled(config): boolean {
     let isDisabled = false;

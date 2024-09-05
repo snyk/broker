@@ -24,6 +24,21 @@ describe('Plugin Manager', () => {
     expect(plugins.get('dummy')[0].pluginName).toEqual('Dummy Plugin');
   });
 
+  it('should load plugins if at least one supported broker type is present', async () => {
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy-multi-1'],
+        connections: { 'my connection': { type: 'dummy-multi-1' } },
+      },
+    };
+    const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
+    expect(plugins.get('dummy-multi-1').length).toBeGreaterThanOrEqual(1);
+    expect(plugins.get('dummy-multi-1')[0].pluginName).toEqual(
+      'Dummy Plugin Multi',
+    );
+  });
+
   it('should load plugins no plugin successfully', async () => {
     const clientOpts = {
       config: {
