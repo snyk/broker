@@ -4,6 +4,7 @@ import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { ClientOpts } from '../../common/types/options';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';
+import version from '../../common/utils/version';
 
 export const retrieveConnectionsForDeployment = async (
   clientOpts: ClientOpts,
@@ -16,6 +17,8 @@ export const retrieveConnectionsForDeployment = async (
     headers: {
       'Content-Type': 'application/vnd.api+json',
       Authorization: `${clientOpts.accessToken?.authHeader}`,
+      'x-broker-client-id': `${clientOpts.config.brokerClientId}`,
+      'x-broker-client-version': `${version}`,
     },
     method: 'GET',
   };

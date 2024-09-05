@@ -51,8 +51,11 @@ export const main = async (clientOpts: ClientOpts) => {
   try {
     logger.info({ version }, 'Broker starting in client mode');
     let hookResults: HookResults = {};
-    const brokerClientId = uuidv4();
-    logger.info({ brokerClientId }, 'generated broker client id');
+    clientOpts.config.brokerClientId = uuidv4();
+    logger.info(
+      { brokerClientId: clientOpts.config.brokerClientId },
+      'generated broker client id',
+    );
 
     clientOpts.config.API_BASE_URL =
       clientOpts.config.API_BASE_URL ??
@@ -79,7 +82,10 @@ export const main = async (clientOpts: ClientOpts) => {
       );
     } else {
       // universal broker logic is in connection manager
-      hookResults = await processStartUpHooks(clientOpts, brokerClientId);
+      hookResults = await processStartUpHooks(
+        clientOpts,
+        clientOpts.config.brokerClientId,
+      );
     }
 
     const loadedClientOpts: LoadedClientOpts = {
@@ -94,7 +100,7 @@ export const main = async (clientOpts: ClientOpts) => {
 
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
-      clientId: brokerClientId,
+      clientId: clientOpts.config.brokerClientId,
       filters: loadedClientOpts.filters,
       preflightChecks: hookResults.preflightCheckResults,
       version,

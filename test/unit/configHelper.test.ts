@@ -37,8 +37,10 @@ describe('config', () => {
   it('everything is false for empty config', async () => {
     await loadBrokerConfig();
     const config = getConfig();
+    config.brokerClientId = '123';
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: false,
+      brokerClientId: '123',
       credPooling: false,
       customAccept: false,
       debugMode: false,
@@ -48,6 +50,7 @@ describe('config', () => {
       tlsReject: false,
       insecureDownstream: false,
       universalBroker: false,
+      version: 'local',
     });
   });
 
@@ -64,8 +67,10 @@ describe('config', () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     await loadBrokerConfig();
     const config = getConfig();
+    config.brokerClientId = '123';
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: true,
+      brokerClientId: '123',
       credPooling: true,
       customAccept: true,
       debugMode: true,
@@ -75,6 +80,7 @@ describe('config', () => {
       tlsReject: true,
       insecureDownstream: true,
       universalBroker: true,
+      version: 'local',
     });
   });
 
@@ -85,8 +91,10 @@ describe('config', () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
     await loadBrokerConfig();
     const config = getConfig();
+    config.brokerClientId = '123';
     expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
       bodyLogMode: false,
+      brokerClientId: '123',
       credPooling: false,
       customAccept: false,
       debugMode: false,
@@ -96,6 +104,7 @@ describe('config', () => {
       tlsReject: false,
       insecureDownstream: false,
       universalBroker: false,
+      version: 'local',
     });
   });
 

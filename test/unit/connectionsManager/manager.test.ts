@@ -20,6 +20,7 @@ describe('Connections Manager', () => {
       id: '',
       isDisabled: false,
       clientConfig: {
+        brokerClientId: '123',
         haMode: false,
         debugMode: false,
         bodyLogMode: false,
@@ -30,6 +31,7 @@ describe('Connections Manager', () => {
         customAccept: false,
         insecureDownstream: false,
         universalBroker: false,
+        version: 'local',
       },
       role: Role.primary,
     };

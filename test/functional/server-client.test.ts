@@ -70,6 +70,7 @@ describe('proxy requests originating from behind the broker server', () => {
       role: 'primary',
       clientConfig: {
         bodyLogMode: false,
+        brokerClientId: expect.any(String),
         credPooling: true, //client sets a PASSWORD_POOL
         customAccept: true,
         debugMode: false,
@@ -79,6 +80,7 @@ describe('proxy requests originating from behind the broker server', () => {
         proxy: false,
         tlsReject: false,
         universalBroker: false,
+        version: 'local',
       },
       identifier:
         '67f47824f806ee9c2fe6c7cc5849269fc1bc599c18e401ee2e2aea422bab6128',
@@ -92,6 +94,7 @@ describe('proxy requests originating from behind the broker server', () => {
       role: 'secondary',
       clientConfig: {
         bodyLogMode: false,
+        brokerClientId: expect.any(String),
         credPooling: true, //client sets a PASSWORD_POOL
         customAccept: true,
         debugMode: false,
@@ -101,6 +104,7 @@ describe('proxy requests originating from behind the broker server', () => {
         proxy: false,
         tlsReject: false,
         universalBroker: false,
+        version: 'local',
       },
       identifier:
         '67f47824f806ee9c2fe6c7cc5849269fc1bc599c18e401ee2e2aea422bab6128',
