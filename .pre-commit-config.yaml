@@ -5,9 +5,24 @@ repos:
       - id: gitleaks
         stages: [ commit ]
   - repo: local
-    language: system
-    stages: [pre-commit]
-    pass_filenames: true
-    name: npm lint
-    id: npm-lint
-    entry: prettier --check
+    hooks:
+      - id: prettier-lint
+        language: system
+        stages: [pre-commit]
+        pass_filenames: true
+        name: prettier lint
+        entry: prettier --check
+        types_or:
+          - "javascript"
+          - "ts"
+        files: ^(lib|test|cli)/
+      - id: eslint
+        language: system
+        stages: [pre-commit]
+        pass_filenames: true
+        name: eslint
+        entry: npx eslint --color --cache
+        types_or:
+          - "javascript"
+          - "ts"
+        files: ^(lib|test|cli)/

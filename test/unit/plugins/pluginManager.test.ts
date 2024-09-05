@@ -34,7 +34,9 @@ describe('Plugin Manager', () => {
     };
     const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
     expect(plugins.get('dummy-multi-1').length).toBeGreaterThanOrEqual(1);
-    expect(plugins.get('dummy-multi-1')[0].pluginName).toEqual('Dummy Plugin Multi');
+    expect(plugins.get('dummy-multi-1')[0].pluginName).toEqual(
+      'Dummy Plugin Multi',
+    );
   });
 
   it('should load plugins no plugin successfully', async () => {
