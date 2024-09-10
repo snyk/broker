@@ -148,6 +148,33 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Injection of valid Git rules without snippets - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_GIT = 'true';
+      process.env.ACCEPT = 'accept.json';
+      process.env.DISABLE_SNIPPETS = 'true';
+      const loadedRules = loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(
+        loadedRules['private'].filter(
+          (x) => x['//'] === 'needed to load code snippets',
+        ),
+      ).toHaveLength(0);
+      delete process.env.ACCEPT_GIT;
+      delete process.env.ACCEPT;
+      delete process.env.DISABLE_SNIPPETS;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid CODE GH rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
