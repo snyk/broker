@@ -65,6 +65,7 @@ RUN <<EOF
     rpm --erase --nodeps libtasn1
     rpm --erase --nodeps libxml2
     rpm --erase --nodeps libyaml
+    rpm --erase --nodeps expat
     rpm --erase --nodeps lz4-libs
     rpm --erase --nodeps ncurses-base
     rpm --erase --nodeps openldap
