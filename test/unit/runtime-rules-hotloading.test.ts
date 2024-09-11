@@ -168,6 +168,14 @@ describe('filter Rules Loading', () => {
           (x) => x['//'] === 'needed to load code snippets',
         ),
       ).toHaveLength(0);
+      for (const rule of [
+        'allow git-upload-pack (for git clone)',
+        'allow info refs (for git clone)',
+      ]) {
+        expect(
+          loadedRules['private'].filter((x) => x['//'] === rule),
+        ).toHaveLength(1);
+      }
       delete process.env.ACCEPT_GIT;
       delete process.env.ACCEPT;
       delete process.env.DISABLE_SNIPPETS;
