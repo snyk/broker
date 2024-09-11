@@ -181,57 +181,67 @@ function injectRulesAtRuntime(
 
       templatePOST['//'] = 'allow git-upload-pack (for git clone)';
 
-      // Code snippets rules
-      const templateGETForSnippets = nestedCopy(
-        filters.private.filter(
-          (entry) =>
-            entry.method === 'GET' &&
-            SNIPPETS_CODE_SCM_ORIGINS.filter(
-              (origin) =>
-                entry.origin?.includes(`{${origin}}`) &&
-                entry.auth?.token != '${JWT_TOKEN}',
-            ).length > 0,
-        )[0],
-      );
-      templateGETForSnippets['//'] = 'needed to load code snippets';
+      const DISABLE_SNIPPETS =
+        process.env.DISABLE_SNIPPETS || config.DISABLE_SNIPPETS;
+      if (DISABLE_SNIPPETS) {
+        logger.info(
+          { snippets: DISABLE_SNIPPETS },
+          'Disabling snippets rules for Code/Git',
+        );
+        filters.private.push(...[templateGET, templatePOST]);
+      } else {
+        // Code snippets rules
+        const templateGETForSnippets = nestedCopy(
+          filters.private.filter(
+            (entry) =>
+              entry.method === 'GET' &&
+              SNIPPETS_CODE_SCM_ORIGINS.filter(
+                (origin) =>
+                  entry.origin?.includes(`{${origin}}`) &&
+                  entry.auth?.token != '${JWT_TOKEN}',
+              ).length > 0,
+          )[0],
+        );
+        templateGETForSnippets['//'] = 'needed to load code snippets';
 
-      switch (scmType) {
-        case 'AZURE_REPOS_HOST':
-          templateGET.path = '*/info/refs*';
-          templateGETForSnippets.path =
-            '/:owner/_apis/git/repositories/:repo/items';
-          templatePOST.path = '*/git-upload-pack';
-          break;
-        case 'GITHUB':
-          templateGET.path = '*/info/refs*';
-          templateGETForSnippets.path = '/repos/:name/:repo/contents/:path';
-          templatePOST.path = '*/git-upload-pack';
-          // if(templateGETForSnippets.auth && templateGETForSnippets.auth.token && templateGETForSnippets.auth.token === '${JWT_TOKEN}'){
-          //   templateGETForSnippets.auth.token === '${GHA_ACCESS_TOKEN}'
-          // }
-          break;
-        case 'GITLAB':
-          templateGET.path = '*/info/refs*';
-          templateGETForSnippets.path =
-            '/api/v4/projects/:project/repository/files/:path';
-          templatePOST.path = '*/git-upload-pack';
-          break;
-        case 'BITBUCKET':
-          templateGET.path = '*/info/refs*';
-          templateGETForSnippets.path =
-            '/projects/:project/repos/:repo/browse*/:file';
-          templatePOST.path = '*/git-upload-pack';
-          break;
-        default:
-          logger.error(
-            {},
-            'Error writing Code specific rules - Cannot determine SCM type',
-          );
+        switch (scmType) {
+          case 'AZURE_REPOS_HOST':
+            templateGET.path = '*/info/refs*';
+            templateGETForSnippets.path =
+              '/:owner/_apis/git/repositories/:repo/items';
+            templatePOST.path = '*/git-upload-pack';
+            break;
+          case 'GITHUB':
+            templateGET.path = '*/info/refs*';
+            templateGETForSnippets.path = '/repos/:name/:repo/contents/:path';
+            templatePOST.path = '*/git-upload-pack';
+            // if(templateGETForSnippets.auth && templateGETForSnippets.auth.token && templateGETForSnippets.auth.token === '${JWT_TOKEN}'){
+            //   templateGETForSnippets.auth.token === '${GHA_ACCESS_TOKEN}'
+            // }
+            break;
+          case 'GITLAB':
+            templateGET.path = '*/info/refs*';
+            templateGETForSnippets.path =
+              '/api/v4/projects/:project/repository/files/:path';
+            templatePOST.path = '*/git-upload-pack';
+            break;
+          case 'BITBUCKET':
+            templateGET.path = '*/info/refs*';
+            templateGETForSnippets.path =
+              '/projects/:project/repos/:repo/browse*/:file';
+            templatePOST.path = '*/git-upload-pack';
+            break;
+          default:
+            logger.error(
+              {},
+              'Error writing Code specific rules - Cannot determine SCM type',
+            );
+        }
+
+        filters.private.push(
+          ...[templateGET, templatePOST, templateGETForSnippets],
+        );
       }
-
-      filters.private.push(
-        ...[templateGET, templatePOST, templateGETForSnippets],
-      );
     }
   }
   const ACCEPT_APPRISK = process.env.ACCEPT_APPRISK || config.ACCEPT_APPRISK;
