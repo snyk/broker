@@ -57,7 +57,7 @@ export const forwardWebSocketRequest = (
       actingGroupPublicId,
       actingOrgPublicId,
       flow,
-      productLine
+      productLine,
     };
 
     if (!requestId) {

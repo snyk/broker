@@ -81,9 +81,11 @@ class BrokerServerPostResponseHandler {
         headers: {
           'Snyk-Request-Id': `${this.#requestId}`,
           'Snyk-acting-org-public-id': `${this.#logContext.actingOrgPublicId}`,
-          'Snyk-acting-group-public-id': `${this.#logContext.actingGroupPublicId}`,
+          'Snyk-acting-group-public-id': `${
+            this.#logContext.actingGroupPublicId
+          }`,
           'Snyk-product-line': `${this.#logContext.productLine}`,
-          'Snyk-flow-name':  `${this.#logContext.flow}`,
+          'Snyk-flow-name': `${this.#logContext.flow}`,
           'Content-Type': BROKER_CONTENT_TYPE,
           Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
