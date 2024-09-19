@@ -35,6 +35,11 @@ export const forwardWebSocketRequest = (
       payload.connectionIdentifier = connectionIdentifier;
     }
     const requestId = payload.headers['snyk-request-id'];
+    const actingOrgPublicId = payload.headers['snyk-acting-org-public-id'];
+    const actingGroupPublicId = payload.headers['snyk-acting-group-public-id'];
+    const productLine = payload.headers['snyk-product-line'];
+    const flow = payload.headers['snyk-flow-name'];
+
     const logContext: ExtendedLogContext = {
       url: payload.url,
       connectionName: websocketConnectionHandler.friendlyName ?? '',
@@ -49,6 +54,10 @@ export const forwardWebSocketRequest = (
       responseMedium: payload.headers['x-broker-ws-response']
         ? 'websocket'
         : 'http',
+      actingGroupPublicId,
+      actingOrgPublicId,
+      flow,
+      productLine
     };
 
     if (!requestId) {
