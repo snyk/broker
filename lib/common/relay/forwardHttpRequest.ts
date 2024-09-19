@@ -45,6 +45,10 @@ export const forwardHttpRequest = (
           : req.headers['snyk-request-id'] || '',
       maskedToken: req['maskedToken'],
       hashedToken: req['hashedToken'],
+      actingOrgPublicId: req.headers['snyk-acting-org-public-id'] as string,
+      actingGroupPublicId: req.headers['snyk-acting-group-public-id'] as string,
+      productLine: req.headers['snyk-product-line'] as string,
+      flow: req.headers['snyk-flow-name'] as string,
     };
 
     const simplifiedContext = logContext;
