@@ -61,7 +61,7 @@
   "dependencies": {
     "axios": "1.7.4",
     "axios-retry": "^3.9.1",
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.20.3",
     "bunyan": "^1.8.12",
     "camelcase": "^5.3.1",
     "clarify": "^2.0.0",
@@ -69,7 +69,7 @@
     "ejson": "^2.2.0",
     "engine.io": "^6.5.5",
     "engine.io-client": "^5.2.0",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
     "js-yaml": "^3.13.1",

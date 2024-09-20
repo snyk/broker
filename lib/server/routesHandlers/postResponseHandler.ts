@@ -14,6 +14,10 @@ export const handlePostResponse = (req: Request, res: Response) => {
     maskedToken: desensitizedToken.maskedToken,
     streamingID,
     requestId: req.headers['snyk-request-id'],
+    actingOrgPublicId: req.headers['snyk-acting-org-public-id'],
+    actingGroupPublicId: req.headers['snyk-acting-group-public-id'],
+    productLine: req.headers['snyk-product-line'],
+    flow: req.headers['snyk-flow-name'],
   };
   logger.info(logContext, 'Handling response-data request');
   req['maskedToken'] = desensitizedToken.maskedToken;

@@ -25,4 +25,8 @@ export interface ExtendedLogContext extends LogContext {
   ioErrorType?: string;
   ioOriginalBodySize?: string;
   responseMedium?: string;
+  actingOrgPublicId?: string;
+  actingGroupPublicId?: string;
+  productLine?: string;
+  flow?: string;
 }

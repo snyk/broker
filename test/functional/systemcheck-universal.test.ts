@@ -9,6 +9,7 @@ import {
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
+import nock from 'nock';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
@@ -23,6 +24,12 @@ describe('broker client systemcheck endpoint', () => {
     tws = await createTestWebServer();
     bs = await createBrokerServer({ filters: serverAccept });
     process.env.SKIP_REMOTE_CONFIG = 'true';
+    nock(`https://snyk.io`)
+      .persist()
+      .get('/no-such-url-ever')
+      .reply(() => {
+        return [308, '/no-such-url-ever/'];
+      });
   });
 
   afterAll(async () => {
