@@ -160,6 +160,16 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
+    },
+    Object {
       "//": "get file content. restrict by file types",
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
@@ -7820,6 +7830,16 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
     },
     Object {
       "//": "get core api's location for sanity check",
@@ -16339,6 +16359,16 @@ Object {
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
     },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
+    },
   ],
   "public": Array [
     Object {
@@ -24113,6 +24143,16 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -32027,6 +32067,16 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -40017,6 +40067,16 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "scheme": "basic",
@@ -47962,6 +48022,16 @@ Object {
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
     },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
+    },
   ],
   "public": Array [
     Object {
@@ -48361,6 +48431,16 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
     },
   ],
   "public": Array [
@@ -64042,6 +64122,16 @@ Object {
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
     },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
+    },
   ],
   "public": Array [
     Object {
@@ -71804,6 +71894,16 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "evaluate permissions",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "POST",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/security/permissionevaluationbatch",
     },
   ],
   "public": Array [

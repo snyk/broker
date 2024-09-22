@@ -174,6 +174,25 @@ describe('filters', () => {
         expect(filterResponseUrl).toMatch(url);
       });
     });
+
+    describe('for azure repos', () => {
+      const rules = JSON.parse(
+        loadFixture(path.join('accept', 'azure-repos.json')),
+      );
+      const filter = loadFilters(rules.private, 'default', {});
+
+      it('should allow evaluating permissions', () => {
+        const url = '/_apis/security/permissionevaluationbatch';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+    });
   });
 
   describe('on body', () => {
