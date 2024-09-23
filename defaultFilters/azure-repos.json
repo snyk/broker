@@ -368,6 +368,16 @@
         "method": "any",
         "path": "/snykgit/*",
         "origin": "${GIT_CLIENT_URL}"
+      },
+      {
+        "//": "evaluate permissions",
+        "method": "POST",
+        "path": "/_apis/security/permissionevaluationbatch",
+        "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+        "auth": {
+          "scheme": "basic",
+          "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+        }
       }
     ]
   }
