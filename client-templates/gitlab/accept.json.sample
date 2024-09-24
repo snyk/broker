@@ -1575,6 +1575,12 @@
       "method": "any",
       "path": "/snykgit/*",
       "origin": "${GIT_CLIENT_URL}"
+    },
+    {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "path": "/api/v4/personal_access_tokens/self",
+      "origin": "https://${GITLAB}"
     }
   ]
 }

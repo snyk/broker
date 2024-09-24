@@ -7413,6 +7413,12 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -15938,6 +15944,12 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
       "//": "list the group's members",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -23751,6 +23763,12 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
     },
   ],
   "public": Array [
@@ -31653,6 +31671,12 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -39645,6 +39669,12 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -47575,6 +47605,12 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -62068,6 +62104,12 @@ Object {
       "path": "/snykgit/*",
     },
     Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -63705,6 +63747,12 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
       "//": "used to scan IAC files",
@@ -71503,6 +71551,12 @@ Object {
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
     },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
+    },
   ],
   "public": Array [
     Object {
@@ -79275,6 +79329,12 @@ Object {
       "method": "any",
       "origin": "\${GIT_CLIENT_URL}",
       "path": "/snykgit/*",
+    },
+    Object {
+      "//": "get token information to check scope",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/personal_access_tokens/self",
     },
   ],
   "public": Array [
