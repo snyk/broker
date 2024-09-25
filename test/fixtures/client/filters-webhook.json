@@ -10,6 +10,10 @@
     {
       "path": "/webhook/gitlab/:webhookId",
       "method": "POST"
+    },
+    {
+      "path": "/webhook/bitbucket-server/:webhookId",
+      "method": "POST"
     }
   ]
 }

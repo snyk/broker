@@ -52,6 +52,13 @@ export const websocketConnectionSelectorMiddleware = (
         availableConnectionsTypes.includes('github-cloud-app')
       ) {
         inboundRequestType = 'github-cloud-app';
+      } else if (
+        splitUrl.length > 2 &&
+        splitUrl[2] == 'bitbucket-server' &&
+        !availableConnectionsTypes.includes('bitbucket-server') &&
+        availableConnectionsTypes.includes('bitbucket-server-bearer-auth')
+      ) {
+        inboundRequestType = 'bitbucket-server-bearer-auth';
       } else {
         logger.warn({ url: req.path }, 'Unexpected type in webhook request');
         res
@@ -89,7 +96,6 @@ export const websocketConnectionSelectorMiddleware = (
         { url: req.path },
         'Unknown type in client->server request.',
       );
-
       if (config.serviceEnv == 'universaltest') {
         // only to support testing, blocking all other unknown request types
         inboundRequestType =

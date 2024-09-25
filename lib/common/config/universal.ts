@@ -2,6 +2,7 @@ import { log as logger } from '../../logs/logger';
 import { Config, ConnectionConfig } from '../../client/types/config';
 import { expandPlaceholderValuesInFlatList, getConfig } from './config';
 import { getPluginsConfig } from './pluginsConfig';
+import { determineFilterType } from '../../client/utils/filterSelection';
 
 export const getConfigForType = (type: string) => {
   const config = getConfig();
@@ -30,7 +31,9 @@ export const getConfigForConnection = (key, config) => {
   return {
     ...getConfigForType(config.connections[key].type),
     ...config.connections[key],
-    ...getValidationConfigForType(config.connections[key].type),
+    ...getValidationConfigForType(
+      determineFilterType(config.connections[key].type, config),
+    ),
   };
 };
 export const getValidationConfigForType = (type) => {
