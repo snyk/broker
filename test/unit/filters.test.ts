@@ -12,6 +12,13 @@ function loadFixture(name: string) {
   return fixture;
 }
 
+function loadDefaultFilter(name: string) {
+  const filterPath = path.join(__dirname, '../../', 'defaultFilters', name);
+  const filter = readFileSync(filterPath, { encoding: 'utf-8' });
+
+  return filter;
+}
+
 describe('filters', () => {
   describe('on URL', () => {
     describe('for GitHub private filters', () => {
@@ -187,6 +194,23 @@ describe('filters', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+    });
+
+    describe('for gitlab', () => {
+      const rules = JSON.parse(loadDefaultFilter('gitlab.json'));
+      const filter = loadFilters(rules.private, 'default', {});
+
+      it('should allow getting self token', () => {
+        const url = '/api/v4/personal_access_tokens/self';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
