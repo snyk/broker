@@ -91,8 +91,65 @@ describe('filters', () => {
     });
 
     describe('for bitbucket server private filters', () => {
+      const rules = JSON.parse(loadDefaultFilter('bitbucket-server.json'));
+      const filter = loadFilters(rules.private, 'default', {});
+
+      it('should allow creating a general pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/comments';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating a general pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow getting a general pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow searching permissions', () => {
+        const url =
+          '/rest/api/1.0/projects/:project/repos/:repo/permissions/search';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+    });
+
+    describe('for bitbucket server bearer auth private filters', () => {
       const rules = JSON.parse(
-        loadFixture(path.join('accept', 'bitbucket-server.json')),
+        loadDefaultFilter('bitbucket-server-bearer-auth.json'),
       );
       const filter = loadFilters(rules.private, 'default', {});
 
@@ -134,43 +191,10 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
-    });
 
-    describe('for bitbucket server bearer auth private filters', () => {
-      const rules = JSON.parse(
-        loadFixture(path.join('accept', 'bitbucket-server-bearer-auth.json')),
-      );
-      const filter = loadFilters(rules.private, 'default', {});
-
-      it('should allow creating a general pull request comment', () => {
+      it('should allow searching permissions', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments';
-
-        const filterResponse = filter({
-          url,
-          method: 'POST',
-        });
-        expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
-      });
-
-      it('should allow updating a general pull request comment', () => {
-        const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
-
-        const filterResponse = filter({
-          url,
-          method: 'PUT',
-        });
-        expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
-      });
-
-      it('should allow getting a general pull request comment', () => {
-        const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+          '/rest/api/1.0/projects/:project/repos/:repo/permissions/search';
 
         const filterResponse = filter({
           url,
