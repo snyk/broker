@@ -20,6 +20,7 @@ import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
 import { fetchJwt } from './auth/oauth';
 import { getServerId } from './dispatcher';
+import { determineFilterType } from './utils/filterSelection';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -38,7 +39,10 @@ export const createWebSocketConnectionPairs = async (
   const integrationType =
     clientOpts.config.connections[`${connectionKey}`].type;
 
-  socketIdentifyingMetadata.supportedIntegrationType = integrationType;
+  socketIdentifyingMetadata.supportedIntegrationType = determineFilterType(
+    integrationType,
+    clientOpts.config.connections[`${connectionKey}`],
+  );
 
   if (!socketIdentifyingMetadata.identifier) {
     throw new Error(

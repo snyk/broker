@@ -117,6 +117,13 @@ const applyEchoRoutes = (app: Express) => {
       resp.send('Received webhook via API');
     },
   );
+  echoRouter.post(
+    '/webhook/bitbucket-server/12345678-1234-1234-1234-123456789abc',
+    (_: express.Request, resp: express.Response) => {
+      resp.status(200);
+      resp.send('Received webhook via websocket');
+    },
+  );
 
   echoRouter.get('/test', (_: express.Request, resp: express.Response) => {
     resp.status(200);

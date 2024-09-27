@@ -55,7 +55,7 @@
         "AZURE_REPOS_HOST":"${AZURE_REPOS_HOST}"
       },
       "my jira pat": {
-        "type": "jira-bearer-auth",
+        "type": "jira",
         "id": "4",
         "identifier": "${BROKER_TOKEN_4}",
         "JIRA_PAT": "${JIRA_PAT}",
