@@ -20,8 +20,10 @@
     },
     "CONNECTIONS": {
       "my bitbucket-server-bearer-auth connection": {
-        "type": "bitbucket-server-bearer-auth",
-        "identifier": "${BROKER_TOKEN_1}"
+        "type": "bitbucket-server",
+        "identifier": "${BROKER_TOKEN_1}",
+        "BITBUCKET": "dummy",
+        "BITBUCKET_PAT": "${BEARER_PAT}"
       }
     }
   }

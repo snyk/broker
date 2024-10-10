@@ -41,7 +41,7 @@ describe('proxy requests originating from behind the broker client', () => {
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env['SNYK_FILTER_RULES_PATHS__bitbucket-server-bearer-auth'] =
       clientAccept;
-    // process.env['SNYK_FILTER_RULES_PATHS__github-cloud-app'] = clientAccept;
+    process.env.BEARER_PAT = 'mypat';
 
     bc = await createUniversalBrokerClient();
     await waitForUniversalBrokerClientsConnection(bs, 1);
