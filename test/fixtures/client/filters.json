@@ -30,6 +30,15 @@
         "token": "${JIRA_PAT}"
       }
     },
+    {
+      "path": "/echo-auth-header-with-bb-bearer-auth/:data",
+      "method": "GET",
+      "origin": "http://localhost:9000",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+    },
     
     {
       "path": "/echo-auth-header-with-raw-auth/:data",
