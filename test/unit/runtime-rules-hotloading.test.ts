@@ -321,4 +321,39 @@ describe('filter Rules Loading', () => {
       delete process.env.ACCEPT;
     },
   );
+
+  test.each(scmRulesToTest)(
+    'Injection of valid Git rules with AppRisk enabled - Testing %s',
+    (folder) => {
+      process.env.ACCEPT_GIT = 'true';
+      process.env.ACCEPT = 'accept.json';
+      process.env.ACCEPT_APPRISK = 'true';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPaths: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      for (const rule of [
+        'allow git-upload-pack (for git clone)',
+        'allow info refs (for git clone)',
+        'needed to load code snippets',
+      ]) {
+        expect(
+          loadedRules['private'].filter((x) => x['//'] === rule),
+        ).toHaveLength(1);
+      }
+      delete process.env.ACCEPT_GIT;
+      delete process.env.ACCEPT;
+      delete process.env.ACCEPT_APPRISK;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+    },
+  );
 });
