@@ -328,7 +328,6 @@ describe('filter Rules Loading', () => {
       process.env.ACCEPT_GIT = 'true';
       process.env.ACCEPT = 'accept.json';
       process.env.ACCEPT_APPRISK = 'true';
-      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
         supportedBrokerTypes: scmRulesToTest,
@@ -353,7 +352,6 @@ describe('filter Rules Loading', () => {
       delete process.env.ACCEPT_GIT;
       delete process.env.ACCEPT;
       delete process.env.ACCEPT_APPRISK;
-      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
     },
   );
 });

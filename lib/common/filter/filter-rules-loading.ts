@@ -267,11 +267,13 @@ function injectRulesAtRuntime(
         findProjectRoot(__dirname) ?? process.cwd(),
         `defaultFilters/apprisk/${type}.json`,
       )) as Rule[];
-      // rm entry from filters.private if matching uri in appRiskRules which takes precedence
-      const appRiskRulesPathPattern = appRiskRules.map((x) => x.path);
-      filters.private = filters.private.filter(
-        (x) => !appRiskRulesPathPattern.includes(x.path),
+      // rm entry from filters.private if matching uri _and matching method_ in appRiskRules which takes precedence
+      const appRiskRulesPathMethodPattern = appRiskRules.map(
+        (x) => `${x.method}|${x.path}`,
       );
+      filters.private = filters.private.filter((x) => {
+        return !appRiskRulesPathMethodPattern.includes(`${x.method}|${x.path}`);
+      });
       filters.private.push(...appRiskRules);
     }
   }
@@ -303,13 +305,15 @@ function injectRulesAtRuntime(
         findProjectRoot(__dirname) ?? process.cwd(),
         `defaultFilters/customPrTemplates/${type}.json`,
       )) as Rule[];
-      // rm entry from filters.private if matching uri in appRiskRules which takes precedence
-      const customPRTemplatesRulesPathPattern = customPRTemplatesRules.map(
-        (x) => x.path,
+      // rm entry from filters.private if matching uri _and matching method_ in customPRTemplatesRules which takes precedence
+      const customPRTemplatesRulesMethodPattern = customPRTemplatesRules.map(
+        (x) => `${x.method}|${x.path}`,
       );
-      filters.private = filters.private.filter(
-        (x) => !customPRTemplatesRulesPathPattern.includes(x.path),
-      );
+      filters.private = filters.private.filter((x) => {
+        return !customPRTemplatesRulesMethodPattern.includes(
+          `${x.method}|${x.path}`,
+        );
+      });
       filters.private.push(...customPRTemplatesRules);
     }
   }
