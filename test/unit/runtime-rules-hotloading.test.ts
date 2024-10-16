@@ -23,10 +23,18 @@ const scmUniversalRulesToTest = [
 ];
 
 describe('filter Rules Loading', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    process.env.ACCEPT = 'accept.json';
+  });
+
+  afterEach(() => {
+    delete process.env.ACCEPT;
+  });
+
   test.each(scmRulesToTest)(
     'Loads normal accept file - Testing %s',
     (folder) => {
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -38,7 +46,6 @@ describe('filter Rules Loading', () => {
       );
 
       expect(loadedRules).toMatchSnapshot();
-      delete process.env.ACCEPT;
     },
   );
 
@@ -46,7 +53,6 @@ describe('filter Rules Loading', () => {
     'Skip injection if no or invalid IAC extensions - Testing %s',
     (folder) => {
       process.env.ACCEPT_IAC = 'rf';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -59,7 +65,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_IAC;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -67,7 +72,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid IAC extensions - Testing %s',
     (folder) => {
       process.env.ACCEPT_IAC = 'tf,yaml, json,yml,tpl';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -80,7 +84,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_IAC;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -88,7 +91,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid IAC extensions - Testing %s',
     (folder) => {
       process.env.ACCEPT_IAC = 'tf,json';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -101,7 +103,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_IAC;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -109,7 +110,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid CODE rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_CODE = 'true';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -122,7 +122,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_CODE;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -130,7 +129,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid Git rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -143,7 +141,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_GIT;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -151,12 +148,11 @@ describe('filter Rules Loading', () => {
     'Injection of valid Git rules without snippets - Testing %s',
     (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      process.env.ACCEPT = 'accept.json';
       process.env.DISABLE_SNIPPETS = 'true';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
-          supportedBrokerTypes: [],
+          supportedBrokerTypes: scmRulesToTest,
           accept: 'accept.json.sample',
           filterRulesPaths: {},
         },
@@ -168,16 +164,21 @@ describe('filter Rules Loading', () => {
           (x) => x['//'] === 'needed to load code snippets',
         ),
       ).toHaveLength(0);
+
       for (const rule of [
-        'allow git-upload-pack (for git clone)',
-        'allow info refs (for git clone)',
+        {
+          name: 'allow git-upload-pack (for git clone)',
+          path: '*/git-upload-pack',
+        },
+        { name: 'allow info refs (for git clone)', path: '*/info/refs*' },
       ]) {
-        expect(
-          loadedRules['private'].filter((x) => x['//'] === rule),
-        ).toHaveLength(1);
+        const filteredRule = loadedRules['private'].filter(
+          (x) => x['//'] === rule.name,
+        );
+        expect(filteredRule).toHaveLength(1);
+        expect(filteredRule[0].path).toEqual(rule.path);
       }
       delete process.env.ACCEPT_GIT;
-      delete process.env.ACCEPT;
       delete process.env.DISABLE_SNIPPETS;
     },
   );
@@ -186,7 +187,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid CODE GH rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
-      process.env.ACCEPT = 'accept.json';
 
       const loadedRules = loadFilterRules(
         {
@@ -200,7 +200,6 @@ describe('filter Rules Loading', () => {
 
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_LARGE_MANIFESTS;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -209,7 +208,6 @@ describe('filter Rules Loading', () => {
     (folder) => {
       process.env.ACCEPT_CODE = 'true';
       process.env.ACCEPT_IAC = 'yaml';
-      process.env.ACCEPT = 'accept.json';
       const loadedRules = loadFilterRules(
         {
           brokerType: 'client',
@@ -223,7 +221,6 @@ describe('filter Rules Loading', () => {
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_CODE;
       delete process.env.ACCEPT_IAC;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -231,7 +228,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid AppRisk rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_APPRISK = 'true';
-      process.env.ACCEPT = 'accept.json';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
@@ -248,7 +244,6 @@ describe('filter Rules Loading', () => {
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_APPRISK;
       delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
-      delete process.env.ACCEPT;
     },
   );
 
@@ -256,7 +251,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
     (folder) => {
       process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'true';
-      process.env.ACCEPT = 'accept.json';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
@@ -273,7 +267,6 @@ describe('filter Rules Loading', () => {
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_CUSTOM_PR_TEMPLATES;
       delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
-      delete process.env.ACCEPT;
     },
   );
 
@@ -281,7 +274,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid Git rules - Universal Broker - Testing %s',
     (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      process.env.ACCEPT = 'accept.json';
       const filterRulesPath = {};
       for (const type of scmUniversalRulesToTest) {
         filterRulesPath[`${type}`] = `defaultFilters/${type}.json`;
@@ -318,7 +310,6 @@ describe('filter Rules Loading', () => {
       }
       expect(loadedRules).toMatchSnapshot();
       delete process.env.ACCEPT_GIT;
-      delete process.env.ACCEPT;
     },
   );
 
@@ -326,7 +317,6 @@ describe('filter Rules Loading', () => {
     'Injection of valid Git rules with AppRisk enabled - Testing %s',
     (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      process.env.ACCEPT = 'accept.json';
       process.env.ACCEPT_APPRISK = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
@@ -350,7 +340,6 @@ describe('filter Rules Loading', () => {
         ).toHaveLength(1);
       }
       delete process.env.ACCEPT_GIT;
-      delete process.env.ACCEPT;
       delete process.env.ACCEPT_APPRISK;
     },
   );
