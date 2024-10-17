@@ -207,9 +207,7 @@ describe('filters', () => {
     });
 
     describe('for azure repos', () => {
-      const rules = JSON.parse(
-        loadFixture(path.join('accept', 'azure-repos.json')),
-      );
+      const rules = JSON.parse(loadDefaultFilter('azure-repos.json'));
       const filter = loadFilters(rules.private, 'default', {});
 
       it('should allow evaluating permissions', () => {
@@ -219,6 +217,20 @@ describe('filters', () => {
           url,
           method: 'POST',
         });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow listing fixtures', () => {
+        const url =
+          '/test-owner/_apis/git/repositories/test-repo/pullrequests/1/iterations';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+
         expect(filterResponse).not.toEqual(false);
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
