@@ -224,7 +224,7 @@ describe('filters', () => {
 
       it('should allow listing fixtures', () => {
         const url =
-          '/test-owner/_apis/git/repositories/test-repo/pullrequests/1/iterations';
+          '/test-owner/_apis/git/repositories/test-repo/pullRequests/1/iterations';
 
         const filterResponse = filter({
           url,

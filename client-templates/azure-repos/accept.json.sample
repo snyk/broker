@@ -382,7 +382,7 @@
     {
       "//": "list pull request iterations",
       "method": "GET",
-      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef/iterations",
+      "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
       "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
       "auth": {
         "scheme": "basic",
