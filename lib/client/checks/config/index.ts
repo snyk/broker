@@ -13,6 +13,7 @@ export function getConfigChecks(config: Config): Check[] {
     acceptFlagsConfigurationCheck(config),
     codeAgentDeprecationCheck(config),
     brokerClientVersionCheck(config),
+    brokerTokenCheck(config),
   ];
 }
 
@@ -78,6 +79,20 @@ const brokerClientVersionCheck = (config: Config): Check => {
     id: 'client-version-validation',
     name: 'Broker Client Version Check',
     enabled: true,
+    check: async function (): Promise<CheckResult> {
+      return await validateBrokerClientVersionAgainstServer(
+        { id: this.id, name: this.name },
+        config,
+      );
+    },
+  } satisfies Check;
+};
+
+const brokerTokenCheck = (config: Config): Check => {
+  return {
+    id: 'broker-token-validation',
+    name: 'Broker Token Validation Check',
+    enabled: !config.universalBrokerEnabled,
     check: async function (): Promise<CheckResult> {
       return await validateBrokerClientVersionAgainstServer(
         { id: this.id, name: this.name },
