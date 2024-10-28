@@ -94,7 +94,7 @@ const brokerTokenCheck = (config: Config): Check => {
     name: 'Broker Token Validation Check',
     enabled: !config.universalBrokerEnabled,
     check: async function (): Promise<CheckResult> {
-      return await validateBrokerClientVersionAgainstServer(
+      return await validateBrokerToken(
         { id: this.id, name: this.name },
         config,
       );
