@@ -1,7 +1,7 @@
 import { log as logger } from '../../../logs/logger';
 import type { CheckOptions, CheckResult } from '../types';
 import type { Config } from '../../types/config';
-import { isUuid } from '../utils';
+import { validate } from 'uuid';
 
 export async function validateBrokerToken(
   checkOptions: CheckOptions,
@@ -19,7 +19,7 @@ export async function validateBrokerToken(
     } satisfies CheckResult;
   }
 
-  if (!isUuid(brokerToken)) {
+  if (!validate(brokerToken)) {
     return {
       id: checkOptions.id,
       name: checkOptions.name,

@@ -5,6 +5,7 @@ import { validateAcceptFlagsConfig } from './customAcceptFile';
 import { validateCodeAgentDeprecation } from './codeAgentDeprecation';
 import { validateUniversalConnectionsConfig } from './universalConnectionConfigCheck';
 import { validateBrokerClientVersionAgainstServer } from './brokerClientVersionCheck';
+import { validateBrokerToken } from './brokerTokenCheck';
 
 export function getConfigChecks(config: Config): Check[] {
   return [
