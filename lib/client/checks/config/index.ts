@@ -5,6 +5,7 @@ import { validateAcceptFlagsConfig } from './customAcceptFile';
 import { validateCodeAgentDeprecation } from './codeAgentDeprecation';
 import { validateUniversalConnectionsConfig } from './universalConnectionConfigCheck';
 import { validateBrokerClientVersionAgainstServer } from './brokerClientVersionCheck';
+import { validateBrokerToken } from './brokerTokenCheck';
 
 export function getConfigChecks(config: Config): Check[] {
   return [
@@ -13,6 +14,7 @@ export function getConfigChecks(config: Config): Check[] {
     acceptFlagsConfigurationCheck(config),
     codeAgentDeprecationCheck(config),
     brokerClientVersionCheck(config),
+    brokerTokenCheck(config),
   ];
 }
 
@@ -80,6 +82,20 @@ const brokerClientVersionCheck = (config: Config): Check => {
     enabled: true,
     check: async function (): Promise<CheckResult> {
       return await validateBrokerClientVersionAgainstServer(
+        { id: this.id, name: this.name },
+        config,
+      );
+    },
+  } satisfies Check;
+};
+
+const brokerTokenCheck = (config: Config): Check => {
+  return {
+    id: 'broker-token-validation',
+    name: 'Broker Token Validation Check',
+    enabled: !config.universalBrokerEnabled,
+    check: async function (): Promise<CheckResult> {
+      return await validateBrokerToken(
         { id: this.id, name: this.name },
         config,
       );
