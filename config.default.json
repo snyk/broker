@@ -362,7 +362,8 @@
         "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN",
         "GIT_URL": "$GITLAB",
         "GIT_USERNAME": "oauth2",
-        "GIT_PASSWORD": "$GITLAB_TOKEN"
+        "GIT_PASSWORD": "$GITLAB_TOKEN",
+        "REMOVE_X_FORWARDED_HEADERS": "true"
       },
       "required": {
         "GITLAB_TOKEN": "<gitlab-token>",
