@@ -466,6 +466,7 @@ workflows:
           context:
             - nodejs-lib-release
             - snyk-bot-slack
+            - team-broker-snyk
           requires:
             - Test
           post-steps:
