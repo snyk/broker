@@ -20,6 +20,21 @@
       "//": "shasum windows binaries",
       "path": "@semantic-release/exec",
       "cmd": "cat binary-releases/snyk-broker-win.exe | npx hasha-cli -a sha256 > binary-releases/snyk-broker-win.exe.sha256"
+    },
+    {
+      "//": "generate Cyclone DX JSON SBOM",
+      "path": "@semantic-release/exec",
+      "cmd": "npx snyk sbom --format cyclonedx1.4+json > sboms/broker.sbom.cyclonedx.json"
+    },
+    {
+      "//": "generate Cyclone DX XML SBOM",
+      "path": "@semantic-release/exec",
+      "cmd": "npx snyk sbom --format cyclonedx1.4+xml > sboms/broker.sbom.cyclonedx.xml"
+    },
+    {
+      "//": "generate SPDX SBOM",
+      "path": "@semantic-release/exec",
+      "cmd": "npx snyk sbom --format spdx2.3+json > sboms/broker.sbom.spdx.json"
     }
   ],
   "publish": [
@@ -56,6 +71,21 @@
           "path": "binary-releases/snyk-broker-win.exe.sha256",
           "name": "snyk-broker-win.exe.sha256",
           "label": "snyk-broker-win.exe.sha256"
+        },
+        {
+          "path": "sboms/broker.sbom.cyclonedx.json",
+          "name": "broker.sbom.cyclonedx.json",
+          "label": "broker.sbom.cyclonedx.json"
+        },
+        {
+          "path": "sboms/broker.sbom.cyclonedx.xml",
+          "name": "broker.sbom.cyclonedx.xml",
+          "label": "broker.sbom.cyclonedx.xml"
+        },
+        {
+          "path": "sboms/broker.sbom.spdx.json",
+          "name": "broker.sbom.spdx.json",
+          "label": "broker.sbom.spdx.json"
         }
       ]
     }
