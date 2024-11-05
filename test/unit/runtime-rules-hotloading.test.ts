@@ -2,6 +2,9 @@ import path from 'path';
 import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
 import { CONFIGURATION } from '../../lib/common/config/config';
 import camelcase from 'camelcase';
+import { FiltersType } from '../../lib/common/types/filter';
+const nock = require('nock');
+import fs from 'fs';
 
 const scmRulesToTest = [
   'azure-repos',
@@ -22,7 +25,22 @@ const scmUniversalRulesToTest = [
   'gitlab',
 ];
 
+const rulesetSourceHostname = 'http://broker-rules.snyk.io';
+
 describe('filter Rules Loading', () => {
+  beforeAll(() => {
+    nock(`${rulesetSourceHostname}`)
+      .persist()
+      .get(/./)
+      .reply((uri) => {
+        const filename = path.basename(uri);
+        const fileContent = fs.readFileSync(
+          `defaultFilters/${filename}`,
+          'utf-8',
+        );
+        return [200, fileContent];
+      });
+  });
   beforeEach(() => {
     jest.resetModules();
     process.env.ACCEPT = 'accept.json';
@@ -44,8 +62,44 @@ describe('filter Rules Loading', () => {
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
-
       expect(loadedRules).toMatchSnapshot();
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Loads custom accept file - Testing %s',
+    async (folder) => {
+      const loadedRules = await loadFilterRules({
+        brokerType: 'client',
+        supportedBrokerTypes: [],
+        accept: `client-templates/${folder}/accept.json.sample`,
+        filterRulesPaths: {},
+      });
+      expect(loadedRules).toMatchSnapshot();
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Loads universal rules - Testing %s',
+    async (folder) => {
+      const loadedRules = await loadFilterRules({
+        brokerType: 'client',
+        supportedBrokerTypes: [`${folder}`],
+        filterRulesPaths: {
+          'azure-repos': `${rulesetSourceHostname}/azure-repos.json`,
+          'bitbucket-server': `${rulesetSourceHostname}/bitbucket-server.json`,
+          'bitbucket-server-bearer-auth': `${rulesetSourceHostname}/bitbucket-server-bearer-auth.json`,
+          'github-enterprise': `${rulesetSourceHostname}/github-enterprise.json`,
+          'github-server-app': `${rulesetSourceHostname}/github-server-app.json`,
+          'github-cloud-app': `${rulesetSourceHostname}/github-cloud-app.json`,
+          github: `${rulesetSourceHostname}/github.json`,
+          gitlab: `${rulesetSourceHostname}/gitlab.json`,
+        },
+        universalBrokerEnabled: true,
+      });
+
+      const loadedRulesForType = loadedRules as Map<string, FiltersType>;
+      expect(loadedRulesForType[folder]).toMatchSnapshot();
     },
   );
 
