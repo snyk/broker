@@ -6,6 +6,7 @@ import { log as logger } from '../../logs/logger';
 import { CONFIGURATION, findProjectRoot } from '../config/config';
 import camelcase from 'camelcase';
 import { FiltersType, Rule } from '../types/filter';
+import { retrieveFilters, isValidURI } from './utils';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
 const IAC_SCM_ORIGINS = [
@@ -318,32 +319,37 @@ function injectRulesAtRuntime(
   return filters;
 }
 
-export default (
+export default async (
   config: CONFIGURATION,
   folderLocation = '',
-): FiltersType | Map<string, FiltersType> => {
+): Promise<FiltersType | Map<string, FiltersType>> => {
   const acceptFilename = config.accept || '';
-  // let filters = config.universalBrokerEnabled
-  //   ? new Map()
-  //   : { private: [], public: [] };
+  let retrievedFilters;
+
+  if (!acceptFilename || (acceptFilename && isValidURI(acceptFilename))) {
+    let rulesUrisMap;
+    if (acceptFilename) {
+      rulesUrisMap = new Map<string, string>().set('current', acceptFilename);
+    } else {
+      rulesUrisMap = new Map<string, string>(
+        Object.entries(config.filterRulesPaths),
+      );
+    }
+    retrievedFilters = await retrieveFilters(rulesUrisMap);
+  }
+
   let filters;
   if (config.universalBrokerEnabled) {
     filters = new Map();
     const supportedBrokerTypes = config.supportedBrokerTypes;
     supportedBrokerTypes.forEach((type) => {
-      filters[type] = yaml.safeLoad(
-        fs.readFileSync(
-          `${path.resolve(
-            findProjectRoot(__dirname) ?? process.cwd(),
-            `${config.filterRulesPaths[type]}`, // this should handle the override for custom filters
-          )}`,
-          'utf8',
-        ),
-      );
+      filters[type] = yaml.safeLoad(retrievedFilters[type]);
       filters[type] = injectRulesAtRuntime(filters[type], config, type);
     });
   } else {
-    if (acceptFilename) {
+    if (acceptFilename && retrievedFilters) {
+      filters = yaml.safeLoad(retrievedFilters.get('current'));
+    } else {
       const acceptLocation = path.resolve(
         folderLocation
           ? folderLocation
