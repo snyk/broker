@@ -140,7 +140,6 @@ function injectRulesAtRuntime(
     config.ACCEPT_GIT;
   if (ACCEPT_CODE) {
     logger.info({ accept: ACCEPT_CODE }, 'Injecting Accept rules for Code/Git');
-
     const templateGET = nestedCopy(
       filters.private.filter(
         (entry) =>
@@ -242,6 +241,7 @@ function injectRulesAtRuntime(
       }
     }
   }
+
   const ACCEPT_APPRISK = process.env.ACCEPT_APPRISK || config.ACCEPT_APPRISK;
   if (ACCEPT_APPRISK) {
     logger.debug(
@@ -337,17 +337,21 @@ export default async (
     }
     retrievedFilters = await retrieveFilters(rulesUrisMap);
   }
-
   let filters;
   if (config.universalBrokerEnabled) {
     filters = new Map();
     const supportedBrokerTypes = config.supportedBrokerTypes;
     supportedBrokerTypes.forEach((type) => {
-      filters[type] = yaml.safeLoad(retrievedFilters[type]);
+      if (!retrievedFilters.get(type)) {
+        throw new Error(`Missing filter for ${type}.`);
+      }
+      filters[type] = yaml.safeLoad(retrievedFilters.get(type));
       filters[type] = injectRulesAtRuntime(filters[type], config, type);
     });
   } else {
-    if (acceptFilename && retrievedFilters) {
+    if (!acceptFilename) {
+      return filters;
+    } else if (acceptFilename && retrievedFilters) {
       filters = yaml.safeLoad(retrievedFilters.get('current'));
     } else {
       const acceptLocation = path.resolve(
