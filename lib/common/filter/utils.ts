@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'fs';
 import { makeSingleRawRequestToDownstream } from '../http/request';
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
 import version from '../utils/version';
@@ -49,10 +50,13 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
     } else {
       retrievedFiltersMap.set(
         key,
-        `${path.resolve(
-          findProjectRoot(__dirname) ?? process.cwd(),
-          location, // this should handle the override for custom filters
-        )}`,
+        fs.readFileSync(
+          `${path.resolve(
+            findProjectRoot(__dirname) ?? process.cwd(),
+            location, // this should handle the override for custom filters
+          )}`,
+          'utf-8',
+        ),
       );
     }
   }
