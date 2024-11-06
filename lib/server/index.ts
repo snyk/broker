@@ -1,7 +1,6 @@
 import { log as logger } from '../logs/logger';
 import { bindSocketToWebserver } from './socket';
 import version from '../common/utils/version';
-import '@snyk/node-dump-stacks';
 import { applyPrometheusMiddleware } from './utils/prometheus-middleware';
 import { validateBrokerTypeMiddleware } from './broker-middleware';
 import { webserver } from '../common/http/webserver';
