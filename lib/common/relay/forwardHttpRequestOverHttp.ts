@@ -9,6 +9,7 @@ import { makeRequestToDownstream } from '../http/request';
 import { maskToken } from '../utils/token';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
 import { LOADEDFILTERSET } from '../types/filter';
+import { getFilterConfig } from '../../client/config/filters';
 
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
@@ -46,8 +47,7 @@ export const forwardHttpRequestOverHttp = (
       options.config.brokerType == 'client' &&
       options.config.universalBrokerEnabled
     ) {
-      const clientOptions = options as LoadedClientOpts;
-      const loadedFilters = clientOptions.loadedFilters as Map<
+      const loadedFilters = getFilterConfig().loadedFilters as Map<
         string,
         LOADEDFILTERSET
       >;
@@ -55,6 +55,9 @@ export const forwardHttpRequestOverHttp = (
         loadedFilters
           .get(res.locals.websocket.supportedIntegrationType) // The chosen type is determined by websocket connect middlwr
           ?.public(req) || false;
+    } else if (options.config.brokerType == 'client') {
+      const loadedFilters = getFilterConfig().loadedFilters as LOADEDFILTERSET;
+      filterResponse = loadedFilters.public(req);
     } else {
       const loadedFilters = options.loadedFilters as LOADEDFILTERSET;
       filterResponse = loadedFilters.public(req);

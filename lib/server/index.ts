@@ -17,13 +17,12 @@ export const main = async (serverOpts: ServerOpts) => {
 
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
-  // Requires are done recursively, so this is here to avoid contaminating the Client
 
-  const LoadedServerOpts = {
+  const loadedServerOpts = {
     loadedFilters: loadAllFilters(serverOpts.filters, serverOpts.config),
     ...serverOpts,
   };
-  if (!LoadedServerOpts.loadedFilters) {
+  if (!loadedServerOpts.loadedFilters) {
     logger.error({ serverOpts }, 'Unable to load filters');
     throw new Error('Unable to load filters');
   }
@@ -39,7 +38,7 @@ export const main = async (serverOpts: ServerOpts) => {
   await serverStarting();
 
   // bind the socket server to the web server
-  const { websocket } = bindSocketToWebserver(server, LoadedServerOpts);
+  const { websocket } = bindSocketToWebserver(server, loadedServerOpts);
 
   if (!process.env.JEST_WORKER_ID) {
     app.use(applyPrometheusMiddleware());
