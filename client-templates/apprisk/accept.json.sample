@@ -1,0 +1,136 @@
+{
+  "public": [
+  ],
+  "private": [
+    {
+      "//": "Ask for Authentication token",
+      "method": "POST",
+      "path": "/cxrestapi/auth/identity/connect/token",
+      "origin": "https://${CHECKMARX}"
+    },
+    {
+      "//": "Get All Project Details",
+      "method": "GET",
+      "path": "/cxrestapi/projects",
+      "origin": "https://${CHECKMARX}"
+    },
+    {
+      "//": "Get Remote Source Settings for GIT",
+      "method": "GET",
+      "path": "/cxrestapi/projects/:id/sourceCode/remoteSettings/git",
+      "origin": "https://${CHECKMARX}"
+    },
+    {
+      "//": "Get All Scans for Project",
+      "method": "GET",
+      "path": "/cxrestapi/sast/scans",
+      "origin": "https://${CHECKMARX}"
+    },
+    {
+      "//": "Get Statistic Results by Scan Id",
+      "method": "GET",
+      "path": "/cxrestapi/sast/scans/:id/resultsStatistics",
+      "origin": "https://${CHECKMARX}"
+    },
+    {
+      "//": "Provide health status of SonarQube",
+      "method": "GET",
+      "path": "/api/system/ping",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Search for projects",
+      "method": "GET",
+      "path": "/api/projects/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Search for components",
+      "method": "GET",
+      "path": "/api/components/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Search for issues",
+      "method": "GET",
+      "path": "/api/issues/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Get DevOps Platform binding of a given project",
+      "method": "GET",
+      "path": "/api/alm_settings/get_binding",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "List links of a project",
+      "method": "GET",
+      "path": "/api/project_links/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "List the branches of a project or application",
+      "method": "GET",
+      "path": "/api/project_branches/list",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Search for Security Hotpots",
+      "method": "GET",
+      "path": "/api/hotspots/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Provides the details of a Security Hotspot",
+      "method": "GET",
+      "path": "/api/hotspots/show",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    },
+    {
+      "//": "Search for a collection of relevant rules matching a specified query",
+      "method": "GET",
+      "path": "/api/rules/search",
+      "origin": "https://${SONARQUBE_HOST_URL}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${SONARQUBE_API_TOKEN}"
+      }
+    }
+  ]
+}
