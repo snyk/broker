@@ -483,6 +483,8 @@ workflows:
             - snyk-bot-slack
             - team-broker-snyk
           requires:
+            - Build base image (Ubuntu)
+            - Build base image (RHEL)
             - Test
           post-steps:
             - notify-slack-on-failure
