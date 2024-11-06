@@ -461,6 +461,21 @@ workflows:
           requires:
             - Install NPM packages
 
+      - build-and-save-docker-image:
+          name: Build base image (Ubuntu)
+          requires:
+            - Install NPM packages
+          dockerfile: dockerfiles/base/Dockerfile
+          nodejs_cycle: "20"
+          project_name: broker
+
+      - build-and-save-docker-ubi-image:
+          name: Build base image (RHEL)
+          requires:
+            - Install NPM packages
+          dockerfile: dockerfiles/base/Dockerfile.ubi
+          project_name: broker-rhel-ubi
+
       - release:
           name: Release to GitHub and NPM
           context:
