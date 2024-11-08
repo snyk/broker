@@ -19,6 +19,7 @@ const mockedFn = makeLegacyRequest.mockImplementation((data, emit) => {
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
 import {
+  CONFIGURATION,
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
@@ -83,7 +84,7 @@ describe('body relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),
       brokerType: 'client',
@@ -103,6 +104,8 @@ describe('body relay', () => {
         },
         github: { default: {} },
       },
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
     };
     loadBrokerConfig(config);
 
@@ -154,7 +157,7 @@ describe('body relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       disableBodyVarsSubstitution: true,
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),
@@ -175,6 +178,8 @@ describe('body relay', () => {
         },
         github: { default: {} },
       },
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
     };
     loadBrokerConfig(config);
 

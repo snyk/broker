@@ -7,16 +7,9 @@ import { log as logger } from '../../logs/logger';
 
 let config: Record<string, any> = {};
 
-export interface CONFIG {
-  supportedBrokerTypes: string[];
-  brokerType: 'client' | 'server';
-  filterRulesPaths: { [key: string]: string };
-}
-
 export const getConfig = () => {
   return config;
 };
-export type CONFIGURATION = CONFIG & Record<string, any>;
 
 export const findProjectRoot = (startDir: string): string | null => {
   let currentDir = startDir;

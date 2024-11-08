@@ -1,9 +1,17 @@
 import { FiltersType, LOADEDFILTERSET } from './filter';
 
+export interface CONFIG {
+  supportedBrokerTypes: string[];
+  brokerType: 'client' | 'server';
+  filterRulesPaths: { [key: string]: string };
+}
+
+export type CONFIGURATION = CONFIG & Record<string, any>;
+
 export interface ClientOpts {
   port: number;
-  config: Record<string, any>;
-  filters: FiltersType | Map<string, FiltersType>;
+  config: CONFIGURATION;
+  filters?: FiltersType | Map<string, FiltersType>;
   serverId?: string;
   connections?: Record<string, any>;
   oauth?: {
@@ -19,8 +27,7 @@ export interface ClientOpts {
 
 export interface ServerOpts {
   port: number;
-  config: Record<string, any>;
-  filters: FiltersType;
+  config: CONFIGURATION;
 }
 export interface LoadedFiltersSet {
   loadedFilters?: LOADEDFILTERSET | Map<string, LOADEDFILTERSET>;

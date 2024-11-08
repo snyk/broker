@@ -1,7 +1,7 @@
 import { unlinkSync, writeFileSync } from 'fs';
 import { retrieveConnectionsForDeployment } from '../../lib/client/config/remoteConfig';
 import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
-import { ClientOpts } from '../../lib/common/types/options';
+import { ClientOpts, CONFIGURATION } from '../../lib/common/types/options';
 const nock = require('nock');
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 
@@ -77,7 +77,7 @@ describe('Remote config helpers', () => {
   });
   it('Retrieve connections from deployment ID', async () => {
     await loadBrokerConfig();
-    let config = getConfig();
+    let config = getConfig() as CONFIGURATION;
 
     const deploymentId = '67890';
     const apiVersion = '2024-04-02~experimental';
@@ -85,6 +85,9 @@ describe('Remote config helpers', () => {
     config.deploymentId = deploymentId;
     config.apiVersion = apiVersion;
     config.API_BASE_URL = apiBaseUrl;
+    config.supportedBrokerTypes = [];
+    config.filterRulesPaths = {};
+    config.brokerType = 'client';
     process.env.SERVICE_ENV = 'universal';
     process.env.CLIENT_ID = '123';
     process.env.CLIENT_SECRET = '123';
@@ -100,7 +103,7 @@ describe('Remote config helpers', () => {
       universalFilePathLocationForTests,
     );
     await loadBrokerConfig();
-    config = getConfig();
+    config = getConfig() as CONFIGURATION;
     expect(config.connections).toEqual({
       'my github connection': {
         GITHUB_TOKEN: 'GITHUB_TOKEN_XYZ',
@@ -114,7 +117,7 @@ describe('Remote config helpers', () => {
 
   it('Retrieve identifier less connection from install ID and deployment ID', async () => {
     await loadBrokerConfig();
-    let config = getConfig();
+    let config = getConfig() as CONFIGURATION;
 
     const deploymentId = '67891';
     const apiVersion = '2024-04-02~experimental';
@@ -137,7 +140,7 @@ describe('Remote config helpers', () => {
       universalFilePathLocationForTests,
     );
     await loadBrokerConfig();
-    config = getConfig();
+    config = getConfig() as CONFIGURATION;
 
     expect(config.connections).toEqual({
       'my github connection': {

@@ -62,8 +62,10 @@ describe('correctly handle pool of multiple clients with same BROKER_TOKEN', () 
     });
   });
 
-  describe('2nd client', () => {
+  describe('2 clients', () => {
     beforeAll(async () => {
+      const PORT = 9999;
+      process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
       bcFirst = await createBrokerClient({
         brokerServerUrl: `http://localhost:${bs.port}`,
         brokerToken: '12345',

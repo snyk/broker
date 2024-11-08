@@ -22,7 +22,7 @@ export const makePostStreamingRequest = async (
   try {
     const downstreamRequestIncomingResponse =
       await makeStreamingRequestToDownstream(req);
-    emitCallback(downstreamRequestIncomingResponse, true);
+    emitCallback(downstreamRequestIncomingResponse);
   } catch (e) {
     logger.error(
       {
@@ -49,8 +49,8 @@ export const makeLegacyRequest = async (
     // Note that the other side of the request will also check the length and will also reject it if it's too large
     // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
     // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
-    const maxLength =
-      parseInt(options.config.socketMaxResponseLength) || 20971520;
+
+    const maxLength = parseInt(options.socketMaxResponseLength) || 20971520;
     if (contentLength && contentLength > maxLength) {
       const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
       logError(logContext, {
@@ -67,12 +67,8 @@ export const makeLegacyRequest = async (
     }
 
     const status = (response && response.statusCode) || 500;
-    if (options.config.RES_BODY_URL_SUB && isJson(response.headers)) {
-      const replaced = replaceUrlPartialChunk(
-        response.body,
-        null,
-        options.config,
-      );
+    if (options.RES_BODY_URL_SUB && isJson(response.headers)) {
+      const replaced = replaceUrlPartialChunk(response.body, null, options);
       response.body = replaced.newChunk;
     }
     if (status > 404) {
@@ -85,7 +81,7 @@ export const makeLegacyRequest = async (
         `[Websocket Flow][Inbound] Unexpected status code for relayed request`,
       );
     }
-    logResponse(logContext, status, response, options.config);
+    logResponse(logContext, status, response, options);
     emitCallback({ status, body: response.body, headers: response.headers });
   } catch (error) {
     logError(logContext, error);

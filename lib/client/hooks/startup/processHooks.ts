@@ -98,6 +98,11 @@ export const processStartUpHooks = async (
     }
 
     if (commitSigningEnabled(clientOpts.config)) {
+      if (!clientOpts.filters) {
+        throw new Error(
+          'Unexpected error: No filters found for commit signing rules injection.',
+        );
+      }
       const commitSigningRules = commitSigningFilterRules();
       if (clientOpts['universalBrokerEnabled']) {
         clientOpts.filters['github'].private?.push(...commitSigningRules);

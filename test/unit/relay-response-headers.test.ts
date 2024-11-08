@@ -15,6 +15,7 @@ const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
 import {
+  CONFIGURATION,
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
@@ -69,9 +70,12 @@ describe('header relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
+      brokerType: 'server',
     };
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -120,11 +124,14 @@ describe('header relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       disableHeaderVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
+      brokerType: 'server',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {

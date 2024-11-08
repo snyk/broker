@@ -3,10 +3,11 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 
 import { log as logger } from '../../logs/logger';
-import { CONFIGURATION, findProjectRoot } from '../config/config';
+import { findProjectRoot } from '../config/config';
 import camelcase from 'camelcase';
 import { FiltersType, Rule } from '../types/filter';
 import { retrieveFilters, isValidURI } from './utils';
+import { CONFIGURATION } from '../types/options';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
 const IAC_SCM_ORIGINS = [

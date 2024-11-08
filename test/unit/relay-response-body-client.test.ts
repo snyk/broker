@@ -17,6 +17,7 @@ const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
 import {
+  CONFIGURATION,
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
@@ -73,10 +74,12 @@ describe('body relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       HOST: 'localhost',
       PORT: '8001',
       brokerType: 'client',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
     };
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -137,12 +140,14 @@ describe('body relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
       brokerType: 'client',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {
@@ -195,12 +200,14 @@ describe('body relay', () => {
 
     const brokerToken = 'test-broker';
 
-    const config = {
+    const config: CONFIGURATION = {
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
       brokerType: 'client',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {

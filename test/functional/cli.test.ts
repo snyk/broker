@@ -20,7 +20,7 @@ describe('CLI', () => {
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(
-            'No Filters found. A Broker requires filters to run. Shutting down.',
+            'BROKER_TOKEN is required to successfully identify itself to the server',
           ),
         );
       }
@@ -41,7 +41,7 @@ describe('CLI', () => {
       } catch (err) {
         expect(err).toEqual(
           new ReferenceError(
-            'No Filters found. A Broker requires filters to run. Shutting down.',
+            'BROKER_SERVER_URL is required to connect to the broker server',
           ),
         );
       }

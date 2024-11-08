@@ -11,15 +11,28 @@ import { ServerOpts } from '../common/types/options';
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from './routesHandlers/httpRequestHandler';
 import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
+import { FiltersType } from '../common/types/filter';
+import filterRulesLoader from '../common/filter/filter-rules-loading';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode');
+
+  const filters = await filterRulesLoader(serverOpts.config);
+  if (!filters) {
+    const error = new ReferenceError(
+      `No Filters found. A Broker requires filters to run. Shutting down.`,
+    );
+    error['code'] = 'MISSING_FILTERS';
+    logger.error({ error }, error.message);
+    throw error;
+  }
+  const classicFilters: FiltersType = filters as FiltersType;
 
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
 
   const loadedServerOpts = {
-    loadedFilters: loadAllFilters(serverOpts.filters, serverOpts.config),
+    loadedFilters: loadAllFilters(classicFilters, serverOpts.config),
     ...serverOpts,
   };
   if (!loadedServerOpts.loadedFilters) {
@@ -44,7 +57,6 @@ export const main = async (serverOpts: ServerOpts) => {
     app.use(applyPrometheusMiddleware());
   }
   app.get('/connection-status/:token', connectionStatusHandler);
-
   app.all(
     '/broker/:token/*',
     overloadHttpRequestWithConnectionDetailsMiddleware,

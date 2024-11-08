@@ -69,6 +69,7 @@ export const main = async (clientOpts: ClientOpts) => {
       'https://api.snyk.io';
 
     await validateMinimalConfig(clientOpts);
+
     if (clientOpts.config.universalBrokerEnabled) {
       const pluginsFolderPath = await findPluginFolder(
         __dirname ?? process.cwd(),
@@ -95,11 +96,10 @@ export const main = async (clientOpts: ClientOpts) => {
         await retrieveAndLoadFilters(clientOpts);
       }, ONEDAY);
     }
-
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
       clientId: clientOpts.config.brokerClientId,
-      filters: clientOpts.filters,
+      filters: clientOpts.filters ?? new Map(),
       preflightChecks: hookResults.preflightCheckResults,
       version,
       clientConfig: getClientConfigMetadata(clientOpts.config),
@@ -212,6 +212,6 @@ export const main = async (clientOpts: ClientOpts) => {
     };
   } catch (err) {
     logger.warn({ err }, `Shutting down client`);
-    // throw err;
+    throw err;
   }
 };
