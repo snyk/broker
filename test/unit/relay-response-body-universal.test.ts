@@ -1,21 +1,10 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
-jest.mock('../../lib/common/relay/requestsHelper');
 import { Role, WebSocketConnection } from '../../lib/client/types/client';
 import { loadBrokerConfig } from '../../lib/common/config/config';
 import { loadAllFilters } from '../../lib/common/filter/filtersAsync';
-import { makeLegacyRequest } from '../../lib/common/relay/requestsHelper';
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const mockedFn = makeLegacyRequest.mockImplementation((data, emit) => {
-  emit();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return data;
-});
+const nock = require('nock');
 
 import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
 import {
@@ -59,6 +48,7 @@ dummyLoadedFilters['github'] = {
     {
       method: 'any',
       url: '/*',
+      origin: 'http://test',
     },
   ],
   public: [
@@ -70,16 +60,25 @@ dummyLoadedFilters['github'] = {
 };
 
 describe('body relay', () => {
+  beforeAll(() => {
+    nock(`http://test`)
+      .persist()
+      .post(/./)
+      .reply((_url, body) => {
+        const response = body;
+        return [200, response];
+      });
+  });
   beforeEach(() => {
-    jest.clearAllMocks();
+    // jest.clearAllMocks();
   });
 
   afterAll(() => {
     delete process.env.BROKER_SERVER_URL;
-    jest.clearAllMocks();
+    // jest.clearAllMocks();
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB', () => {
+  it('relay swaps body values found in BROKER_VAR_SUB', async () => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -132,27 +131,27 @@ describe('body relay', () => {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-    route(
+    let response;
+    await route(
       {
         url: '/',
         method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
       },
-      () => {
-        expect(makeLegacyRequest).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][0];
-        const url = JSON.parse(arg.body).url;
-        expect(url).toEqual(
-          `http://${config.connections.myconn.HOST2}:${config.connections.myconn.PORT}/webhook`,
-        );
+      (responseCallback) => {
+        response = responseCallback;
       },
+    );
+    expect(response).toBeDefined();
+    expect(response.status).toEqual(200);
+    expect(JSON.parse(response.body).url).toEqual(
+      `http://${config.connections.myconn.HOST2}:${config.connections.myconn.PORT}/webhook`,
     );
   });
 
-  it('relay does NOT swaps body values found in BROKER_VAR_SUB if disable substition true', () => {
+  it('relay does NOT swaps body values found in BROKER_VAR_SUB if disable substition true', async () => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -203,21 +202,21 @@ describe('body relay', () => {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-    route(
+    let response;
+    await route(
       {
         url: '/',
         method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
       },
-      () => {
-        expect(makeLegacyRequest).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][0];
-        const url = JSON.parse(arg.body).url;
-        expect(url).toEqual('${HOST}:${PORT}/webhook');
+      (responseCallback) => {
+        response = responseCallback;
       },
     );
+    expect(response).toBeDefined();
+    expect(response.status).toEqual(200);
+    expect(JSON.parse(response.body).url).toEqual('${HOST}:${PORT}/webhook');
   });
 });

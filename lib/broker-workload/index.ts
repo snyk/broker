@@ -1,18 +1,22 @@
-import { runPreRequestPlugins } from '../../client/brokerClientPlugins/pluginManager';
-import { getFilterConfig } from '../../client/config/filters';
-import { prepareRequestFromFilterResult } from '../relay/prepareRequest';
-import { LOADEDFILTERSET } from '../types/filter';
-import { ExtendedLogContext } from '../types/log';
-import { computeContentLength } from '../utils/content-length';
-import { contentLengthHeader } from '../utils/headers-value-constants';
+import { runPreRequestPlugins } from '../client/brokerClientPlugins/pluginManager';
+import { prepareRequestFromFilterResult } from '../common/relay/prepareRequest';
+import { ExtendedLogContext } from '../common/types/log';
+import { computeContentLength } from '../common/utils/content-length';
+import { contentLengthHeader } from '../common/utils/headers-value-constants';
 import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
-} from '../utils/metrics';
-import { maskToken, hashToken } from '../utils/token';
-import { log as logger } from '../../logs/logger';
-import { HybridResponseHandler } from '../relay/responseSenders';
-import { getCorrelationDataFromHeaders } from '../utils/correlation-headers';
+} from '../common/utils/metrics';
+import { maskToken, hashToken } from '../common/utils/token';
+import { log as logger } from '../logs/logger';
+import { HybridResponseHandler } from '../common/relay/responseSenders';
+import { getCorrelationDataFromHeaders } from '../common/utils/correlation-headers';
+import { filterRequest } from './request-filtering';
+import {
+  makeRequestToDownstream,
+  makeStreamingRequestToDownstream,
+} from '../common/http/request';
+import { logError } from '../logs/log';
 
 export class brokerWorkload {
   options;
@@ -58,12 +62,13 @@ export class brokerWorkload {
         'Header Snyk-Request-Id not included in headers passed through',
       );
     }
+
     const responseHandler = new HybridResponseHandler(
       {
         connectionIdentifier: this.connectionIdentifier,
         payloadStreamingId: payload.streamingID,
         ...correlationHeaders,
-        overHttp: payload.headers['x-broker-ws-response'] ? false : true,
+        // overHttp: payload.headers['x-broker-ws-response'] ? false : true,
       },
       this.websocketConnectionHandler,
       websocketResponseHandler,
@@ -79,32 +84,18 @@ export class brokerWorkload {
       }`,
     );
 
-    let filterResponse;
-    if (
-      this.options.config.brokerType == 'client' &&
-      this.options.config.universalBrokerEnabled
-    ) {
-      const loadedFilters = getFilterConfig().loadedFilters as Map<
-        string,
-        LOADEDFILTERSET
-      >;
-      filterResponse =
-        loadedFilters
-          .get(this.websocketConnectionHandler.supportedIntegrationType)
-          ?.private(payload) || false;
-    } else if (this.options.config.brokerType == 'client') {
-      const loadedFilters = getFilterConfig().loadedFilters as LOADEDFILTERSET;
-      filterResponse = loadedFilters.private(payload);
-    } else {
-      const loadedFilters = this.options.loadedFilters as LOADEDFILTERSET;
-      filterResponse = loadedFilters.private(payload);
-    }
+    const filterResponse = filterRequest(
+      payload,
+      this.options,
+      this.websocketConnectionHandler,
+    );
     if (!filterResponse) {
       incrementWebSocketRequestsTotal(true, 'inbound-request');
       const reason =
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
       logContext.error = 'Blocked by filter rules';
       logger.warn(logContext, reason);
+      // TODO: need to type the response object
       return responseHandler.sendResponse({
         status: 401,
         body: {
@@ -131,12 +122,53 @@ export class brokerWorkload {
         );
         payload.headers[contentLengthHeader] = computeContentLength(payload);
       }
+      if (this.options.config.brokerType !== 'client') {
+        preparedRequest.req.headers['x-snyk-broker'] = `${maskToken(
+          this.connectionIdentifier,
+        )}`;
+      }
       incrementHttpRequestsTotal(false, 'outbound-request');
-      await responseHandler.sendDataResponse(
-        payload.streamingID,
-        preparedRequest.req,
-        logContext,
-      );
+
+      if (payload.streamingID) {
+        // indicates server supports streaming
+        try {
+          const downstreamRequestIncomingResponse =
+            await makeStreamingRequestToDownstream(preparedRequest.req);
+          responseHandler.streamDataResponse(downstreamRequestIncomingResponse);
+        } catch (e) {
+          logger.error(
+            {
+              ...logContext,
+              error: e,
+              stackTrace: new Error('stacktrace generator').stack,
+            },
+            '[Downstream] Caught error making streaming request to downstream ',
+          );
+        }
+      } else {
+        // here if request against server had header x-broker-ws-response:true
+        try {
+          const response = await makeRequestToDownstream(preparedRequest.req);
+          const status = (response && response.statusCode) || 500;
+          if (status > 404) {
+            logger.warn(
+              {
+                statusCode: response.statusCode,
+                responseHeaders: response.headers,
+                url: preparedRequest.req.url,
+              },
+              `[Websocket Flow][Inbound] Unexpected status code for relayed request`,
+            );
+          }
+          responseHandler.sendDataResponse(response, logContext);
+        } catch (error) {
+          logError(logContext, error);
+          return responseHandler.sendResponse({
+            status: 500,
+            body: error,
+          });
+        }
+      }
     }
   }
 }
