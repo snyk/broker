@@ -14,6 +14,7 @@ import {
   waitForBrokerClientConnections,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+import { maskToken } from '../../lib/common/utils/token';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
@@ -72,6 +73,18 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.data).toStrictEqual({
       some: { example: 'json' },
     });
+  });
+
+  it('successfully broker POST with x-broker-server header', async () => {
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/echo-headers`,
+      { some: { example: 'json' } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.data['x-snyk-broker']).toStrictEqual(
+      maskToken(brokerToken),
+    );
   });
 
   it('successfully broker exact bytes of POST body', async () => {
