@@ -229,6 +229,11 @@ export const forwardWebSocketRequest = (
         );
         payload.headers[contentLengthHeader] = computeContentLength(payload);
       }
+      if (options.config.brokerType !== 'client') {
+        preparedRequest.req.headers['x-snyk-broker'] = `${maskToken(
+          connectionIdentifier,
+        )}`;
+      }
 
       incrementHttpRequestsTotal(false, 'outbound-request');
       payload.streamingID

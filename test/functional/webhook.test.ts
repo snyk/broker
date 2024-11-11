@@ -16,6 +16,7 @@ import {
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from '../setup/constants';
+import { maskToken } from '../../lib/common/utils/token';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters-webhook.json');
@@ -79,5 +80,18 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual('Received webhook via API');
+  });
+  it('successfully broker injects x-snyk-broker header to Webhook calls', async () => {
+    await closeBrokerServer(bs);
+
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/return-req-headers`,
+      { some: { example: 'json' } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.data['x-snyk-broker']).toStrictEqual(
+      maskToken('broker-token-12345'),
+    );
   });
 });

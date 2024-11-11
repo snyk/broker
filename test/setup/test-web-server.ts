@@ -125,6 +125,14 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  echoRouter.post(
+    '/webhook/github/return-req-headers',
+    (req: express.Request, resp: express.Response) => {
+      resp.status(200);
+      resp.send(req.headers);
+    },
+  );
+
   echoRouter.get('/test', (_: express.Request, resp: express.Response) => {
     resp.status(200);
     resp.send('All good');
