@@ -17,4 +17,9 @@ ignore:
         reason: Mitigated in code
         expires: 2025-02-10T21:59:20.738Z
         created: 2024-06-26T21:59:20.744Z
+  SNYK-JS-CROSSSPAWN-8303230:
+    - '*':
+        reason: No upstream fix available
+        expires: 2024-12-11T13:11:49.669Z
+        created: 2024-11-11T13:11:49.674Z
 patch: {}
