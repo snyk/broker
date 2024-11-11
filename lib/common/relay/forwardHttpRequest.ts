@@ -16,6 +16,7 @@ import { streamsStore } from '../http/server-post-stream-handler';
 import { ExtendedLogContext } from '../types/log';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
 import { LOADEDFILTERSET } from '../types/filter';
+import { maskToken } from '../utils/token';
 
 // 1. Request coming in over HTTP conn (logged)
 // 2. Filter for rule match (log and block if no match)
@@ -31,6 +32,9 @@ export const forwardHttpRequest = (
     // If this is the server, we should receive a Snyk-Request-Id header from upstream
     // If this is the client, we will have to generate one
     req.headers['snyk-request-id'] ||= uuid();
+    req.headers['x-snyk-broker'] = `${maskToken(
+      res.locals.websocket.identifier, // This should be coupled/replaced by deployment ID
+    )}`;
     const responseWantedOverWs = req.headers['x-broker-ws-response']
       ? true
       : false;
@@ -113,10 +117,7 @@ export const forwardHttpRequest = (
         url: req.url,
         method: req.method,
         body: req.body,
-        headers: {
-          ...req.headers,
-          'x-snyk-brokered': 'true',
-        },
+        headers: req.headers,
         streamingID,
       });
       incrementWebSocketRequestsTotal(false, 'outbound-request');
@@ -141,10 +142,7 @@ export const forwardHttpRequest = (
           url: req.url,
           method: req.method,
           body: req.body,
-          headers: {
-            ...req.headers,
-            'x-snyk-brokered': 'true',
-          },
+          headers: req.headers,
           streamingID: '',
         },
         (ioResponse) => {
