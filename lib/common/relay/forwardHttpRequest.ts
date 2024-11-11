@@ -113,7 +113,10 @@ export const forwardHttpRequest = (
         url: req.url,
         method: req.method,
         body: req.body,
-        headers: req.headers,
+        headers: {
+          ...req.headers,
+          'x-snyk-brokered': 'true',
+        },
         streamingID,
       });
       incrementWebSocketRequestsTotal(false, 'outbound-request');
@@ -138,7 +141,10 @@ export const forwardHttpRequest = (
           url: req.url,
           method: req.method,
           body: req.body,
-          headers: req.headers,
+          headers: {
+            ...req.headers,
+            'x-snyk-brokered': 'true',
+          },
           streamingID: '',
         },
         (ioResponse) => {
