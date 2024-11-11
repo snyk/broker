@@ -46,6 +46,11 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
         method: 'GET',
       };
       const filter = await makeSingleRawRequestToDownstream(req);
+      if (filter.statusCode && filter.statusCode > 299) {
+        throw new Error(
+          `Error downloading filter ${key}. Url ${location} returned ${filter.statusCode}`,
+        );
+      }
       retrievedFiltersMap.set(key, filter.body);
     } else {
       retrievedFiltersMap.set(
