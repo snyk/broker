@@ -1,0 +1,527 @@
+{
+  "API_VERSION":"2024-02-08~experimental",
+  "CONNECTIONS_MANAGER": {
+    "watcher": {
+      "interval": 60000
+    }
+  },
+  "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
+  "SUPPORTED_BROKER_TYPES": [
+    "apprisk",
+    "artifactory",
+    "azure-repos",
+    "bitbucket-server",
+    "bitbucket-server-bearer-auth",
+    "github-enterprise",
+    "github-server-app",
+    "github-cloud-app",
+    "github",
+    "gitlab",
+    "jira-bearer-auth",
+    "jira",
+    "nexus",
+    "docker-hub",
+    "ecr",
+    "acr",
+    "gcr",
+    "artifactory-cr",
+    "harbor-cr",
+    "quay-cr",
+    "github-cr",
+    "nexus-cr",
+    "digitalocean-cr",
+    "gitlab-cr",
+    "google-artifact-cr",
+    "workload"
+  ],
+  "BROKER_CLIENT_CONFIGURATION": {
+    "common": {
+      "default": {
+        "BROKER_SERVER_URL": "https://broker2.snyk.io",
+        "BROKER_HEALTHCHECK_PATH": "/healthcheck"
+      },
+      "required": {}
+    },
+    "acr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "apprisk": {
+      "validations": [
+        {
+          "url": "https://$CHECKMARX/cxrestapi/auth/identity/connect/token",
+          "body": {
+            "BROKER_VAR_SUB": ["username", "password"],
+            "username": "$CHECKMARX_USERNAME",
+            "password": "$CHECKMARX_PASSWORD",
+            "grant_type": "password",
+            "scope": "sast_rest_api",
+            "client_id": "resource_owner_client",
+            "client_secret": "014DF517-39D1-4453-B7B3-9930C563627C"
+          },
+          "method": "post",
+          "headers": {
+            "x-broker-content-type": "application/x-www-form-urlencoded"
+          }
+        },
+        {
+          "url": "https://$SONARQUBE_HOST_URL/system/ping",
+          "method": "GET",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $SONARQUBE_API_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "CHECKMARX": "$CHECKMARX",
+        "CHECKMARX_USERNAME": "$CHECKMARX_USERNAME",
+        "CHECKMARX_PASSWORD": "$CHECKMARX_PASSWORD",
+        "SONARQUBE_HOST_URL": "$SONARQUBE_HOST_URL",
+        "SONARQUBE_API_TOKEN": "$SONARQUBE_API_TOKEN"
+      },
+      "required": {
+        "CHECKMARX": "checkmarx.customer.com",
+        "CHECKMARX_USERNAME": "<username>",
+        "CHECKMARX_PASSWORD": "<password>",
+        "SONARQUBE_HOST_URL": "<sonarqube-host-url>",
+        "SONARQUBE_API_TOKEN": "<sonarqube-api-token>"
+      }
+    },
+    "artifactory": {
+      "validations": [
+        {
+          "url": "https://$ARTIFACTORY_URL/api/system/ping",
+          "auth": {
+            "type": "basic",
+            "username": "$ARTIFACTORY_USERNAME",
+            "password": "$ARTIFACTORY_PASSWORD"
+          }
+        }
+      ],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$ARTIFACTORY_URL/api/system/ping"
+      },
+      "required": {
+        "ARTIFACTORY_URL": "<username>:<password>@<yourdomain.artifactory.com>/artifactory"
+      }
+    },
+    "artifactory-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "azure-repos": {
+      "validations": [
+        {
+          "url": "https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
+          "auth": {
+            "type": "basic",
+            "username": "PAT",
+            "password": "$AZURE_REPOS_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$AZURE_REPOS_HOST/$AZURE_REPOS_ORG/_apis/git/repositories",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "PAT:$AZURE_REPOS_TOKEN",
+        "GIT_URL": "$AZURE_REPOS_HOST/$AZURE_REPOS_ORG",
+        "GIT_USERNAME": "PAT",
+        "GIT_PASSWORD": "$AZURE_REPOS_TOKEN",
+        "AZURE_REPOS_HOST": "dev.azure.com"
+      },
+      "required": {
+        "AZURE_REPOS_TOKEN": "<token>",
+        "AZURE_REPOS_ORG": "<organisation name>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "bitbucket-server": {
+      "validations": [
+        {
+          "url": "https://$BITBUCKET/rest/api/1.0/projects",
+          "auth": {
+            "type": "basic",
+            "username": "$BITBUCKET_USERNAME",
+            "password": "$BITBUCKET_PASSWORD"
+          }
+        }
+      ],
+      "default": {
+        "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD",
+        "GIT_URL": "$BITBUCKET",
+        "GIT_USERNAME": "$BITBUCKET_USERNAME",
+        "GIT_PASSWORD": "$BITBUCKET_PASSWORD"
+      },
+      "required": {
+        "BITBUCKET_USERNAME": "<username>",
+        "BITBUCKET_PASSWORD": "<password>",
+        "BITBUCKET": "bitbucket.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "bitbucket-server-bearer-auth": {
+      "validations": [
+        {
+          "url": "https://$BITBUCKET/rest/api/1.0/projects",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $BITBUCKET_PAT"
+          }
+        }
+      ],
+      "default": {
+        "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $BITBUCKET_PAT",
+        "GIT_URL": "$BITBUCKET",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$BITBUCKET_PAT"
+      },
+      "required": {
+        "BITBUCKET_PAT": "<bitbucket-pat>",
+        "BITBUCKET": "bitbucket.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "container-registry-agent": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "digitalocean-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "docker-hub": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "ecr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "gcr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github": {
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/user",
+          "auth": {
+            "type": "header",
+            "value": "token $GITHUB_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "GITHUB": "github.com",
+        "GITHUB_RAW": "raw.githubusercontent.com",
+        "GITHUB_API": "api.github.com",
+        "GITHUB_GRAPHQL": "api.github.com",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GITHUB_TOKEN"
+      },
+      "required": {
+        "GITHUB_TOKEN": "<github-token>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-enterprise": {
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/user",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "token $GITHUB_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_GRAPHQL": "$GITHUB/api",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "token $GITHUB_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GITHUB_TOKEN"
+      },
+      "required": {
+        "GITHUB_TOKEN": "<github-token>",
+        "GITHUB": "ghe.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-server-app": {
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/installation/repositories?per_page=1&page=1",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $GHA_ACCESS_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_GRAPHQL": "$GITHUB/api",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
+      },
+      "required": {
+        "GITHUB": "ghe.yourdomain.com",
+        "GITHUB_API": "$GITHUB/api/v3",
+        "GITHUB_APP_ID": "APP_ID",
+        "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
+        "GITHUB_APP_CLIENT_ID": "123",
+        "GITHUB_APP_INSTALLATION_ID": "123",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "github-cloud-app": {
+      "validations": [
+        {
+          "url": "https://$GITHUB_API/installation/repositories?per_page=1&page=1",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $GHA_ACCESS_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "GITHUB_API": "api.github.com",
+        "GITHUB_GRAPHQL": "$GITHUB_API",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITHUB_API/user",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "bearer $GHA_ACCESS_TOKEN",
+        "GIT_URL": "$GITHUB",
+        "GIT_USERNAME": "x-access-token",
+        "GIT_PASSWORD": "$GHA_ACCESS_TOKEN"
+      },
+      "required": {
+        "GITHUB": "github.com",
+        "GITHUB_API": "api.github.com",
+        "GITHUB_APP_ID": "APP_ID",
+        "GITHUB_APP_PRIVATE_PEM_PATH": "abc",
+        "GITHUB_APP_CLIENT_ID": "123",
+        "GITHUB_APP_INSTALLATION_ID": "123",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "gitlab": {
+      "validations": [
+        {
+          "url": "https://$GITLAB/api/v3/user",
+          "auth": {
+            "type": "header",
+            "name": "private_token",
+            "value": "$GITLAB_TOKEN"
+          }
+        }
+      ],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN",
+        "GIT_URL": "$GITLAB",
+        "GIT_USERNAME": "oauth2",
+        "GIT_PASSWORD": "$GITLAB_TOKEN",
+        "REMOVE_X_FORWARDED_HEADERS": "true"
+      },
+      "required": {
+        "GITLAB_TOKEN": "<gitlab-token>",
+        "GITLAB": "gitlab.yourdomain.com",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "gitlab-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "google-artifact-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "harbor-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "jira": {
+      "validations": [
+        {
+          "url": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+          "auth": {
+            "type": "basic",
+            "username": "$JIRA_USERNAME",
+            "password": "$JIRA_PASSWORD"
+          }
+        }
+      ],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$JIRA_USERNAME:$JIRA_PASSWORD"
+      },
+      "required": {
+        "JIRA_USERNAME": "<jira-username>",
+        "JIRA_PASSWORD": "<jira-password>",
+        "JIRA_HOSTNAME": "jira.yourdomain.com"
+      }
+    },
+    "jira-bearer-auth": {
+      "validations": [
+        {
+          "url": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "value": "Bearer $JIRA_PAT"
+          }
+        }
+      ],
+      "default": {
+        "BROKER_CLIENT_VALIDATION_URL": "https://$JIRA_HOSTNAME/rest/api/2/myself",
+        "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $JIRA_PAT"
+      },
+      "required": {
+        "JIRA_PAT": "<jira-pat>",
+        "JIRA_HOSTNAME": "jira.yourdomain.com"
+      }
+    },
+    "nexus": {
+      "validations": [
+        {
+          "url": "https://$BASE_NEXUS_URL/service/rest/v1/status/check/api/system/ping",
+          "auth": {
+            "type": "basic",
+            "username": "$NEXUS_USERNAME",
+            "password": "$NEXUS_PASSWORD"
+          }
+        }
+      ],
+      "default": {
+        "NEXUS_URL": "$BASE_NEXUS_URL/repository",
+        "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS_URL/service/rest/v1/status/check",
+        "REMOVE_X_FORWARDED_HEADERS": "true"
+      },
+      "required": {
+        "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+      }
+    },
+    "nexus2": {
+      "validations": [
+        {
+          "url": "https://$BASE_NEXUS2_URL/nexus/service/local/status",
+          "auth": {
+            "type": "basic",
+            "username": "$NEXUS2_USERNAME",
+            "password": "$NEXUS2_PASSWORD"
+          }
+        }
+      ],
+      "default": {
+        "NEXUS_URL": "$BASE_NEXUS2_URL/nexus/content",
+        "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS2_URL/nexus/service/local/status"
+      },
+      "required": {
+        "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+      }
+    },
+    "nexus-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "quay-cr": {
+      "default": {},
+      "required": {
+        "CR_AGENT_URL": "https://<agent-host>:<agent-port>",
+        "BROKER_CLIENT_URL": "https://<broker.client.hostname>:<port>"
+      }
+    },
+    "workload": {
+      "validations": [
+      ],
+      "default": {
+      },
+      "required": {
+        "WORKLOAD_INTERNAL_URI": "http://workload-internal-uri"
+      }
+    }
+  },
+  "FILTER_RULES_PATHS": {
+    "apprisk": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/apprisk.json",
+    "artifactory": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/artifactory.json",
+    "azure-repos": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/azure-repos.json",
+    "bitbucket-server": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/bitbucket-server.json",
+    "bitbucket-server-bearer-auth": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/bitbucket-server-bearer-auth.json",
+    "github-enterprise": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/github-enterprise.json",
+    "github-server-app": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/github-server-app.json",
+    "github-cloud-app": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/github-cloud-app.json",
+    "github": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/github-com.json",
+    "gitlab": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/gitlab.json",
+    "jira": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/jira.json",
+    "jira-bearer-auth": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/jira-bearer-auth.json",
+    "nexus": "https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/nexus-and-nexus2.json",
+    "docker-hub":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "ecr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "acr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "gcr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "artifactory-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "harbor-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "quay-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "github-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "nexus-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "digitalocean-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "gitlab-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "google-artifact-cr":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/container-registry-agent.json",
+    "workload":"https://raw.githubusercontent.com/snyk/broker/refs/heads/master/defaultFilters/workload.json"
+  }
+}

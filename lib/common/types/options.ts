@@ -22,9 +22,11 @@ export interface ServerOpts {
   config: Record<string, any>;
   filters: FiltersType;
 }
-export interface LoadedClientOpts extends ClientOpts {
-  loadedFilters: LOADEDFILTERSET | Map<string, LOADEDFILTERSET>;
+export interface LoadedFiltersSet {
+  loadedFilters?: LOADEDFILTERSET | Map<string, LOADEDFILTERSET>;
 }
+export type LoadedClientOpts = LoadedFiltersSet & ClientOpts;
+
 export interface LoadedServerOpts extends ServerOpts {
   loadedFilters: LOADEDFILTERSET | Map<string, LOADEDFILTERSET>;
 }

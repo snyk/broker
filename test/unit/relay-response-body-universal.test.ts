@@ -22,6 +22,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { setFilterConfig } from '../../lib/client/config/filters';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -119,6 +120,9 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: loadAllFilters(dummyLoadedFilters, config),
     };
+    setFilterConfig({
+      loadedFilters: loadAllFilters(dummyLoadedFilters, config),
+    });
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {

@@ -46,7 +46,7 @@ export const app = async ({ port = 7341, client = false, config }) => {
       any
     > as CONFIGURATION;
     localConfig.brokerType = method;
-    const filters = filterRulesLoader(localConfig);
+    const filters = await filterRulesLoader(localConfig);
     if (!filters) {
       const error = new ReferenceError(
         `No Filters found. A Broker requires filters to run. Shutting down.`,
@@ -56,7 +56,6 @@ export const app = async ({ port = 7341, client = false, config }) => {
       throw error;
     } else {
       if (method == 'client') {
-        // if the localConfig has the broker server, then we must assume it's a client
         return await (
           await import('./client')
         ).main({

@@ -2,6 +2,9 @@ import path from 'path';
 import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
 import { CONFIGURATION } from '../../lib/common/config/config';
 import camelcase from 'camelcase';
+import { FiltersType } from '../../lib/common/types/filter';
+const nock = require('nock');
+import fs from 'fs';
 
 const scmRulesToTest = [
   'azure-repos',
@@ -22,7 +25,22 @@ const scmUniversalRulesToTest = [
   'gitlab',
 ];
 
+const rulesetSourceHostname = 'http://broker-rules.snyk.io';
+
 describe('filter Rules Loading', () => {
+  beforeAll(() => {
+    nock(`${rulesetSourceHostname}`)
+      .persist()
+      .get(/./)
+      .reply((uri) => {
+        const filename = path.basename(uri);
+        const fileContent = fs.readFileSync(
+          `defaultFilters/${filename}`,
+          'utf-8',
+        );
+        return [200, fileContent];
+      });
+  });
   beforeEach(() => {
     jest.resetModules();
     process.env.ACCEPT = 'accept.json';
@@ -34,8 +52,8 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Loads normal accept file - Testing %s',
-    (folder) => {
-      const loadedRules = loadFilterRules(
+    async (folder) => {
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -44,16 +62,52 @@ describe('filter Rules Loading', () => {
         },
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
-
       expect(loadedRules).toMatchSnapshot();
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Loads custom accept file - Testing %s',
+    async (folder) => {
+      const loadedRules = await loadFilterRules({
+        brokerType: 'client',
+        supportedBrokerTypes: [],
+        accept: `client-templates/${folder}/accept.json.sample`,
+        filterRulesPaths: {},
+      });
+      expect(loadedRules).toMatchSnapshot();
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Loads universal rules - Testing %s',
+    async (folder) => {
+      const loadedRules = await loadFilterRules({
+        brokerType: 'client',
+        supportedBrokerTypes: [`${folder}`],
+        filterRulesPaths: {
+          'azure-repos': `${rulesetSourceHostname}/azure-repos.json`,
+          'bitbucket-server': `${rulesetSourceHostname}/bitbucket-server.json`,
+          'bitbucket-server-bearer-auth': `${rulesetSourceHostname}/bitbucket-server-bearer-auth.json`,
+          'github-enterprise': `${rulesetSourceHostname}/github-enterprise.json`,
+          'github-server-app': `${rulesetSourceHostname}/github-server-app.json`,
+          'github-cloud-app': `${rulesetSourceHostname}/github-cloud-app.json`,
+          github: `${rulesetSourceHostname}/github.json`,
+          gitlab: `${rulesetSourceHostname}/gitlab.json`,
+        },
+        universalBrokerEnabled: true,
+      });
+
+      const loadedRulesForType = loadedRules as Map<string, FiltersType>;
+      expect(loadedRulesForType[folder]).toMatchSnapshot();
     },
   );
 
   test.each(scmRulesToTest)(
     'Skip injection if no or invalid IAC extensions - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_IAC = 'rf';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -70,9 +124,9 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid IAC extensions - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_IAC = 'tf,yaml, json,yml,tpl';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -89,9 +143,9 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid IAC extensions - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_IAC = 'tf,json';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -108,9 +162,9 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid CODE rules - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_CODE = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -127,9 +181,9 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid Git rules - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -146,10 +200,10 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid Git rules without snippets - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_GIT = 'true';
       process.env.DISABLE_SNIPPETS = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: scmRulesToTest,
@@ -185,10 +239,10 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid CODE GH rules - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
 
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -205,10 +259,10 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid CODE rules and IAC extensions (yaml only) - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_CODE = 'true';
       process.env.ACCEPT_IAC = 'yaml';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         {
           brokerType: 'client',
           supportedBrokerTypes: [],
@@ -226,7 +280,7 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid AppRisk rules - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_APPRISK = 'true';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
@@ -236,7 +290,7 @@ describe('filter Rules Loading', () => {
         filterRulesPaths: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         config,
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -249,7 +303,7 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'true';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
@@ -259,7 +313,7 @@ describe('filter Rules Loading', () => {
         filterRulesPaths: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         config,
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
@@ -272,18 +326,19 @@ describe('filter Rules Loading', () => {
 
   test.each(scmUniversalRulesToTest)(
     'Injection of valid Git rules - Universal Broker - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_GIT = 'true';
       const filterRulesPath = {};
       for (const type of scmUniversalRulesToTest) {
         filterRulesPath[`${type}`] = `defaultFilters/${type}.json`;
       }
-      const loadedRules = loadFilterRules({
+      const loadedRules = await loadFilterRules({
         brokerType: 'client',
         supportedBrokerTypes: scmUniversalRulesToTest,
         filterRulesPaths: filterRulesPath,
         universalBrokerEnabled: true,
       });
+
       expect(
         loadedRules[folder].private.filter((x) =>
           x.path.includes('*/git-upload-pack'),
@@ -315,7 +370,7 @@ describe('filter Rules Loading', () => {
 
   test.each(scmRulesToTest)(
     'Injection of valid Git rules with AppRisk enabled - Testing %s',
-    (folder) => {
+    async (folder) => {
       process.env.ACCEPT_GIT = 'true';
       process.env.ACCEPT_APPRISK = 'true';
       const config: CONFIGURATION = {
@@ -325,7 +380,7 @@ describe('filter Rules Loading', () => {
         filterRulesPaths: {},
       };
       config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
-      const loadedRules = loadFilterRules(
+      const loadedRules = await loadFilterRules(
         config,
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );

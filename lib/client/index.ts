@@ -22,13 +22,15 @@ import {
 } from './hooks/startup/processHooks';
 import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
 import { isWebsocketConnOpen } from './utils/socketHelpers';
-import { loadAllFilters } from '../common/filter/filtersAsync';
-import { ClientOpts, LoadedClientOpts } from '../common/types/options';
+import { ClientOpts } from '../common/types/options';
 import { websocketConnectionSelectorMiddleware } from './routesHandler/websocketConnectionMiddlewares';
 import { getClientConfigMetadata } from './config/configHelpers';
 import { loadPlugins } from './brokerClientPlugins/pluginManager';
 import { manageWebsocketConnections } from './connectionsManager/manager';
 import { findPluginFolder } from '../common/config/config';
+import { retrieveAndLoadFilters } from './utils/filterLoading';
+
+const ONEDAY = 24 * 3600 * 1000; // 24h in ms
 
 process.on('uncaughtException', (error) => {
   if (error.message == 'read ECONNRESET') {
@@ -87,21 +89,17 @@ export const main = async (clientOpts: ClientOpts) => {
         clientOpts.config.brokerClientId,
       );
     }
-
-    const loadedClientOpts: LoadedClientOpts = {
-      loadedFilters: loadAllFilters(clientOpts.filters, clientOpts.config),
-      ...clientOpts,
-    };
-
-    if (!loadedClientOpts.loadedFilters) {
-      logger.error({ clientOpts }, 'Unable to load filters');
-      throw new Error('Unable to load filters');
+    await retrieveAndLoadFilters(clientOpts);
+    if (process.env.NODE_ENV != 'test') {
+      setInterval(async () => {
+        await retrieveAndLoadFilters(clientOpts);
+      }, ONEDAY);
     }
 
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
       clientId: clientOpts.config.brokerClientId,
-      filters: loadedClientOpts.filters,
+      filters: clientOpts.filters,
       preflightChecks: hookResults.preflightCheckResults,
       version,
       clientConfig: getClientConfigMetadata(clientOpts.config),
@@ -111,48 +109,33 @@ export const main = async (clientOpts: ClientOpts) => {
     };
 
     let websocketConnections: WebSocketConnection[] = [];
-    if (loadedClientOpts.config.universalBrokerEnabled) {
+    if (clientOpts.config.universalBrokerEnabled) {
       websocketConnections = await manageWebsocketConnections(
-        loadedClientOpts,
+        clientOpts,
         globalIdentifyingMetadata,
       );
     } else {
       websocketConnections.push(
-        createWebSocket(
-          loadedClientOpts,
-          globalIdentifyingMetadata,
-          Role.primary,
-        ),
+        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary),
       );
       websocketConnections.push(
-        createWebSocket(
-          loadedClientOpts,
-          globalIdentifyingMetadata,
-          Role.secondary,
-        ),
+        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.secondary),
       );
     }
 
     // start the local webserver to listen for relay requests
-    const { app, server } = webserver(
-      loadedClientOpts.config,
-      loadedClientOpts.port,
-    );
-
-    const httpToWsForwarder = forwardHttpRequest(loadedClientOpts);
+    const { app, server } = webserver(clientOpts.config, clientOpts.port);
+    const httpToWsForwarder = forwardHttpRequest(clientOpts);
     const httpToAPIForwarder = forwardHttpRequestOverHttp(
-      loadedClientOpts,
-      loadedClientOpts.config,
+      clientOpts,
+      clientOpts.config,
     );
     // IMPORTANT: defined before relay (`app.all('/*', ...`)
-    app.get('/health/checks', handleChecksRoute(loadedClientOpts.config));
-    app.get(
-      '/health/checks/:checkId',
-      handleCheckIdsRoutes(loadedClientOpts.config),
-    );
+    app.get('/health/checks', handleChecksRoute(clientOpts.config));
+    app.get('/health/checks/:checkId', handleCheckIdsRoutes(clientOpts.config));
 
     app.get(
-      loadedClientOpts.config.brokerHealthcheckPath || '/healthcheck',
+      clientOpts.config.brokerHealthcheckPath || '/healthcheck',
       (req, res, next) => {
         res.locals.websocketConnections = websocketConnections;
         next();
@@ -161,13 +144,17 @@ export const main = async (clientOpts: ClientOpts) => {
     );
 
     app.get('/filters', (req, res) => {
-      res.send(loadedClientOpts.filters);
+      res.send(clientOpts.filters);
+    });
+    app.post('/filters', async (req, res) => {
+      await retrieveAndLoadFilters(clientOpts);
+      res.send(clientOpts.filters);
     });
 
     app.get(
-      loadedClientOpts.config.brokerSystemcheckPath || '/systemcheck',
+      clientOpts.config.brokerSystemcheckPath || '/systemcheck',
       (req, res, next) => {
-        res.locals.clientOpts = loadedClientOpts;
+        res.locals.clientOpts = clientOpts;
         next();
       },
       systemCheckHandler,
