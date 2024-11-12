@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   prodsec: snyk/prodsec-orb@1.0
   slack: circleci/slack@4.12.5
-  snyk: snyk/snyk@1.7.2
+  snyk: snyk/snyk@2.2.0
 
 defaults: &defaults
   docker:
@@ -290,6 +290,9 @@ jobs:
   scan-docker-image:
     <<: *defaults
     parameters:
+      monitor_on_build:
+        type: boolean
+        default: true
       project:
         type: string
       project_name:
@@ -308,6 +311,7 @@ jobs:
           additional-arguments: --policy-path=.snyk
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
+          monitor-on-build: <<parameters.monitor_on_build>>
           organization: platform-broker
           project: <<parameters.project>>
           severity-threshold: <<parameters.severity_threshold>>
@@ -439,6 +443,7 @@ workflows:
             - Build base image (Ubuntu)
           project: snyk/broker
           project_name: broker
+          monitor_on_build: false
 
       - build-and-save-docker-ubi-image:
           name: Build base image (RHEL)
@@ -456,9 +461,7 @@ workflows:
             - Build base image (RHEL)
           project: snyk/broker-rhel-ubi
           project_name: broker-rhel-ubi
-          post-steps:
-            - notify-slack-on-failure:
-                channel: broker-alerts-vulns
+          monitor_on_build: false
 
       - release:
           name: Release to GitHub and NPM
