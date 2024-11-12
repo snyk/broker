@@ -5,7 +5,7 @@ import type { CheckId, CheckResult, CheckStatus } from '../types';
 import {
   HttpResponse,
   makeSingleRawRequestToDownstream,
-} from '../../../common/http/request';
+} from '../../../hybrid-sdk/http/request';
 
 export async function executeHttpRequest(
   checkOptions: {

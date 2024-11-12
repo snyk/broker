@@ -4,7 +4,7 @@ import BrokerPlugin from '../abstractBrokerPlugin';
 import { createPrivateKey } from 'node:crypto';
 import { sign } from 'jsonwebtoken';
 import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
-import { makeRequestToDownstream } from '../../../common/http/request';
+import { makeRequestToDownstream } from '../../../hybrid-sdk/http/request';
 import { maskSCMToken } from '../../../common/utils/token';
 import { getPluginsConfig } from '../../../common/config/pluginsConfig';
 import { replace } from '../../../common/utils/replace-vars';

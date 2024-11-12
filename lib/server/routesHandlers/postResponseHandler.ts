@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { StreamResponseHandler } from '../../common/http/server-post-stream-handler';
+
 import { log as logger } from '../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
+import { StreamResponseHandler } from '../../hybrid-sdk/http/server-post-stream-handler';
 
 export const handlePostResponse = (req: Request, res: Response) => {
   incrementHttpRequestsTotal(false, 'data-response');

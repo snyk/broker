@@ -1,18 +1,12 @@
-import { getConfig } from '../config/config';
-import { BrokerServerPostResponseHandler } from '../http/downstream-post-stream-to-server';
+import { getConfig } from '../common/config/config';
+import { BrokerServerPostResponseHandler } from './http/downstream-post-stream-to-server';
 import { legacyStreaming } from './requestsHelper';
-import { log as logger } from '../../logs/logger';
-import { CorrelationHeaders } from '../utils/correlation-headers';
+import { log as logger } from '../logs/logger';
 import { IncomingMessage } from 'node:http';
-import { logError, logResponse } from '../../logs/log';
-import { isJson } from '../utils/json';
-import { replaceUrlPartialChunk } from '../utils/replace-vars';
-
-export type RequestMetadata = {
-  connectionIdentifier: string;
-  payloadStreamingId: string;
-  //   streamResponse: boolean;
-} & CorrelationHeaders;
+import { logError, logResponse } from '../logs/log';
+import { isJson } from '../common/utils/json';
+import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { RequestMetadata } from './types';
 
 export interface HybridResponse {
   status: number;

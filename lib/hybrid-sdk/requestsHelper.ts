@@ -1,12 +1,12 @@
 import {
   makeRequestToDownstream,
   makeStreamingRequestToDownstream,
-} from '../http/request';
-import { PostFilterPreparedRequest } from './prepareRequest';
-import { log as logger } from '../../logs/logger';
-import { logError, logResponse } from '../../logs/log';
-import { isJson } from '../utils/json';
-import { replaceUrlPartialChunk } from '../utils/replace-vars';
+} from './http/request';
+import { PostFilterPreparedRequest } from '../common/relay/prepareRequest';
+import { log as logger } from '../logs/logger';
+import { logError, logResponse } from '../logs/log';
+import { isJson } from '../common/utils/json';
+import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
 
 export const makePostStreamingRequest = async (
   req: PostFilterPreparedRequest,

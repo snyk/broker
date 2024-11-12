@@ -1,4 +1,4 @@
-import { makeRequestToDownstream } from '../../../common/http/request';
+import { makeRequestToDownstream } from '../../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
 import { log as logger } from '../../../logs/logger';
 import {

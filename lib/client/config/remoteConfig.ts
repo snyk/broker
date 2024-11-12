@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { makeRequestToDownstream } from '../../common/http/request';
+import { makeRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { ClientOpts } from '../../common/types/options';
 import { BrokerConnectionApiResponse } from '../types/api';

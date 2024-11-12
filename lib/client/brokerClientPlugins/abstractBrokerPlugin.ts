@@ -2,7 +2,7 @@ import { getPluginsConfig } from '../../common/config/pluginsConfig';
 import {
   HttpResponse,
   makeRequestToDownstream,
-} from '../../common/http/request';
+} from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { log as logger } from '../../logs/logger';
 

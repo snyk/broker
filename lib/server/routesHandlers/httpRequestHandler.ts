@@ -4,7 +4,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { getSocketConnections } from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
-import { makeStreamingRequestToDownstream } from '../../common/http/request';
+import { makeStreamingRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { URL, URLSearchParams } from 'node:url';
 

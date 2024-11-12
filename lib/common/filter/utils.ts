@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'fs';
-import { makeSingleRawRequestToDownstream } from '../http/request';
+import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
 import version from '../utils/version';
 import { findProjectRoot } from '../config/config';

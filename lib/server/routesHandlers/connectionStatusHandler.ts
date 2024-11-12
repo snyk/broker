@@ -4,7 +4,7 @@ import { getSocketConnections } from '../socket';
 import { log as logger } from '../../logs/logger';
 import { hostname } from 'node:os';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
-import { makeStreamingRequestToDownstream } from '../../common/http/request';
+import { makeStreamingRequestToDownstream } from '../../hybrid-sdk/http/request';
 
 export const connectionStatusHandler = async (req: Request, res: Response) => {
   const token = req.params.token;

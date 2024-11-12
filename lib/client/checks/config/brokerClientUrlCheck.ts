@@ -5,7 +5,7 @@ import { urlContainsProtocol } from '../../../common/utils/urlValidator';
 import {
   HttpResponse,
   makeSingleRawRequestToDownstream,
-} from '../../../common/http/request';
+} from '../../../hybrid-sdk/http/request';
 import { retry } from '../../retry/exponential-backoff';
 import version from '../../../common/utils/version';
 

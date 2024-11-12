@@ -3,8 +3,8 @@ import https from 'https';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
-import { PostFilterPreparedRequest } from '../relay/prepareRequest';
-import { getConfig } from '../config/config';
+import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { getConfig } from '../../common/config/config';
 import { switchToInsecure } from './utils';
 export interface HttpResponse {
   headers: Object;

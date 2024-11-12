@@ -8,8 +8,8 @@
 import url from 'url';
 import tunnel from 'tunnel';
 import https from 'https';
+import { loadBrokerConfig, getConfig } from '../../common/config/config';
 
-import { getConfig, loadBrokerConfig } from '../config/config';
 loadBrokerConfig();
 const brokerServer = url.parse(getConfig().brokerServerUrl || '');
 brokerServer.port =

@@ -9,13 +9,13 @@ import {
 } from '../common/utils/metrics';
 import { maskToken, hashToken } from '../common/utils/token';
 import { log as logger } from '../logs/logger';
-import { HybridResponseHandler } from '../common/relay/responseSenders';
+import { HybridResponseHandler } from '../hybrid-sdk/responseSenders';
 import { getCorrelationDataFromHeaders } from '../common/utils/correlation-headers';
-import { filterRequest } from './request-filtering';
+import { filterRequest } from './requestFiltering';
 import {
   makeRequestToDownstream,
   makeStreamingRequestToDownstream,
-} from '../common/http/request';
+} from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
 
 export class brokerWorkload {

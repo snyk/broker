@@ -1,10 +1,10 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
-jest.mock('../../lib/common/http/request');
+jest.mock('../../lib/hybrid-sdk/http/request');
 import { setFilterConfig } from '../../lib/client/config/filters';
 import { Role, WebSocketConnection } from '../../lib/client/types/client';
-import { makeRequestToDownstream } from '../../lib/common/http/request';
+import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
