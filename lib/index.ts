@@ -26,6 +26,8 @@ process.on('unhandledRejection', (reason: any) => {
 });
 
 export const app = async ({ port = 7341, client = false, config }) => {
+  const events = require('events');
+  events.EventEmitter.defaultMaxListeners = 30;
   try {
     // note: the config is loaded in the main function to allow us to mock in tests
     if (process.env.JEST_WORKER_ID) {
