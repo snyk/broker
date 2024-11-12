@@ -10,9 +10,10 @@ import { BrokerClientRequestWorkload } from '../../broker-workload/clientRequest
 // 5. Send response over HTTP conn
 export const forwardHttpRequest = (
   options: LoadedClientOpts | LoadedServerOpts,
+  makeHttpRequest = false,
 ) => {
   return async (req: Request, res: Response) => {
     const workload = new BrokerClientRequestWorkload(req, res, options);
-    await workload.handler();
+    await workload.handler(makeHttpRequest);
   };
 };

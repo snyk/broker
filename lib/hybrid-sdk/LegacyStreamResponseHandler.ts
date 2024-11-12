@@ -1,9 +1,9 @@
 import {
   streamsStore,
   StreamResponse,
-} from '../../hybrid-sdk/http/server-post-stream-handler';
-import { log as logger } from '../../logs/logger';
-import { observeResponseSize } from '../utils/metrics';
+} from './http/server-post-stream-handler';
+import { log as logger } from '../logs/logger';
+import { observeResponseSize } from '../common/utils/metrics';
 
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */

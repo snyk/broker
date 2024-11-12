@@ -14,7 +14,7 @@ export class BrokerClientRequestWorkload {
     this.options = options;
   }
 
-  async handler() {
+  async handler(makeRequestOverHttp = false) {
     const hybridClientRequestHandler = new HybridClientRequestHandler(
       this.req,
       this.res,
@@ -36,7 +36,10 @@ export class BrokerClientRequestWorkload {
         .status(401)
         .send({ message: 'blocked', reason, url: this.req.url });
     } else {
-      hybridClientRequestHandler.makeRequest(filterResponse);
+      hybridClientRequestHandler.makeRequest(
+        filterResponse,
+        makeRequestOverHttp,
+      );
       incrementHttpRequestsTotal(false, 'inbound-request');
     }
   }

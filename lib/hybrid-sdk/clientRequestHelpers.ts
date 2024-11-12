@@ -12,6 +12,8 @@ import { ExtendedLogContext } from '../common/types/log';
 import { v4 as uuid } from 'uuid';
 import stream from 'stream';
 import { streamsStore } from './http/server-post-stream-handler';
+import { maskToken } from '../common/utils/token';
+import { makeRequestToDownstream } from './http/request';
 
 export class HybridClientRequestHandler {
   logContext: ExtendedLogContext;
@@ -55,10 +57,7 @@ export class HybridClientRequestHandler {
     delete this.simplifiedContext.requestHeaders;
     logger.info(this.simplifiedContext, '[HTTP Flow] Received request');
   }
-  private makeWebsocketRequestWithStreamingResponse(result) {
-    this.req.url = result.url;
-    this.logContext.ioUrl = result.url;
-
+  private makeWebsocketRequestWithStreamingResponse() {
     const streamingID = uuid();
     const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
     streamBuffer.on('error', (error) => {
@@ -101,9 +100,7 @@ export class HybridClientRequestHandler {
     incrementWebSocketRequestsTotal(false, 'outbound-request');
     return;
   }
-  private makeWebsocketRequestWithWebsocketResponse(result) {
-    this.req.url = result.url;
-    this.logContext.ioUrl = result.url;
+  private makeWebsocketRequestWithWebsocketResponse() {
     logger.debug(
       this.logContext,
       '[HTTP Flow][Relay] Sending request over websocket connection expecting Websocket response',
@@ -188,15 +185,56 @@ export class HybridClientRequestHandler {
     );
     incrementWebSocketRequestsTotal(false, 'outbound-request');
   }
+  private makeHttpRequest() {
+    const apiDomain = new URL(
+      this.options.API_BASE_URL ||
+        (this.options.BROKER_SERVER_URL
+          ? this.options.BROKER_SERVER_URL.replace('//broker.', '//api.')
+          : 'https://api.snyk.io'),
+    );
 
-  makeRequest(filterResponse) {
-    if (
+    const requestUri = new URL(this.req.url, apiDomain);
+    this.req.headers['host'] = requestUri.host;
+    this.req.headers['x-snyk-broker'] = `${maskToken(
+      this.res.locals.websocket.identifier, // This should be coupled/replaced by deployment ID
+    )}`;
+
+    const filteredReq = {
+      url: requestUri.toString(),
+      method: this.req.method,
+      body: this.req.body,
+      headers: this.req.headers,
+    };
+
+    makeRequestToDownstream(filteredReq)
+      .then((resp) => {
+        if (resp.statusCode) {
+          this.res.status(resp.statusCode).set(resp.headers).send(resp.body);
+        } else {
+          this.res.status(500).send(resp.statusText);
+        }
+      })
+      .catch((err) => {
+        logger.error(
+          this.logContext,
+          err,
+          'Failed to forward webhook event to Snyk Platform',
+        );
+      });
+  }
+
+  makeRequest(filterResponse, makeRequestOverHttp = false) {
+    this.req.url = filterResponse.url;
+    this.logContext.ioUrl = filterResponse.url;
+    if (makeRequestOverHttp) {
+      this.makeHttpRequest();
+    } else if (
       this.res?.locals?.capabilities?.includes('post-streams') &&
       !this.responseWantedOverWs
     ) {
-      this.makeWebsocketRequestWithStreamingResponse(filterResponse);
+      this.makeWebsocketRequestWithStreamingResponse();
     } else {
-      this.makeWebsocketRequestWithWebsocketResponse(filterResponse);
+      this.makeWebsocketRequestWithWebsocketResponse();
     }
   }
 }

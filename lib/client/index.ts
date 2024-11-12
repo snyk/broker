@@ -20,7 +20,6 @@ import {
   processStartUpHooks,
   validateMinimalConfig,
 } from './hooks/startup/processHooks';
-import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
 import { isWebsocketConnOpen } from './utils/socketHelpers';
 import { ClientOpts } from '../common/types/options';
 import { websocketConnectionSelectorMiddleware } from './routesHandler/websocketConnectionMiddlewares';
@@ -126,10 +125,7 @@ export const main = async (clientOpts: ClientOpts) => {
     // start the local webserver to listen for relay requests
     const { app, server } = webserver(clientOpts.config, clientOpts.port);
     const httpToWsForwarder = forwardHttpRequest(clientOpts);
-    const httpToAPIForwarder = forwardHttpRequestOverHttp(
-      clientOpts,
-      clientOpts.config,
-    );
+    const httpToAPIForwarder = forwardHttpRequest(clientOpts, true);
     // IMPORTANT: defined before relay (`app.all('/*', ...`)
     app.get('/health/checks', handleChecksRoute(clientOpts.config));
     app.get('/health/checks/:checkId', handleCheckIdsRoutes(clientOpts.config));

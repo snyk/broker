@@ -18,7 +18,7 @@ import {
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
 
-export class brokerWorkload {
+export class BrokerWorkload {
   options;
   connectionIdentifier: string;
   websocketConnectionHandler;
