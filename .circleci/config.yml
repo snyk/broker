@@ -469,11 +469,31 @@ workflows:
           nodejs_cycle: "20"
           project_name: broker
 
+      - scan-docker-image:
+          name: Scan base image (Ubuntu)
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Build base image (Ubuntu)
+          project: snyk/broker
+          project_name: broker
+
       - build-and-save-docker-ubi-image:
           name: Build base image (RHEL)
           requires:
             - Install NPM packages
           dockerfile: dockerfiles/base/Dockerfile.ubi
+          project_name: broker-rhel-ubi
+
+      - scan-docker-image:
+          name: Scan base image (RHEL)
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Build base image (RHEL)
+          project: snyk/broker-rhel-ubi
           project_name: broker-rhel-ubi
 
       - release:
@@ -483,8 +503,8 @@ workflows:
             - snyk-bot-slack
             - team-broker-snyk
           requires:
-            - Build base image (Ubuntu)
-            - Build base image (RHEL)
+            - Scan base image (Ubuntu)
+            - Scan base image (RHEL)
             - Test
           post-steps:
             - notify-slack-on-failure
