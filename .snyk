@@ -22,4 +22,9 @@ ignore:
         reason: No upstream fix available
         expires: 2024-12-11T13:11:49.669Z
         created: 2024-11-11T13:11:49.674Z
+  SNYK-RHEL8-PAM-8350338:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2024-12-12T12:19:17.636Z
+        created: 2024-11-12T12:19:17.640Z
 patch: {}

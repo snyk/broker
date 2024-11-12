@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   prodsec: snyk/prodsec-orb@1.0
   slack: circleci/slack@4.12.5
-  snyk: snyk/snyk@1.7.2
+  snyk: snyk/snyk@2.2.0
 
 defaults: &defaults
   docker:
@@ -119,6 +119,22 @@ commands:
           name: Load archived Docker image
           command: |
             docker load < "/tmp/workspace/images/<<parameters.project_name>>:$CIRCLE_WORKFLOW_ID.tar.gz"
+  load-slack-templates:
+    steps:
+      - run:
+          name: Load Slack message templates
+          command: |
+            echo 'export SLACK_FAIL_MESSAGE_TEMPLATE=$(cat .circleci/templates/slack_fail_message.json)' >> $BASH_ENV
+  notify-slack-on-failure:
+    parameters:
+      channel:
+        type: string
+        default: broker-alerts-cicd
+    steps:
+      - slack/notify:
+          channel: <<parameters.channel>>
+          event: fail
+          template: SLACK_FAIL_MESSAGE_TEMPLATE
   tag-and-push-docker-image:
     description: "Tag and push Docker image to registry"
     parameters:
@@ -166,72 +182,17 @@ commands:
             export COSIGN_KEY=$(echo $COSIGN_ENCODED_KEY | base64 -d)
             cosign sign --yes --key env://COSIGN_KEY --annotations tag=$IMAGE_TAG $IMAGE_WITH_DIGEST
             unset COSIGN_KEY
+  prepare:
+    description: "Checkout repository source code and load all Slack templates"
+    steps:
+      - checkout
+      - load-slack-templates
   prepare-dev-package-metadata:
     steps:
       - run:
           name: Prepare package.json and metadata.json for dev images
           command: |
             cd dockerfiles/.scripts && source prepare.sh
-  notify-slack-on-failure:
-    parameters:
-      channel:
-        type: string
-        default: broker-alerts-cicd
-    steps:
-      - slack/notify:
-          channel: <<parameters.channel>>
-          event: fail
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "CICD pipeline failed :circleci-fail:",
-                    "emoji": true
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Project*: ${CIRCLE_PROJECT_REPONAME}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Job*: ${CIRCLE_JOB}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Branch*: ${CIRCLE_BRANCH}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Author*: ${CIRCLE_USERNAME}"
-                    }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "emoji": true,
-                        "text": "View Job"
-                      },
-                      "url": "${CIRCLE_BUILD_URL}"
-                    }
-                  ]
-                }
-              ]
-            }
 
 jobs:
   install-npm-packages:
@@ -239,7 +200,7 @@ jobs:
     environment:
       NODE_ENV: development
     steps:
-      - checkout
+      - prepare
       - run:
           name: Install NPM packages
           command: npm clean-install
@@ -250,7 +211,7 @@ jobs:
   lint:
     <<: *defaults
     steps:
-      - checkout
+      - prepare
       - attach_workspace:
           at: ~/broker
       - run:
@@ -259,14 +220,14 @@ jobs:
   lint-json-samples:
     <<: *defaults
     steps:
-      - checkout
+      - prepare
       - run:
           name: Lint JSON templates
           command: ./lintVerifier.sh
   test:
     <<: *defaults
     steps:
-      - checkout
+      - prepare
       - attach_workspace:
           at: ~/broker
       - run:
@@ -292,7 +253,7 @@ jobs:
         type: string
         default: "broker"
     steps:
-      - checkout
+      - prepare
       - setup_remote_docker:
           docker_layer_caching: true
       - get-tagged-broker-version
@@ -317,7 +278,7 @@ jobs:
         type: string
         default: "broker"
     steps:
-      - checkout
+      - prepare
       - setup_remote_docker:
           docker_layer_caching: false
       - get-tagged-broker-version
@@ -329,6 +290,9 @@ jobs:
   scan-docker-image:
     <<: *defaults
     parameters:
+      monitor_on_build:
+        type: boolean
+        default: true
       project:
         type: string
       project_name:
@@ -338,7 +302,7 @@ jobs:
         type: string
         default: "high"
     steps:
-      - checkout
+      - prepare
       - setup_remote_docker:
           docker_layer_caching: false
       - load-docker-image:
@@ -347,6 +311,7 @@ jobs:
           additional-arguments: --policy-path=.snyk
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
+          monitor-on-build: <<parameters.monitor_on_build>>
           organization: platform-broker
           project: <<parameters.project>>
           severity-threshold: <<parameters.severity_threshold>>
@@ -361,7 +326,7 @@ jobs:
         type: string
         default: "broker"
     steps:
-      - checkout
+      - prepare
       - setup_remote_docker:
           docker_layer_caching: true
       - dockerhub-login
@@ -395,7 +360,7 @@ jobs:
         type: string
         default: "high"
     steps:
-      - checkout
+      - prepare
       - setup_remote_docker:
           docker_layer_caching: false
       - dockerhub-login
@@ -422,7 +387,7 @@ jobs:
   release:
     <<: *defaults
     steps:
-      - checkout
+      - prepare
       - attach_workspace:
           at: ~/broker
       - run:
@@ -469,12 +434,34 @@ workflows:
           nodejs_cycle: "20"
           project_name: broker
 
+      - scan-docker-image:
+          name: Scan base image (Ubuntu)
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Build base image (Ubuntu)
+          project: snyk/broker
+          project_name: broker
+          monitor_on_build: false
+
       - build-and-save-docker-ubi-image:
           name: Build base image (RHEL)
           requires:
             - Install NPM packages
           dockerfile: dockerfiles/base/Dockerfile.ubi
           project_name: broker-rhel-ubi
+
+      - scan-docker-image:
+          name: Scan base image (RHEL)
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Build base image (RHEL)
+          project: snyk/broker-rhel-ubi
+          project_name: broker-rhel-ubi
+          monitor_on_build: false
 
       - release:
           name: Release to GitHub and NPM
@@ -483,8 +470,8 @@ workflows:
             - snyk-bot-slack
             - team-broker-snyk
           requires:
-            - Build base image (Ubuntu)
-            - Build base image (RHEL)
+            - Scan base image (Ubuntu)
+            - Scan base image (RHEL)
             - Test
           post-steps:
             - notify-slack-on-failure
