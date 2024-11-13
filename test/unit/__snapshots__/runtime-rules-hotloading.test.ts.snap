@@ -7607,6 +7607,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -16188,6 +16194,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "list the group's members",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -24057,6 +24069,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
   ],
   "public": Array [
@@ -32015,6 +32033,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -40063,6 +40087,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -48049,6 +48079,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -62648,6 +62684,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -64291,6 +64333,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
     Object {
       "//": "used to scan IAC files",
@@ -72145,6 +72193,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -79973,6 +80027,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
   ],
   "public": Array [
@@ -87803,6 +87863,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -95631,6 +95697,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
   ],
   "public": Array [
