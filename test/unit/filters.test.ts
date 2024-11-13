@@ -145,6 +145,19 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow fetching single PR info', () => {
+        const url =
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for bitbucket server bearer auth private filters', () => {
@@ -204,6 +217,19 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow fetching pr info', () => {
+        const url =
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for azure repos', () => {
@@ -236,8 +262,9 @@ describe('filters', () => {
         expect(filterResponseUrl).toMatch(url);
       });
 
-      it('should allow fetching pr info', () => {
-        const url = '/test-owner/_apis/git/repositories/test-repo/pullRequests/1';
+      it('should allow fetching single pr info', () => {
+        const url =
+          '/test-owner/_apis/git/repositories/test-repo/pullRequests/1';
 
         const filterResponse = filter({
           url,

@@ -1389,6 +1389,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -2479,6 +2490,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to get custom pull request template",
@@ -9573,6 +9594,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to get repo's commits",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -10785,6 +10817,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to get repo's commits",
@@ -17835,6 +17877,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -18904,6 +18957,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -25713,6 +25776,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -26814,6 +26888,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -33699,6 +33783,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34822,6 +34917,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -41759,6 +41864,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -42860,6 +42976,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -50186,6 +50312,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -51471,6 +51608,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -52583,6 +52731,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -53753,6 +53911,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -65970,6 +66138,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -67039,6 +67218,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -73805,6 +73994,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -74874,6 +75074,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -81640,6 +81850,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -82709,6 +82930,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -89475,6 +89706,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -90544,6 +90786,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
