@@ -235,6 +235,33 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow fetching pr info', () => {
+        const url = '/test-owner/_apis/git/repositories/test-repo/pullRequests/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow fetching pr info with api-version', () => {
+        const url =
+          '/test-owner/_apis/git/repositories/test-repo/pullrequests/1?api-version=7.1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for gitlab', () => {
