@@ -21,6 +21,7 @@ import { maskToken } from '../common/utils/token';
 import { fetchJwt } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
+import { notificationHandler } from './socketHandlers/notificationHandler';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -225,7 +226,7 @@ export const createWebSocket = (
         : localClientOps.config.brokerToken,
     ),
   );
-
+  websocket.on('notification', notificationHandler);
   websocket.on('error', errorHandler);
 
   websocket.on('open', () =>
