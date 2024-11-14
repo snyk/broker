@@ -180,6 +180,25 @@ Object {
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
     },
     Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
+    },
+    Object {
       "//": "get file content. restrict by file types",
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
@@ -1370,6 +1389,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -2460,6 +2490,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to get custom pull request template",
@@ -7588,6 +7628,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -8025,6 +8071,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
     Object {
       "//": "get core api's location for sanity check",
@@ -9529,6 +9594,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to get repo's commits",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -10741,6 +10817,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to get repo's commits",
@@ -16150,6 +16236,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "list the group's members",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -16590,6 +16682,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -17766,6 +17877,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -18835,6 +18957,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -24001,6 +24133,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -24412,6 +24550,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -25619,6 +25776,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -26720,6 +26888,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -31941,6 +32119,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://oauth2:\${GITLAB_TOKEN}@\${GITLAB}",
@@ -32373,6 +32557,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -33580,6 +33783,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34703,6 +34917,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -39968,6 +40192,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -40408,6 +40638,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -41615,6 +41864,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -42716,6 +42976,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -47937,6 +48207,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://oauth2:\${GITLAB_TOKEN}@\${GITLAB}",
@@ -48402,6 +48678,25 @@ Object {
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
     },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
+    },
   ],
   "public": Array [
     Object {
@@ -48821,6 +49116,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -49996,6 +50310,17 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -51283,6 +51608,17 @@ Object {
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
     Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
+    Object {
       "//": "used to scan IAC files",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -52395,6 +52731,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -53565,6 +53911,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
     Object {
       "//": "used to scan IAC files",
@@ -62496,6 +62852,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -64141,6 +64503,12 @@ Object {
       "path": "/api/v4/personal_access_tokens/self",
     },
     Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITLAB}",
@@ -64575,6 +64943,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -65751,6 +66138,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -66820,6 +67218,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -71974,6 +72382,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -72385,6 +72799,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -73561,6 +73994,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -74630,6 +75074,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -79784,6 +80238,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -80195,6 +80655,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -81371,6 +81850,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -82440,6 +82930,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -87594,6 +88094,12 @@ Object {
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
     },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+    },
   ],
   "public": Array [
     Object {
@@ -88005,6 +88511,25 @@ Object {
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
       "path": "/:owner/_apis/git/repositories/:repo/pullRequests/:pullRef/iterations",
+    },
+    Object {
+      "//": "get pull-request info",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "GET",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/:owner/_apis/git/repositories/:repo/pullrequests/:pullRef",
+      "valid": Array [
+        Object {
+          "queryParam": "api-version",
+          "values": Array [
+            "7.1",
+            "",
+          ],
+        },
+      ],
     },
   ],
   "public": Array [
@@ -89181,6 +89706,17 @@ Object {
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
     },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+    },
   ],
   "public": Array [
     Object {
@@ -90250,6 +90786,16 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET}",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
+    },
+    Object {
+      "//": "get a single pull request info",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "GET",
+      "origin": "https://\${BITBUCKET}",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
     },
   ],
   "public": Array [
@@ -95403,6 +95949,12 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/personal_access_tokens/self",
+    },
+    Object {
+      "//": "get single pull request info",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef",
     },
   ],
   "public": Array [

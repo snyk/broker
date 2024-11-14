@@ -1062,6 +1062,16 @@
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
       }
+    },
+    {
+      "//": "get a single pull request info",
+      "method": "GET",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
     }
   ]
 }
