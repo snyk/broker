@@ -1581,6 +1581,12 @@
       "method": "GET",
       "path": "/api/v4/personal_access_tokens/self",
       "origin": "https://${GITLAB}"
-    }
+    },
+    {
+        "//": "get single pull request info",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+        "origin": "https://${GITLAB}"
+      }
   ]
 }
