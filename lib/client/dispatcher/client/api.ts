@@ -1,6 +1,7 @@
 import { makeRequestToDownstream } from '../../../common/http/request';
 import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
 import { log as logger } from '../../../logs/logger';
+import { getClientOpts } from '../../config/configHelpers';
 import {
   CreateConnectionRequestData,
   CreateConnectionRequestParams,
@@ -24,12 +25,14 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
       const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
       const url = new URL(path, this.baseUrl);
       url.searchParams.append('version', this.version);
+      const headers = { 'Content-type': 'application/vnd.api+json' };
+      if (getClientOpts().accessToken) {
+        headers['Authorization'] = getClientOpts().accessToken?.authHeader;
+      }
       const req: PostFilterPreparedRequest = {
         url: url.toString(),
         method: 'POST',
-        headers: {
-          'Content-type': 'application/vnd.api+json',
-        },
+        headers,
         body: JSON.stringify({
           data: {
             attributes: {

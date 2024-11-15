@@ -66,7 +66,6 @@ export const createWebSocketConnectionPairs = async (
   } else {
     logger.info(
       {
-        connection: socketIdentifyingMetadata.friendlyName,
         serverId: serverId,
       },
       'received server id',

@@ -8,6 +8,12 @@ import {
 } from '../../common/config/config';
 import version from '../../common/utils/version';
 
+let globalClientOpts: Record<string, any> = {};
+
+export const getClientOpts = () => {
+  return globalClientOpts;
+};
+
 export const reloadConfig = async (clientOpts) => {
   // Reload config with connection
   await loadBrokerConfig();
@@ -17,6 +23,7 @@ export const reloadConfig = async (clientOpts) => {
     clientOpts.config,
     globalConfig.config,
   ) as Record<string, any> as CONFIGURATION;
+  globalClientOpts = clientOpts;
 };
 
 export const getClientConfigMetadata = (
