@@ -77,6 +77,12 @@
         "method": "POST",
         "path": "/scan",
         "origin": "${CR_AGENT_URL}"
+      },
+      {
+        "//": "returns image-metadata for given repository and image reference",
+        "method": "GET",
+        "path": "/image-metadata/*",
+        "origin": "${CR_AGENT_URL}"
       }
     ]
   }
