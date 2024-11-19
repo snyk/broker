@@ -1,10 +1,9 @@
-import { log as logger } from '../../logs/logger';
-import { observeResponseSize } from '../utils/metrics';
-
 import {
-  StreamResponse,
   streamsStore,
-} from '../http/server-post-stream-handler';
+  StreamResponse,
+} from './http/server-post-stream-handler';
+import { log as logger } from '../logs/logger';
+import { observeResponseSize } from '../common/utils/metrics';
 
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */

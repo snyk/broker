@@ -1,4 +1,4 @@
-import { makeSingleRawRequestToDownstream } from '../../common/http/request';
+import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import version from '../../common/utils/version';
 import { ConnectionConfig } from '../types/config';

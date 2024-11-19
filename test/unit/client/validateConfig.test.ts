@@ -8,6 +8,9 @@ describe('Client Config validations', () => {
       config: {
         brokerToken: '123',
         brokerServerUrl: 'test',
+        supportedBrokerTypes: [],
+        filterRulesPaths: {},
+        brokerType: 'client',
       },
       filters: { public: [], private: [] },
     };
@@ -23,6 +26,9 @@ describe('Client Config validations', () => {
         brokerServerUrl: 'test',
         clientId: '123',
         clientSecret: '123',
+        supportedBrokerTypes: [],
+        filterRulesPaths: {},
+        brokerType: 'client',
       },
       filters: { public: [], private: [] },
     };
@@ -39,6 +45,9 @@ describe('Client Config validations', () => {
         brokerToken: '123',
         brokerServerUrl: 'test',
         universalBrokerEnabled: true,
+        supportedBrokerTypes: [],
+        filterRulesPaths: {},
+        brokerType: 'client',
       },
       filters: { public: [], private: [] },
     };
@@ -56,6 +65,9 @@ describe('Client Config validations', () => {
         brokerServerUrl: 'test',
         universalBrokerEnabled: true,
         SKIP_REMOTE_CONFIG: true,
+        supportedBrokerTypes: [],
+        filterRulesPaths: {},
+        brokerType: 'client',
       },
       filters: { public: [], private: [] },
     };

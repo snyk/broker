@@ -1,7 +1,7 @@
 import { log as logger } from '../../logs/logger';
 import version from '../../common/utils/version';
 import { sanitise } from '../../logs/logger';
-import { makeRequestToDownstream } from '../../common/http/request';
+import { makeRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { isJson } from '../../common/utils/json';
 
 const credsFromHeader = (s) => {

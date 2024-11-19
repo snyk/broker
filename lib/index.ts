@@ -1,16 +1,7 @@
 import 'clarify'; // clean the stacktraces
-
-import filterRulesLoader, {
-  isUniversalFilters,
-} from './common/filter/filter-rules-loading';
 import { log as logger } from './logs/logger';
-import {
-  CONFIGURATION,
-  getConfig,
-  loadBrokerConfig,
-} from './common/config/config';
-
-import { FiltersType } from './common/types/filter';
+import { getConfig, loadBrokerConfig } from './common/config/config';
+import { CONFIGURATION } from './common/types/options';
 
 process.on('uncaughtExceptionMonitor', (error, origin) => {
   logger.error({ error, origin }, 'found unhandled exception');
@@ -48,39 +39,21 @@ export const app = async ({ port = 7341, client = false, config }) => {
       any
     > as CONFIGURATION;
     localConfig.brokerType = method;
-    const filters = await filterRulesLoader(localConfig);
-    if (!filters) {
-      const error = new ReferenceError(
-        `No Filters found. A Broker requires filters to run. Shutting down.`,
-      );
-      error['code'] = 'MISSING_FILTERS';
-      logger.error({ error }, error.message);
-      throw error;
+
+    if (method == 'client') {
+      return await (
+        await import('./client')
+      ).main({
+        config: localConfig,
+        port: localConfig.port || port,
+      });
     } else {
-      if (method == 'client') {
-        return await (
-          await import('./client')
-        ).main({
-          config: localConfig,
-          port: localConfig.port || port,
-          filters,
-        });
-      } else {
-        if (isUniversalFilters(filters)) {
-          throw new ReferenceError(
-            'Unexpected Universal Broker filters for server',
-          );
-        } else {
-          const classicFilters: FiltersType = filters as FiltersType;
-          return await (
-            await import('./server')
-          ).main({
-            config: localConfig,
-            port: localConfig.port || port,
-            filters: classicFilters,
-          });
-        }
-      }
+      return await (
+        await import('./server')
+      ).main({
+        config: localConfig,
+        port: localConfig.port || port,
+      });
     }
   } catch (error: any) {
     logger.error({ error }, `${error.message}`);

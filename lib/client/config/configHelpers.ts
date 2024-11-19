@@ -1,12 +1,9 @@
 import { ConfigMetadata } from '../types/client';
 import { Config } from '../types/config';
 import { log as logger } from '../../logs/logger';
-import {
-  CONFIGURATION,
-  getConfig,
-  loadBrokerConfig,
-} from '../../common/config/config';
+import { getConfig, loadBrokerConfig } from '../../common/config/config';
 import version from '../../common/utils/version';
+import { CONFIGURATION } from '../../common/types/options';
 
 export const reloadConfig = async (clientOpts) => {
   // Reload config with connection

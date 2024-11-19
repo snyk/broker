@@ -8,7 +8,11 @@ describe('Connections Manager', () => {
     const config: LoadedClientOpts = {
       loadedFilters: new Map<string, any>(),
       port: 0,
-      config: {},
+      config: {
+        supportedBrokerTypes: [],
+        filterRulesPaths: {},
+        brokerType: 'client',
+      },
       filters: new Map<string, any>(),
     };
     const globalIdentifyingMetadata: IdentifyingMetadata = {

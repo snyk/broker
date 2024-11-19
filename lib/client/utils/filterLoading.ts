@@ -1,8 +1,7 @@
 import filterRulesLoader from '../../common/filter/filter-rules-loading';
-import { CONFIGURATION } from '../../common/config/config';
 import { loadAllFilters } from '../../common/filter/filtersAsync';
 import { log as logger } from '../../logs/logger';
-import { ClientOpts } from '../../common/types/options';
+import { ClientOpts, CONFIGURATION } from '../../common/types/options';
 import { getFilterConfig } from '../config/filters';
 
 export const retrieveAndLoadFilters = async (
@@ -10,6 +9,7 @@ export const retrieveAndLoadFilters = async (
 ): Promise<void> => {
   const globalFilterConfig = getFilterConfig();
   const filters = await filterRulesLoader(clientOpts.config as CONFIGURATION);
+  clientOpts.filters = filters;
   globalFilterConfig.loadedFilters = loadAllFilters(filters, clientOpts.config);
   logger.debug('Loading Filters');
 };

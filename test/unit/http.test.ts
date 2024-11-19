@@ -3,7 +3,7 @@ import {
   makeRequestToDownstream,
   makeSingleRawRequestToDownstream,
   makeStreamingRequestToDownstream,
-} from '../../lib/common/http/request';
+} from '../../lib/hybrid-sdk/http/request';
 import http from 'http';
 
 const nock = require('nock');

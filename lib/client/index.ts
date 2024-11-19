@@ -20,7 +20,6 @@ import {
   processStartUpHooks,
   validateMinimalConfig,
 } from './hooks/startup/processHooks';
-import { forwardHttpRequestOverHttp } from '../common/relay/forwardHttpRequestOverHttp';
 import { isWebsocketConnOpen } from './utils/socketHelpers';
 import { ClientOpts } from '../common/types/options';
 import { websocketConnectionSelectorMiddleware } from './routesHandler/websocketConnectionMiddlewares';
@@ -69,6 +68,7 @@ export const main = async (clientOpts: ClientOpts) => {
       'https://api.snyk.io';
 
     await validateMinimalConfig(clientOpts);
+
     if (clientOpts.config.universalBrokerEnabled) {
       const pluginsFolderPath = await findPluginFolder(
         __dirname ?? process.cwd(),
@@ -95,11 +95,10 @@ export const main = async (clientOpts: ClientOpts) => {
         await retrieveAndLoadFilters(clientOpts);
       }, ONEDAY);
     }
-
     const globalIdentifyingMetadata: IdentifyingMetadata = {
       capabilities: ['post-streams'],
       clientId: clientOpts.config.brokerClientId,
-      filters: clientOpts.filters,
+      filters: clientOpts.filters ?? new Map(),
       preflightChecks: hookResults.preflightCheckResults,
       version,
       clientConfig: getClientConfigMetadata(clientOpts.config),
@@ -126,10 +125,7 @@ export const main = async (clientOpts: ClientOpts) => {
     // start the local webserver to listen for relay requests
     const { app, server } = webserver(clientOpts.config, clientOpts.port);
     const httpToWsForwarder = forwardHttpRequest(clientOpts);
-    const httpToAPIForwarder = forwardHttpRequestOverHttp(
-      clientOpts,
-      clientOpts.config,
-    );
+    const httpToAPIForwarder = forwardHttpRequest(clientOpts, true);
     // IMPORTANT: defined before relay (`app.all('/*', ...`)
     app.get('/health/checks', handleChecksRoute(clientOpts.config));
     app.get('/health/checks/:checkId', handleCheckIdsRoutes(clientOpts.config));
@@ -212,6 +208,6 @@ export const main = async (clientOpts: ClientOpts) => {
     };
   } catch (err) {
     logger.warn({ err }, `Shutting down client`);
-    // throw err;
+    throw err;
   }
 };

@@ -1,10 +1,10 @@
 import path from 'path';
 import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
-import { CONFIGURATION } from '../../lib/common/config/config';
 import camelcase from 'camelcase';
 import { FiltersType } from '../../lib/common/types/filter';
 const nock = require('nock');
 import fs from 'fs';
+import { CONFIGURATION } from '../../lib/common/types/options';
 
 const scmRulesToTest = [
   'azure-repos',

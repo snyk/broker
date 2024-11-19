@@ -1,7 +1,7 @@
 import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../logs/logger';
 import { getConfig } from '../../common/config/config';
-import { axiosInstance } from '../../common/http/axios';
+import { axiosInstance } from '../../hybrid-sdk/http/axios';
 import { v4 as uuid } from 'uuid';
 
 class DispatcherClient {

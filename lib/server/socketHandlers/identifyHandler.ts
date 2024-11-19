@@ -1,4 +1,4 @@
-import { legacyStreamResponseHandler } from '../../common/relay/LegacyStreamResponseHandler';
+import { legacyStreamResponseHandler } from '../../hybrid-sdk/LegacyStreamResponseHandler';
 import { incrementSocketConnectionGauge } from '../../common/utils/metrics';
 import { log as logger } from '../../logs/logger';
 import { clientConnected, clientPinged } from '../infra/dispatcher';
