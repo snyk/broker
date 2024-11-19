@@ -6,8 +6,13 @@ import { getSocketConnections } from '../socket';
 import { metadataWithoutFilters } from '../utils/socket';
 import { getDesensitizedToken } from '../utils/token';
 import { getForwardWebSocketRequestHandler } from './initHandlers';
+import semver from 'semver';
 
 let response;
+const minimalSupportedBrokerVersion =
+  process.env.MINIMAL_SUPPORTED_BROKER_VERSION ?? '4.100.0';
+const minimalRecommendedBrokerVersion =
+  process.env.MINIMAL_RECOMMENDED_BROKER_VERSION ?? '4.182.0';
 const streamingResponse = legacyStreamResponseHandler;
 
 export const initIdentifyHandler = () => {
@@ -38,13 +43,27 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
   const { maskedToken, hashedToken } = getDesensitizedToken(token);
   const clientId = clientData.metadata.clientId;
   const clientVersion = clientData.metadata.version;
-  // TODO: If version < cutoff version, then alert first, then deny
-  //   if(clientVersion < minimalVersion) {
-  //     socket.send('error', { message: `Broker Client Version is outdated. Minimal version: ${minimalVersion}. Please upgrade to latest version` });
-  //   }
-  //   if(clientVersion < minimalSupportedVersion) {
-  //     socket.send('warning', { message: `Broker Client Version is outdated. Minimal version: ${minimalVersion}. Please upgrade to latest version` });
-  //   }
+
+  if (
+    clientVersion != 'local' &&
+    semver.lt(clientVersion, minimalSupportedBrokerVersion)
+  ) {
+    socket.send('notification', {
+      level: 'error',
+      message: `Broker Client Version is outdated. Minimal version: ${minimalSupportedBrokerVersion}. Please upgrade to latest version`,
+    });
+    socket.end();
+    return false;
+  }
+  if (
+    clientVersion != 'local' &&
+    semver.lt(clientVersion, minimalRecommendedBrokerVersion)
+  ) {
+    socket.send('notification', {
+      level: 'warning',
+      message: `Broker Client Version is deprecated. Minimal version: ${minimalRecommendedBrokerVersion}. Please upgrade to latest version`,
+    });
+  }
 
   logger.info(
     {
