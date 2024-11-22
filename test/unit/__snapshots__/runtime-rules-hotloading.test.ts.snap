@@ -1378,6 +1378,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -2480,6 +2502,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -9583,6 +9625,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -10807,6 +10871,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -17867,6 +17951,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -18947,6 +19053,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -25765,6 +25891,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -26878,6 +27026,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -33772,6 +33940,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -34907,6 +35097,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -41853,6 +42063,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -42966,6 +43198,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -50301,6 +50553,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -51597,6 +51871,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -52721,6 +53017,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -53901,6 +54217,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -66128,6 +66464,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -67208,6 +67566,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -73984,6 +74362,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -75064,6 +75464,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -81840,6 +82260,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -82920,6 +83362,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
@@ -89696,6 +90158,28 @@ Object {
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
     },
     Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "password": "\${BITBUCKET_PASSWORD}",
+        "scheme": "basic",
+        "username": "\${BITBUCKET_USERNAME}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
+    },
+    Object {
       "//": "used to validate credentials",
       "auth": Object {
         "password": "\${BITBUCKET_PASSWORD}",
@@ -90776,6 +91260,26 @@ Object {
       "method": "GET",
       "origin": "https://\${BITBUCKET_API}",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
+    },
+    Object {
+      "//": "create an inline pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
+    },
+    Object {
+      "//": "resolve a pull request comment",
+      "auth": Object {
+        "scheme": "bearer",
+        "token": "\${BITBUCKET_PAT}",
+      },
+      "method": "POST",
+      "origin": "https://\${BITBUCKET_API}",
+      "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
     },
     Object {
       "//": "used to validate credentials",
