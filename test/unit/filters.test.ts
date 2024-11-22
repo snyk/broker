@@ -133,6 +133,32 @@ describe('filters', () => {
         expect(filterResponseUrl).toMatch(url);
       });
 
+      it('should allow creating an inline pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow resolving a pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
       it('should allow searching permissions', () => {
         const url =
           '/rest/api/1.0/projects/:project/repos/:repo/permissions/search';
@@ -199,6 +225,32 @@ describe('filters', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow creating an inline pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow resolving a pull request comment', () => {
+        const url =
+          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
