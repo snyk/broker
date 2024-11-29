@@ -3,5 +3,6 @@ ARG BASE_IMAGE=snyk/broker:base-rhel-ubi
 FROM ${BASE_IMAGE}
 
 USER snyk
+ENV UNIVERSAL_BROKER_ENABLED=true
 
 CMD ["broker", "--verbose"]

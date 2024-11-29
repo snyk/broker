@@ -39,6 +39,7 @@ COPY defaultFilters /home/node/defaultFilters
 USER root
 RUN chgrp -R 0 /home/node && chmod -R g=u,o= /home/node && chown -R node /home/node
 USER node
+ENV UNIVERSAL_BROKER_ENABLED=true
 
 EXPOSE $PORT
 
