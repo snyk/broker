@@ -151,11 +151,11 @@ export const createWebSocket = (
     websocket.identifier = identifyingMetadata.identifier;
     websocket.supportedIntegrationType =
       identifyingMetadata.supportedIntegrationType || '';
-    websocket.serverId = serverId || '';
     websocket.friendlyName = identifyingMetadata.friendlyName || '';
   } else {
     websocket.identifier = maskToken(identifyingMetadata.identifier);
   }
+  websocket.serverId = serverId || '';
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 

@@ -112,9 +112,7 @@ export class HybridResponseHandler {
         this.logContext,
         this.options,
         this.connectionIdentifier,
-        this.options.universalBrokerEnabled
-          ? this.websocketConnectionHandler?.serverId
-          : this.options.serverId,
+        this.websocketConnectionHandler?.serverId ?? '',
         this.requestMetadata.requestId,
         this.websocketConnectionHandler.role,
       );
