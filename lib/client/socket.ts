@@ -138,6 +138,8 @@ export const createWebSocket = (
     socketSettings['transport'] = {
       extraHeaders: {
         Authorization: clientOpts.accessToken?.authHeader,
+        'x-snyk-broker-client-id': identifyingMetadata.clientId,
+        'x-snyk-broker-client-role': identifyingMetadata.role,
       },
     };
   }
@@ -171,8 +173,8 @@ export const createWebSocket = (
         clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
       );
 
-      // websocket.transport.extraHeaders['Authorization'] =
-      //   clientOpts.accessToken!.authHeader;
+      websocket.transport.extraHeaders['Authorization'] =
+        clientOpts.accessToken!.authHeader;
       // websocket.end();
       // websocket.open();
       timeoutHandlerId = setTimeout(
