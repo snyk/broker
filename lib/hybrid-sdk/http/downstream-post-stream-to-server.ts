@@ -9,6 +9,7 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 import { getConfig } from '../../common/config/config';
+import { getClientOpts } from '../../client/config/configHelpers';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -68,6 +69,7 @@ class BrokerServerPostResponseHandler {
           this.#streamingId
         }`,
       );
+
       if (this.#serverId) {
         url.searchParams.append('server_id', this.#serverId);
       }
@@ -94,6 +96,10 @@ class BrokerServerPostResponseHandler {
           ? parseInt(this.#config.brokerClientPostTimeout)
           : 1200000,
       };
+      if (getClientOpts().accessToken) {
+        options.headers['authorization'] =
+          getClientOpts().accessToken.authHeader;
+      }
 
       this.#brokerSrvPostRequestHandler = client.request(
         brokerServerPostRequestUrl,
