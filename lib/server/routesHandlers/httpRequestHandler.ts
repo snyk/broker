@@ -70,7 +70,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   res.locals.socketVersion = connections.get(token)![0].socketVersion;
   res.locals.capabilities = connections.get(token)![0].metadata.capabilities;
   res.locals.brokerAppClientId =
-    connections.get(token)![0].metadata.brokerAppClientId;
+    connections.get(token)![0].brokerAppClientId ?? '';
   req['locals'] = {};
   req['locals']['capabilities'] =
     connections.get(token)![0].metadata.capabilities;
