@@ -1,0 +1,18 @@
+{
+    "//": "private refers to what's internal to snyk, i.e. the snyk.io server",
+    "private": [
+        {
+            "//": "send any type of request to our connected clients",
+            "method": "any",
+            "path": "/*"
+        }
+    ],
+    "public": [
+        {
+            "//": "send any type of request to our connected clients",
+            "method": "any",
+            "path": "/*"
+        }
+    ]
+}
+
