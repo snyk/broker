@@ -2,7 +2,7 @@ ARG BASE_IMAGE=ubuntu:20.04
 ARG NODE_VERSION=20.11.0
 
 
-FROM ${BASE_IMAGE} as node-base
+FROM ${BASE_IMAGE} AS node-base
 
 ARG NODE_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
@@ -76,7 +76,7 @@ EOF
 
 
 
-FROM node-base as broker-builder
+FROM node-base AS broker-builder
 
 ARG NODE_VERSION
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
