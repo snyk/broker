@@ -8,11 +8,13 @@ ARG NODE_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PATH=$PATH:/home/node/.npm-global/bin
+ARG USER_UID=1000
+ARG USER_GID=${USER_UID}
 
 RUN <<EOF
     set -ex
-    groupadd --gid 1000 node
-    useradd --uid 1000 --gid node --shell /bin/bash --create-home node
+    groupadd --gid ${USER_GID} node
+    useradd --uid ${USER_UID} --gid node --shell /bin/bash --create-home node
     apt update
     apt upgrade --assume-yes
     # install packages needed for node installation
