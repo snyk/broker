@@ -1024,8 +1024,9 @@ workflows:
             - team-broker-snyk
           requires:
             - Scan repository for secrets
+          additional_arguments: "--build-arg BASE_IMAGE=ubuntu:24.04 --build-arg USER_UID=2000"
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "21"
+          nodejs_cycle: "23"
           project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure
