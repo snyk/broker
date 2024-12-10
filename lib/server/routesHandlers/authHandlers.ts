@@ -30,6 +30,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
     );
     return res.status(401).send('Invalid parameters or credentials.');
   }
+
   const connection = getSocketConnectionByIdentifier(identifier);
   const currentClient = connection
     ? connection.find((x) => x.metadata.clientId === brokerClientId)
@@ -46,7 +47,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
   } else {
     const credsCheckResponse = await validateBrokerClientCredentials(
       credentials,
-      brokerAppClientId as string,
+      brokerClientId as string,
       identifier,
     );
     if (credsCheckResponse) {

@@ -50,7 +50,6 @@ export const handlePostResponse = (req: Request, res: Response) => {
     : null;
 
   const brokerAppClientId = decodedJwt ? decodedJwt?.payload['azp'] : '';
-
   if (
     getConfig().BROKER_SERVER_MANDATORY_AUTH_ENABLED &&
     (!brokerAppClientId ||

@@ -18,7 +18,6 @@ export interface ClientSocket {
   brokerClientId: string;
   brokerAppClientId: string;
   role: Role;
-  jwt: any;
   metadata?: any;
 }
 const socketConnections = new Map<string, ClientSocket[]>();
@@ -47,10 +46,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
   };
 
   const websocket = new Primus(server, ioConfig);
-  if (
-    process.env.HPS_BACKEND_URL_WITH_BASE_PATH &&
-    process.env.HPS_BACKEND_VERSION
-  ) {
+  if (loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
     websocket.authorize(async (req, done) => {
       const connectionIdentifier = req.uri.pathname
         .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
@@ -92,11 +88,9 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           { maskedToken: maskToken(connectionIdentifier), brokerClientId },
           `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
         );
-        const decodedJwt = decode(jwt, { complete: true });
-        const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
         const credsCheckResponse = await validateBrokerClientCredentials(
           jwt,
-          brokerAppClientId,
+          brokerClientId,
           connectionIdentifier,
         );
         if (!credsCheckResponse) {
@@ -107,13 +101,14 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           });
         }
 
+        const decodedJwt = decode(jwt, { complete: true });
+        const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
         const currentClient: ClientSocket = {
           socketType: 'server',
           socketVersion: 1,
           brokerClientId: brokerClientId,
           brokerAppClientId: brokerAppClientId,
           role: role ?? Role.primary,
-          jwt,
         };
         const connections = getSocketConnections();
         const clientPool =

@@ -194,13 +194,15 @@ export const createWebSocket = (
       }
       timeoutHandlerId = setTimeout(
         timeoutHandler,
-        (clientOpts.accessToken!.expiresIn - 60) * 1000,
+        // (clientOpts.accessToken!.expiresIn - 60) * 1000,
+        30000,
       );
     };
 
     timeoutHandlerId = setTimeout(
       timeoutHandler,
-      (clientOpts.accessToken!.expiresIn - 60) * 1000,
+      // (clientOpts.accessToken!.expiresIn - 60) * 1000,
+      10000,
     );
   }
 
