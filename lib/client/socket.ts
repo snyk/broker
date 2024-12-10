@@ -22,6 +22,7 @@ import { fetchJwt } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
+import { renewBrokerServerConnection } from './auth/brokerServerConnection';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -66,7 +67,6 @@ export const createWebSocketConnectionPairs = async (
   } else {
     logger.info(
       {
-        connection: socketIdentifyingMetadata.friendlyName,
         serverId: serverId,
       },
       'received server id',
@@ -97,6 +97,11 @@ export const createWebSocket = (
   const localClientOps = Object.assign({}, clientOpts);
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
+  if (!identifyingMetadata.identifier) {
+    throw new Error(
+      `Invalid Broker Identifier/Token in websocket tunnel creation step.`,
+    );
+  }
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -175,8 +180,18 @@ export const createWebSocket = (
 
       websocket.transport.extraHeaders['Authorization'] =
         clientOpts.accessToken!.authHeader;
-      // websocket.end();
-      // websocket.open();
+      if (clientOpts.config.WS_TUNNEL_BOUNCE_ON_AUTH_REFRESH) {
+        websocket.end();
+        websocket.open();
+      } else {
+        await renewBrokerServerConnection({
+          connectionIdentifier: identifyingMetadata.identifier!,
+          brokerClientId: identifyingMetadata.clientId,
+          authorization: clientOpts.accessToken!.authHeader,
+          role: identifyingMetadata.role,
+          serverId: serverId,
+        });
+      }
       timeoutHandlerId = setTimeout(
         timeoutHandler,
         (clientOpts.accessToken!.expiresIn - 60) * 1000,
@@ -234,6 +249,26 @@ export const createWebSocket = (
   websocket.on('open', () =>
     openHandler(websocket, localClientOps, identifyingMetadata),
   );
+
+  websocket.on('service', (msg) => {
+    logger.info({ msg }, 'service message received');
+  });
+  // websocket.on('outgoing::open', function () {
+  //   type OnErrorHandler = (type: string, code: number) => void;
+
+  //   const originalErrorHandler: OnErrorHandler =
+  //     websocket.socket.transport.onError;
+
+  //   websocket.socket.transport.onError = (...args: [string, number]) => {
+  //     const [type, code] = args; // Destructure for clarity
+  //     if (code === 401) {
+  //       logger.error({ type, code }, `Connection denied: unauthorized.`);
+  //     } else {
+  //       logger.error({ type, code }, `Transport error during polling.`);
+  //     }
+  //     originalErrorHandler.apply(websocket.socket?.transport, args);
+  //   };
+  // });
 
   websocket.on('close', () =>
     closeHandler(localClientOps, identifyingMetadata),

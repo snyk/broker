@@ -13,6 +13,7 @@ import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 import { FiltersType } from '../common/types/filter';
 import filterRulesLoader from '../common/filter/filter-rules-loading';
+import { authRefreshHandler } from './routesHandlers/authHandlers';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode');
@@ -57,6 +58,10 @@ export const main = async (serverOpts: ServerOpts) => {
     app.use(applyPrometheusMiddleware());
   }
   app.get('/connection-status/:token', connectionStatusHandler);
+  app.post(
+    '/hidden/brokers/connections/:identifier/auth/refresh',
+    authRefreshHandler,
+  );
   app.all(
     '/broker/:token/*',
     overloadHttpRequestWithConnectionDetailsMiddleware,
@@ -64,7 +69,17 @@ export const main = async (serverOpts: ServerOpts) => {
     getForwardHttpRequestHandler(),
   );
 
-  app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  if (
+    loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED ||
+    loadedServerOpts.config.RESPONSE_DATA_HIDDEN_ENABLED
+  ) {
+    app.post(
+      '/hidden/broker/response-data/:brokerToken/:streamingId',
+      handlePostResponse,
+    );
+  } else {
+    app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  }
 
   app.get('/', (req, res) => res.status(200).json({ ok: true, version }));
 
