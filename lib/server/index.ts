@@ -69,7 +69,17 @@ export const main = async (serverOpts: ServerOpts) => {
     getForwardHttpRequestHandler(),
   );
 
-  app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  if (
+    loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED ||
+    loadedServerOpts.config.RESPONSE_DATA_HIDDEN_ENABLED
+  ) {
+    app.post(
+      '/hidden/broker/response-data/:brokerToken/:streamingId',
+      handlePostResponse,
+    );
+  } else {
+    app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  }
 
   app.get('/', (req, res) => res.status(200).json({ ok: true, version }));
 
