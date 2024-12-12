@@ -39,7 +39,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
     .on('data', function (data) {
       try {
         logger.trace(
-          { ...logContext, dataLength: data.length },
+          { ...logContext, dataLength: Buffer.byteLength(data, 'utf8') },
           'Received data event',
         );
         let bytesRead = 0;
@@ -52,12 +52,16 @@ export const handlePostResponse = (req: Request, res: Response) => {
           );
         }
 
+        let statusAndHeadersLength = Buffer.byteLength(
+          statusAndHeaders,
+          'utf8',
+        );
         if (
           statusAndHeadersSize > 0 &&
-          statusAndHeaders.length < statusAndHeadersSize
+          statusAndHeadersLength < statusAndHeadersSize
         ) {
           const endPosition = Math.min(
-            bytesRead + statusAndHeadersSize - statusAndHeaders.length,
+            bytesRead + statusAndHeadersSize - statusAndHeadersLength,
             data.length,
           );
           logger.trace(
@@ -66,8 +70,8 @@ export const handlePostResponse = (req: Request, res: Response) => {
           );
           statusAndHeaders += data.toString('utf8', bytesRead, endPosition);
           bytesRead = endPosition;
-
-          if (statusAndHeaders.length === statusAndHeadersSize) {
+          statusAndHeadersLength = Buffer.byteLength(statusAndHeaders, 'utf8');
+          if (statusAndHeadersLength === statusAndHeadersSize) {
             logger.trace(
               { ...logContext, statusAndHeaders },
               'Converting to json',
@@ -92,7 +96,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
             logger.trace(
               {
                 ...logContext,
-                currentSize: statusAndHeaders.length,
+                currentSize: statusAndHeadersLength,
                 expectedSize: statusAndHeadersSize,
               },
               'Was unable to fit all information into a single data object',

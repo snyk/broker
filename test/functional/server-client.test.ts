@@ -164,6 +164,22 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(Buffer.from(response.data)).toEqual(body);
     expect(response.headers['x-broker-ws-response']).not.toBeNull();
   });
+
+  it('successfully broker POST with unicode body and header values', async () => {
+    const response = await axiosClient.post(
+      `http://localhost:${bs.port}/broker/${brokerToken}/echo-with-unicode`,
+      { some: { example: 'json' } },
+    );
+    expect(decodeURIComponent(response.headers.test)).toEqual(
+      'Special-Char-碰撞.proj',
+    );
+    expect(response.status).toEqual(200);
+    expect(response.data).toStrictEqual({
+      some: { example: 'json' },
+      test: 'Special-Char-碰撞.proj',
+    });
+  });
+
   it('successfully broker GET', async () => {
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/xyz`,
