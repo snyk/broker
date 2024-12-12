@@ -63,6 +63,12 @@
     },
 
     {
+      "path": "/echo-with-unicode",
+      "method": "POST",
+      "origin": "http://localhost:9000"
+    },
+
+    {
       "path": "/echo-body/filtered",
       "method": "POST",
       "origin": "http://localhost:9000",

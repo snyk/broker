@@ -240,6 +240,21 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  echoRouter.post(
+    '/echo-with-unicode/:param?',
+    (req: express.Request, resp: express.Response) => {
+      const unicodeValue = 'Special-Char-碰撞.proj';
+      const body = JSON.parse(req.body);
+      body.test = unicodeValue;
+      const contentType = req.get('Content-Type');
+      if (contentType) {
+        resp.type(contentType);
+      }
+      resp.setHeader('test', encodeURIComponent(unicodeValue));
+      resp.send(JSON.stringify(body));
+    },
+  );
+
   // mimics functionality of https://httpbin.org/headers
   echoRouter.get(
     '/echo-headers/httpbin',
