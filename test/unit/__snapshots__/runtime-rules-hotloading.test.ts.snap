@@ -16344,6 +16344,12 @@ Object {
       "path": "/api/v4/projects/:project/groups",
     },
     Object {
+      "//": "list of members in a project",
+      "method": "GET",
+      "origin": "https://\${GITLAB}",
+      "path": "/api/v4/projects/:project/members",
+    },
+    Object {
       "//": "used to retrieve organization context from catalog-info.yaml",
       "method": "GET",
       "origin": "https://\${GITLAB}",
