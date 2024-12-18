@@ -32,6 +32,7 @@ describe('proxy requests originating from behind the broker server', () => {
     process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
     process.env.JIRAUSER = 'user';
     process.env.PASS = 'pass';
+    process.env.LOG_ENABLE_BODY = 'true'; // setting this to true to assert it connects with it disabled
 
     tws = await createTestWebServer();
 
