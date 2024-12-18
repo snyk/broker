@@ -84,6 +84,36 @@ describe('config', () => {
     });
   });
 
+  it('custom accept is false if ACCEPT exists and set to accept.json', async () => {
+    process.env.LOG_LEVEL = 'debug';
+    process.env.LOG_ENABLE_BODY = 'true';
+    process.env.GITHUB_TOKEN_POOL = '123,456';
+    process.env.INSECURE_DOWNSTREAM = 'true_but_truly_value_does_not_matter';
+    process.env.BROKER_HA_MODE_ENABLED = 'true';
+    process.env.HTTP_PROXY = 'http://myproxy';
+    process.env.NODE_EXTRA_CA_CERT = 'my/path';
+    process.env.ACCEPT = 'accept.json';
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    await loadBrokerConfig();
+    const config = getConfig();
+    config.brokerClientId = '123';
+    expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
+      bodyLogMode: true,
+      brokerClientId: '123',
+      credPooling: true,
+      customAccept: false,
+      debugMode: true,
+      haMode: true,
+      privateCa: true,
+      proxy: true,
+      tlsReject: true,
+      insecureDownstream: true,
+      universalBroker: true,
+      version: 'local',
+    });
+  });
+
   it('everything is false for everything disabled in config', async () => {
     process.env.LOG_LEVEL = 'info';
     process.env.GITHUB_TOKEN = '456';
