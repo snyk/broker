@@ -37,7 +37,10 @@ export const getClientConfigMetadata = (
     tlsReject:
       parseInt(clientConfig.nodeTlsRejectUnauthorized) === 0 ? true : false,
     proxy: clientConfig.httpProxy || clientConfig.httpsProxy ? true : false,
-    customAccept: clientConfig.accept ? true : false,
+    customAccept:
+      clientConfig.accept && clientConfig.accept != 'accept.json'
+        ? true
+        : false,
     insecureDownstream: clientConfig.insecureDownstream ? true : false,
     universalBroker: clientConfig.universalBrokerEnabled ? true : false,
   };
