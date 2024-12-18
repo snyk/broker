@@ -31,7 +31,7 @@ export const getClientConfigMetadata = (
     version: `${version}`,
     haMode: highAvailabilityModeEnabled(clientConfig),
     debugMode: clientConfig.logLevel === 'debug' ? true : false,
-    bodyLogMode: clientConfig.logEnableBody ? true : false,
+    bodyLogMode: clientConfig.logEnableBody === 'true' ? true : false,
     credPooling: isCredPoolingUsed(clientConfig),
     privateCa: clientConfig.nodeExtraCaCert ? true : false,
     tlsReject:
