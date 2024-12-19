@@ -38,7 +38,6 @@ export async function fetchJwt(
     const jwt = accessToken.access_token;
     const type = accessToken.token_type;
     const expiresIn = accessToken.expires_in;
-
     return { expiresIn: expiresIn, authHeader: `${type} ${jwt}` };
   } catch (err) {
     logger.error({ err }, 'Unable to retrieve JWT');

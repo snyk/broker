@@ -91,6 +91,7 @@ export const main = async (clientOpts: ClientOpts) => {
         clientOpts.config.brokerClientId,
       );
     }
+
     await retrieveAndLoadFilters(clientOpts);
     if (process.env.NODE_ENV != 'test') {
       setInterval(async () => {

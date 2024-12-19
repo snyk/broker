@@ -33,9 +33,9 @@ describe('proxy requests originating from behind the broker server with pooled c
 
     const PORT = 9999;
     tws = await createTestWebServer();
-
+    process.env.RESPONSE_DATA_HIDDEN_ENABLED = 'true';
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
-
+    process.env.API_BASE_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltestpool';
