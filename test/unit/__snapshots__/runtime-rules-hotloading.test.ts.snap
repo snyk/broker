@@ -16342,6 +16342,15 @@ Object {
       "method": "GET",
       "origin": "https://\${GITLAB}",
       "path": "/api/v4/projects/:project/groups",
+      "valid": Array [
+        Object {
+          "queryParam": "with_shared",
+          "values": Array [
+            "true",
+            "false",
+          ],
+        },
+      ],
     },
     Object {
       "//": "list of members in a project",
