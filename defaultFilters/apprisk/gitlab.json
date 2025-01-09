@@ -15,7 +15,13 @@
     "//": "list of groups in a project",
     "method": "GET",
     "path": "/api/v4/projects/:project/groups",
-    "origin": "https://${GITLAB}"
+    "origin": "https://${GITLAB}",
+    "valid": [
+      {
+        "queryParam": "with_shared",
+        "values": ["true", "false"]
+      }
+    ]
   },
   {
     "//": "list of members in a project",
