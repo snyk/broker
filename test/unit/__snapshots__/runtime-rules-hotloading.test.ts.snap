@@ -25948,7 +25948,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -25959,7 +25959,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
@@ -27080,7 +27080,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -27090,7 +27090,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
@@ -34019,7 +34019,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -34030,7 +34030,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
@@ -35171,7 +35171,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -35181,7 +35181,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
@@ -42120,7 +42120,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -42131,7 +42131,7 @@ Object {
         "username": "\${BITBUCKET_USERNAME}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
@@ -43252,7 +43252,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "GET",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/info/refs*",
     },
     Object {
@@ -43262,7 +43262,7 @@ Object {
         "token": "\${BITBUCKET_PAT}",
       },
       "method": "POST",
-      "origin": "https://\${BITBUCKET}",
+      "origin": "https://\${BITBUCKET_GIT}",
       "path": "*/git-upload-pack",
     },
     Object {
