@@ -154,6 +154,7 @@
         }
       ],
       "default": {
+        "BITBUCKET_GIT": "$BITBUCKET",
         "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
         "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
         "BROKER_CLIENT_VALIDATION_BASIC_AUTH": "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD",

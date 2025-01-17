@@ -219,6 +219,8 @@ function injectRulesAtRuntime(
           templateGETForSnippets.path =
             '/projects/:project/repos/:repo/browse*/:file';
           templatePOST.path = '*/git-upload-pack';
+          templateGET.origin = 'https://${BITBUCKET_GIT}';
+          templatePOST.origin = 'https://${BITBUCKET_GIT}';
           break;
         default:
           logger.error(
