@@ -11,7 +11,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
   const desensitizedToken = getDesensitizedToken(token);
   const connections = getSocketConnections();
   if (connections.has(token)) {
-    const clientsMetadata = connections.get(req.params.token).map((conn) => ({
+    const clientsMetadata = connections.get(req.params.token)!.map((conn) => ({
       version: conn.metadata && conn.metadata.version,
       filters: conn.metadata && conn.metadata.filters,
     }));

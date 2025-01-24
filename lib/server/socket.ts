@@ -5,13 +5,30 @@ import { SocketHandler } from './types/socket';
 import { handleIoError } from './socketHandlers/errorHandler';
 import { handleSocketConnection } from './socketHandlers/connectionHandler';
 import { initConnectionHandler } from './socketHandlers/initHandlers';
-// import { maskToken } from '../common/utils/token';
-// import { log as logger } from '../logs/logger';
+import { log as logger } from '../logs/logger';
+import { maskToken } from '../common/utils/token';
+import { validateBrokerClientCredentials } from './auth/authHelpers';
+import { Role } from '../client/types/client';
+import { decode } from 'jsonwebtoken';
 
-const socketConnections = new Map();
+export interface ClientSocket {
+  socket?: { end() };
+  socketType: 'server';
+  socketVersion: number;
+  brokerClientId: string;
+  brokerAppClientId: string;
+  role: Role;
+  metadata?: any;
+  credsValidationTime?: string;
+}
+const socketConnections = new Map<string, ClientSocket[]>();
 
 export const getSocketConnections = () => {
   return socketConnections;
+};
+
+export const getSocketConnectionByIdentifier = (identifier: string) => {
+  return socketConnections.get(identifier);
 };
 
 const socket = ({ server, loadedServerOpts }): SocketHandler => {
@@ -30,54 +47,94 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
   };
 
   const websocket = new Primus(server, ioConfig);
-  // websocket.authorize(async (req, done) => {
-  //   const maskedToken = maskToken(
-  //     req.uri.pathname.replaceAll(/^\/primus\/([^/]+)\//g, '$1').toLowerCase(),
-  //   );
-  //   const authHeader = req.headers['authorization'];
+  if (loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
+    websocket.authorize(async (req, done) => {
+      const connectionIdentifier = req.uri.pathname
+        .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
+        .toLowerCase();
+      const maskedToken = maskToken(connectionIdentifier);
+      const authHeader =
+        req.headers['Authorization'] ?? req.headers['authorization'];
+      const brokerClientId = req.headers['x-snyk-broker-client-id'] ?? null;
+      const role = req.headers['x-snyk-broker-client-role'] ?? null;
+      if (
+        (!authHeader ||
+          !authHeader.toLowerCase().startsWith('bearer') ||
+          !brokerClientId) &&
+        loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
+      ) {
+        logger.debug({ maskedToken }, 'request missing Authorization header');
+        done({
+          statusCode: 401,
+          authenticate: 'Bearer',
+          message: 'missing required authorization header',
+        });
+        return;
+      }
 
-  //   if (
-  //     (!authHeader || !authHeader.startsWith('Bearer')) &&
-  //     loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
-  //   ) {
-  //     logger.error({ maskedToken }, 'request missing Authorization header');
-  //     done({
-  //       statusCode: 401,
-  //       authenticate: 'Bearer',
-  //       message: 'missing required authorization header',
-  //     });
-  //     return;
-  //   }
+      const jwt = authHeader
+        ? authHeader.substring(authHeader.indexOf(' ') + 1)
+        : '';
+      if (
+        !jwt &&
+        loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
+      ) {
+        done({
+          statusCode: 401,
+          authenticate: 'Bearer',
+          message: 'Invalid JWT',
+        });
+        return;
+      } else {
+        logger.debug(
+          { maskedToken: maskToken(connectionIdentifier), brokerClientId },
+          `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+        );
+        const credsCheckResponse = await validateBrokerClientCredentials(
+          jwt,
+          brokerClientId,
+          connectionIdentifier,
+        );
+        if (!credsCheckResponse) {
+          done({
+            statusCode: 401,
+            authenticate: 'Bearer',
+            message: 'Invalid credentials.',
+          });
+        }
 
-  //   const jwt = authHeader
-  //     ? authHeader.substring(authHeader.indexOf(' ') + 1)
-  //     : '';
-  //   if (!jwt) logger.debug({}, `TODO: Validate jwt`);
-  //   done();
-  //   // let oauthResponse = await axiosInstance.request({
-  //   //   url: 'http://localhost:8080/oauth2/introspect',
-  //   //   method: 'POST',
-  //   //   headers: {
-  //   //     'Content-Type': 'application/x-www-form-urlencoded',
-  //   //   },
-  //   //   auth: {
-  //   //     username: 'broker-connection-a',
-  //   //     password: 'secret',
-  //   //   },
-  //   //   data: `token=${token}`,
-  //   // });
-
-  //   // if (!oauthResponse.data.active) {
-  //   //   logger.error({maskedToken}, 'JWT is not active (could be expired, malformed, not issued by us, etc)');
-  //   //   done({
-  //   //     statusCode: 403,
-  //   //     message: 'token not active',
-  //   //   });
-  //   // } else {
-  //   //   req.oauth_data = oauthResponse.data;
-  //   //   done();
-  //   // }
-  // });
+        const decodedJwt = decode(jwt, { complete: true });
+        const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
+        const nowDate = new Date().toISOString();
+        const currentClient: ClientSocket = {
+          socketType: 'server',
+          socketVersion: 1,
+          brokerClientId: brokerClientId,
+          brokerAppClientId: brokerAppClientId,
+          role: role ?? Role.primary,
+          credsValidationTime: nowDate,
+        };
+        const connections = getSocketConnections();
+        const clientPool =
+          (connections.get(connectionIdentifier) as Array<ClientSocket>) || [];
+        const currentClientIndex = clientPool.findIndex(
+          (x) =>
+            x.brokerClientId === currentClient.brokerClientId &&
+            x.role === currentClient.role,
+        );
+        if (currentClientIndex < 0) {
+          clientPool.unshift(currentClient);
+        } else {
+          clientPool[currentClientIndex] = {
+            ...clientPool[currentClientIndex],
+            ...currentClient,
+          };
+        }
+        connections.set(connectionIdentifier, clientPool);
+      }
+      done();
+    });
+  }
   websocket.socketType = 'server';
   websocket.socketVersion = 1;
   websocket.plugin('emitter', Emitter);
