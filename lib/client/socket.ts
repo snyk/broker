@@ -22,6 +22,7 @@ import { fetchJwt } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
+import { renewBrokerServerConnection } from './auth/brokerServerConnection';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -66,7 +67,6 @@ export const createWebSocketConnectionPairs = async (
   } else {
     logger.info(
       {
-        connection: socketIdentifyingMetadata.friendlyName,
         serverId: serverId,
       },
       'received server id',
@@ -97,6 +97,11 @@ export const createWebSocket = (
   const localClientOps = Object.assign({}, clientOpts);
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
+  if (!identifyingMetadata.identifier) {
+    throw new Error(
+      `Invalid Broker Identifier/Token in websocket tunnel creation step.`,
+    );
+  }
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -162,30 +167,61 @@ export const createWebSocket = (
   websocket.role = identifyingMetadata.role;
 
   if (clientOpts.accessToken) {
-    let timeoutHandlerId;
     let timeoutHandler = async () => {};
     timeoutHandler = async () => {
       logger.debug({}, 'Refreshing oauth access token');
-      clearTimeout(timeoutHandlerId);
+      clearTimeout(websocket.timeoutHandlerId);
       clientOpts.accessToken = await fetchJwt(
         clientOpts.config.API_BASE_URL,
         clientOpts.config.brokerClientConfiguration.common.oauth!.clientId,
         clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
       );
 
-      websocket.transport.extraHeaders['Authorization'] =
-        clientOpts.accessToken!.authHeader;
-      // websocket.end();
-      // websocket.open();
-      timeoutHandlerId = setTimeout(
-        timeoutHandler,
-        (clientOpts.accessToken!.expiresIn - 60) * 1000,
-      );
+      if (clientOpts.config.UNIVERSAL_BROKER_GA) {
+        websocket.transport.extraHeaders = {
+          Authorization: clientOpts.accessToken!.authHeader,
+          'x-snyk-broker-client-id': identifyingMetadata.clientId,
+          'x-snyk-broker-client-role': identifyingMetadata.role,
+        };
+
+        logger.debug(
+          {
+            connection: maskToken(identifyingMetadata.identifier),
+            role: identifyingMetadata.role,
+          },
+          'Renewing auth.',
+        );
+
+        const renewResponse = await renewBrokerServerConnection({
+          connectionIdentifier: identifyingMetadata.identifier!,
+          brokerClientId: identifyingMetadata.clientId,
+          authorization: clientOpts.accessToken!.authHeader,
+          role: identifyingMetadata.role,
+          serverId: serverId,
+        });
+        if (renewResponse.statusCode != 201) {
+          logger.debug(
+            {
+              connection: identifyingMetadata.identifier,
+              role: identifyingMetadata.role,
+              responseCode: renewResponse.statusCode,
+            },
+            'Failed to renew connection',
+          );
+        } else {
+          websocket.timeoutHandlerId = setTimeout(
+            timeoutHandler,
+            clientOpts.config.AUTH_EXPIRATION_OVERRIDE ??
+              (clientOpts.accessToken!.expiresIn - 60) * 1000,
+          );
+        }
+      }
     };
 
-    timeoutHandlerId = setTimeout(
+    websocket.timeoutHandlerId = setTimeout(
       timeoutHandler,
-      (clientOpts.accessToken!.expiresIn - 60) * 1000,
+      clientOpts.config.AUTH_EXPIRATION_OVERRIDE ??
+        (clientOpts.accessToken!.expiresIn - 60) * 1000,
     );
   }
 
@@ -235,9 +271,33 @@ export const createWebSocket = (
     openHandler(websocket, localClientOps, identifyingMetadata),
   );
 
-  websocket.on('close', () =>
-    closeHandler(localClientOps, identifyingMetadata),
-  );
+  websocket.on('service', (msg) => {
+    logger.info({ msg }, 'service message received');
+  });
+  // websocket.on('outgoing::open', function () {
+  //   type OnErrorHandler = (type: string, code: number) => void;
+
+  //   const originalErrorHandler: OnErrorHandler =
+  //     websocket.socket.transport.onError;
+
+  //   websocket.socket.transport.onError = (...args: [string, number]) => {
+  //     const [type, code] = args; // Destructure for clarity
+  //     if (code === 401) {
+  //       logger.error({ type, code }, `Connection denied: unauthorized.`);
+  //     } else {
+  //       logger.error({ type, code }, `Transport error during polling.`);
+  //     }
+  //     originalErrorHandler.apply(websocket.socket?.transport, args);
+  //   };
+  // });
+
+  websocket.on('close', () => {
+    if (websocket.timeoutHandlerId) {
+      logger.debug({}, `Clearing ${maskToken(websocket.identifier)} timers.`);
+      clearTimeout(websocket.timeoutHandlerId);
+    }
+    closeHandler(localClientOps, identifyingMetadata);
+  });
 
   // only required if we're manually opening the connection
   // websocket.open();

@@ -82,6 +82,7 @@ export class HybridClientRequestHandler {
       response: this.res,
       streamBuffer,
       streamSize: 0,
+      brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
     });
     streamBuffer.pipe(this.res);
     const simplifiedContextWithStreamingID = this.simplifiedContext;
