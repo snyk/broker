@@ -15,6 +15,7 @@ export interface StreamResponse {
   streamBuffer: stream.PassThrough;
   response: Response;
   streamSize?: number;
+  brokerAppClientId: string;
 }
 
 export class StreamResponseHandler {
@@ -35,12 +36,18 @@ export class StreamResponseHandler {
       streamingID,
       streamResponse.streamBuffer,
       streamResponse.response,
+      streamResponse.brokerAppClientId,
     );
   }
 
-  constructor(streamingID, streamBuffer, response) {
+  constructor(streamingID, streamBuffer, response, brokerAppClientId) {
     this.streamingID = streamingID;
-    this.streamResponse = { streamBuffer, response, streamSize: 0 };
+    this.streamResponse = {
+      streamBuffer,
+      response,
+      streamSize: 0,
+      brokerAppClientId,
+    };
   }
 
   writeStatusAndHeaders = (statusAndHeaders) => {
