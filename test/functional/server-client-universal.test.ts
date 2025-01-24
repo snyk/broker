@@ -28,10 +28,11 @@ describe('proxy requests originating from behind the broker server', () => {
   beforeAll(async () => {
     const PORT = 9999;
     tws = await createTestWebServer();
-
+    process.env.RESPONSE_DATA_HIDDEN_ENABLED = 'true';
     bs = await createBrokerServer({ filters: serverAccept, port: PORT });
 
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
+    process.env.API_BASE_URL = `http://localhost:${bs.port}`;
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';

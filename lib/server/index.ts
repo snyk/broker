@@ -13,6 +13,8 @@ import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 import { FiltersType } from '../common/types/filter';
 import filterRulesLoader from '../common/filter/filter-rules-loading';
+import { authRefreshHandler } from './routesHandlers/authHandlers';
+import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode');
@@ -64,7 +66,24 @@ export const main = async (serverOpts: ServerOpts) => {
     getForwardHttpRequestHandler(),
   );
 
-  app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  if (loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
+    app.post(
+      '/hidden/brokers/connections/:identifier/auth/refresh',
+      authRefreshHandler,
+    );
+    app.post(
+      '/hidden/broker/response-data/:brokerToken/:streamingId',
+      handlePostResponse,
+    );
+
+    setInterval(
+      disconnectConnectionsWithStaleCreds,
+      loadedServerOpts.config.STALE_CONNECTIONS_CLEANUP_FREQUENCY ??
+        10 * 60 * 1000,
+    );
+  } else {
+    app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  }
 
   app.get('/', (req, res) => res.status(200).json({ ok: true, version }));
 

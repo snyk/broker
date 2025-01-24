@@ -68,12 +68,14 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
 
   // Grab a first (newest) client from the pool
   // This is really silly...
-  res.locals.websocket = connections.get(token)[0].socket;
-  res.locals.socketVersion = connections.get(token)[0].socketVersion;
-  res.locals.capabilities = connections.get(token)[0].metadata.capabilities;
+  res.locals.websocket = connections.get(token)![0].socket;
+  res.locals.socketVersion = connections.get(token)![0].socketVersion;
+  res.locals.capabilities = connections.get(token)![0].metadata.capabilities;
+  res.locals.brokerAppClientId =
+    connections.get(token)![0].brokerAppClientId ?? '';
   req['locals'] = {};
   req['locals']['capabilities'] =
-    connections.get(token)[0].metadata.capabilities;
+    connections.get(token)![0].metadata.capabilities;
   // strip the leading url
   req.url = req.url.slice(`/broker/${token}`.length);
   if (req.url.includes('connection_role')) {

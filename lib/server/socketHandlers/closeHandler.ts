@@ -19,7 +19,7 @@ export const handleConnectionCloseOnSocket = (
         .get(token)
         ?.filter((_) => _.socket !== socket);
       const filteredClientPool =
-        clientPool?.filter((_) => _.socket !== socket) || '';
+        clientPool?.filter((_) => _.socket !== socket) || [];
       logger.info(
         {
           closeReason,

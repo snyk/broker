@@ -4,6 +4,8 @@ import { log as logger } from '../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { StreamResponseHandler } from '../../hybrid-sdk/http/server-post-stream-handler';
+import { getConfig } from '../../common/config/config';
+import { decode } from 'jsonwebtoken';
 
 export const handlePostResponse = (req: Request, res: Response) => {
   incrementHttpRequestsTotal(false, 'data-response');
@@ -31,6 +33,35 @@ export const handlePostResponse = (req: Request, res: Response) => {
       .status(500)
       .json({ message: 'unable to find request matching streaming id' });
     return;
+  }
+  if (getConfig().BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
+    const credentials = req.headers.authorization;
+    if (!credentials) {
+      logger.error(
+        logContext,
+        'Invalid Broker Client credentials on response data',
+      );
+      res.status(401).json({ message: 'Invalid Broker Client credentials' });
+      return;
+    }
+    const decodedJwt = credentials
+      ? decode(credentials!.replace(/bearer /i, ''), {
+          complete: true,
+        })
+      : null;
+
+    const brokerAppClientId = decodedJwt ? decodedJwt?.payload['azp'] : '';
+    if (
+      !brokerAppClientId ||
+      brokerAppClientId != streamHandler.streamResponse.brokerAppClientId
+    ) {
+      logger.error(
+        logContext,
+        'Invalid Broker Client credentials for stream on response data',
+      );
+      res.status(401).json({ message: 'Invalid Broker Client credentials' });
+      return;
+    }
   }
   let statusAndHeaders = '';
   let statusAndHeadersSize = -1;
