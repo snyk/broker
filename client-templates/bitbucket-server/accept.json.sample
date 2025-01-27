@@ -1194,7 +1194,7 @@
       "//": "get a single pull request info",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "basic",
         "username": "${BITBUCKET_USERNAME}",
