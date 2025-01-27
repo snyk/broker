@@ -67,6 +67,7 @@ export const createWebSocketConnectionPairs = async (
   } else {
     logger.info(
       {
+        connection: maskToken(socketIdentifyingMetadata.identifier),
         serverId: serverId,
       },
       'received server id',
@@ -139,7 +140,7 @@ export const createWebSocket = (
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
 
-  if (clientOpts.accessToken) {
+  if (clientOpts.accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
         Authorization: clientOpts.accessToken?.authHeader,
@@ -274,22 +275,6 @@ export const createWebSocket = (
   websocket.on('service', (msg) => {
     logger.info({ msg }, 'service message received');
   });
-  // websocket.on('outgoing::open', function () {
-  //   type OnErrorHandler = (type: string, code: number) => void;
-
-  //   const originalErrorHandler: OnErrorHandler =
-  //     websocket.socket.transport.onError;
-
-  //   websocket.socket.transport.onError = (...args: [string, number]) => {
-  //     const [type, code] = args; // Destructure for clarity
-  //     if (code === 401) {
-  //       logger.error({ type, code }, `Connection denied: unauthorized.`);
-  //     } else {
-  //       logger.error({ type, code }, `Transport error during polling.`);
-  //     }
-  //     originalErrorHandler.apply(websocket.socket?.transport, args);
-  //   };
-  // });
 
   websocket.on('close', () => {
     if (websocket.timeoutHandlerId) {

@@ -100,7 +100,7 @@ class BrokerServerPostResponseHandler {
           ? parseInt(this.#config.brokerClientPostTimeout)
           : 1200000,
       };
-      if (getClientOpts().accessToken) {
+      if (getClientOpts().accessToken && this.#config.universalBrokerGa) {
         options.headers['authorization'] =
           getClientOpts().accessToken.authHeader;
       }
