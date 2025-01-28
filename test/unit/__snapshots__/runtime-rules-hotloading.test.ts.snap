@@ -4416,6 +4416,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to get custom pull request template",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -5850,6 +5856,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to get custom pull request template",
@@ -12899,6 +12911,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to get repo's teams list",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -14381,6 +14399,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to get repo's teams list",
@@ -20953,6 +20977,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to get given manifest file",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -22381,6 +22411,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to get given manifest file",
@@ -28956,6 +28992,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
@@ -30396,6 +30438,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -37047,6 +37095,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -38499,6 +38553,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to scan IAC files",
@@ -45128,6 +45188,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "method": "GET",
       "origin": "https://pat:\${GITHUB_TOKEN}@\${GITHUB}",
@@ -46568,6 +46634,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -56157,6 +56229,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -58361,6 +58439,12 @@ Object {
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
     Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
+    Object {
       "//": "used to scan IAC files",
       "method": "GET",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -59807,6 +59891,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to scan IAC files",
@@ -61291,6 +61381,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
     Object {
       "//": "used to scan IAC files",
@@ -69465,6 +69561,12 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
   ],
   "public": Array [
     Object {
@@ -70888,6 +70990,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
   ],
   "public": Array [
@@ -77363,6 +77471,12 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
   ],
   "public": Array [
     Object {
@@ -78786,6 +78900,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
   ],
   "public": Array [
@@ -85261,6 +85381,12 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
   ],
   "public": Array [
     Object {
@@ -86684,6 +86810,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
   ],
   "public": Array [
@@ -93159,6 +93291,12 @@ Object {
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
     },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+    },
   ],
   "public": Array [
     Object {
@@ -94582,6 +94720,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+    },
+    Object {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/hooks/:id/config",
     },
   ],
   "public": Array [

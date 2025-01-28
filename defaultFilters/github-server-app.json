@@ -2022,6 +2022,16 @@
           "scheme": "bearer",
           "token": "${GHA_ACCESS_TOKEN}"
         }
-      }
+      },
+      {
+        "//": "allow webhook configs to be updated, to allow for secret upgrades",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/hooks/:id/config",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
     ]
   }

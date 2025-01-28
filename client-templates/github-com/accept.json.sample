@@ -2136,6 +2136,12 @@
       "method": "POST",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "allow webhook configs to be updated, to allow for secret upgrades",
+      "method": "PATCH",
+      "path": "/repos/:name/:repo/hooks/:id/config",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     }
   ]
 }
