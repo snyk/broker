@@ -356,6 +356,20 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow updating webhooks', () => {
+        const url =
+          '/_apis/hooks/subscriptions/fb17310a-983e-5851-a4cd-6381e14a4da4';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for gitlab', () => {

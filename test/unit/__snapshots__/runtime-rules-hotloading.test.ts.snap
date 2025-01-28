@@ -199,6 +199,16 @@ Object {
       ],
     },
     Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
+    Object {
       "//": "get file content. restrict by file types",
       "method": "GET",
       "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
@@ -8144,6 +8154,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
     Object {
       "//": "get core api's location for sanity check",
@@ -16816,6 +16836,16 @@ Object {
         },
       ],
     },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
   ],
   "public": Array [
     Object {
@@ -24737,6 +24767,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -32798,6 +32838,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
     Object {
       "//": "allow info refs (for git clone)",
@@ -40935,6 +40985,16 @@ Object {
       ],
     },
     Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
+    Object {
       "//": "allow info refs (for git clone)",
       "auth": Object {
         "scheme": "basic",
@@ -49027,6 +49087,16 @@ Object {
         },
       ],
     },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
   ],
   "public": Array [
     Object {
@@ -49465,6 +49535,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
   ],
   "public": Array [
@@ -65401,6 +65481,16 @@ Object {
         },
       ],
     },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
   ],
   "public": Array [
     Object {
@@ -73310,6 +73400,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
   ],
   "public": Array [
@@ -81221,6 +81321,16 @@ Object {
         },
       ],
     },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
+    },
   ],
   "public": Array [
     Object {
@@ -89130,6 +89240,16 @@ Object {
           ],
         },
       ],
+    },
+    Object {
+      "//": "update webhook",
+      "auth": Object {
+        "scheme": "basic",
+        "token": "\${BROKER_CLIENT_VALIDATION_BASIC_AUTH}",
+      },
+      "method": "PUT",
+      "origin": "https://\${AZURE_REPOS_HOST}/\${AZURE_REPOS_ORG}",
+      "path": "/_apis/hooks/subscriptions/:subscriptionId",
     },
   ],
   "public": Array [
