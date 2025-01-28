@@ -88,6 +88,21 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow updating webhook config', () => {
+        const url = '/repos/test-org/test-repo/hooks/12345/config';
+
+        const filterResponse = filter({
+          url,
+          method: 'PATCH',
+        });
+
+        console.log('filterResponse', filterResponse);
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for bitbucket server private filters', () => {
