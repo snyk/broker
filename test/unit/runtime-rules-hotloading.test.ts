@@ -161,6 +161,25 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Injection of valid IAC extensions - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_IAC = 'false';
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_IAC;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid CODE rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CODE = 'true';
