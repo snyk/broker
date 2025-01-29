@@ -161,6 +161,25 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Disabling Injection of valid IAC extensions - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_IAC = 'false';
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_IAC;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid CODE rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CODE = 'true';
@@ -199,7 +218,7 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
-    'Disbaling Injection of valid Git rules - Testing %s',
+    'Disabling Injection of valid Git rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'false';
       const loadedRules = await loadFilterRules(
@@ -260,6 +279,26 @@ describe('filter Rules Loading', () => {
     'Injection of valid CODE GH rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
+
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_LARGE_MANIFESTS;
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Disable Injection of valid CODE GH rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_LARGE_MANIFESTS = 'false';
 
       const loadedRules = await loadFilterRules(
         {
@@ -347,6 +386,29 @@ describe('filter Rules Loading', () => {
     'Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'true';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPaths: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = await loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_CUSTOM_PR_TEMPLATES;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Disabling Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'false';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
