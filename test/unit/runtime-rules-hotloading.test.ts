@@ -405,6 +405,29 @@ describe('filter Rules Loading', () => {
     },
   );
 
+  test.each(scmRulesToTest)(
+    'Disabling Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'false';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPaths: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = await loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_CUSTOM_PR_TEMPLATES;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+    },
+  );
+
   test.each(scmUniversalRulesToTest)(
     'Injection of valid Git rules - Universal Broker - Testing %s',
     async (folder) => {

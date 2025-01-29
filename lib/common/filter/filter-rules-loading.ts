@@ -289,7 +289,7 @@ function injectRulesAtRuntime(
 
   const ACCEPT_CUSTOM_PR_TEMPLATES =
     process.env.ACCEPT_CUSTOM_PR_TEMPLATES || config.ACCEPT_CUSTOM_PR_TEMPLATES;
-  if (ACCEPT_CUSTOM_PR_TEMPLATES) {
+  if (ACCEPT_CUSTOM_PR_TEMPLATES && ACCEPT_CUSTOM_PR_TEMPLATES != 'false') {
     logger.debug(
       { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
       `Injecting Accept rules for Custom PR Templates`,
