@@ -1599,6 +1599,6 @@
         "method": "GET",
         "path": "/api/v4/projects/:project/merge_requests/:pullRef",
         "origin": "https://${GITLAB}"
-    },
+      }
   ]
 }
