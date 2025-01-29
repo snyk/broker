@@ -6,6 +6,7 @@
     }
   },
   "ACCEPT_ESSENTIALS": true,
+  "ACCEPT_GIT": true,
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
     "apprisk",

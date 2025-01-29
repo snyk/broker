@@ -139,7 +139,7 @@ function injectRulesAtRuntime(
     process.env.ACCEPT_GIT ||
     config.ACCEPT_CODE ||
     config.ACCEPT_GIT;
-  if (ACCEPT_CODE) {
+  if (ACCEPT_CODE && ACCEPT_CODE != 'false') {
     logger.info({ accept: ACCEPT_CODE }, 'Injecting Accept rules for Code/Git');
     const templateGET = nestedCopy(
       filters.private.filter(

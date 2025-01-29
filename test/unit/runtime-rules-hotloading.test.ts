@@ -199,6 +199,25 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'Disbaling Injection of valid Git rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_GIT = 'false';
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_GIT;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid Git rules without snippets - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';
