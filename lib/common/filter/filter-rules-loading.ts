@@ -34,7 +34,11 @@ function injectRulesAtRuntime(
   ruleType?,
 ) {
   const ACCEPT_IAC = process.env.ACCEPT_IAC || config.ACCEPT_IAC;
-  if (ACCEPT_IAC && (!ruleType || CODE_SCM_ORIGINS.includes(ruleType))) {
+  if (
+    ACCEPT_IAC &&
+    ACCEPT_IAC != 'false' &&
+    (!ruleType || CODE_SCM_ORIGINS.includes(ruleType))
+  ) {
     logger.info(
       { accept: ACCEPT_IAC },
       'Injecting Accept rules for IAC extensions - Possible values tf, yaml, yml, json, tpl',
@@ -109,7 +113,7 @@ function injectRulesAtRuntime(
   const ACCEPT_LARGE_MANIFESTS =
     process.env.ACCEPT_LARGE_MANIFESTS ||
     config.ACCEPT_LARGE_MANIFESTS == 'true';
-  if (ACCEPT_LARGE_MANIFESTS) {
+  if (ACCEPT_LARGE_MANIFESTS && ACCEPT_LARGE_MANIFESTS != 'false') {
     const scmType = CODE_SCM_ORIGINS.find((element) => {
       if (filters.private[0].origin?.includes(element)) {
         return true;
@@ -139,7 +143,7 @@ function injectRulesAtRuntime(
     process.env.ACCEPT_GIT ||
     config.ACCEPT_CODE ||
     config.ACCEPT_GIT;
-  if (ACCEPT_CODE) {
+  if (ACCEPT_CODE && ACCEPT_CODE != 'false') {
     logger.info({ accept: ACCEPT_CODE }, 'Injecting Accept rules for Code/Git');
     const templateGET = nestedCopy(
       filters.private.filter(
@@ -245,8 +249,12 @@ function injectRulesAtRuntime(
     }
   }
 
-  const ACCEPT_APPRISK = process.env.ACCEPT_APPRISK || config.ACCEPT_APPRISK;
-  if (ACCEPT_APPRISK) {
+  const ACCEPT_APPRISK =
+    process.env.ACCEPT_APPRISK ||
+    config.ACCEPT_APPRISK ||
+    process.env.ACCEPT_ESSENTIALS ||
+    config.ACCEPT_ESSENTIALS;
+  if (ACCEPT_APPRISK && ACCEPT_APPRISK != 'false') {
     logger.debug(
       { accept: ACCEPT_APPRISK },
       `Injecting Accept rules for AppRisk`,
@@ -281,7 +289,7 @@ function injectRulesAtRuntime(
 
   const ACCEPT_CUSTOM_PR_TEMPLATES =
     process.env.ACCEPT_CUSTOM_PR_TEMPLATES || config.ACCEPT_CUSTOM_PR_TEMPLATES;
-  if (ACCEPT_CUSTOM_PR_TEMPLATES) {
+  if (ACCEPT_CUSTOM_PR_TEMPLATES && ACCEPT_CUSTOM_PR_TEMPLATES != 'false') {
     logger.debug(
       { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
       `Injecting Accept rules for Custom PR Templates`,
