@@ -24,6 +24,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     const localHostname = hostname();
     const regex = new RegExp(/-[0-9]{1,2}-[0-1]/);
     if (
+      !process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED &&
       localHostname &&
       localHostname.endsWith('-1') &&
       localHostname.match(regex)
@@ -65,7 +66,6 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       return res.status(404).json({ ok: false });
     }
   }
-
   // Grab a first (newest) client from the pool
   // This is really silly...
   res.locals.websocket = connections.get(token)![0].socket;

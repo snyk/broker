@@ -15,7 +15,7 @@ export const disconnectConnectionsWithStaleCreds = async () => {
           },
           'Cutting off connection.',
         );
-        client.socket!.end();
+        client.socket?.end();
       }
     });
   }
