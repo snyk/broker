@@ -33,8 +33,7 @@ function injectRulesAtRuntime(
   config: CONFIGURATION,
   ruleType?,
 ) {
-  const ACCEPT_IAC =
-    process.env.ACCEPT_IAC || config.ACCEPT_IAC;
+  const ACCEPT_IAC = process.env.ACCEPT_IAC || config.ACCEPT_IAC;
   if (
     ACCEPT_IAC &&
     ACCEPT_IAC != 'false' &&
@@ -114,7 +113,7 @@ function injectRulesAtRuntime(
   const ACCEPT_LARGE_MANIFESTS =
     process.env.ACCEPT_LARGE_MANIFESTS ||
     config.ACCEPT_LARGE_MANIFESTS == 'true';
-  if (ACCEPT_LARGE_MANIFESTS) {
+  if (ACCEPT_LARGE_MANIFESTS && ACCEPT_LARGE_MANIFESTS != 'false') {
     const scmType = CODE_SCM_ORIGINS.find((element) => {
       if (filters.private[0].origin?.includes(element)) {
         return true;

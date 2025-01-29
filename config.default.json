@@ -8,7 +8,7 @@
   "ACCEPT_ESSENTIALS": true,
   "ACCEPT_GIT": true,
   "ACCEPT_IAC": "tf,yaml,yml,json,tpl",
-
+  "ACCEPT_LARGE_MANIFESTS": true,
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
     "apprisk",

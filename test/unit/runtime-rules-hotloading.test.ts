@@ -161,7 +161,7 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
-    'Injection of valid IAC extensions - Testing %s',
+    'Disabling Injection of valid IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'false';
       const loadedRules = await loadFilterRules(
@@ -218,7 +218,7 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
-    'Disbaling Injection of valid Git rules - Testing %s',
+    'Disabling Injection of valid Git rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'false';
       const loadedRules = await loadFilterRules(
@@ -279,6 +279,26 @@ describe('filter Rules Loading', () => {
     'Injection of valid CODE GH rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
+
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_LARGE_MANIFESTS;
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Disable Injection of valid CODE GH rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_LARGE_MANIFESTS = 'false';
 
       const loadedRules = await loadFilterRules(
         {
