@@ -139,7 +139,7 @@ function injectRulesAtRuntime(
     process.env.ACCEPT_GIT ||
     config.ACCEPT_CODE ||
     config.ACCEPT_GIT;
-  if (ACCEPT_CODE) {
+  if (ACCEPT_CODE && ACCEPT_CODE != 'false') {
     logger.info({ accept: ACCEPT_CODE }, 'Injecting Accept rules for Code/Git');
     const templateGET = nestedCopy(
       filters.private.filter(
@@ -245,8 +245,12 @@ function injectRulesAtRuntime(
     }
   }
 
-  const ACCEPT_APPRISK = process.env.ACCEPT_APPRISK || config.ACCEPT_APPRISK;
-  if (ACCEPT_APPRISK) {
+  const ACCEPT_APPRISK =
+    process.env.ACCEPT_APPRISK ||
+    config.ACCEPT_APPRISK ||
+    process.env.ACCEPT_ESSENTIALS ||
+    config.ACCEPT_ESSENTIALS;
+  if (ACCEPT_APPRISK && ACCEPT_APPRISK != 'false') {
     logger.debug(
       { accept: ACCEPT_APPRISK },
       `Injecting Accept rules for AppRisk`,
