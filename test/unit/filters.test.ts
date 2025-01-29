@@ -399,6 +399,30 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow fetching webhook info', () => {
+        const url = '/api/v4/projects/test-project/hooks/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating webhook info', () => {
+        const url = '/api/v4/projects/test-project/hooks/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
   });
 
