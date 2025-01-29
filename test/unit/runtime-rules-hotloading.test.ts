@@ -281,7 +281,7 @@ describe('filter Rules Loading', () => {
   test.each(scmRulesToTest)(
     'Injection of valid AppRisk rules - Testing %s',
     async (folder) => {
-      process.env.ACCEPT_APPRISK = 'true';
+      process.env.ACCEPT_ESSENTIALS = 'true';
       process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
@@ -296,7 +296,30 @@ describe('filter Rules Loading', () => {
       );
 
       expect(loadedRules).toMatchSnapshot();
-      delete process.env.ACCEPT_APPRISK;
+      delete process.env.ACCEPT_ESSENTIALS;
+      delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Disabling Injection of valid AppRisk rules - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_ESSENTIALS = 'false';
+      process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`] = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPaths: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = await loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_ESSENTIALS;
       delete process.env[`BROKER_DOWNSTREAM_TYPE_${folder}`];
     },
   );
@@ -372,7 +395,7 @@ describe('filter Rules Loading', () => {
     'Injection of valid Git rules with AppRisk enabled - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';
-      process.env.ACCEPT_APPRISK = 'true';
+      process.env.ACCEPT_ESSENTIALS = 'true';
       const config: CONFIGURATION = {
         brokerType: 'client',
         supportedBrokerTypes: scmRulesToTest,
@@ -395,7 +418,7 @@ describe('filter Rules Loading', () => {
         ).toHaveLength(1);
       }
       delete process.env.ACCEPT_GIT;
-      delete process.env.ACCEPT_APPRISK;
+      delete process.env.ACCEPT_ESSENTIALS;
     },
   );
 });

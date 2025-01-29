@@ -245,8 +245,12 @@ function injectRulesAtRuntime(
     }
   }
 
-  const ACCEPT_APPRISK = process.env.ACCEPT_APPRISK || config.ACCEPT_APPRISK;
-  if (ACCEPT_APPRISK) {
+  const ACCEPT_APPRISK =
+    process.env.ACCEPT_APPRISK ||
+    config.ACCEPT_APPRISK ||
+    process.env.ACCEPT_ESSENTIALS ||
+    config.ACCEPT_ESSENTIALS;
+  if (ACCEPT_APPRISK && ACCEPT_APPRISK != 'false') {
     logger.debug(
       { accept: ACCEPT_APPRISK },
       `Injecting Accept rules for AppRisk`,
