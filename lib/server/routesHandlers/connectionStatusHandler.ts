@@ -20,6 +20,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
     const localHostname = hostname();
     const regex = new RegExp(/-[0-9]{1,2}-[0-1]/);
     if (
+      !process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED &&
       localHostname &&
       localHostname.endsWith('-1') &&
       localHostname.match(regex)

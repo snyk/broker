@@ -96,12 +96,22 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           connectionIdentifier,
         );
         if (!credsCheckResponse) {
+          logger.debug(
+            { maskedToken: maskToken(connectionIdentifier), brokerClientId },
+            `Denied auth for Connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+          );
           done({
             statusCode: 401,
             authenticate: 'Bearer',
             message: 'Invalid credentials.',
           });
+          return;
         }
+
+        logger.debug(
+          { maskedToken: maskToken(connectionIdentifier), brokerClientId },
+          `Successful auth for Connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+        );
 
         const decodedJwt = decode(jwt, { complete: true });
         const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
