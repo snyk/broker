@@ -23,6 +23,7 @@ import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
 import { renewBrokerServerConnection } from './auth/brokerServerConnection';
+import version from '../common/utils/version';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -139,13 +140,15 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-
+  console.log('@@@@@@@@@@@@@@@@@@@@@2');
+  console.log(clientOpts.accessToken?.authHeader);
   if (clientOpts.accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
         Authorization: clientOpts.accessToken?.authHeader,
         'x-snyk-broker-client-id': identifyingMetadata.clientId,
         'x-snyk-broker-client-role': identifyingMetadata.role,
+        'x-broker-client-version': version,
       },
     };
   }
@@ -183,6 +186,7 @@ export const createWebSocket = (
           Authorization: clientOpts.accessToken!.authHeader,
           'x-snyk-broker-client-id': identifyingMetadata.clientId,
           'x-snyk-broker-client-role': identifyingMetadata.role,
+          'x-broker-client-version': version,
         };
 
         logger.debug(
