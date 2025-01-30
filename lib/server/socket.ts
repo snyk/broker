@@ -91,7 +91,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
         );
         const credsCheckResponse = await validateBrokerClientCredentials(
-          jwt,
+          authHeader,
           brokerClientId,
           connectionIdentifier,
         );
