@@ -18,10 +18,8 @@ export const forwardHttpRequest = (
   makeHttpRequest = false,
 ) => {
   return async (req: Request, res: Response) => {
-    const workloadName =
-      options.config.workloadName ?? 'BrokerClientRequestWorkload';
-    const workloadModulePath =
-      options.config.workloadModulePath ?? '../broker-workload/clientRequests';
+    const workloadName = options.config.clientWorkloadName;
+    const workloadModulePath = options.config.clientWorkloadModulePath;
 
     const workload = (await Workload.instantiate(
       workloadName,

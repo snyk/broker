@@ -71,6 +71,10 @@ describe('header relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       supportedBrokerTypes: [],
@@ -129,6 +133,10 @@ describe('header relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       supportedBrokerTypes: [],
@@ -183,6 +191,10 @@ describe('header relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       disableHeaderVarsSubstitution: true,
@@ -238,6 +250,10 @@ describe('header relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       SECRET_TOKEN: 'very-secret',
       VALUE: 'some-special-value',
       disableHeaderVarsSubstitution: true,

@@ -20,10 +20,8 @@ export const forwardWebSocketRequest = (
   // 5. Send response over websocket conn
 
   return (connectionIdentifier) => async (payload: RequestPayload, emit) => {
-    const workloadName = options.config.workloadName ?? 'BrokerWorkload';
-    const workloadModulePath =
-      options.config.workloadModulePath ??
-      '../broker-workload/websocketRequests';
+    const workloadName = options.config.remoteWorkloadName;
+    const workloadModulePath = options.config.remoteWorkloadModulePath;
     const workload = (await Workload.instantiate(
       workloadName,
       workloadModulePath,

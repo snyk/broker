@@ -84,6 +84,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),
       brokerType: 'client',
@@ -157,6 +161,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientRequests',
       disableBodyVarsSubstitution: true,
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),
