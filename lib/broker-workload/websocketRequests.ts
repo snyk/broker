@@ -17,8 +17,13 @@ import {
   makeStreamingRequestToDownstream,
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
+import {
+  RemoteServerWorkloadRuntimeParams,
+  Workload,
+  WorkloadType,
+} from '../hybrid-sdk/workloadFactory';
 
-export class BrokerWorkload {
+export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
   options;
   connectionIdentifier: string;
   websocketConnectionHandler;
@@ -27,12 +32,15 @@ export class BrokerWorkload {
     options,
     websocketConnectionHandler,
   ) {
+    super('broker', WorkloadType['remote-server']);
     this.options = options;
     this.connectionIdentifier = connectionIdentifier;
     this.websocketConnectionHandler = websocketConnectionHandler;
   }
 
-  async handler(payload, websocketResponseHandler) {
+  async handler(data: RemoteServerWorkloadRuntimeParams) {
+    const { payload, websocketHandler } = data;
+    const websocketResponseHandler = websocketHandler;
     if (this.options.config.universalBrokerEnabled) {
       payload.connectionIdentifier = this.connectionIdentifier;
     }
