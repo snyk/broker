@@ -140,8 +140,6 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-  console.log('@@@@@@@@@@@@@@@@@@@@@2');
-  console.log(clientOpts.accessToken?.authHeader);
   if (clientOpts.accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
@@ -281,10 +279,10 @@ export const createWebSocket = (
   });
 
   websocket.on('close', () => {
-    if (websocket.timeoutHandlerId) {
-      logger.debug({}, `Clearing ${maskToken(websocket.identifier)} timers.`);
-      clearTimeout(websocket.timeoutHandlerId);
-    }
+    // if (websocket.timeoutHandlerId) {
+    //   logger.debug({}, `Clearing ${maskToken(websocket.identifier)} timers.`);
+    //   clearTimeout(websocket.timeoutHandlerId);
+    // }
     closeHandler(localClientOps, identifyingMetadata);
   });
 

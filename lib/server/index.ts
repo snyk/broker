@@ -72,7 +72,7 @@ export const main = async (serverOpts: ServerOpts) => {
       authRefreshHandler,
     );
     app.post(
-      '/hidden/broker/response-data/:brokerToken/:streamingId',
+      '/hidden/brokers/response-data/:brokerToken/:streamingId',
       handlePostResponse,
     );
 
