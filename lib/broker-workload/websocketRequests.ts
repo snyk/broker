@@ -1,8 +1,8 @@
 import { runPreRequestPlugins } from '../client/brokerClientPlugins/pluginManager';
-import { prepareRequestFromFilterResult } from '../common/relay/prepareRequest';
+import { prepareRequestFromFilterResult } from './prepareRequest';
 import { ExtendedLogContext } from '../common/types/log';
-import { computeContentLength } from '../common/utils/content-length';
-import { contentLengthHeader } from '../common/utils/headers-value-constants';
+import { computeContentLength } from './content-length';
+import { contentLengthHeader } from './headers-value-constants';
 import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
@@ -10,7 +10,7 @@ import {
 import { maskToken, hashToken } from '../common/utils/token';
 import { log as logger } from '../logs/logger';
 import { HybridResponseHandler } from '../hybrid-sdk/responseSenders';
-import { getCorrelationDataFromHeaders } from '../common/utils/correlation-headers';
+import { getCorrelationDataFromHeaders } from './correlation-headers';
 import { filterRequest } from './requestFiltering';
 import {
   makeRequestToDownstream,

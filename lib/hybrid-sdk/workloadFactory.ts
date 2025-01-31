@@ -1,6 +1,3 @@
-// import { BrokerClientRequestWorkload } from '../broker-workload/clientRequests';
-// import { BrokerWorkload } from '../broker-workload/websocketRequests';
-
 export enum WorkloadType {
   remoteServer = 'remoteServer',
   localClient = 'localClient',
@@ -25,10 +22,7 @@ export interface RemoteServerWorkloadRuntimeParams {
 export interface LocalClientWorkloadRuntimeParams {
   makeRequestOverHttp?: boolean;
 }
-// export type WorkloadRuntimeParamType<T extends WorkloadType> =
-//   T extends WorkloadType.remoteServer
-//     ? RemoteServerWorkloadRuntimeParams
-//     : LocalClientWorkloadRuntimeParams;
+
 type WorkloadRuntimeParamType<
   T extends WorkloadType.localClient | WorkloadType.remoteServer,
 > = T extends WorkloadType.remoteServer
@@ -59,9 +53,6 @@ export abstract class Workload<
   abstract handler(
     data: WorkloadRuntimeParamType<T>,
   ): WorkloadRuntimeReturnType;
-
-  // abstract handler(makeRequestOverHttp: boolean): void;
-  // abstract handler(payload: any, websocketHandler: any): void;
 
   private static async instantiateRemoteServerWorkload(
     name: string,

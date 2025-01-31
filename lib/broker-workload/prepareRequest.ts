@@ -1,35 +1,28 @@
 import { format, parse } from 'url';
-import { TestResult } from '../types/filter';
-import version from '../utils/version';
-import tryJSONParse from '../utils/try-json-parse';
-import { replace } from '../utils/replace-vars';
+import { TestResult } from '../common/types/filter';
+import version from '../common/utils/version';
+import tryJSONParse from '../common/utils/try-json-parse';
+import { replace } from '../common/utils/replace-vars';
 import undefsafe from 'undefsafe';
-import { log as logger } from '../../logs/logger';
+import { log as logger } from '../logs/logger';
 import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} from '../../client/scm';
-import { getConfigForIdentifier } from '../config/universal';
-import { computeContentLength } from '../utils/content-length';
+} from '../client/scm';
+import { getConfigForIdentifier } from '../common/config/universal';
+import { computeContentLength } from './content-length';
 import {
   contentLengthHeader,
   contentTypeHeader,
   urlencoded,
-} from '../utils/headers-value-constants';
+} from './headers-value-constants';
+import { PostFilterPreparedRequest } from '../hybrid-sdk/types';
 
 export interface PostFilterPreparingRequestError {
   status: number;
   errorMsg: string;
-}
-
-export interface PostFilterPreparedRequest {
-  url: string;
-  headers: Object;
-  method: string;
-  body?: any;
-  timeoutMs?: number;
 }
 
 export const prepareRequestFromFilterResult = async (

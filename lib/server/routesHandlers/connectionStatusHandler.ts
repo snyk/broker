@@ -3,7 +3,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { getSocketConnections } from '../socket';
 import { log as logger } from '../../logs/logger';
 import { hostname } from 'node:os';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../hybrid-sdk/types';
 import { makeStreamingRequestToDownstream } from '../../hybrid-sdk/http/request';
 
 export const connectionStatusHandler = async (req: Request, res: Response) => {
