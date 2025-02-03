@@ -4,6 +4,7 @@ import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request'
 import { PostFilterPreparedRequest } from '../relay/prepareRequest';
 import version from '../utils/version';
 import { findProjectRoot } from '../config/config';
+import { log as logger } from '../../logs/logger';
 
 export const validateHeaders = (headerFilters, requestHeaders = []) => {
   for (const filter of headerFilters) {
@@ -30,7 +31,7 @@ export const isValidURI = (uri: string) => {
   }
 };
 
-/* Retrieve filters from list of uris 
+/* Retrieve filters from list of uris
    Can be uri or local path          */
 export const retrieveFilters = async (locations: Map<string, string>) => {
   const retrievedFiltersMap = new Map<string, any>();
@@ -45,6 +46,7 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
         headers: { 'user-agent': `Snyk Broker Client ${version}` },
         method: 'GET',
       };
+      logger.debug({ location }, `Downloading ${key} filter`);
       const filter = await makeSingleRawRequestToDownstream(req);
       if (filter.statusCode && filter.statusCode > 299) {
         throw new Error(
