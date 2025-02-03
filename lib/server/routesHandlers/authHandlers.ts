@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { validateBrokerClientCredentials } from '../auth/authHelpers';
 import { log as logger } from '../../logs/logger';
-import { validate } from 'uuid';
 import { getSocketConnectionByIdentifier } from '../socket';
 import { maskToken } from '../../common/utils/token';
 interface BrokerConnectionAuthRequest {
@@ -19,7 +18,8 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
   const role = req.query['connection_role'];
   const credentials = `${credentialsFromHeader}`;
   const brokerAppClientId =
-    req.headers[`${process.env.SNYK_INTERNAL_AUTH_CLIENT_ID_HEADER}`];
+    req.headers[`${process.env.SNYK_INTERNAL_AUTH_CLIENT_ID_HEADER}`] ??
+    'not available';
   const identifier = req.params.identifier;
   logger.debug(
     { maskedToken: maskToken(identifier), brokerAppClientId, role },
@@ -27,13 +27,6 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
   );
   const body = JSON.parse(req.body.toString()) as BrokerConnectionAuthRequest;
   const brokerClientId = body.data.attributes.broker_client_id;
-  if (!validate(brokerClientId) || !validate(brokerAppClientId)) {
-    logger.warn(
-      { identifier, brokerClientId, brokerAppClientId },
-      'Invalid credentials',
-    );
-    return res.status(401).send('Invalid parameters or credentials.');
-  }
 
   const connection = getSocketConnectionByIdentifier(identifier);
   const currentClient = connection

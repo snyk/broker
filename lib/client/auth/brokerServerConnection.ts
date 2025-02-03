@@ -42,6 +42,7 @@ export const renewBrokerServerConnection = async (
     headers: {
       authorization: brokerServerConnectionParams.authorization,
       'user-agent': `Snyk Broker Client ${version}`,
+      'Content-type': 'application/vnd.api+json',
     },
     method: 'POST',
     body: JSON.stringify(body),
