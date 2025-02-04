@@ -40,7 +40,7 @@ export const renewBrokerServerConnection = async (
   const req: PostFilterPreparedRequest = {
     url: url.toString(),
     headers: {
-      authorization: brokerServerConnectionParams.authorization,
+      Authorization: brokerServerConnectionParams.authorization,
       'user-agent': `Snyk Broker Client ${version}`,
       'Content-type': 'application/vnd.api+json',
     },

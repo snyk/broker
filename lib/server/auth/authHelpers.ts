@@ -8,6 +8,7 @@ export const validateBrokerClientCredentials = async (
   authHeaderValue: string,
   brokerClientId: string,
   brokerConnectionIdentifier: string,
+  isInternalJwt = false,
 ) => {
   const body = {
     data: {
@@ -18,10 +19,11 @@ export const validateBrokerClientCredentials = async (
     },
   };
 
+  const serviceHostname = isInternalJwt
+    ? `${getConfig().authorizationService}`
+    : `${getConfig().apiHostname}`;
   const req: PostFilterPreparedRequest = {
-    url: `${
-      getConfig().apiHostname
-    }/hidden/brokers/connections/${brokerConnectionIdentifier}/auth/validate?version=2024-02-08~experimental`,
+    url: `${serviceHostname}/hidden/brokers/connections/${brokerConnectionIdentifier}/auth/validate?version=2024-02-08~experimental`,
     headers: {
       authorization: authHeaderValue,
       'Content-type': 'application/vnd.api+json',
@@ -29,13 +31,12 @@ export const validateBrokerClientCredentials = async (
     method: 'POST',
     body: JSON.stringify(body),
   };
-  logger.debug(
-    { maskToken: maskToken(brokerConnectionIdentifier) },
-    `Validate Broker Client Credentials request`,
-  );
   const response = await makeSingleRawRequestToDownstream(req);
   logger.debug(
-    { validationResponseCode: response.statusCode },
+    {
+      maskedToken: maskToken(brokerConnectionIdentifier),
+      validationResponseCode: response.statusCode,
+    },
     'Validate Broker Client Credentials response',
   );
   if (response.statusCode === 201) {

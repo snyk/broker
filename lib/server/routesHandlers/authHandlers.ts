@@ -51,6 +51,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
       credentials,
       brokerClientId as string,
       identifier,
+      true,
     );
     logger.debug(
       { credsCheckResponse: credsCheckResponse },
@@ -75,7 +76,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
         'Invalid credentials - Creds check response returned false',
       );
       currentClient.socket!.end();
-      return res.status(401).send('Invalid credentials.');
+      return res.status(401).send('Credentials failed validation');
     }
   }
 };
