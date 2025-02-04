@@ -195,13 +195,16 @@ export const createWebSocket = (
           'Renewing auth.',
         );
 
-        const renewResponse = await renewBrokerServerConnection({
-          connectionIdentifier: identifyingMetadata.identifier!,
-          brokerClientId: identifyingMetadata.clientId,
-          authorization: clientOpts.accessToken!.authHeader,
-          role: identifyingMetadata.role,
-          serverId: serverId,
-        });
+        const renewResponse = await renewBrokerServerConnection(
+          {
+            connectionIdentifier: identifyingMetadata.identifier!,
+            brokerClientId: identifyingMetadata.clientId,
+            authorization: clientOpts.accessToken!.authHeader,
+            role: identifyingMetadata.role,
+            serverId: serverId,
+          },
+          clientOpts.config,
+        );
         if (renewResponse.statusCode != 201) {
           logger.debug(
             {

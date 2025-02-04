@@ -64,7 +64,11 @@ class BrokerServerPostResponseHandler {
 
   async #initHttpClientRequest() {
     try {
-      const backendHostname = `${this.#config.brokerServerUrl}/hidden/brokers`;
+      const backendHostname =
+        this.#config.universalBrokerEnabled && this.#config.universalBrokerGa
+          ? `${this.#config.brokerServerUrl}/hidden/brokers`
+          : `${this.#config.brokerServerUrl}`;
+
       const url = new URL(
         `${backendHostname}/response-data/${this.#brokerToken}/${
           this.#streamingId

@@ -1,5 +1,5 @@
-import { getConfig } from '../../common/config/config';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { CONFIGURATION } from '../../common/types/options';
 import version from '../../common/utils/version';
 import {
   HttpResponse,
@@ -16,8 +16,8 @@ export interface BrokerServerConnectionParams {
 }
 export const renewBrokerServerConnection = async (
   brokerServerConnectionParams: BrokerServerConnectionParams,
+  clientConfig: CONFIGURATION,
 ): Promise<HttpResponse> => {
-  const clientConfig = getConfig();
   const apiHostname = clientConfig.API_BASE_URL;
   const body = {
     data: {
