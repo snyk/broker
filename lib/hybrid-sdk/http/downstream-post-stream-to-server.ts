@@ -64,10 +64,7 @@ class BrokerServerPostResponseHandler {
 
   async #initHttpClientRequest() {
     try {
-      const backendHostname =
-        this.#config.universalBrokerEnabled && this.#config.universalBrokerGa
-          ? `${this.#config.API_BASE_URL}/hidden/brokers`
-          : this.#config.brokerServerUrl;
+      const backendHostname = `${this.#config.brokerServerUrl}/hidden/brokers`;
       const url = new URL(
         `${backendHostname}/response-data/${this.#brokerToken}/${
           this.#streamingId
@@ -95,6 +92,7 @@ class BrokerServerPostResponseHandler {
           'Content-Type': BROKER_CONTENT_TYPE,
           Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
+          'x-broker-client-version': version,
         },
         timeout: this.#config.brokerClientPostTimeout
           ? parseInt(this.#config.brokerClientPostTimeout)
@@ -213,7 +211,7 @@ class BrokerServerPostResponseHandler {
   }
 
   async forwardRequest(response: http.IncomingMessage, streamingID) {
-    const config = getConfig();
+    const config = this.#config;
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;

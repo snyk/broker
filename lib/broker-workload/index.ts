@@ -68,10 +68,10 @@ export class BrokerWorkload {
         connectionIdentifier: this.connectionIdentifier,
         payloadStreamingId: payload.streamingID,
         ...correlationHeaders,
-        // overHttp: payload.headers['x-broker-ws-response'] ? false : true,
       },
       this.websocketConnectionHandler,
       websocketResponseHandler,
+      this.options.config,
       logContext,
     );
 
