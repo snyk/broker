@@ -18,7 +18,7 @@ export const renewBrokerServerConnection = async (
   brokerServerConnectionParams: BrokerServerConnectionParams,
 ): Promise<HttpResponse> => {
   const clientConfig = getConfig();
-  const apiHostname = clientConfig.apiHostname;
+  const apiHostname = clientConfig.API_BASE_URL;
   const body = {
     data: {
       type: 'broker_connection',
