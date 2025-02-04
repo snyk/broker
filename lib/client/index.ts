@@ -69,6 +69,7 @@ export const main = async (clientOpts: ClientOpts) => {
       ).replace('//broker2.', '//api.') ??
       'https://api.snyk.io';
 
+    clientOpts.config.apiHostname = clientOpts.config.API_BASE_URL;
     await validateMinimalConfig(clientOpts);
 
     if (clientOpts.config.universalBrokerEnabled) {
