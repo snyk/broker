@@ -1,5 +1,6 @@
 {
   "API_VERSION":"2024-02-08~experimental",
+  "DISPATCHER_URL_PREFIX":"/hidden/broker",
   "CONNECTIONS_MANAGER": {
     "watcher": {
       "interval": 60000
