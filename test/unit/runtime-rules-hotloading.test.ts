@@ -337,6 +337,25 @@ describe('filter Rules Loading', () => {
   );
 
   test.each(scmRulesToTest)(
+    'No Injection of IAC extensions - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_IAC = 'false';
+      const loadedRules = await loadFilterRules(
+        {
+          brokerType: 'client',
+          supportedBrokerTypes: [],
+          accept: 'accept.json.sample',
+          filterRulesPaths: {},
+        },
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+
+      expect(loadedRules).toMatchSnapshot();
+      delete process.env.ACCEPT_IAC;
+    },
+  );
+
+  test.each(scmRulesToTest)(
     'Injection of valid AppRisk rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_ESSENTIALS = 'true';
