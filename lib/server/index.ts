@@ -20,7 +20,7 @@ export const main = async (serverOpts: ServerOpts) => {
   const filters = await filterRulesLoader(serverOpts.config);
   if (!filters) {
     const error = new ReferenceError(
-      `No Filters found. A Broker requires filters to run. Shutting down.`,
+      `Server mode - No Filters found. A Broker requires filters to run. Review config.default.json or ACCEPT env var. Shutting down.`,
     );
     error['code'] = 'MISSING_FILTERS';
     logger.error({ error }, error.message);

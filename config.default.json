@@ -528,6 +528,19 @@
     "digitalocean-cr":"defaultFilters/container-registry-agent.json",
     "gitlab-cr":"defaultFilters/container-registry-agent.json",
     "google-artifact-cr":"defaultFilters/container-registry-agent.json",
-    "workload":"defaultFilters/workload.json"
+    "workload":"defaultFilters/workload.json",
+    "apprisk-azure-repos":"defaultFilters/apprisk/azure-repos.json",
+    "apprisk-bitbucket-server-bearer-auth":"defaultFilters/apprisk/bitbucket-server-bearer-auth.json",
+    "apprisk-bitbucket-server":"defaultFilters/apprisk/bitbucket-server.json",
+    "apprisk-github-enterprise":"defaultFilters/apprisk/github-enterprise.json",
+    "apprisk-github":"defaultFilters/apprisk/github.json",
+    "apprisk-gitlab":"defaultFilters/apprisk/gitlab.json",
+    "custom-pr-templates-azure-repos":"defaultFilters/customPrTemplates/azure-repos.json",
+    "custom-pr-templates-bitbucket-server-bearer-auth":"defaultFilters/customPrTemplates/bitbucket-server-bearer-auth.json",
+    "custom-pr-templates-bitbucket-server":"defaultFilters/customPrTemplates/bitbucket-server.json",
+    "custom-pr-templates-github-enterprise":"defaultFilters/customPrTemplates/github-enterprise.json",
+    "custom-pr-templates-github":"defaultFilters/customPrTemplates/github.json",
+    "custom-pr-templates-gitlab":"defaultFilters/customPrTemplates/gitlab.json"
+
   }
 }

@@ -56,10 +56,12 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         return httpResponse.pipe(res);
       } catch (err) {
         logger.error({ err }, `Error in HTTP middleware: ${err}`);
+        res.setHeader('x-broker-failure', 'error-forwarding-to-primary');
         return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
       logger.warn({ desensitizedToken }, 'no matching connection found');
+      res.setHeader('x-broker-failure', 'no-connection');
       return res.status(404).json({ ok: false });
     }
   }

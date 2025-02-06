@@ -325,7 +325,7 @@ describe('proxy requests originating from behind the broker server', () => {
       `http://localhost:${bs.port}/broker/${brokerToken}XXX/echo-body`,
       {},
     );
-
+    expect(response.headers['x-broker-failure']).toEqual('no-connection');
     expect(response.status).toEqual(404);
   });
 
