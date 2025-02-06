@@ -44,12 +44,17 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "list of users in a project",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/users",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to search all manifest files",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/tree",
       "origin": "https://${GITLAB}"
     },
-
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
