@@ -70,6 +70,13 @@ export const main = async (clientOpts: ClientOpts) => {
       'https://api.snyk.io';
 
     clientOpts.config.apiHostname = clientOpts.config.API_BASE_URL;
+
+    if (
+      clientOpts.config.universalBrokerEnabled &&
+      clientOpts.config.UNIVERSAL_BROKER_GA
+    ) {
+      process.env.SNYK_DISPATCHER_URL_PREFIX = '/hidden/brokers';
+    }
     await validateMinimalConfig(clientOpts);
 
     if (clientOpts.config.universalBrokerEnabled) {

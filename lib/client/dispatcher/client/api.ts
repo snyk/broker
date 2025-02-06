@@ -20,9 +20,10 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
   async createConnection(
     params: CreateConnectionRequestParams,
     data: CreateConnectionRequestData,
+    config,
   ): Promise<ServerId> {
     try {
-      const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
+      const path = `${config.DISPATCHER_URL_PREFIX}/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
       const url = new URL(path, this.baseUrl);
       url.searchParams.append('version', this.version);
       const headers = { 'Content-type': 'application/vnd.api+json' };
