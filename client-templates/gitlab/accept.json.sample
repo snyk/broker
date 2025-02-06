@@ -49,7 +49,6 @@
       "path": "/api/v4/projects/:project/repository/tree",
       "origin": "https://${GITLAB}"
     },
-
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
