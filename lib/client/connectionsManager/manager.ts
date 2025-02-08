@@ -7,7 +7,7 @@ import { handleTerminationSignal } from '../../common/utils/signals';
 import { cleanUpUniversalFile } from '../utils/cleanup';
 import { validateUniversalConnectionsRemoteConfig } from './validator';
 import { existsSync, writeFileSync } from 'fs';
-import { fetchJwt } from '../auth/oauth';
+import { setfetchAndUpdateJwt } from '../auth/oauth';
 import { reloadConfig } from '../config/configHelpers';
 import { processStartUpHooks } from '../hooks/startup/processHooks';
 import { setMainWatcher } from './mainWatcher';
@@ -36,8 +36,8 @@ export const manageWebsocketConnections = async (
         await reloadConfig(clientOpts);
       }
 
-      clientOpts.accessToken = await fetchJwt(
-        clientOpts.config.API_BASE_URL,
+      await setfetchAndUpdateJwt(
+        clientOpts.config,
         clientOpts.config.brokerClientConfiguration.common.oauth.clientId,
         clientOpts.config.brokerClientConfiguration.common.oauth.clientSecret,
       );

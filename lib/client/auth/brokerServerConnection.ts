@@ -33,7 +33,7 @@ export const renewBrokerServerConnection = async (
   url.searchParams.append('connection_role', brokerServerConnectionParams.role);
   if (brokerServerConnectionParams.serverId) {
     url.searchParams.append(
-      'serverId',
+      'server_id',
       `${brokerServerConnectionParams.serverId}`,
     );
   }

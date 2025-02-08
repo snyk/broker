@@ -18,7 +18,7 @@ import { initializeSocketHandlers } from './socketHandlers/init';
 
 import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
-import { fetchJwt } from './auth/oauth';
+import { getAuthConfig } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
@@ -140,10 +140,10 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-  if (clientOpts.accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
+  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
-        Authorization: clientOpts.accessToken?.authHeader,
+        Authorization: getAuthConfig().accessToken.authHeader,
         'x-snyk-broker-client-id': identifyingMetadata.clientId,
         'x-snyk-broker-client-role': identifyingMetadata.role,
         'x-broker-client-version': version,
@@ -168,20 +168,14 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (clientOpts.accessToken) {
+  if (getAuthConfig().accessToken) {
     let timeoutHandler = async () => {};
     timeoutHandler = async () => {
-      logger.debug({}, 'Refreshing oauth access token');
       clearTimeout(websocket.timeoutHandlerId);
-      clientOpts.accessToken = await fetchJwt(
-        clientOpts.config.API_BASE_URL,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientId,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
-      );
 
       if (clientOpts.config.UNIVERSAL_BROKER_GA) {
         websocket.transport.extraHeaders = {
-          Authorization: clientOpts.accessToken!.authHeader,
+          Authorization: getAuthConfig().accessToken.authHeader,
           'x-snyk-broker-client-id': identifyingMetadata.clientId,
           'x-snyk-broker-client-role': identifyingMetadata.role,
           'x-broker-client-version': version,
@@ -194,12 +188,11 @@ export const createWebSocket = (
           },
           'Renewing auth.',
         );
-
         const renewResponse = await renewBrokerServerConnection(
           {
             connectionIdentifier: identifyingMetadata.identifier!,
             brokerClientId: identifyingMetadata.clientId,
-            authorization: clientOpts.accessToken!.authHeader,
+            authorization: getAuthConfig().accessToken.authHeader,
             role: identifyingMetadata.role,
             serverId: serverId,
           },
@@ -215,20 +208,23 @@ export const createWebSocket = (
             'Failed to renew connection',
           );
         } else {
-          websocket.timeoutHandlerId = setTimeout(
-            timeoutHandler,
-            clientOpts.config.AUTH_EXPIRATION_OVERRIDE ??
-              (clientOpts.accessToken!.expiresIn - 60) * 1000,
+          logger.debug(
+            {
+              connection: maskToken(identifyingMetadata.identifier),
+              role: identifyingMetadata.role,
+            },
+            'Auth renewed',
           );
+          websocket.timeoutHandlerId = setTimeout(async () => {
+            await timeoutHandler();
+          }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
         }
       }
     };
 
-    websocket.timeoutHandlerId = setTimeout(
-      timeoutHandler,
-      clientOpts.config.AUTH_EXPIRATION_OVERRIDE ??
-        (clientOpts.accessToken!.expiresIn - 60) * 1000,
-    );
+    websocket.timeoutHandlerId = setTimeout(async () => {
+      await timeoutHandler();
+    }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
   }
 
   websocket.on('incoming::error', (e) => {

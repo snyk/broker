@@ -1,6 +1,7 @@
 import { makeRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { log as logger } from '../../logs/logger';
+
 interface tokenExchangeResponse {
   access_token: string;
   expires_in: number;
@@ -8,7 +9,17 @@ interface tokenExchangeResponse {
   token_type: string;
 }
 
-export async function fetchJwt(
+const authConfig: Record<string, any> = {};
+
+export const getAuthConfig = () => {
+  return authConfig;
+};
+
+export const setAuthConfigKey = (key: string, value: unknown) => {
+  authConfig[key] = value;
+};
+
+export async function fetchAndUpdateJwt(
   apiHostname: string,
   clientId: string,
   clientSecret: string,
@@ -34,13 +45,60 @@ export async function fetchJwt(
         `${oauthResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`,
       );
     }
-    const accessToken = JSON.parse(oauthResponse.body) as tokenExchangeResponse;
-    const jwt = accessToken.access_token;
-    const type = accessToken.token_type;
-    const expiresIn = accessToken.expires_in;
+    const accessTokenJSON = JSON.parse(
+      oauthResponse.body,
+    ) as tokenExchangeResponse;
+    const jwt = accessTokenJSON.access_token;
+    const type = accessTokenJSON.token_type;
+    const expiresIn = accessTokenJSON.expires_in;
 
+    setAuthConfigKey('accessToken', {
+      expiresIn: expiresIn,
+      authHeader: `${type} ${jwt}`,
+    });
     return { expiresIn: expiresIn, authHeader: `${type} ${jwt}` };
   } catch (err) {
     logger.error({ err }, 'Unable to retrieve JWT');
   }
 }
+
+const refreshJwt = async (clientConfig, clientId, clientSecret) => {
+  logger.debug({}, 'Refreshing oauth access token');
+  try {
+    const newJwt = await fetchAndUpdateJwt(
+      clientConfig.apiHostname,
+      clientId,
+      clientSecret,
+    );
+    if (!newJwt) {
+      throw new Error('Error retrieving new JWT:undefined.');
+    }
+    setAuthConfigKey('accessToken', {
+      expiresIn: newJwt.expiresIn,
+      authHeader: newJwt.authHeader,
+    });
+    setTimeout(async () => {
+      refreshJwt(clientConfig, clientId, clientSecret);
+    }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
+  } catch (err) {
+    logger.error(`Error retrieving new JWT ${err}`);
+  }
+};
+
+export const setfetchAndUpdateJwt = async (
+  clientConfig,
+  clientId,
+  clientSecret,
+) => {
+  const newJwt = await fetchAndUpdateJwt(
+    clientConfig.apiHostname,
+    clientId,
+    clientSecret,
+  );
+  logger.debug({}, 'Setting auth updater.');
+  if (newJwt) {
+    setTimeout(async () => {
+      refreshJwt(clientConfig, clientId, clientSecret);
+    }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
+  }
+};
