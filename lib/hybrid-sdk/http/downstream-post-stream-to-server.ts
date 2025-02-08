@@ -9,7 +9,7 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 import { getConfig } from '../../common/config/config';
-import { getClientOpts } from '../../client/config/configHelpers';
+import { getAuthConfig } from '../../client/auth/oauth';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -102,9 +102,9 @@ class BrokerServerPostResponseHandler {
           ? parseInt(this.#config.brokerClientPostTimeout)
           : 1200000,
       };
-      if (getClientOpts().accessToken && this.#config.universalBrokerGa) {
+      if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
         options.headers['authorization'] =
-          getClientOpts().accessToken.authHeader;
+          getAuthConfig().accessToken.authHeader;
       }
 
       this.#brokerSrvPostRequestHandler = client.request(
