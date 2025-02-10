@@ -30,6 +30,12 @@
     "origin": "https://${GITLAB}"
   },
   {
+    "//": "get user details",
+    "method": "GET",
+    "path": "/api/v4/users/:username",
+    "origin": "https://${GITLAB}"
+  },
+  {
     "//": "used to retrieve organization context from catalog-info.yaml",
     "method": "GET",
     "path": "/api/v4/projects/:project/repository/files/catalog-info.yaml/raw",
