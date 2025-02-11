@@ -6,6 +6,10 @@ import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { getConfig } from '../../common/config/config';
 import { switchToInsecure } from './utils';
+import {
+  maskToken,
+  extractBrokerTokenFromUrl,
+} from '../../common/utils/token';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
@@ -65,13 +69,23 @@ export const makeRequestToDownstream = async (
               response.statusCode >= 200 &&
               response.statusCode < 300
             ) {
+              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+              const maskedToken = maskToken(brokerToken);
               logger.trace(
-                { statusCode: response.statusCode, url: localRequest.url },
+                {
+                  statusCode: response.statusCode,
+                  url: localRequest.url.replaceAll(brokerToken, maskedToken)
+                },
                 `Successful request`,
               );
             } else {
+              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+              const maskedToken = maskToken(brokerToken);
               logger.debug(
-                { statusCode: response.statusCode, url: localRequest.url },
+                {
+                  statusCode: response.statusCode,
+                  url: localRequest.url.replaceAll(brokerToken, maskedToken)
+                },
                 `Non 2xx HTTP Code Received`,
               );
             }
@@ -103,16 +117,26 @@ export const makeRequestToDownstream = async (
       // An error occurred while fetching.
       request.on('error', (error) => {
         if (retries > 0) {
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const maskedToken = maskToken(brokerToken);
           logger.warn(
-            { url: localRequest.url, err: error },
+            {
+              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              err: error
+            },
             `Request failed. Retrying after 500ms...`,
           );
           setTimeout(() => {
             resolve(makeRequestToDownstream(localRequest, retries - 1));
           }, 500); // Wait for 0.5 second before retrying
         } else {
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const maskedToken = maskToken(brokerToken);
           logger.error(
-            { url: localRequest.url, err: error },
+            {
+              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              err: error
+            },
             `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
           reject(error);
@@ -162,19 +186,23 @@ export const makeStreamingRequestToDownstream = (
             response.statusCode >= 200 &&
             response.statusCode < 300
           ) {
+            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+            const maskedToken = maskToken(brokerToken);
             logger.info(
               {
                 statusCode: response.statusCode,
-                url: localRequest.url,
+                url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
               },
               `Successful downstream request`,
             );
           } else {
+            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+            const maskedToken = maskToken(brokerToken);
             logger.warn(
               {
                 statusCode: response.statusCode,
-                url: localRequest.url,
+                url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: response.headers,
               },
               `Non 2xx HTTP Code Received`,
@@ -206,8 +234,13 @@ export const makeStreamingRequestToDownstream = (
       );
       request.on('error', (error) => {
         if (retries > 0) {
+          const brokerToken = extractBrokerTokenFromUrl(req.url);
+          const maskedToken = maskToken(brokerToken);
           logger.warn(
-            { url: req.url, err: error },
+            {
+              url: req.url.replaceAll(brokerToken, maskedToken),
+              err: error
+            },
             `Request failed. Retrying after 500ms...`,
           );
           setTimeout(() => {
@@ -216,8 +249,13 @@ export const makeStreamingRequestToDownstream = (
             );
           }, 500); // Wait for 0.5 second before retrying
         } else {
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const maskedToken = maskToken(brokerToken);
           logger.error(
-            { url: localRequest.url, err: error },
+            {
+              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              err: error
+            },
             `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
           reject(error);
