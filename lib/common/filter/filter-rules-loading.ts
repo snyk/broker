@@ -6,7 +6,7 @@ import { log as logger } from '../../logs/logger';
 import { findProjectRoot } from '../config/config';
 import camelcase from 'camelcase';
 import { FiltersType, Rule } from '../types/filter';
-import { retrieveFilters, isValidURI } from './utils';
+import { retrieveFilters, isValidURI, deepMergeRules } from './utils';
 import { CONFIGURATION } from '../types/options';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
@@ -315,15 +315,17 @@ function injectRulesAtRuntime(
         `defaultFilters/customPrTemplates/${type}.json`,
       )) as Rule[];
       // rm entry from filters.private if matching uri _and matching method_ in customPRTemplatesRules which takes precedence
-      const customPRTemplatesRulesMethodPattern = customPRTemplatesRules.map(
-        (x) => `${x.method}|${x.path}`,
-      );
-      filters.private = filters.private.filter((x) => {
-        return !customPRTemplatesRulesMethodPattern.includes(
-          `${x.method}|${x.path}`,
-        );
-      });
-      filters.private.push(...customPRTemplatesRules);
+      // const customPRTemplatesRulesMethodPattern = customPRTemplatesRules.map(
+      //   (x) => `${x.method}|${x.path}`,
+      // );
+
+      // filters.private = filters.private.filter((x) => {
+      //   return !customPRTemplatesRulesMethodPattern.includes(
+      //     `${x.method}|${x.path}`,
+      //   );
+      // });
+      // filters.private.push(...customPRTemplatesRules);
+      filters.private = deepMergeRules(filters.private, customPRTemplatesRules)
     }
   }
 
