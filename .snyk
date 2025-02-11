@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.25.0
+version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-RHEL8-GLIBC-6656573:
@@ -15,8 +15,8 @@ ignore:
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
-        expires: 2025-02-10T21:59:20.738Z
-        created: 2024-06-26T21:59:20.744Z
+        expires: 2025-03-13T12:03:16.272Z
+        created: 2025-02-11T12:03:16.275Z
   SNYK-JS-CROSSSPAWN-8303230:
     - '*':
         reason: No upstream fix available
