@@ -74,7 +74,7 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
 
 export function deepMergeRules(arr1: Rule[], arr2: Rule[]): Rule[] {
   const isObject = (item: any): item is Record<string, any> =>
-    item && typeof item === "object" && !Array.isArray(item);
+    item && typeof item === 'object' && !Array.isArray(item);
 
   const mergeArrays = (target: any[], source: any[]): any[] => {
     const result = [...target];
@@ -82,10 +82,12 @@ export function deepMergeRules(arr1: Rule[], arr2: Rule[]): Rule[] {
     for (const item of source) {
       if (isObject(item) && item.queryParam) {
         const existing = result.find(
-          (i) => isObject(i) && i.queryParam === item.queryParam
+          (i) => isObject(i) && i.queryParam === item.queryParam,
         );
         if (existing) {
-          existing.values = [...new Set([...(existing.values || []), ...(item.values || [])])];
+          existing.values = [
+            ...new Set([...(existing.values || []), ...(item.values || [])]),
+          ];
         } else {
           result.push(item);
         }
@@ -97,7 +99,10 @@ export function deepMergeRules(arr1: Rule[], arr2: Rule[]): Rule[] {
     return result;
   };
 
-  const mergeObjects = (target: Record<string, any>, source: Record<string, any>): Record<string, any> => {
+  const mergeObjects = (
+    target: Record<string, any>,
+    source: Record<string, any>,
+  ): Record<string, any> => {
     for (const key of Object.keys(source)) {
       if (isObject(target[key]) && isObject(source[key])) {
         target[key] = mergeObjects(target[key], source[key]);
@@ -115,7 +120,7 @@ export function deepMergeRules(arr1: Rule[], arr2: Rule[]): Rule[] {
   for (const rule of [...arr1, ...arr2]) {
     if (!rule || !isObject(rule)) continue;
 
-    if ("method" in rule && "path" in rule && "origin" in rule) {
+    if ('method' in rule && 'path' in rule && 'origin' in rule) {
       const key = `${rule.method}:${rule.path}:${rule.origin}`;
 
       if (grouped[key]) {

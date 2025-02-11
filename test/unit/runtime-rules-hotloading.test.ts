@@ -50,7 +50,7 @@ describe('filter Rules Loading', () => {
     delete process.env.ACCEPT;
   });
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Loads normal accept file - Testing %s',
     async (folder) => {
       const loadedRules = await loadFilterRules(
@@ -66,7 +66,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Loads custom accept file - Testing %s',
     async (folder) => {
       const loadedRules = await loadFilterRules({
@@ -79,7 +79,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Loads universal rules - Testing %s',
     async (folder) => {
       const loadedRules = await loadFilterRules({
@@ -103,7 +103,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Skip injection if no or invalid IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'rf';
@@ -122,7 +122,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'tf,yaml, json,yml,tpl';
@@ -141,7 +141,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'tf,json';
@@ -160,7 +160,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Disabling Injection of valid IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'false';
@@ -179,7 +179,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid CODE rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CODE = 'true';
@@ -198,7 +198,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid Git rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';
@@ -217,7 +217,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Disabling Injection of valid Git rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'false';
@@ -236,7 +236,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid Git rules without snippets - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';
@@ -275,7 +275,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid CODE GH rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'true';
@@ -295,7 +295,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Disable Injection of valid CODE GH rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_LARGE_MANIFESTS = 'false';
@@ -315,7 +315,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid CODE rules and IAC extensions (yaml only) - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CODE = 'true';
@@ -336,7 +336,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'No Injection of IAC extensions - Testing %s',
     async (folder) => {
       process.env.ACCEPT_IAC = 'false';
@@ -355,7 +355,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid AppRisk rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_ESSENTIALS = 'true';
@@ -378,7 +378,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Disabling Injection of valid AppRisk rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_ESSENTIALS = 'false';
@@ -424,7 +424,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Disabling Injection of valid ACCEPT_CUSTOM_PR_TEMPLATES rules - Testing %s',
     async (folder) => {
       process.env.ACCEPT_CUSTOM_PR_TEMPLATES = 'false';
@@ -447,7 +447,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmUniversalRulesToTest)(
+  test.each(scmUniversalRulesToTest)(
     'Injection of valid Git rules - Universal Broker - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';
@@ -491,7 +491,7 @@ describe('filter Rules Loading', () => {
     },
   );
 
-  test.skip.each(scmRulesToTest)(
+  test.each(scmRulesToTest)(
     'Injection of valid Git rules with AppRisk enabled - Testing %s',
     async (folder) => {
       process.env.ACCEPT_GIT = 'true';

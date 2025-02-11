@@ -284,6 +284,8 @@ function injectRulesAtRuntime(
         return !appRiskRulesPathMethodPattern.includes(`${x.method}|${x.path}`);
       });
       filters.private.push(...appRiskRules);
+      // filters.private = deepMergeRules(filters.private, appRiskRules)
+
     }
   }
 
