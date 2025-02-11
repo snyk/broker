@@ -8,11 +8,11 @@ import { CONFIGURATION } from '../../lib/common/types/options';
 
 const scmRulesToTest = [
   'azure-repos',
-  // 'bitbucket-server',
-  // 'bitbucket-server-bearer-auth',
-  // 'github',
-  // 'github-enterprise',
-  // 'gitlab',
+  'bitbucket-server',
+  'bitbucket-server-bearer-auth',
+  'github',
+  'github-enterprise',
+  'gitlab',
 ];
 const scmUniversalRulesToTest = [
   'azure-repos',
