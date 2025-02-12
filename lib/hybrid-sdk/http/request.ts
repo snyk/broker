@@ -6,10 +6,7 @@ import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { getConfig } from '../../common/config/config';
 import { switchToInsecure } from './utils';
-import {
-  maskToken,
-  extractBrokerTokenFromUrl,
-} from '../../common/utils/token';
+import { maskToken, extractBrokerTokenFromUrl } from '../../common/utils/token';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
@@ -74,7 +71,7 @@ export const makeRequestToDownstream = async (
               logger.trace(
                 {
                   statusCode: response.statusCode,
-                  url: localRequest.url.replaceAll(brokerToken, maskedToken)
+                  url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 },
                 `Successful request`,
               );
@@ -84,7 +81,7 @@ export const makeRequestToDownstream = async (
               logger.debug(
                 {
                   statusCode: response.statusCode,
-                  url: localRequest.url.replaceAll(brokerToken, maskedToken)
+                  url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 },
                 `Non 2xx HTTP Code Received`,
               );
@@ -122,7 +119,7 @@ export const makeRequestToDownstream = async (
           logger.warn(
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
-              err: error
+              err: error,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -135,7 +132,7 @@ export const makeRequestToDownstream = async (
           logger.error(
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
-              err: error
+              err: error,
             },
             `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
@@ -239,7 +236,7 @@ export const makeStreamingRequestToDownstream = (
           logger.warn(
             {
               url: req.url.replaceAll(brokerToken, maskedToken),
-              err: error
+              err: error,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -254,7 +251,7 @@ export const makeStreamingRequestToDownstream = (
           logger.error(
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
-              err: error
+              err: error,
             },
             `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
