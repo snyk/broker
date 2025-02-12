@@ -278,14 +278,8 @@ export const createWebSocket = (
   });
 
   websocket.on('close', () => {
-    // if (websocket.timeoutHandlerId) {
-    //   logger.debug({}, `Clearing ${maskToken(websocket.identifier)} timers.`);
-    //   clearTimeout(websocket.timeoutHandlerId);
-    // }
     closeHandler(localClientOps, identifyingMetadata);
   });
 
-  // only required if we're manually opening the connection
-  // websocket.open();
   return websocket;
 };

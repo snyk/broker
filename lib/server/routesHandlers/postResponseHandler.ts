@@ -53,6 +53,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
     const brokerAppClientId = decodedJwt ? decodedJwt?.payload['azp'] : '';
     if (
       !brokerAppClientId ||
+      !streamHandler.streamResponse.brokerAppClientId ||
       brokerAppClientId != streamHandler.streamResponse.brokerAppClientId
     ) {
       logger.error(

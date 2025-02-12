@@ -15,7 +15,7 @@ export interface StreamResponse {
   streamBuffer: stream.PassThrough;
   response: Response;
   streamSize?: number;
-  brokerAppClientId: string;
+  brokerAppClientId: string | null;
 }
 
 export class StreamResponseHandler {
@@ -36,7 +36,7 @@ export class StreamResponseHandler {
       streamingID,
       streamResponse.streamBuffer,
       streamResponse.response,
-      streamResponse.brokerAppClientId,
+      streamResponse.brokerAppClientId ?? null,
     );
   }
 
