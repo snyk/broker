@@ -293,7 +293,7 @@ Public filters are for requests that are received on your broker client and are 
 
 - The broker requires at least node@4.latest
 - Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
-- If your private service is using an unrecognized certificate, you will need to supply a Certificate Authority file and add the following environment value when runnning the client: `CA_CERT=ca.cert.pem` - Client will load your CA certificate and use it for requests to your internal service
+- If your private service is using an unrecognized certificate, you will need to supply a Certificate Authority file and add the following environment value when running the client: `CA_CERT=ca.cert.pem` - Client will load your CA certificate and use it for requests to your internal service
 
 ## License
 
