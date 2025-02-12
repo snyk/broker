@@ -14,3 +14,19 @@ export function urlContainsProtocol(url: string, protocol: string): boolean {
     return false;
   }
 }
+
+export function isHttpUrl(brokerClientUrl: string): boolean {
+  logger.trace(
+    { url: brokerClientUrl },
+    'checking if URL is correctly configured',
+  );
+  try {
+    return (
+      urlContainsProtocol(brokerClientUrl, 'http:') ||
+      urlContainsProtocol(brokerClientUrl, 'https:')
+    );
+  } catch (error) {
+    logger.error({ error }, 'Error checking URL HTTP protocol');
+    return false;
+  }
+}

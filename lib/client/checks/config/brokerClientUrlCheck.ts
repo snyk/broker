@@ -1,7 +1,10 @@
 import { log as logger } from '../../../logs/logger';
 import type { CheckOptions, CheckResult } from '../types';
 import type { Config } from '../../types/config';
-import { urlContainsProtocol } from '../../../common/utils/urlValidator';
+import {
+  urlContainsProtocol,
+  isHttpUrl,
+} from '../../../common/utils/urlValidator';
 import {
   HttpResponse,
   makeSingleRawRequestToDownstream,
@@ -57,22 +60,6 @@ export async function validateBrokerClientUrl(
     const errorMessage = `Error executing check with checkId ${checkOptions.id}`;
     logger.debug({ error }, errorMessage);
     throw new Error(errorMessage);
-  }
-}
-
-function isHttpUrl(brokerClientUrl: string): boolean {
-  logger.trace(
-    { url: brokerClientUrl },
-    'checking if URL is correctly configured',
-  );
-  try {
-    return (
-      urlContainsProtocol(brokerClientUrl, 'http:') ||
-      urlContainsProtocol(brokerClientUrl, 'https:')
-    );
-  } catch (error) {
-    logger.error({ error }, 'Error checking URL HTTP protocol');
-    return false;
   }
 }
 
