@@ -8,7 +8,7 @@ export const disconnectConnectionsWithStaleCreds = async () => {
   for (const [identifier, connection] of connectionsIterator) {
     connection.forEach((client) => {
       if (!isDateWithinAnHourAndFiveSec(client.credsValidationTime!)) {
-        logger.debug(
+        logger.info(
           {
             connection: `${identifier}`,
             credsLastValidated: client.credsValidationTime,
