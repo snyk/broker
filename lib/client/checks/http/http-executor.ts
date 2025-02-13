@@ -1,5 +1,4 @@
 import { log as logger } from '../../../logs/logger';
-import version from '../../../common/utils/version';
 import { retry } from '../../retry/exponential-backoff';
 import type { CheckId, CheckResult, CheckStatus } from '../types';
 import {
@@ -27,7 +26,6 @@ export async function executeHttpRequest(
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `broker client/${version} (http check service)`,
       },
       timeoutMs: httpOptions.timeoutMs,
     };

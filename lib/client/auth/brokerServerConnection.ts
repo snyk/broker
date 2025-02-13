@@ -1,6 +1,5 @@
 import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { CONFIGURATION } from '../../common/types/options';
-import version from '../../common/utils/version';
 import {
   HttpResponse,
   makeRequestToDownstream,
@@ -41,7 +40,6 @@ export const renewBrokerServerConnection = async (
     url: url.toString(),
     headers: {
       Authorization: brokerServerConnectionParams.authorization,
-      'user-agent': `Snyk Broker Client ${version}`,
       'Content-type': 'application/vnd.api+json',
     },
     method: 'POST',
