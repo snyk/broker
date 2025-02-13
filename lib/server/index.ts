@@ -13,14 +13,16 @@ import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 import { FiltersType } from '../common/types/filter';
 import filterRulesLoader from '../common/filter/filter-rules-loading';
+import { authRefreshHandler } from './routesHandlers/authHandlers';
+import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 
 export const main = async (serverOpts: ServerOpts) => {
-  logger.info({ version }, 'Broker starting in server mode');
+  logger.info({ version }, 'Broker starting in server mode.');
 
   const filters = await filterRulesLoader(serverOpts.config);
   if (!filters) {
     const error = new ReferenceError(
-      `Server mode - No Filters found. A Broker requires filters to run. Review config.default.json or ACCEPT env var. Shutting down.`,
+      `Server mode - no filters found. A Broker requires filters to run. Review config.default.json or ACCEPT env var. Shutting down.`,
     );
     error['code'] = 'MISSING_FILTERS';
     logger.error({ error }, error.message);
@@ -36,12 +38,12 @@ export const main = async (serverOpts: ServerOpts) => {
     ...serverOpts,
   };
   if (!loadedServerOpts.loadedFilters) {
-    logger.error({ serverOpts }, 'Unable to load filters');
-    throw new Error('Unable to load filters');
+    logger.error({ serverOpts }, 'Unable to load filters.');
+    throw new Error('Unable to load filters.');
   }
 
   const onSignal = async () => {
-    logger.debug('received exit signal, closing server');
+    logger.debug('Received exit signal, closing server.');
     await serverStopping(() => {
       process.exit(0);
     });
@@ -64,7 +66,24 @@ export const main = async (serverOpts: ServerOpts) => {
     getForwardHttpRequestHandler(),
   );
 
-  app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  if (loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
+    app.post(
+      '/hidden/brokers/connections/:identifier/auth/refresh',
+      authRefreshHandler,
+    );
+    app.post(
+      '/hidden/brokers/response-data/:brokerToken/:streamingId',
+      handlePostResponse,
+    );
+
+    setInterval(
+      disconnectConnectionsWithStaleCreds,
+      loadedServerOpts.config.STALE_CONNECTIONS_CLEANUP_FREQUENCY ??
+        10 * 60 * 1000,
+    );
+  } else {
+    app.post('/response-data/:brokerToken/:streamingId', handlePostResponse);
+  }
 
   app.get('/', (req, res) => res.status(200).json({ ok: true, version }));
 
@@ -75,10 +94,10 @@ export const main = async (serverOpts: ServerOpts) => {
   return {
     websocket: websocket,
     close: (done) => {
-      logger.info('server websocket is closing');
+      logger.info('Server websocket is closing.');
       server.close();
       websocket.destroy(function () {
-        logger.info('server websocket is closed');
+        logger.info('Server websocket is closed.');
         if (done) {
           return done();
         }

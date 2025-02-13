@@ -18,10 +18,12 @@ import { initializeSocketHandlers } from './socketHandlers/init';
 
 import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
-import { fetchJwt } from './auth/oauth';
+import { getAuthConfig } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
+import { renewBrokerServerConnection } from './auth/brokerServerConnection';
+import version from '../common/utils/version';
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -47,7 +49,7 @@ export const createWebSocketConnectionPairs = async (
 
   if (!socketIdentifyingMetadata.identifier) {
     throw new Error(
-      `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier`,
+      `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier.`,
     );
   }
   let serverId: string | null = null;
@@ -60,16 +62,16 @@ export const createWebSocketConnectionPairs = async (
   }
   if (serverId === null) {
     if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
-      logger.warn({}, 'could not receive server id from Broker Dispatcher');
+      logger.warn({}, 'Could not receive server id from Broker Dispatcher.');
     }
     serverId = '';
   } else {
     logger.info(
       {
-        connection: socketIdentifyingMetadata.friendlyName,
+        connection: maskToken(socketIdentifyingMetadata.identifier),
         serverId: serverId,
       },
-      'received server id',
+      'Received server id.',
     );
     clientOpts.config.connections[
       `${socketIdentifyingMetadata.friendlyName}`
@@ -97,6 +99,11 @@ export const createWebSocket = (
   const localClientOps = Object.assign({}, clientOpts);
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
+  if (!identifyingMetadata.identifier) {
+    throw new Error(
+      `Invalid Broker identifier in websocket tunnel creation step.`,
+    );
+  }
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -133,13 +140,13 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-
-  if (clientOpts.accessToken) {
+  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
-        Authorization: clientOpts.accessToken?.authHeader,
+        Authorization: getAuthConfig().accessToken.authHeader,
         'x-snyk-broker-client-id': identifyingMetadata.clientId,
         'x-snyk-broker-client-role': identifyingMetadata.role,
+        'x-broker-client-version': version,
       },
     };
   }
@@ -161,32 +168,63 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (clientOpts.accessToken) {
-    let timeoutHandlerId;
+  if (getAuthConfig().accessToken) {
     let timeoutHandler = async () => {};
     timeoutHandler = async () => {
-      logger.debug({}, 'Refreshing oauth access token');
-      clearTimeout(timeoutHandlerId);
-      clientOpts.accessToken = await fetchJwt(
-        clientOpts.config.API_BASE_URL,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientId,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
-      );
+      clearTimeout(websocket.timeoutHandlerId);
 
-      websocket.transport.extraHeaders['Authorization'] =
-        clientOpts.accessToken!.authHeader;
-      // websocket.end();
-      // websocket.open();
-      timeoutHandlerId = setTimeout(
-        timeoutHandler,
-        (clientOpts.accessToken!.expiresIn - 60) * 1000,
-      );
+      if (clientOpts.config.UNIVERSAL_BROKER_GA) {
+        websocket.transport.extraHeaders = {
+          Authorization: getAuthConfig().accessToken.authHeader,
+          'x-snyk-broker-client-id': identifyingMetadata.clientId,
+          'x-snyk-broker-client-role': identifyingMetadata.role,
+          'x-broker-client-version': version,
+        };
+
+        logger.debug(
+          {
+            connection: maskToken(identifyingMetadata.identifier),
+            role: identifyingMetadata.role,
+          },
+          'Renewing auth.',
+        );
+        const renewResponse = await renewBrokerServerConnection(
+          {
+            connectionIdentifier: identifyingMetadata.identifier!,
+            brokerClientId: identifyingMetadata.clientId,
+            authorization: getAuthConfig().accessToken.authHeader,
+            role: identifyingMetadata.role,
+            serverId: serverId,
+          },
+          clientOpts.config,
+        );
+        if (renewResponse.statusCode != 201) {
+          logger.debug(
+            {
+              connection: identifyingMetadata.identifier,
+              role: identifyingMetadata.role,
+              responseCode: renewResponse.statusCode,
+            },
+            'Failed to renew connection.',
+          );
+        } else {
+          logger.debug(
+            {
+              connection: maskToken(identifyingMetadata.identifier),
+              role: identifyingMetadata.role,
+            },
+            'Auth renewed',
+          );
+          websocket.timeoutHandlerId = setTimeout(async () => {
+            await timeoutHandler();
+          }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
+        }
+      }
     };
 
-    timeoutHandlerId = setTimeout(
-      timeoutHandler,
-      (clientOpts.accessToken!.expiresIn - 60) * 1000,
-    );
+    websocket.timeoutHandlerId = setTimeout(async () => {
+      await timeoutHandler();
+    }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
   }
 
   websocket.on('incoming::error', (e) => {
@@ -198,7 +236,7 @@ export const createWebSocket = (
       url: localClientOps.config.brokerServerUrlForSocket,
       serverId: serverId,
     },
-    `broker client is connecting to broker server ${role}`,
+    `Broker client is connecting to broker server ${role}.`,
   );
   initializeSocketHandlers(websocket, localClientOps);
 
@@ -235,11 +273,13 @@ export const createWebSocket = (
     openHandler(websocket, localClientOps, identifyingMetadata),
   );
 
-  websocket.on('close', () =>
-    closeHandler(localClientOps, identifyingMetadata),
-  );
+  websocket.on('service', (msg) => {
+    logger.info({ msg }, 'Service message received.');
+  });
 
-  // only required if we're manually opening the connection
-  // websocket.open();
+  websocket.on('close', () => {
+    closeHandler(localClientOps, identifyingMetadata);
+  });
+
   return websocket;
 };

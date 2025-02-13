@@ -41,7 +41,7 @@ function injectRulesAtRuntime(
   ) {
     logger.info(
       { accept: ACCEPT_IAC },
-      'Injecting Accept rules for IAC extensions - Possible values tf, yaml, yml, json, tpl',
+      'Injecting Accept rules for IAC extensions - Possible values tf, yaml, yml, json, tpl.',
     );
     const extensions = ACCEPT_IAC.replace(/\s/g, '')
       .split(',')
@@ -49,7 +49,7 @@ function injectRulesAtRuntime(
     if (extensions.length <= 0) {
       logger.error(
         { accept: extensions },
-        '[MISCONFIGURATION] None of the requested ACCEPT IAC file extensions is compatible',
+        '[MISCONFIGURATION] None of the requested ACCEPT IAC file extensions is compatible.',
       );
     } else if (!filters.private[0].origin?.includes('AZURE')) {
       // API endpoints for IAC (github, ghe, bitbucket server), doesn't matter for azure, gitlab
@@ -122,7 +122,7 @@ function injectRulesAtRuntime(
     if (scmType === 'GITHUB') {
       logger.info(
         { accept: ACCEPT_LARGE_MANIFESTS },
-        'Injecting Accept rules for Large Manifest files',
+        'Injecting accept rules for large manifest files.',
       );
       const largeManifestRule = {
         '//': 'used to get given manifest file',
@@ -134,7 +134,7 @@ function injectRulesAtRuntime(
     } else {
       logger.error(
         { accept: ACCEPT_LARGE_MANIFESTS },
-        'Large Manifest files Rules is only applicable to Github systems',
+        'Large manifest files rules is only applicable to Github systems.',
       );
     }
   }
@@ -144,7 +144,10 @@ function injectRulesAtRuntime(
     config.ACCEPT_CODE ||
     config.ACCEPT_GIT;
   if (ACCEPT_CODE && ACCEPT_CODE != 'false') {
-    logger.info({ accept: ACCEPT_CODE }, 'Injecting Accept rules for Code/Git');
+    logger.info(
+      { accept: ACCEPT_CODE },
+      'Injecting accept rules for Code/Git.',
+    );
     const templateGET = nestedCopy(
       filters.private.filter(
         (entry) =>
@@ -229,7 +232,7 @@ function injectRulesAtRuntime(
         default:
           logger.error(
             {},
-            'Error writing Code specific rules - Cannot determine SCM type',
+            'Error writing Code specific rules - Cannot determine SCM type.',
           );
       }
 
@@ -238,7 +241,7 @@ function injectRulesAtRuntime(
       if (DISABLE_SNIPPETS) {
         logger.info(
           { snippets: DISABLE_SNIPPETS },
-          'Disabling snippets rules for Code/Git',
+          'Disabling snippets rules for Code/Git.',
         );
         filters.private.push(...[templateGET, templatePOST]);
       } else {
@@ -270,7 +273,7 @@ function injectRulesAtRuntime(
     if (type && fs.existsSync(`defaultFilters/apprisk/${type}.json`)) {
       logger.info(
         { accept: ACCEPT_APPRISK },
-        `Injecting additional ${type} Accept rules for AppRisk`,
+        `Injecting additional ${type} accept rules for AppRisk.`,
       );
       const appRiskRules = require(path.join(
         findProjectRoot(__dirname) ?? process.cwd(),
@@ -286,7 +289,7 @@ function injectRulesAtRuntime(
   if (ACCEPT_CUSTOM_PR_TEMPLATES && ACCEPT_CUSTOM_PR_TEMPLATES != 'false') {
     logger.debug(
       { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
-      `Injecting Accept rules for Custom PR Templates`,
+      `Injecting accept rules for custom PR templates.`,
     );
     const type =
       ruleType ??
@@ -302,7 +305,7 @@ function injectRulesAtRuntime(
     ) {
       logger.info(
         { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
-        `Injecting additional ${type} Accept rules for Custom PR Templates`,
+        `Injecting additional ${type} accept rules for custom PR Templates`,
       );
       const customPRTemplatesRules = require(path.join(
         findProjectRoot(__dirname) ?? process.cwd(),
@@ -368,7 +371,7 @@ export default async (
     } else {
       logger.info(
         { accept: process.env.ACCEPT },
-        'Custom accept json, skipping filter rule injection',
+        'Custom accept json, skipping filter rule injection.',
       );
     }
   }

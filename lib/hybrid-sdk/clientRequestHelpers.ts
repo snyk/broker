@@ -55,7 +55,7 @@ export class HybridClientRequestHandler {
 
     this.simplifiedContext = this.logContext;
     delete this.simplifiedContext.requestHeaders;
-    logger.info(this.simplifiedContext, '[HTTP Flow] Received request');
+    logger.info(this.simplifiedContext, '[HTTP Flow] Received request.');
   }
   private makeWebsocketRequestWithStreamingResponse() {
     const streamingID = uuid();
@@ -82,13 +82,14 @@ export class HybridClientRequestHandler {
       response: this.res,
       streamBuffer,
       streamSize: 0,
+      brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
     });
     streamBuffer.pipe(this.res);
     const simplifiedContextWithStreamingID = this.simplifiedContext;
     simplifiedContextWithStreamingID['streamingID'] = streamingID;
-    logger.info(
+    logger.debug(
       simplifiedContextWithStreamingID,
-      '[HTTP Flow] Brokering request through WS',
+      '[HTTP Flow] Brokering request through WS.',
     );
     this.res.locals.websocket.send('request', {
       url: this.req.url,
@@ -106,9 +107,9 @@ export class HybridClientRequestHandler {
       '[HTTP Flow][Relay] Sending request over websocket connection expecting Websocket response',
     );
 
-    logger.info(
+    logger.debug(
       this.simplifiedContext,
-      '[HTTP Flow] Brokering request through WS',
+      '[HTTP Flow] Brokering request through WS and response through WS.',
     );
     // relay the http request over the websocket, handle websocket response
     this.res.locals.websocket.send(
@@ -126,7 +127,7 @@ export class HybridClientRequestHandler {
         this.logContext.responseBodyType = typeof ioResponse.body;
 
         const logMsg =
-          '[HTTP Flow][Relay] Return response from Websocket back to HTTP connection';
+          '[HTTP Flow][Relay] Return response from Websocket back to HTTP connection.';
         if (ioResponse.status <= 299) {
           logger.debug(this.logContext, logMsg);
           let responseBodyString = '';
@@ -151,7 +152,7 @@ export class HybridClientRequestHandler {
           }
         } else {
           const errorLogMsg =
-            '[HTTP Flow][Relay] Non 2xx response from Websocket back to HTTP connection';
+            '[HTTP Flow][Relay] Non 2xx response from Websocket back to HTTP connection.';
           this.logContext.ioErrorType = ioResponse.errorType;
           this.logContext.ioOriginalBodySize = ioResponse.originalBodySize;
           logger.warn(this.logContext, errorLogMsg);
@@ -178,7 +179,7 @@ export class HybridClientRequestHandler {
               err,
               stackTrace: new Error('stacktrace generator').stack,
             },
-            '[HTTP Flow][Relay] Error forwarding response from Web Socket to HTTP connection',
+            '[HTTP Flow][Relay] Error forwarding response from Websocket to HTTP connection.',
           );
         }
       },
@@ -218,7 +219,7 @@ export class HybridClientRequestHandler {
         logger.error(
           this.logContext,
           err,
-          'Failed to forward webhook event to Snyk Platform',
+          'Failed to forward webhook event to Snyk Platform.',
         );
       });
   }

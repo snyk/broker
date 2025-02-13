@@ -9,7 +9,7 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 import { getConfig } from '../../common/config/config';
-import { getClientOpts } from '../../client/config/configHelpers';
+import { getAuthConfig } from '../../client/auth/oauth';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -64,8 +64,13 @@ class BrokerServerPostResponseHandler {
 
   async #initHttpClientRequest() {
     try {
+      const backendHostname =
+        this.#config.universalBrokerEnabled && this.#config.universalBrokerGa
+          ? `${this.#config.brokerServerUrl}/hidden/brokers`
+          : `${this.#config.brokerServerUrl}`;
+
       const url = new URL(
-        `${this.#config.brokerServerUrl}/response-data/${this.#brokerToken}/${
+        `${backendHostname}/response-data/${this.#brokerToken}/${
           this.#streamingId
         }`,
       );
@@ -91,14 +96,15 @@ class BrokerServerPostResponseHandler {
           'Content-Type': BROKER_CONTENT_TYPE,
           Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
+          'x-broker-client-version': version,
         },
         timeout: this.#config.brokerClientPostTimeout
           ? parseInt(this.#config.brokerClientPostTimeout)
           : 1200000,
       };
-      if (getClientOpts().accessToken) {
+      if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
         options.headers['authorization'] =
-          getClientOpts().accessToken.authHeader;
+          getAuthConfig().accessToken.authHeader;
       }
 
       this.#brokerSrvPostRequestHandler = client.request(
@@ -209,7 +215,7 @@ class BrokerServerPostResponseHandler {
   }
 
   async forwardRequest(response: http.IncomingMessage, streamingID) {
-    const config = getConfig();
+    const config = this.#config;
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;

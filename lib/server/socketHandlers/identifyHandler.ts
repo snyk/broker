@@ -35,7 +35,7 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
   if (!token) {
     logger.warn(
       { token, metadata: metadataWithoutFilters(clientData.metadata) },
-      'new client connection identified without a token',
+      'New client connection identified without a token.',
     );
     return false;
   }
@@ -50,7 +50,7 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
   ) {
     socket.send('notification', {
       level: 'error',
-      message: `Broker Client Version is outdated. Minimal version: ${minimalSupportedBrokerVersion}. Please upgrade to latest version`,
+      message: `Broker client version is outdated. Minimal version: ${minimalSupportedBrokerVersion}. Please upgrade to latest version.`,
     });
     socket.end();
     return false;
@@ -61,7 +61,7 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
   ) {
     socket.send('notification', {
       level: 'warning',
-      message: `Broker Client Version is deprecated. Minimal version: ${minimalRecommendedBrokerVersion}. Please upgrade to latest version`,
+      message: `Broker client version is deprecated. Minimal version: ${minimalRecommendedBrokerVersion}. Please upgrade to latest version.`,
     });
   }
 
@@ -71,16 +71,32 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
       hashedToken,
       metadata: metadataWithoutFilters(clientData.metadata),
     },
-    'new client connection identified',
+    'New client connection identified.',
   );
-  const connections = getSocketConnections();
-  const clientPool = connections.get(token) || [];
-  clientPool.unshift({
+  const currentClient = {
     socket,
     socketType: 'server',
     socketVersion: 1,
     metadata: clientData.metadata,
-  });
+    brokerClientId: clientData.metadata.clientId,
+  };
+  const connections = getSocketConnections();
+  const clientPool = (connections.get(token) as Array<any>) || [];
+  const currentClientIndex = clientPool.findIndex(
+    (x) =>
+      clientData.metadata.clientId &&
+      x.brokerClientId === clientData.metadata.clientId &&
+      clientData.metadata.role &&
+      x.role === clientData.metadata.role,
+  );
+  if (currentClientIndex < 0) {
+    clientPool.unshift(currentClient);
+  } else {
+    clientPool[currentClientIndex] = {
+      ...clientPool[currentClientIndex],
+      ...currentClient,
+    };
+  }
   connections.set(token, clientPool);
 
   socket.on('chunk', streamingResponse(token));

@@ -58,5 +58,5 @@ export default async (templateName) => {
     ),
   );
 
-  logger.info({ templateName }, 'initialisation complete');
+  logger.info({ templateName }, 'Initialisation complete.');
 };

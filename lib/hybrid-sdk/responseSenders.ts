@@ -1,4 +1,3 @@
-import { getConfig } from '../common/config/config';
 import { BrokerServerPostResponseHandler } from './http/downstream-post-stream-to-server';
 import { legacyStreaming } from './requestsHelper';
 import { log as logger } from '../logs/logger';
@@ -19,7 +18,7 @@ export class HybridResponseHandler {
   connectionIdentifier;
   websocketConnectionHandler;
   logContext;
-  options;
+  config;
   requestMetadata: RequestMetadata;
   websocketResponseHandler;
   responseHandler;
@@ -27,11 +26,12 @@ export class HybridResponseHandler {
     requestMetadata: RequestMetadata,
     websocketConnectionHandler,
     websocketResponseHandler,
+    config,
     logContext,
   ) {
     this.logContext = logContext;
     this.websocketResponseHandler = websocketResponseHandler;
-    this.options = getConfig();
+    this.config = config;
     this.connectionIdentifier = requestMetadata.connectionIdentifier;
     this.websocketConnectionHandler = websocketConnectionHandler;
     this.requestMetadata = requestMetadata;
@@ -67,8 +67,7 @@ export class HybridResponseHandler {
     // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
     // not just the size of the body, so allow 1MB for miscellaneous data (e.g., headers, Primus overhead)
 
-    const maxLength =
-      parseInt(this.options.socketMaxResponseLength) || 20971520;
+    const maxLength = parseInt(this.config.socketMaxResponseLength) || 20971520;
     if (contentLength && contentLength > maxLength) {
       const errorMessage = `body size of ${contentLength} is greater than max allowed of ${maxLength} bytes`;
       logError(logContext, {
@@ -84,16 +83,12 @@ export class HybridResponseHandler {
       });
     }
 
-    if (this.options.RES_BODY_URL_SUB && isJson(response.headers)) {
-      const replaced = replaceUrlPartialChunk(
-        response.body,
-        null,
-        this.options,
-      );
+    if (this.config.RES_BODY_URL_SUB && isJson(response.headers)) {
+      const replaced = replaceUrlPartialChunk(response.body, null, this.config);
       response.body = replaced.newChunk;
     }
     const status = (response && response.statusCode) || 500;
-    logResponse(logContext, status, response, this.options);
+    logResponse(logContext, status, response, this.config);
     this.sendResponse({
       status,
       body: response.body,
@@ -110,7 +105,7 @@ export class HybridResponseHandler {
       this.logContext.requestHeaders = {};
       const postHandler = new BrokerServerPostResponseHandler(
         this.logContext,
-        this.options,
+        this.config,
         this.connectionIdentifier,
         this.websocketConnectionHandler?.serverId ?? '',
         this.requestMetadata.requestId,
@@ -161,7 +156,7 @@ export class HybridResponseHandler {
         legacyStreaming(
           this.logContext,
           responseData,
-          this.options,
+          this.config,
           this.websocketConnectionHandler,
           this.requestMetadata.payloadStreamingId,
         );
