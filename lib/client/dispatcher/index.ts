@@ -41,7 +41,7 @@ export async function getServerId(
       const timeout = 2 ** attempt * 30000;
       logger.warn(
         { attempt, timeout },
-        `waiting for ${timeout}ms before next Broker Dispatcher API call`,
+        `Waiting for ${timeout}ms before next Broker Dispatcher API call.`,
       );
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, timeout);
     }

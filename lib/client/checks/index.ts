@@ -19,7 +19,7 @@ export function preflightChecksEnabled(config: any): boolean {
 
   logger.info(
     { enabled: preflightChecksEnabled },
-    'verifying if preflight checks are enabled',
+    'Verifying if preflight checks are enabled.',
   );
 
   return preflightChecksEnabled;
@@ -46,7 +46,7 @@ export async function executePreflightChecks(
     } else {
       logger.error(
         { error: r.reason },
-        'Unexpected error when executing checks',
+        'Unexpected error when executing checks.',
       );
     }
   });

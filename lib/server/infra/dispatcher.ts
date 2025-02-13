@@ -193,26 +193,28 @@ if (config.dispatcherUrl) {
   };
 } else {
   logger.error(
-    'DISPATCHER_URL not set - creating no-op functions to ensure Server still functions',
+    'DISPATCHER_URL not set - creating no-op functions to ensure server still functions.',
   );
   clientConnected = async function () {
-    logger.trace('client connected - no-op instead of notifying dispatcher');
+    logger.trace('Client connected - no-op instead of notifying dispatcher.');
   };
 
   clientPinged = async function () {
-    logger.trace('client pinged - no-op instead of notifying dispatcher');
+    logger.trace('Client pinged - no-op instead of notifying dispatcher.');
   };
 
   clientDisconnected = async function () {
-    logger.trace('client disconnected - no-op instead of notifying dispatcher');
+    logger.trace(
+      'Client disconnected - no-op instead of notifying dispatcher.',
+    );
   };
 
   serverStarting = async function () {
-    logger.info('server started - no-op instead of notifying dispatcher');
+    logger.info('Server started - no-op instead of notifying dispatcher.');
   };
 
   serverStopping = async function (cb) {
-    logger.info('server stopping - no-op instead of notifying dispatcher');
+    logger.info('Server stopping - no-op instead of notifying dispatcher.');
     cb();
   };
 }

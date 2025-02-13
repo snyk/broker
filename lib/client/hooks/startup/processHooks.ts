@@ -88,10 +88,13 @@ export const processStartUpHooks = async (
         );
 
         if (serverId === null) {
-          logger.warn({}, 'could not receive server id from Broker Dispatcher');
+          logger.warn(
+            {},
+            'Could not receive server id from Broker Dispatcher.',
+          );
           serverId = '';
         } else {
-          logger.info({ serverId }, 'received server id');
+          logger.debug({ serverId }, 'Received server id.');
           clientOpts.config.serverId = serverId;
         }
       }
@@ -113,10 +116,10 @@ export const processStartUpHooks = async (
         if (clientOpts.filters instanceof Map) {
           logger.error(
             { clientOpts },
-            'Error pushing commit signing rules, unexpected filters type',
+            'Error pushing commit signing rules, unexpected filters type.',
           );
           throw new Error(
-            'Error pushing commit signing rules, unexpected filters type',
+            'Error pushing commit signing rules, unexpected filters type.',
           );
         } else {
           clientOpts.filters.private.push(...commitSigningRules);
@@ -124,14 +127,14 @@ export const processStartUpHooks = async (
       }
       logger.info(
         { enabled: true, rulesCount: commitSigningRules.length },
-        'loading commit signing rules',
+        'Loading commit signing rules.',
       );
     }
 
     if (clientOpts.config.INSECURE_DOWNSTREAM) {
       logger.warn(
         {},
-        'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted',
+        'Caution! Running in insecure downstream mode, making downstream calls over http, data is not encrypted.',
       );
     }
 
@@ -141,7 +144,7 @@ export const processStartUpHooks = async (
         : undefined,
     };
   } catch (error) {
-    logger.error({ error }, 'Error processing startup hooks');
+    logger.error({ error }, 'Error processing startup hooks.');
     throw error;
   }
 };

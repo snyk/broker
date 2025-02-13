@@ -50,14 +50,14 @@ process.on('uncaughtException', (error) => {
 
 export const main = async (clientOpts: ClientOpts) => {
   try {
-    logger.info({ version }, 'Broker starting in client mode');
+    logger.info({ version }, 'Broker starting in client mode.');
     let hookResults: HookResults = {};
     clientOpts.config.brokerClientId = uuidv4();
     clientOpts.config.logEnableBody = 'false';
     clientOpts.config.LOG_ENABLE_BODY = 'false';
     logger.info(
       { brokerClientId: clientOpts.config.brokerClientId },
-      'generated broker client id',
+      'Generated broker client id.',
     );
 
     clientOpts.config.API_BASE_URL =
@@ -177,7 +177,7 @@ export const main = async (clientOpts: ClientOpts) => {
         if (isWebsocketConnOpen(res.locals.websocket)) {
           httpToWsForwarder(req, res);
         } else {
-          logger.warn('Websocket connection closed, forwarding via API');
+          logger.warn('Websocket connection closed, forwarding via API.');
           httpToAPIForwarder(req, res);
         }
       },
@@ -200,14 +200,14 @@ export const main = async (clientOpts: ClientOpts) => {
     return {
       websocketConnections,
       close: (done) => {
-        logger.info('client websocket is closing');
+        logger.info('Client websocket is closing.');
         server.close();
         for (let i = 0; i < websocketConnections.length; i++) {
           websocketConnections[i].destroy(function () {
             logger.info(
-              `client websocket ${
+              `Client websocket ${
                 websocketConnections[i].identifier || ''
-              } is closed`,
+              } is closed.`,
             );
             if (done) {
               return done();
@@ -217,7 +217,7 @@ export const main = async (clientOpts: ClientOpts) => {
       },
     };
   } catch (err) {
-    logger.warn({ err }, `Shutting down client`);
+    logger.warn({ err }, `Shutting down client.`);
     throw err;
   }
 };

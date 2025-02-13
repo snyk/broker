@@ -60,7 +60,7 @@ export const websocketConnectionSelectorMiddleware = (
       ) {
         inboundRequestType = 'bitbucket-server-bearer-auth';
       } else {
-        logger.warn({ url: req.path }, 'Unexpected type in webhook request');
+        logger.warn({ url: req.path }, 'Unexpected type in webhook request.');
         res
           .status(401)
           .send(

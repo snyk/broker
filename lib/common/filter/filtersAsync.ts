@@ -38,7 +38,7 @@ export const loadAllFilters = (
     for (let i = 0; i < filtersKeys.length; i++) {
       logger.info(
         { type: filtersKeys[i] },
-        `Loading ruleset (private + public rules) for ${filtersKeys[i]}`,
+        `Loading ruleset (private + public rules) for ${filtersKeys[i]}.`,
       );
       const loadedFilterSet = {
         public: loadFilters(
@@ -57,7 +57,7 @@ export const loadAllFilters = (
         { type: filtersKeys[i] },
         `Loaded ${filters[filtersKeys[i]].private.length} private & ${
           filters[filtersKeys[i]].public.length
-        } public rules`,
+        } public rules.`,
       );
     }
     return filtersMap;
@@ -245,14 +245,14 @@ export const loadFilters: LOADEDFILTER = (
                 capability: c,
                 clientCapabilities: req?.locals?.capabilities,
               },
-              'client does not report support for capability',
+              'Client does not report support for capability.',
             );
           }
         }
         if (!matchedAll) {
           // We have to throw to avoid it getting approved by a generic matcher later on
           throw new Error(
-            'client does not support all required capabilities for endpoint',
+            'Client does not support all required capabilities for endpoint.',
           );
         }
       }
@@ -260,7 +260,7 @@ export const loadFilters: LOADEDFILTER = (
       const origin = replace(baseOrigin, localConfig);
       logger.debug(
         { path: entryPath, origin, url, querystring },
-        'rule matched',
+        'Rule matched.',
       );
 
       querystring = querystring ? `?${querystring}` : '';
@@ -275,7 +275,7 @@ export const loadFilters: LOADEDFILTER = (
 
   return (payload: RequestPayload): false | TestResult => {
     let res: false | TestResult = false;
-    logger.debug({ rulesCount: tests.length }, 'looking for a rule match');
+    logger.debug({ rulesCount: tests.length }, 'Looking for a rule match.');
 
     try {
       for (const test of tests) {
@@ -285,7 +285,7 @@ export const loadFilters: LOADEDFILTER = (
         }
       }
     } catch (e: unknown) {
-      logger.warn({ error: e }, 'caught error checking request against rules');
+      logger.warn({ error: e }, 'Caught error checking request against rules.');
       res = false;
     }
     return res;

@@ -5,5 +5,5 @@ export const handleIoError = (error) => {
 };
 
 export const handleSocketError = (error) => {
-  logger.warn({ error }, 'error on websocket connection');
+  logger.warn({ error }, 'Error on websocket connection.');
 };

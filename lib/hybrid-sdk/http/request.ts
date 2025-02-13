@@ -162,13 +162,13 @@ export const makeStreamingRequestToDownstream = (
             response.statusCode >= 200 &&
             response.statusCode < 300
           ) {
-            logger.info(
+            logger.debug(
               {
                 statusCode: response.statusCode,
                 url: localRequest.url,
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
               },
-              `Successful downstream request`,
+              `Successful downstream request.`,
             );
           } else {
             logger.warn(

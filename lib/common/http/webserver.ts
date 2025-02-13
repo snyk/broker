@@ -91,7 +91,7 @@ export const webserver = (config, altPort: number) => {
   server.listen(port);
   logger.info(
     { port, requestTimeout: server.requestTimeout },
-    'local server is listening',
+    'local server is listening.',
   );
   return { app, server };
 };
