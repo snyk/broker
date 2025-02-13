@@ -1,6 +1,6 @@
 [
   {
-    "//": "get file content. restrict by file types",
+    "//": "get file existence. restrict by file types",
     "method": "GET",
     "path": "/:owner/_apis/git/repositories/:repo/items",
     "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
