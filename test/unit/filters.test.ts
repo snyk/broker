@@ -297,6 +297,33 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow fetching webook info', () => {
+        const url =
+          '/rest/api/1.0/projects/:project/repos/:repo/webhooks/:webhookId';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating webhook config', () => {
+        const url =
+          '/rest/api/1.0/projects/:project/repos/:repo/webhooks/:webhookId';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for azure repos', () => {
@@ -394,6 +421,30 @@ describe('filters', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow fetching webhook info', () => {
+        const url = '/api/v4/projects/test-project/hooks/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating webhook info', () => {
+        const url = '/api/v4/projects/test-project/hooks/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
