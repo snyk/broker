@@ -10,6 +10,7 @@ import https from 'https';
 import http from 'http';
 import { getConfig } from '../../common/config/config';
 import { getAuthConfig } from '../../client/auth/oauth';
+import { addServerIdAndRoleQS } from './utils';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -69,18 +70,14 @@ class BrokerServerPostResponseHandler {
           ? `${this.#config.brokerServerUrl}/hidden/brokers`
           : `${this.#config.brokerServerUrl}`;
 
-      const url = new URL(
+      let url = new URL(
         `${backendHostname}/response-data/${this.#brokerToken}/${
           this.#streamingId
         }`,
       );
 
-      if (this.#serverId) {
-        url.searchParams.append('server_id', this.#serverId);
-      }
-      if (this.#role) {
-        url.searchParams.append('connection_role', this.#role);
-      }
+      url = addServerIdAndRoleQS(url, this.#serverId, this.#role);
+
       const brokerServerPostRequestUrl = url.toString();
 
       const options = {
