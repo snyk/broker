@@ -1,5 +1,4 @@
 import { log as logger } from '../../logs/logger';
-import version from '../../common/utils/version';
 import { sanitise } from '../../logs/logger';
 import { makeRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { isJson } from '../../common/utils/json';
@@ -52,9 +51,7 @@ export const checkCredentials = async (
     brokerClientValidationTimeoutMs,
   };
 
-  const validationRequestHeaders = {
-    'user-agent': 'Snyk Broker client ' + version,
-  };
+  const validationRequestHeaders = {};
   if (auth) {
     validationRequestHeaders['authorization'] = auth;
   }
@@ -67,17 +64,7 @@ export const checkCredentials = async (
       headers: validationRequestHeaders,
       method: brokerClientValidationMethod,
     });
-    // await rp({
-    //   url: config.brokerClientValidationUrl,
-    //   headers: validationRequestHeaders,
-    //   method: brokerClientValidationMethod,
-    //   timeout: brokerClientValidationTimeoutMs,
-    //   json: isJsonResponse,
-    //   resolveWithFullResponse: true,
-    //   agentOptions: {
-    //     ca: config.caCert, // Optional CA cert
-    //   },
-    // })
+
     // test logic requires to surface internal data
     // which is best not exposed in production
 

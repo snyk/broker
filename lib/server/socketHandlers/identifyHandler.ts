@@ -73,14 +73,30 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
     },
     'new client connection identified',
   );
-  const connections = getSocketConnections();
-  const clientPool = connections.get(token) || [];
-  clientPool.unshift({
+  const currentClient = {
     socket,
     socketType: 'server',
     socketVersion: 1,
     metadata: clientData.metadata,
-  });
+    brokerClientId: clientData.metadata.clientId,
+  };
+  const connections = getSocketConnections();
+  const clientPool = (connections.get(token) as Array<any>) || [];
+  const currentClientIndex = clientPool.findIndex(
+    (x) =>
+      clientData.metadata.clientId &&
+      x.brokerClientId === clientData.metadata.clientId &&
+      clientData.metadata.role &&
+      x.role === clientData.metadata.role,
+  );
+  if (currentClientIndex < 0) {
+    clientPool.unshift(currentClient);
+  } else {
+    clientPool[currentClientIndex] = {
+      ...clientPool[currentClientIndex],
+      ...currentClient,
+    };
+  }
   connections.set(token, clientPool);
 
   socket.on('chunk', streamingResponse(token));

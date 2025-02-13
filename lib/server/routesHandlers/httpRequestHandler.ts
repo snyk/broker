@@ -24,6 +24,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     const localHostname = hostname();
     const regex = new RegExp(/-[0-9]{1,2}-[0-1]/);
     if (
+      !process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED &&
       localHostname &&
       localHostname.endsWith('-1') &&
       localHostname.match(regex)
@@ -65,15 +66,16 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       return res.status(404).json({ ok: false });
     }
   }
-
   // Grab a first (newest) client from the pool
   // This is really silly...
-  res.locals.websocket = connections.get(token)[0].socket;
-  res.locals.socketVersion = connections.get(token)[0].socketVersion;
-  res.locals.capabilities = connections.get(token)[0].metadata.capabilities;
+  res.locals.websocket = connections.get(token)![0].socket;
+  res.locals.socketVersion = connections.get(token)![0].socketVersion;
+  res.locals.capabilities = connections.get(token)![0].metadata.capabilities;
+  res.locals.brokerAppClientId =
+    connections.get(token)![0].brokerAppClientId ?? '';
   req['locals'] = {};
   req['locals']['capabilities'] =
-    connections.get(token)[0].metadata.capabilities;
+    connections.get(token)![0].metadata.capabilities;
   // strip the leading url
   req.url = req.url.slice(`/broker/${token}`.length);
   if (req.url.includes('connection_role')) {
