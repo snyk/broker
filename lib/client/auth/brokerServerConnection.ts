@@ -5,6 +5,7 @@ import {
   HttpResponse,
   makeRequestToDownstream,
 } from '../../hybrid-sdk/http/request';
+import { addServerIdAndRoleQS } from '../../hybrid-sdk/http/utils';
 import { Role } from '../types/client';
 
 export interface BrokerServerConnectionParams {
@@ -27,16 +28,15 @@ export const renewBrokerServerConnection = async (
       },
     },
   };
-  const url = new URL(
+  let url = new URL(
     `${apiHostname}/hidden/brokers/connections/${brokerServerConnectionParams.connectionIdentifier}/auth/refresh`,
   );
-  url.searchParams.append('connection_role', brokerServerConnectionParams.role);
-  if (brokerServerConnectionParams.serverId) {
-    url.searchParams.append(
-      'server_id',
-      `${brokerServerConnectionParams.serverId}`,
-    );
-  }
+  url = addServerIdAndRoleQS(
+    url,
+    brokerServerConnectionParams.serverId,
+    brokerServerConnectionParams.role,
+  );
+
   const req: PostFilterPreparedRequest = {
     url: url.toString(),
     headers: {

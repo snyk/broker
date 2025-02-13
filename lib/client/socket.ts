@@ -16,7 +16,7 @@ import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
-import { LoadedClientOpts } from '../common/types/options';
+import { CONFIGURATION, LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
 import { getAuthConfig } from './auth/oauth';
 import { getServerId } from './dispatcher';
@@ -24,6 +24,14 @@ import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
 import { renewBrokerServerConnection } from './auth/brokerServerConnection';
 import version from '../common/utils/version';
+import { addServerIdAndRoleQS } from '../hybrid-sdk/http/utils';
+
+const getAuthExpirationTimeout = (config: CONFIGURATION) => {
+  return (
+    config.AUTH_EXPIRATION_OVERRIDE ??
+    (getAuthConfig().accessToken.expiresIn - 60) * 1000
+  );
+};
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -115,16 +123,15 @@ export const createWebSocket = (
       : `/primus/${localClientOps.config.brokerToken}`,
   });
 
-  const urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
+  let urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
   const serverId =
     localClientOps.config.serverId ?? identifyingMetadata.serverId;
-  if (serverId && serverId > -1) {
-    urlWithServerIdAndRole.searchParams.append('server_id', serverId);
-  }
-  urlWithServerIdAndRole.searchParams.append(
-    'connection_role',
+  urlWithServerIdAndRole = addServerIdAndRoleQS(
+    urlWithServerIdAndRole,
+    serverId,
     role ?? Role.primary,
   );
+
   localClientOps.config.brokerServerUrlForSocket =
     urlWithServerIdAndRole.toString();
 
@@ -217,14 +224,14 @@ export const createWebSocket = (
           );
           websocket.timeoutHandlerId = setTimeout(async () => {
             await timeoutHandler();
-          }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
+          }, getAuthExpirationTimeout(clientOpts.config));
         }
       }
     };
 
     websocket.timeoutHandlerId = setTimeout(async () => {
       await timeoutHandler();
-    }, clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? (getAuthConfig().accessToken.expiresIn - 60) * 1000);
+    }, getAuthExpirationTimeout(clientOpts.config));
   }
 
   websocket.on('incoming::error', (e) => {
