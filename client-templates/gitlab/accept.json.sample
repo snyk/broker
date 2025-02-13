@@ -1499,6 +1499,18 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "allow webhooks to be updated",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/hooks/:id",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "allow webhooks to be fetched, used to facilitate patch upgrades",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/hooks/:id",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "used to create commit status messages",
       "method": "POST",
       "path": "/api/v4/projects/:project/statuses/:sha",
