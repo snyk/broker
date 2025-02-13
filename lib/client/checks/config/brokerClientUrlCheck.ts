@@ -10,7 +10,6 @@ import {
   makeSingleRawRequestToDownstream,
 } from '../../../hybrid-sdk/http/request';
 import { retry } from '../../retry/exponential-backoff';
-import version from '../../../common/utils/version';
 
 export async function validateBrokerClientUrl(
   checkOptions: CheckOptions,
@@ -100,7 +99,6 @@ async function isBrokerClientUrlTLSTerminated(
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `broker client/${version} (config check service)`,
       },
     };
     try {
