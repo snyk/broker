@@ -1,23 +1,23 @@
 import { format, parse } from 'url';
-import { TestResult } from '../types/filter';
-import version from '../utils/version';
-import tryJSONParse from '../utils/try-json-parse';
-import { replace } from '../utils/replace-vars';
+import { TestResult } from '../common/types/filter';
+import version from '../common/utils/version';
+import tryJSONParse from '../common/utils/try-json-parse';
+import { replace } from '../common/utils/replace-vars';
 import undefsafe from 'undefsafe';
-import { log as logger } from '../../logs/logger';
+import { log as logger } from '../logs/logger';
 import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} from '../../client/scm';
-import { getConfigForIdentifier } from '../config/universal';
-import { computeContentLength } from '../utils/content-length';
+} from '../client/scm';
+import { getConfigForIdentifier } from '../common/config/universal';
+import { computeContentLength } from '../common/utils/content-length';
 import {
   contentLengthHeader,
   contentTypeHeader,
   urlencoded,
-} from '../utils/headers-value-constants';
+} from '../common/utils/headers-value-constants';
 
 export interface PostFilterPreparingRequestError {
   status: number;
@@ -135,8 +135,6 @@ export const prepareRequestFromFilterResult = async (
     'x-forwarded-proto',
     'content-length',
     'host',
-    'accept-encoding',
-    'content-encoding',
     'x-forwarded-host',
     'x-forwarded-port',
     'snyk-acting-group-public-id',

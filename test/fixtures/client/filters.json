@@ -39,7 +39,7 @@
         "token": "${BITBUCKET_PAT}"
       }
     },
-    
+
     {
       "path": "/echo-auth-header-with-raw-auth/:data",
       "method": "GET",
@@ -104,7 +104,7 @@
       "method": "POST",
       "origin": "http://${GITHUB_TOKEN}@localhost:9000"
     },
-    
+
     {
       "path": "/echo-headers/bitbucket",
       "method": "POST",
@@ -114,6 +114,12 @@
     {
       "path": "/echo-headers",
       "method": "POST",
+      "origin": "http://localhost:9000"
+    },
+
+    {
+      "path": "/echo-headers/httpbin",
+      "method": "GET",
       "origin": "http://localhost:9000"
     },
 

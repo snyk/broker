@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { makeRequestToDownstream } from '../../hybrid-sdk/http/request';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { ClientOpts } from '../../common/types/options';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';

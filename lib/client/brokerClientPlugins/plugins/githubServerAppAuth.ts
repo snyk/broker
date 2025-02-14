@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { createPrivateKey } from 'node:crypto';
 import { sign } from 'jsonwebtoken';
-import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeRequestToDownstream } from '../../../hybrid-sdk/http/request';
 import { maskSCMToken } from '../../../common/utils/token';
 import { getPluginsConfig } from '../../../common/config/pluginsConfig';

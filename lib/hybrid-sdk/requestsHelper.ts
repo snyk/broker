@@ -2,7 +2,7 @@ import {
   makeRequestToDownstream,
   makeStreamingRequestToDownstream,
 } from './http/request';
-import { PostFilterPreparedRequest } from '../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../broker-workload/prepareRequest';
 import { log as logger } from '../logs/logger';
 import { logError, logResponse } from '../logs/log';
 import { isJson } from '../common/utils/json';

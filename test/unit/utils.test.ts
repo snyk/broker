@@ -1,4 +1,4 @@
-import { PostFilterPreparedRequest } from '../../lib/common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../lib/broker-workload/prepareRequest';
 import { computeContentLength } from '../../lib/common/utils/content-length';
 
 describe('utils', () => {
