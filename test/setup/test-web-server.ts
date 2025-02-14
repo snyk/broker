@@ -7,6 +7,7 @@ import { choosePort } from './detect-port';
 import { createTestLogger } from '../helpers/logger';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from './constants';
 import { Express } from 'express';
+import compression from 'compression';
 
 const LOG = createTestLogger();
 
@@ -70,7 +71,7 @@ export const createTestWebServer = async (
 
 const applyMiddlewares = (app: Express) => {
   app.disable('x-powered-by');
-
+  app.use(compression());
   // handle empty body
   app.use(
     (req: express.Request, _: express.Response, next: express.NextFunction) => {

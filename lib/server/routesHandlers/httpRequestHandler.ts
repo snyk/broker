@@ -5,7 +5,7 @@ import { getSocketConnections } from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
 import { makeStreamingRequestToDownstream } from '../../hybrid-sdk/http/request';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { URL, URLSearchParams } from 'node:url';
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = async (

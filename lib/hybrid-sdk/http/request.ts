@@ -3,7 +3,7 @@ import https from 'https';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { getConfig } from '../../common/config/config';
 import { switchToInsecure } from './utils';
 import { maskToken, extractBrokerTokenFromUrl } from '../../common/utils/token';

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'fs';
 import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
-import { PostFilterPreparedRequest } from '../relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import version from '../utils/version';
 import { findProjectRoot } from '../config/config';
 import { log as logger } from '../../logs/logger';

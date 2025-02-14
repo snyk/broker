@@ -1,5 +1,5 @@
 import { runPreRequestPlugins } from '../client/brokerClientPlugins/pluginManager';
-import { prepareRequestFromFilterResult } from '../common/relay/prepareRequest';
+import { prepareRequestFromFilterResult } from './prepareRequest';
 import { ExtendedLogContext } from '../common/types/log';
 import { computeContentLength } from '../common/utils/content-length';
 import { contentLengthHeader } from '../common/utils/headers-value-constants';

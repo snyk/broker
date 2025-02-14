@@ -487,7 +487,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(encodedAuth).toEqual('user:pass');
   });
 
-  it('ignores accept-encoding (gzip)', async () => {
+  it('forwards accept-encoding (gzip)', async () => {
     const paramRequiringCompression = 'hello-'.repeat(200);
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/${paramRequiringCompression}`,
@@ -502,7 +502,20 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toEqual(paramRequiringCompression);
   });
 
-  it('ignores accept-encoding (deflate)', async () => {
+  it('Accept-Encoding is passed through', async () => {
+    const response = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers/httpbin`,
+      {
+        headers: {
+          'Accept-Encoding': 'gzip',
+        },
+      },
+    );
+
+    expect(response.data.headers).toHaveProperty('accept-encoding');
+  });
+
+  it('forwards accept-encoding (deflate)', async () => {
     const paramRequiringCompression = 'hello-'.repeat(200);
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-param/${paramRequiringCompression}`,

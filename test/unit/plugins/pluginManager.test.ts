@@ -4,7 +4,7 @@ import {
   runStartupPlugins,
 } from '../../../lib/client/brokerClientPlugins/pluginManager';
 import { findProjectRoot } from '../../../lib/common/config/config';
-import { PostFilterPreparedRequest } from '../../../lib/common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../../lib/broker-workload/prepareRequest';
 
 describe('Plugin Manager', () => {
   const pluginsFolderPath = `${findProjectRoot(

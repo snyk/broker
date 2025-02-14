@@ -1,5 +1,5 @@
 import { makeSingleRawRequestToDownstream } from '../../../hybrid-sdk/http/request';
-import { PostFilterPreparedRequest } from '../../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import version from '../../../common/utils/version';
 import { CheckOptions, CheckResult } from '../types';
 

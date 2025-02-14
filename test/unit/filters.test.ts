@@ -97,8 +97,6 @@ describe('filters', () => {
           method: 'PATCH',
         });
 
-        console.log('filterResponse', filterResponse);
-
         expect(filterResponse).not.toEqual(false);
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);

@@ -2,7 +2,7 @@ import { readdir } from 'fs/promises';
 import { log as logger } from '../../logs/logger';
 import BrokerPlugin from './abstractBrokerPlugin';
 import { existsSync } from 'fs';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { getPluginsConfig } from '../../common/config/pluginsConfig';
 
 export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
