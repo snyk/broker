@@ -1,7 +1,13 @@
 import { RequestPayload } from '../types/http';
 import { WebSocketConnection } from '../../client/types/client';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
-import { BrokerWorkload } from '../../broker-workload';
+import {
+  RemoteServerWorkloadRuntimeParams,
+  Workload,
+  WorkloadType,
+} from '../../hybrid-sdk/workloadFactory';
+import { BrokerWorkload } from '../../broker-workload/websocketRequests';
+// import { BrokerWorkload } from '../../broker-workload/websocketRequests';
 
 export const forwardWebSocketRequest = (
   options: LoadedClientOpts | LoadedServerOpts,
@@ -14,11 +20,19 @@ export const forwardWebSocketRequest = (
   // 5. Send response over websocket conn
 
   return (connectionIdentifier) => async (payload: RequestPayload, emit) => {
-    const workload = new BrokerWorkload(
-      connectionIdentifier,
-      options,
-      websocketConnectionHandler,
-    );
-    await workload.handler(payload, emit);
+    const workloadName = options.config.remoteWorkloadName;
+    const workloadModulePath = options.config.remoteWorkloadModulePath;
+    const workload = (await Workload.instantiate(
+      workloadName,
+      workloadModulePath,
+      WorkloadType.remoteServer,
+      { connectionIdentifier, options, websocketConnectionHandler },
+    )) as BrokerWorkload;
+
+    const data: RemoteServerWorkloadRuntimeParams = {
+      payload,
+      websocketHandler: emit,
+    };
+    await workload.handler(data);
   };
 };

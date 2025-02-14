@@ -1,5 +1,5 @@
-import { PostFilterPreparedRequest } from '../../lib/common/relay/prepareRequest';
-import { computeContentLength } from '../../lib/common/utils/content-length';
+import { computeContentLength } from '../../lib/broker-workload/content-length';
+import { PostFilterPreparedRequest } from '../../lib/hybrid-sdk/types';
 
 describe('utils', () => {
   it('computeContentLength 0 for bodylessr requests', () => {
