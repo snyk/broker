@@ -1,7 +1,7 @@
 import { RequestPayload } from './http';
 
 export interface FILTER {
-  (payload: RequestPayload): false | TestResult;
+  (payload: RequestPayload): boolean | Rule;
 }
 export interface LOADEDFILTER {
   (
@@ -36,6 +36,7 @@ export interface Rule {
   url?: string;
   valid?: ValidEntryObject[];
   auth?: AuthObject;
+  connectionType?: string;
 }
 
 export interface FiltersType {

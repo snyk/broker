@@ -11,6 +11,16 @@ export const getConfig = () => {
   return config;
 };
 
+export const setConfigKey = (key: string, value: unknown) => {
+  config[key] = value;
+};
+
+export const setConfigAndReturnOriginalConfigForTestOnly = (configObject) => {
+  const originalConfig = Object.assign({}, config);
+  config = configObject;
+  return originalConfig;
+};
+
 export const findProjectRoot = (startDir: string): string | null => {
   let currentDir = startDir;
 

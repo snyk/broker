@@ -39,7 +39,6 @@ export const app = async ({ port = 7341, client = false, config }) => {
       any
     > as CONFIGURATION;
     localConfig.brokerType = method;
-
     if (method == 'client') {
       return await (
         await import('./client')

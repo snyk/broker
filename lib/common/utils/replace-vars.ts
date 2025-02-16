@@ -1,3 +1,5 @@
+import { setConfigKey } from '../config/config';
+
 export const replace = (input, source) => {
   return (input || '').replace(/(\${.*?})/g, (_, match) => {
     const key = match.slice(2, -1); // ditch the wrappers
@@ -23,7 +25,8 @@ export const replace = (input, source) => {
       if (idx >= pool.length) {
         idx = 0;
       }
-      source[poolIndex] = idx + 1;
+      // source[poolIndex] = idx + 1;
+      setConfigKey(poolIndex, idx + 1);
     }
 
     return pool ? pool[idx] : source[key] || '';

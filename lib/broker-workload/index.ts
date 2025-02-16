@@ -17,6 +17,7 @@ import {
   makeStreamingRequestToDownstream,
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
+import { getInterpolatedRequest } from './utils';
 
 export class BrokerWorkload {
   options;
@@ -84,12 +85,12 @@ export class BrokerWorkload {
       }`,
     );
 
-    const filterResponse = filterRequest(
+    const matchedFilterRule = filterRequest(
       payload,
       this.options,
       this.websocketConnectionHandler,
     );
-    if (!filterResponse) {
+    if (!matchedFilterRule) {
       incrementWebSocketRequestsTotal(true, 'inbound-request');
       const reason =
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
@@ -105,9 +106,14 @@ export class BrokerWorkload {
         },
       });
     } else {
+      const urlInterpolated = getInterpolatedRequest(
+        this.connectionIdentifier,
+        matchedFilterRule,
+        payload.url,
+      );
       incrementWebSocketRequestsTotal(false, 'inbound-request');
       const preparedRequest = await prepareRequestFromFilterResult(
-        filterResponse,
+        urlInterpolated,
         payload,
         logContext,
         this.options,

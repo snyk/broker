@@ -28,6 +28,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   beforeAll(async () => {
     const PORT = 9999;
     process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
+    process.env.PASSWORD_POOL = 'password1,password2';
     tws = await createTestWebServer();
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
@@ -36,7 +37,6 @@ describe('proxy requests originating from behind the broker server with pooled c
       brokerServerUrl: `${process.env.BROKER_SERVER_URL}`,
       brokerToken: '12345',
       filters: clientAccept,
-      passwordPool: ['password1', 'password2'],
     });
     ({ brokerToken, metadata } = await waitForBrokerClientConnection(bs));
   });
