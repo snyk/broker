@@ -92,11 +92,11 @@ export const loadFilters: LOADEDFILTER = (
 
     let {
       method,
-      origin, // eslint-disable-line prefer-const
+      origin: baseOrigin, // eslint-disable-line prefer-const
       path: entryPath,
       valid, // eslint-disable-line prefer-const
     } = entry;
-    const baseOrigin = origin;
+    // const baseOrigin = origin;
     method = (method || 'get').toLowerCase();
 
     const bodyFilters = valid ? valid.filter((v) => !!v.path && !v.regex) : [];
@@ -107,23 +107,19 @@ export const loadFilters: LOADEDFILTER = (
     const headerFilters = valid ? valid.filter((v) => !!v.header) : [];
 
     // now track if there's any values that we need to interpolate later
-    const fromConfig = {};
+
     // load config from config.default.json based on type and config.universal.json based on token
     let localConfig =
       type && configFromApp?.universalBrokerEnabled
         ? Object.assign({}, getConfigForType(type), configFromApp)
         : configFromApp;
-    // slightly bespoke version of replace-vars.js
-    entryPath = (entryPath || '').replace(/(\${.*?})/g, (_, match) => {
-      const key = match.slice(2, -1); // ditch the wrappers
-      fromConfig[key] = localConfig[key] || '';
-      return ':' + key;
-    });
 
+    if (!entryPath) {
+      entryPath = '';
+    }
     if (entryPath[0] !== '/') {
       entryPath = '/' + entryPath;
     }
-
     logger.debug({ method, path: entryPath }, 'adding new filter rule');
     const regexp = pathRegexp(entryPath, keys);
 
@@ -159,14 +155,6 @@ export const loadFilters: LOADEDFILTER = (
       if (!res) {
         // no url match
         return false;
-      }
-
-      // reconstruct the url from the user config
-      for (let i = 1; i < res.length; i++) {
-        const val = fromConfig[keys[i - 1].name];
-        if (val) {
-          url = url.replace(res[i], val);
-        }
       }
 
       // if validity filters are present, at least one must be satisfied
