@@ -35,7 +35,6 @@ export interface Rule {
   path?: string;
   url?: string;
   valid?: ValidEntryObject[];
-  stream?: boolean;
   auth?: AuthObject;
 }
 
@@ -47,5 +46,4 @@ export interface FiltersType {
 export interface TestResult {
   url: any;
   auth: any;
-  stream: boolean | undefined;
 }

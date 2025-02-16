@@ -97,7 +97,6 @@ export const loadFilters: LOADEDFILTER = (
       valid, // eslint-disable-line prefer-const
     } = entry;
     const baseOrigin = origin;
-    const { stream } = entry;
     method = (method || 'get').toLowerCase();
 
     const bodyFilters = valid ? valid.filter((v) => !!v.path && !v.regex) : [];
@@ -244,7 +243,6 @@ export const loadFilters: LOADEDFILTER = (
       return {
         url: origin + url + querystring,
         auth: entry.auth && authHeader(entry.auth, localConfig),
-        stream,
       };
     };
   });

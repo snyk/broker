@@ -51,10 +51,10 @@ const dummyWebsocketHandler: WebSocketConnection = {
 
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '', stream: true };
+    return { url: '/', auth: '' };
   },
   public: () => {
-    return { url: '/', auth: '', stream: true };
+    return { url: '/', auth: '' };
   },
 };
 
