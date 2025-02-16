@@ -35,7 +35,6 @@ export interface Rule {
   path?: string;
   url?: string;
   valid?: ValidEntryObject[];
-  requiredCapabilities?: Array<string>;
   stream?: boolean;
   auth?: AuthObject;
 }

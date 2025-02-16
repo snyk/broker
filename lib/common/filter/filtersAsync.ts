@@ -95,7 +95,6 @@ export const loadFilters: LOADEDFILTER = (
       origin, // eslint-disable-line prefer-const
       path: entryPath,
       valid, // eslint-disable-line prefer-const
-      requiredCapabilities, // eslint-disable-line prefer-const
     } = entry;
     const baseOrigin = origin;
     const { stream } = entry;
@@ -231,29 +230,6 @@ export const loadFilters: LOADEDFILTER = (
       if (headerFilters.length) {
         if (!validateHeaders(headerFilters, req.headers)) {
           return false;
-        }
-      }
-
-      if (requiredCapabilities) {
-        let matchedAll = true;
-        for (const c of requiredCapabilities) {
-          if (!req?.locals?.capabilities.includes(c)) {
-            matchedAll = false;
-            logger.warn(
-              {
-                path: entryPath,
-                capability: c,
-                clientCapabilities: req?.locals?.capabilities,
-              },
-              'client does not report support for capability',
-            );
-          }
-        }
-        if (!matchedAll) {
-          // We have to throw to avoid it getting approved by a generic matcher later on
-          throw new Error(
-            'client does not support all required capabilities for endpoint',
-          );
         }
       }
 
