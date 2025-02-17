@@ -1,5 +1,5 @@
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { getConfig } from '../../common/config/config';
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
 import { maskToken } from '../../common/utils/token';
 import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { log as logger } from '../../logs/logger';

@@ -1,4 +1,4 @@
-import { PostFilterPreparedRequest } from '../../common/relay/prepareRequest';
+import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { CONFIGURATION } from '../../common/types/options';
 import {
   HttpResponse,
