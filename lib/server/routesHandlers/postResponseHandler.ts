@@ -21,6 +21,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
     actingGroupPublicId: req.headers['snyk-acting-group-public-id'],
     productLine: req.headers['snyk-product-line'],
     flow: req.headers['snyk-flow-name'],
+    payloadSize: 0,
   };
   logger.info(logContext, 'Handling response-data request');
   req['maskedToken'] = desensitizedToken.maskedToken;
@@ -66,7 +67,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
   }
   let statusAndHeaders = '';
   let statusAndHeadersSize = -1;
-
+  let payloadSize = 0;
   req
     .on('data', function (data) {
       try {
@@ -135,7 +136,6 @@ export const handlePostResponse = (req: Request, res: Response) => {
             );
           }
         }
-
         if (bytesRead < data.length) {
           logger.trace(
             logContext,
@@ -153,6 +153,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
             },
           );
         }
+        payloadSize += data.length;
       } catch (e) {
         logger.error(
           { ...logContext, statusAndHeaders, statusAndHeadersSize, error: e },
@@ -161,6 +162,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
       }
     })
     .on('end', function () {
+      logContext.payloadSize = payloadSize;
       logger.debug(logContext, 'Handling response-data request - end part');
       streamHandler.finished();
       res.status(200).json({});

@@ -528,7 +528,6 @@ describe('proxy requests originating from behind the broker server', () => {
     for (let i = 0; i < 500; i++) {
       buf.writeUInt8(i & 0xff, i);
     }
-
     expect(response.status).toEqual(299);
     expect(response.headers).toHaveProperty('test-orig-url');
     expect(response.headers['test-orig-url']).toEqual('/test-blob/1');

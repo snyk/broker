@@ -1,5 +1,5 @@
 import { runPreRequestPlugins } from '../client/brokerClientPlugins/pluginManager';
-import { prepareRequestFromFilterResult } from './prepareRequest';
+import { prepareRequest } from './prepareRequest';
 import { ExtendedLogContext } from '../common/types/log';
 import { computeContentLength } from '../common/utils/content-length';
 import { contentLengthHeader } from '../common/utils/headers-value-constants';
@@ -17,7 +17,7 @@ import {
   makeStreamingRequestToDownstream,
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
-import { getInterpolatedRequest } from './utils';
+import { getInterpolatedRequest } from './interpolateRequestWithConfigData';
 
 export class BrokerWorkload {
   options;
@@ -109,10 +109,14 @@ export class BrokerWorkload {
       const urlInterpolated = getInterpolatedRequest(
         this.connectionIdentifier,
         matchedFilterRule,
-        payload.url,
+        payload,
+        logContext,
+        this.options.config,
+        'downstream',
       );
+
       incrementWebSocketRequestsTotal(false, 'inbound-request');
-      const preparedRequest = await prepareRequestFromFilterResult(
+      const preparedRequest = await prepareRequest(
         urlInterpolated,
         payload,
         logContext,
