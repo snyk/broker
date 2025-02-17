@@ -20,6 +20,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -49,12 +50,16 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 
@@ -68,14 +73,21 @@ describe('body relay', () => {
     jest.clearAllMocks();
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB with application/x-www-form-urlencoded content-type', (done) => {
+  it('relay swaps body values found in BROKER_VAR_SUB application/x-www-form-urlencoded type', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
-      HOST: 'localhost',
-      PORT: '8001',
+      universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
+      connections: {
+        myconn: {
+          identifier: brokerToken,
+          HOST: 'localhost',
+          PORT: '8001',
+        },
+      },
       supportedBrokerTypes: [],
       filterRulesPaths: {},
       brokerType: 'server',
@@ -112,13 +124,17 @@ describe('body relay', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
-        headers,
+        headers: headers,
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
+
+        expect(arg.headers['content-type']).toEqual(
+          'application/x-www-form-urlencoded',
+        );
         expect(arg.body).toEqual(
-          `url=${config.HOST}%3A${config.PORT}%2Fwebhook`,
+          `url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
         );
 
         done();
@@ -126,69 +142,21 @@ describe('body relay', () => {
     );
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB with JSON type', (done) => {
+  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
-      HOST: 'localhost',
-      PORT: '8001',
-      supportedBrokerTypes: [],
-      filterRulesPaths: {},
-      brokerType: 'server',
-    };
-    const options: LoadedClientOpts | LoadedServerOpts = {
-      filters: {
-        private: [
-          {
-            method: 'any',
-            url: '/*',
-          },
-        ],
-        public: [],
+      universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
+      connections: {
+        myconn: {
+          identifier: brokerToken,
+          HOST: 'localhost',
+          PORT: '8001',
+        },
       },
-      config,
-      port: 8001,
-      loadedFilters: dummyLoadedFilters,
-    };
-
-    const route = relay(options, dummyWebsocketHandler)(brokerToken);
-
-    const body = {
-      BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook',
-    };
-
-    route(
-      {
-        url: '/',
-        method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        body: Buffer.from(JSON.stringify(body)),
-        headers: {},
-      },
-      () => {
-        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual(
-          `${config.HOST}:${config.PORT}/webhook`,
-        );
-
-        done();
-      },
-    );
-  });
-
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled with json type', (done) => {
-    expect.hasAssertions();
-
-    const brokerToken = 'test-broker';
-
-    const config: CONFIGURATION = {
-      HOST: 'localhost',
-      PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
       supportedBrokerTypes: [],
@@ -236,15 +204,21 @@ describe('body relay', () => {
     );
   });
 
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled  with application/x-www-form-urlencoded content-type', (done) => {
+  it('calculate content type after converting request body', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
-      HOST: 'localhost',
-      PORT: '8001',
-      disableBodyVarsSubstitution: true,
+      universalBrokerEnabled: true,
+      plugins: new Map<string, any>(),
+      connections: {
+        myconn: {
+          identifier: brokerToken,
+          HOST: 'localhost',
+          PORT: '8001',
+        },
+      },
       supportedBrokerTypes: [],
       filterRulesPaths: {},
       brokerType: 'server',
@@ -281,14 +255,13 @@ describe('body relay', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
-        headers,
+        headers: headers,
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-        expect(arg.body).toEqual(
-          'BROKER_VAR_SUB=url&url=%24%7BHOST%7D%3A%24%7BPORT%7D%2Fwebhook',
-        );
+
+        expect(arg.headers['Content-Length']).toEqual(arg.body.length);
 
         done();
       },

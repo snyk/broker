@@ -2,7 +2,6 @@ const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
 jest.mock('../../lib/hybrid-sdk/http/request');
-import { setFilterConfig } from '../../lib/client/config/filters';
 import { Role, WebSocketConnection } from '../../lib/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
@@ -21,6 +20,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -50,12 +50,16 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 
@@ -69,7 +73,7 @@ describe('body relay', () => {
     jest.clearAllMocks();
   });
 
-  it('relay swaps body values found in BROKER_VAR_SUB', (done) => {
+  it('relay swaps body values found in BROKER_VAR_SUB with application/x-www-form-urlencoded content-type', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -77,9 +81,9 @@ describe('body relay', () => {
     const config: CONFIGURATION = {
       HOST: 'localhost',
       PORT: '8001',
-      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      brokerType: 'server',
     };
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -95,24 +99,71 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
-    setFilterConfig({
-      loadedFilters: dummyLoadedFilters,
-    });
+
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-
-    const expectedBody = {
-      url: `${config.HOST}:${config.PORT}/webhook`,
+    const headers = {
+      'x-broker-content-type': 'application/x-www-form-urlencoded',
     };
 
-    const bodyLengthBytes = Buffer.byteLength(
-      JSON.stringify(expectedBody),
-      'utf8',
+    route(
+      {
+        url: '/',
+        method: 'POST',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        body: Buffer.from(JSON.stringify(body)),
+        headers,
+      },
+      () => {
+        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
+        const arg = mockedFn.mock.calls[0][0];
+        expect(arg.body).toEqual(
+          `url=${config.HOST}%3A${config.PORT}%2Fwebhook`,
+        );
+
+        done();
+      },
     );
+  });
+
+  it('relay swaps body values found in BROKER_VAR_SUB with JSON type', (done) => {
+    expect.hasAssertions();
+
+    const brokerToken = 'test-broker';
+
+    const config: CONFIGURATION = {
+      HOST: 'localhost',
+      PORT: '8001',
+      supportedBrokerTypes: [],
+      filterRulesPaths: {},
+      brokerType: 'server',
+    };
+    const options: LoadedClientOpts | LoadedServerOpts = {
+      filters: {
+        private: [
+          {
+            method: 'any',
+            url: '/*',
+          },
+        ],
+        public: [],
+      },
+      config,
+      port: 8001,
+      loadedFilters: dummyLoadedFilters,
+    };
+
+    const route = relay(options, dummyWebsocketHandler)(brokerToken);
+
+    const body = {
+      BROKER_VAR_SUB: ['url'],
+      url: '${HOST}:${PORT}/webhook',
+    };
 
     route(
       {
@@ -129,13 +180,13 @@ describe('body relay', () => {
         expect(JSON.parse(arg.body).url).toEqual(
           `${config.HOST}:${config.PORT}/webhook`,
         );
-        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
+
         done();
       },
     );
   });
 
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
+  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled with json type', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -145,9 +196,9 @@ describe('body relay', () => {
       PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
-      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      brokerType: 'server',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {
@@ -164,17 +215,12 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
-    setFilterConfig({
-      loadedFilters: dummyLoadedFilters,
-    });
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
     };
-
-    const bodyLengthBytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
 
     route(
       {
@@ -189,13 +235,13 @@ describe('body relay', () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
         expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
-        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
+
         done();
       },
     );
   });
 
-  it('handles characters outside of [a-zA-Z0-9]', (done) => {
+  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled  with application/x-www-form-urlencoded content-type', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -204,12 +250,10 @@ describe('body relay', () => {
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
-      brokerServerUrl: 'http://localhost:8001',
-      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      brokerType: 'server',
     };
-
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
         private: [
@@ -224,18 +268,16 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
-    setFilterConfig({
-      loadedFilters: dummyLoadedFilters,
-    });
+
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
       BROKER_VAR_SUB: ['url'],
       url: '${HOST}:${PORT}/webhook',
-      data: 'data–with–u+2013–dashes',
     };
-
-    const bodyLengthBytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
+    const headers = {
+      'x-broker-content-type': 'application/x-www-form-urlencoded',
+    };
 
     route(
       {
@@ -244,13 +286,15 @@ describe('body relay', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
-        headers: {},
+        headers,
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
-        expect(arg.headers['Content-Length']).toEqual(bodyLengthBytes);
+        expect(arg.body).toEqual(
+          'BROKER_VAR_SUB=url&url=%24%7BHOST%7D%3A%24%7BPORT%7D%2Fwebhook',
+        );
+
         done();
       },
     );

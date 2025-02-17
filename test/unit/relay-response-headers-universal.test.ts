@@ -1,6 +1,5 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
-
 jest.mock('../../lib/hybrid-sdk/http/request');
 import { Role, WebSocketConnection } from '../../lib/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
@@ -20,6 +19,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -49,26 +49,28 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 
-describe('body relay', () => {
+describe('header relay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
   afterAll(() => {
     delete process.env.BROKER_SERVER_URL;
     jest.clearAllMocks();
   });
-
-  it('relay swaps body values found in BROKER_VAR_SUB application/x-www-form-urlencoded type', (done) => {
+  it('swaps header values found in BROKER_VAR_SUB', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -79,8 +81,8 @@ describe('body relay', () => {
       connections: {
         myconn: {
           identifier: brokerToken,
-          HOST: 'localhost',
-          PORT: '8001',
+          SECRET_TOKEN: 'very-secret',
+          VALUE: 'some-special-value',
         },
       },
       supportedBrokerTypes: [],
@@ -101,43 +103,37 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
-
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
-    const body = {
-      BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook',
-    };
     const headers = {
-      'x-broker-content-type': 'application/x-www-form-urlencoded',
+      'x-broker-var-sub': 'private-token,replaceme',
+      donttouch: 'not to be changed ${VALUE}',
+      'private-token': 'Bearer ${SECRET_TOKEN}',
+      replaceme: 'replace ${VALUE}',
     };
 
     route(
       {
         url: '/',
-        method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        body: Buffer.from(JSON.stringify(body)),
+        method: 'GET',
         headers: headers,
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-
-        expect(arg.headers['content-type']).toEqual(
-          'application/x-www-form-urlencoded',
+        expect(arg.headers['private-token']).toEqual(
+          `Bearer ${config.connections.myconn.SECRET_TOKEN}`,
         );
-        expect(arg.body).toEqual(
-          `url=${config.connections.myconn.HOST}%3A${config.connections.myconn.PORT}%2Fwebhook`,
+        expect(arg.headers.replaceme).toEqual(
+          `replace ${config.connections.myconn.VALUE}`,
         );
-
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );
   });
 
-  it('relay does NOT swap body values found in BROKER_VAR_SUB if disabled', (done) => {
+  it('does NOT swap header values found in BROKER_VAR_SUB', (done) => {
     expect.hasAssertions();
 
     const brokerToken = 'test-broker';
@@ -148,11 +144,11 @@ describe('body relay', () => {
       connections: {
         myconn: {
           identifier: brokerToken,
-          HOST: 'localhost',
-          PORT: '8001',
+          SECRET_TOKEN: 'very-secret',
+          VALUE: 'some-special-value',
         },
       },
-      disableBodyVarsSubstitution: true,
+      disableHeaderVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
@@ -175,89 +171,25 @@ describe('body relay', () => {
     };
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
-    const body = {
-      BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook',
-    };
-
-    route(
-      {
-        url: '/',
-        method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        body: Buffer.from(JSON.stringify(body)),
-        headers: {},
-      },
-      () => {
-        expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
-        const arg = mockedFn.mock.calls[0][0];
-        expect(JSON.parse(arg.body).url).toEqual('${HOST}:${PORT}/webhook');
-
-        done();
-      },
-    );
-  });
-
-  it('calculate content type after converting request body', (done) => {
-    expect.hasAssertions();
-
-    const brokerToken = 'test-broker';
-
-    const config: CONFIGURATION = {
-      universalBrokerEnabled: true,
-      plugins: new Map<string, any>(),
-      connections: {
-        myconn: {
-          identifier: brokerToken,
-          HOST: 'localhost',
-          PORT: '8001',
-        },
-      },
-      supportedBrokerTypes: [],
-      filterRulesPaths: {},
-      brokerType: 'server',
-    };
-    const options: LoadedClientOpts | LoadedServerOpts = {
-      filters: {
-        private: [
-          {
-            method: 'any',
-            url: '/*',
-          },
-        ],
-        public: [],
-      },
-      config,
-      port: 8001,
-      loadedFilters: dummyLoadedFilters,
-    };
-
-    const route = relay(options, dummyWebsocketHandler)(brokerToken);
-
-    const body = {
-      BROKER_VAR_SUB: ['url'],
-      url: '${HOST}:${PORT}/webhook',
-    };
     const headers = {
-      'x-broker-content-type': 'application/x-www-form-urlencoded',
+      'x-broker-var-sub': 'private-token,replaceme',
+      donttouch: 'not to be changed ${VALUE}',
+      'private-token': 'Bearer ${SECRET_TOKEN}',
+      replaceme: 'replace ${VALUE}',
     };
 
     route(
       {
         url: '/',
-        method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        body: Buffer.from(JSON.stringify(body)),
+        method: 'GET',
         headers: headers,
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
-
-        expect(arg.headers['Content-Length']).toEqual(arg.body.length);
-
+        expect(arg.headers['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
+        expect(arg.headers.replaceme).toEqual('replace ${VALUE}');
+        expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
         done();
       },
     );

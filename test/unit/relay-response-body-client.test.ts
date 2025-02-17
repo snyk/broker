@@ -2,6 +2,7 @@ const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
 jest.mock('../../lib/hybrid-sdk/http/request');
+import { setFilterConfig } from '../../lib/client/config/filters';
 import { Role, WebSocketConnection } from '../../lib/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
@@ -20,6 +21,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -49,12 +51,16 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 
@@ -76,9 +82,9 @@ describe('body relay', () => {
     const config: CONFIGURATION = {
       HOST: 'localhost',
       PORT: '8001',
+      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
-      brokerType: 'server',
     };
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -94,7 +100,9 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
-
+    setFilterConfig({
+      loadedFilters: dummyLoadedFilters,
+    });
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
@@ -142,9 +150,9 @@ describe('body relay', () => {
       PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
+      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
-      brokerType: 'server',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {
@@ -161,6 +169,9 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
+    setFilterConfig({
+      loadedFilters: dummyLoadedFilters,
+    });
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {
@@ -199,9 +210,9 @@ describe('body relay', () => {
       PORT: '8001',
       disableBodyVarsSubstitution: true,
       brokerServerUrl: 'http://localhost:8001',
+      brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
-      brokerType: 'server',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {
@@ -218,6 +229,9 @@ describe('body relay', () => {
       port: 8001,
       loadedFilters: dummyLoadedFilters,
     };
+    setFilterConfig({
+      loadedFilters: dummyLoadedFilters,
+    });
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const body = {

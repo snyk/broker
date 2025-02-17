@@ -19,6 +19,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -48,12 +49,16 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '' };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 
@@ -101,6 +106,8 @@ describe('header relay', () => {
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const headers = {
+      'x-broker-content-type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
       'x-broker-var-sub': 'private-token,replaceme',
       donttouch: 'not to be changed ${VALUE}',
       'private-token': 'Bearer ${SECRET_TOKEN}',
@@ -116,6 +123,10 @@ describe('header relay', () => {
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['Content-Type']).toBeUndefined();
+        expect(arg.headers['content-type']).toEqual(
+          'application/x-www-form-urlencoded',
+        );
         expect(arg.headers['private-token']).toEqual(
           `Bearer ${config.connections.myconn.SECRET_TOKEN}`,
         );
@@ -167,6 +178,7 @@ describe('header relay', () => {
     const route = relay(options, dummyWebsocketHandler)(brokerToken);
 
     const headers = {
+      'x-broker-content-type': 'application/x-www-form-urlencoded',
       'x-broker-var-sub': 'private-token,replaceme',
       donttouch: 'not to be changed ${VALUE}',
       'private-token': 'Bearer ${SECRET_TOKEN}',
@@ -182,6 +194,9 @@ describe('header relay', () => {
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
         const arg = mockedFn.mock.calls[0][0];
+        expect(arg.headers['content-type']).toEqual(
+          'application/x-www-form-urlencoded',
+        );
         expect(arg.headers['private-token']).toEqual('Bearer ${SECRET_TOKEN}');
         expect(arg.headers.replaceme).toEqual('replace ${VALUE}');
         expect(arg.headers.donttouch).toEqual('not to be changed ${VALUE}');
