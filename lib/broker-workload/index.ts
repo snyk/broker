@@ -17,7 +17,7 @@ import {
   makeStreamingRequestToDownstream,
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
-import { getInterpolatedRequest } from './interpolateRequestWithConfigData';
+import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
 
 export class BrokerWorkload {
   options;

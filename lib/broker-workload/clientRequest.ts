@@ -3,7 +3,7 @@ import { HybridClientRequestHandler } from '../hybrid-sdk/clientRequestHelpers';
 import { incrementHttpRequestsTotal } from '../common/utils/metrics';
 import { filterClientRequest } from './requestFiltering';
 import { log as logger } from '../logs/logger';
-import { getInterpolatedRequest } from './interpolateRequestWithConfigData';
+import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
 import { ExtendedLogContext } from '../common/types/log';
 import { hashToken, maskToken } from '../common/utils/token';
 import { randomUUID } from 'node:crypto';
