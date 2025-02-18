@@ -3,7 +3,7 @@ import {
   replace,
   replaceUrlPartialChunk,
 } from '../../lib/common/utils/replace-vars';
-let config = getConfig();
+const config = getConfig();
 const setConfigAndReturnOriginalConfigForTestOnly = (configObject) => {
   const originalConfig = Object.assign({}, config);
   setConfig(configObject);
