@@ -1,24 +1,31 @@
 import { Request, Response } from 'express';
 import { HybridClientRequestHandler } from '../hybrid-sdk/clientRequestHelpers';
-import { incrementHttpRequestsTotal } from '../common/utils/metrics';
+
 import { filterClientRequest } from './requestFiltering';
 import { log as logger } from '../logs/logger';
 import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
-import { ExtendedLogContext } from '../common/types/log';
-import { hashToken, maskToken } from '../common/utils/token';
 import { randomUUID } from 'node:crypto';
+import {
+  LocalClientWorkloadRuntimeParams,
+  Workload,
+  WorkloadType,
+} from '../hybrid-sdk/workloadFactory';
+import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
+import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
+import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 
-export class BrokerClientRequestWorkload {
+export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClient> {
   req: Request;
   res: Response;
   options;
   constructor(req, res, options) {
+    super('broker', WorkloadType['local-client']);
     this.req = req;
     this.res = res;
     this.options = options;
   }
 
-  async handler(makeRequestOverHttp = false) {
+  async handler(data: LocalClientWorkloadRuntimeParams) {
     const hybridClientRequestHandler = new HybridClientRequestHandler(
       this.req,
       this.res,
@@ -69,7 +76,7 @@ export class BrokerClientRequestWorkload {
           this.options.config,
           'upstream',
         ),
-        makeRequestOverHttp,
+        data.makeRequestOverHttp,
       );
       incrementHttpRequestsTotal(false, 'inbound-request');
     }

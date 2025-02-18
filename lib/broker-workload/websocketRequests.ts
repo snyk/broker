@@ -1,16 +1,10 @@
-import { runPreRequestPlugins } from '../client/brokerClientPlugins/pluginManager';
-import { prepareRequest } from './prepareRequest';
-import { ExtendedLogContext } from '../common/types/log';
-import { computeContentLength } from '../common/utils/content-length';
-import { contentLengthHeader } from '../common/utils/headers-value-constants';
-import {
-  incrementWebSocketRequestsTotal,
-  incrementHttpRequestsTotal,
-} from '../common/utils/metrics';
-import { maskToken, hashToken } from '../common/utils/token';
+import { runPreRequestPlugins } from '../hybrid-sdk/client/brokerClientPlugins/pluginManager';
+import { computeContentLength } from './content-length';
+import { contentLengthHeader } from './headers-value-constants';
+
 import { log as logger } from '../logs/logger';
 import { HybridResponseHandler } from '../hybrid-sdk/responseSenders';
-import { getCorrelationDataFromHeaders } from '../common/utils/correlation-headers';
+import { getCorrelationDataFromHeaders } from './correlation-headers';
 import { filterRequest } from './requestFiltering';
 import {
   makeRequestToDownstream,
@@ -18,8 +12,20 @@ import {
 } from '../hybrid-sdk/http/request';
 import { logError } from '../logs/log';
 import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
+import {
+  RemoteServerWorkloadRuntimeParams,
+  Workload,
+  WorkloadType,
+} from '../hybrid-sdk/workloadFactory';
+import { prepareRequest } from './prepareRequest';
+import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
+import {
+  incrementWebSocketRequestsTotal,
+  incrementHttpRequestsTotal,
+} from '../hybrid-sdk/common/utils/metrics';
+import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 
-export class BrokerWorkload {
+export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
   options;
   connectionIdentifier: string;
   websocketConnectionHandler;
@@ -28,12 +34,15 @@ export class BrokerWorkload {
     options,
     websocketConnectionHandler,
   ) {
+    super('broker', WorkloadType['remote-server']);
     this.options = options;
     this.connectionIdentifier = connectionIdentifier;
     this.websocketConnectionHandler = websocketConnectionHandler;
   }
 
-  async handler(payload, websocketResponseHandler) {
+  async handler(data: RemoteServerWorkloadRuntimeParams) {
+    const { payload, websocketHandler } = data;
+    const websocketResponseHandler = websocketHandler;
     if (this.options.config.universalBrokerEnabled) {
       payload.connectionIdentifier = this.connectionIdentifier;
     }
