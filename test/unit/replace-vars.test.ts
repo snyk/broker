@@ -1,8 +1,14 @@
-import { setConfigAndReturnOriginalConfigForTestOnly } from '../../lib/common/config/config';
+import { getConfig, setConfig } from '../../lib/common/config/config';
 import {
   replace,
   replaceUrlPartialChunk,
 } from '../../lib/common/utils/replace-vars';
+let config = getConfig();
+const setConfigAndReturnOriginalConfigForTestOnly = (configObject) => {
+  const originalConfig = Object.assign({}, config);
+  setConfig(configObject);
+  return originalConfig;
+};
 
 describe('replacePartialChunk', () => {
   const config = {
