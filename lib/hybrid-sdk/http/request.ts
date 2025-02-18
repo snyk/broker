@@ -3,11 +3,13 @@ import https from 'https';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
+
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
-import { getConfig } from '../../common/config/config';
+
+import { getConfig } from '../common/config/config';
+import { extractBrokerTokenFromUrl, maskToken } from '../common/utils/token';
 import { switchToInsecure } from './utils';
-import { maskToken, extractBrokerTokenFromUrl } from '../../common/utils/token';
-import version from '../../common/utils/version';
+import version from '../common/utils/version';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;

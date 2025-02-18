@@ -1,5 +1,5 @@
-import { getFilterConfig } from '../client/config/filters';
-import { LOADEDFILTERSET } from '../common/types/filter';
+import { getFilterConfig } from '../hybrid-sdk/client/config/filters';
+import { LOADEDFILTERSET } from '../hybrid-sdk/common/types/filter';
 
 export const filterRequest = (payload, options, websocketConnectionHandler) => {
   let filterResponse;

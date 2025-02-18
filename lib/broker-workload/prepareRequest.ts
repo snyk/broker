@@ -1,20 +1,21 @@
 import { format, parse } from 'url';
-import { TestResult } from '../common/types/filter';
-import version from '../common/utils/version';
 import { log as logger } from '../logs/logger';
 import {
   gitHubCommitSigningEnabled,
   gitHubTreeCheckNeeded,
   signGitHubCommit,
   validateGitHubTreePayload,
-} from '../client/scm';
-import { getConfigForIdentifier } from '../common/config/universal';
-import { computeContentLength } from '../common/utils/content-length';
+} from '../hybrid-sdk/client/scm';
+import { computeContentLength } from './content-length';
 import {
   contentLengthHeader,
   contentTypeHeader,
   urlencoded,
-} from '../common/utils/headers-value-constants';
+} from './headers-value-constants';
+
+import { getConfigForIdentifier } from '../hybrid-sdk/common/config/universal';
+import { TestResult } from '../hybrid-sdk/common/types/filter';
+import version from '../hybrid-sdk/common/utils/version';
 
 export interface PostFilterPreparingRequestError {
   status: number;

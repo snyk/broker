@@ -1,11 +1,11 @@
 import bunyan from 'bunyan';
 import escapeRegExp from 'lodash.escaperegexp';
 import mapValues from 'lodash.mapvalues';
-import { getConfig } from '../common/config/config';
+import { getConfig } from '../hybrid-sdk/common/config/config';
 import {
   getPluginsConfig,
   getPluginsConfigByConnectionKey,
-} from '../common/config/pluginsConfig';
+} from '../hybrid-sdk/common/config/pluginsConfig';
 
 const sanitiseConfigVariable = (raw, variable) =>
   raw.replace(
