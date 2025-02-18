@@ -33,7 +33,7 @@ export class Plugin extends BrokerPlugin {
   // Useful for credentials retrieval, initial setup, etc...
   async startUp(connectionConfig, pluginsConfig?): Promise<void> {
     try {
-      this.logger.info({ plugin: this.pluginName }, 'Running Startup');
+      this.logger.info({ plugin: this.pluginName }, 'Running Startup.');
       this.logger.trace(
         {
           plugin: this.pluginCode,
@@ -52,7 +52,7 @@ export class Plugin extends BrokerPlugin {
           !connectionConfig.GITHUB_APP_ID)
       ) {
         throw new Error(
-          `Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)`,
+          `Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID).`,
         );
       }
       if (
@@ -61,7 +61,7 @@ export class Plugin extends BrokerPlugin {
         !existsSync(connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH)
       ) {
         throw new Error(
-          `Pem file path is invalid ${connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH}`,
+          `PEM file path is invalid ${connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH}.`,
         );
       }
 
@@ -74,7 +74,7 @@ export class Plugin extends BrokerPlugin {
           connectionConfig.GITHUB_APP_ID,
         );
       if (!getPluginsConfig()[connectionConfig.friendlyName].JWT_TOKEN) {
-        throw new Error(`Github app  Plugin Error: could not get JWT.`);
+        throw new Error(`Github app plugin error: could not get JWT.`);
       }
       this._setJWTLifecycleHandler(now, connectionConfig);
 
@@ -85,9 +85,7 @@ export class Plugin extends BrokerPlugin {
           getPluginsConfig()[connectionConfig.friendlyName].JWT_TOKEN,
         );
       if (!getPluginsConfig()[connectionConfig.friendlyName].ghaAccessToken) {
-        throw new Error(
-          `Github app  Plugin Error: could not get Access Token.`,
-        );
+        throw new Error(`Github app plugin error: could not get access token.`);
       }
       getPluginsConfig()[connectionConfig.friendlyName].GHA_ACCESS_TOKEN =
         JSON.parse(
@@ -97,7 +95,7 @@ export class Plugin extends BrokerPlugin {
         this._setAccessTokenLifecycleHandler(connectionConfig);
       } else {
         throw new Error(
-          `Github app  Plugin Error: could not extract access token.`,
+          `Github app plugin Error: could not extract access token.`,
         );
       }
     } catch (err) {
@@ -106,7 +104,7 @@ export class Plugin extends BrokerPlugin {
         `Error in ${this.pluginName}-${this.pluginCode} startup.`,
       );
       throw new Error(
-        `Error in ${this.pluginName}-${this.pluginCode} startup. ${err}`,
+        `Error in ${this.pluginName}-${this.pluginCode} startup. ${err}.`,
       );
     }
   }
@@ -138,7 +136,7 @@ export class Plugin extends BrokerPlugin {
           try {
             this.logger.debug(
               { plugin: this.pluginCode },
-              'Refreshing github app JWT token',
+              'Refreshing github app JWT token.',
             );
             clearTimeout(timeoutHandlerId);
             const timeoutHandlerNow = Date.now();
@@ -150,7 +148,7 @@ export class Plugin extends BrokerPlugin {
               );
             if (!getPluginsConfig()[connectionConfig.friendlyName].JWT_TOKEN) {
               throw new Error(
-                `Github app  Plugin Error: could not  refreshed JWT.`,
+                `Github app plugin error: could not refresh JWT.`,
               );
             }
             if (process.env.NODE_ENV != 'test') {
@@ -167,7 +165,7 @@ export class Plugin extends BrokerPlugin {
           } catch (err) {
             this.logger.error(
               { plugin: this.pluginCode, err },
-              `Error refreshing JWT`,
+              `Error refreshing JWT.`,
             );
             throw err;
           }
@@ -216,7 +214,7 @@ export class Plugin extends BrokerPlugin {
     } catch (err) {
       this.logger.error(
         { plugin: this.pluginCode, err },
-        `Error getting access token`,
+        `Error getting access token.`,
       );
       throw err;
     }
@@ -230,7 +228,7 @@ export class Plugin extends BrokerPlugin {
         try {
           this.logger.debug(
             { plugin: this.pluginCode },
-            'Refreshing github app access token',
+            'Refreshing github app access token.',
           );
           clearTimeout(timeoutHandlerId);
           getPluginsConfig()[connectionConfig.friendlyName].ghaAccessToken =
@@ -248,7 +246,7 @@ export class Plugin extends BrokerPlugin {
             !getPluginsConfig()[connectionConfig.friendlyName].ghaAccessToken
           ) {
             throw new Error(
-              `Github app  Plugin Error: could not get refreshed Access Token.`,
+              `Github app plugin error: could not get refreshed access token.`,
             );
           } else {
             this.logger.debug(
@@ -268,7 +266,7 @@ export class Plugin extends BrokerPlugin {
                 getPluginsConfig()[connectionConfig.friendlyName]
                   .ghaAccessToken,
               ).expires_at
-            }`,
+            }.`,
           );
           if (process.env.NODE_ENV != 'test') {
             timeoutHandlerId = setTimeout(
@@ -287,7 +285,7 @@ export class Plugin extends BrokerPlugin {
         } catch (err) {
           this.logger.error(
             { plugin: this.pluginCode, err },
-            `Error setting Access Token lifecycle handler.`,
+            `Error setting access token lifecycle handler.`,
           );
           throw err;
         }
@@ -319,7 +317,7 @@ export class Plugin extends BrokerPlugin {
   ) {
     this.logger.debug(
       { plugin: this.pluginName, connection: connectionConfiguration },
-      'Running prerequest plugin',
+      'Running prerequest plugin.',
     );
 
     const regexPattern = /\$[A-Za-z0-9_%]+/g;

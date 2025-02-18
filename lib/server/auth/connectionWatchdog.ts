@@ -17,7 +17,7 @@ export const disconnectConnectionsWithStaleCreds = async () => {
             connection: `${identifier}`,
             credsLastValidated: client.credsValidationTime,
           },
-          'Cutting off connection.',
+          'Disconnecting connection due to stale auth.',
         );
         client.socket?.end();
       }

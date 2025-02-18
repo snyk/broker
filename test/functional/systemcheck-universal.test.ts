@@ -434,7 +434,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my github connection',
+          'Validation failed, please review connection details for my github connection.',
       },
       {
         connectionName: 'my gitlab connection',
@@ -447,7 +447,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my gitlab connection',
+          'Validation failed, please review connection details for my gitlab connection.',
       },
       {
         connectionName: 'my azure connection',
@@ -460,7 +460,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my azure connection',
+          'Validation failed, please review connection details for my azure connection.',
       },
       {
         connectionName: 'my jira pat',
@@ -473,7 +473,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my jira pat',
+          'Validation failed, please review connection details for my jira pat.',
       },
     ]);
     delete process.env.CLIENT_ID;
@@ -525,7 +525,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my github connection',
+          'Validation failed, please review connection details for my github connection.',
       },
       {
         connectionName: 'my gitlab connection',
@@ -542,7 +542,7 @@ describe('broker client systemcheck endpoint', () => {
         ],
         validated: false,
         message:
-          'Validation failed, please review connection details for my gitlab connection',
+          'Validation failed, please review connection details for my gitlab connection.',
       },
     ]);
     delete process.env.CLIENT_ID;

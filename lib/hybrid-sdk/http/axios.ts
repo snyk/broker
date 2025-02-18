@@ -21,7 +21,7 @@ axiosRetry(axiosInstance, {
           requestId:
             requestConfig.headers && requestConfig.headers['Snyk-Request-Id'],
         },
-        `retrying request x ${retryCount} `,
+        `Retrying request x ${retryCount}.`,
       );
     }
   },

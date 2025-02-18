@@ -13,7 +13,7 @@ export const handleSocketConnection = (socket) => {
     .toLowerCase();
 
   const desensitizedToken = getDesensitizedToken(token);
-  logger.info({ desensitizedToken }, 'new client connection');
+  logger.info({ desensitizedToken }, 'New client connection.');
 
   socket.send('identify', { capabilities: ['receive-post-streams'] });
 

@@ -63,11 +63,11 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           !brokerClientId) &&
         loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
       ) {
-        logger.debug({ maskedToken }, 'request missing Authorization header');
+        logger.debug({ maskedToken }, 'Request missing Authorization header.');
         done({
           statusCode: 401,
           authenticate: 'Bearer',
-          message: 'missing required authorization header',
+          message: 'Missing required authorization header.',
         });
         return;
       }
@@ -82,13 +82,13 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         done({
           statusCode: 401,
           authenticate: 'Bearer',
-          message: 'Invalid JWT',
+          message: 'Invalid JWT.',
         });
         return;
       } else {
         logger.debug(
           { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-          `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+          `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
         );
         const credsCheckResponse = await validateBrokerClientCredentials(
           authHeader,
@@ -98,7 +98,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         if (!credsCheckResponse) {
           logger.debug(
             { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-            `Denied auth for Connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+            `Denied auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
           );
           done({
             statusCode: 401,
@@ -110,7 +110,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
 
         logger.debug(
           { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-          `Successful auth for Connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}`,
+          `Successful auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
         );
 
         const decodedJwt = decode(jwt, { complete: true });
