@@ -20,6 +20,7 @@ import {
   LoadedClientOpts,
   LoadedServerOpts,
 } from '../../lib/common/types/options';
+import { AuthObject } from '../../lib/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -49,12 +50,16 @@ const dummyWebsocketHandler: WebSocketConnection = {
   readyState: 3,
 };
 
+const dummyAuthObject: AuthObject = {
+  scheme: '',
+};
+
 const dummyLoadedFilters = {
   private: () => {
-    return { url: '/', auth: '', stream: true };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
   public: () => {
-    return { url: '/', auth: '', stream: true };
+    return { method: 'GET', url: '/', auth: dummyAuthObject };
   },
 };
 

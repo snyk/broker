@@ -1,7 +1,14 @@
+import { getConfig, setConfig } from '../../lib/common/config/config';
 import {
   replace,
   replaceUrlPartialChunk,
 } from '../../lib/common/utils/replace-vars';
+const config = getConfig();
+const setConfigAndReturnOriginalConfigForTestOnly = (configObject) => {
+  const originalConfig = Object.assign({}, config);
+  setConfig(configObject);
+  return originalConfig;
+};
 
 describe('replacePartialChunk', () => {
   const config = {
@@ -84,7 +91,7 @@ describe('replace - with arrays', () => {
 
   it('Goes back to the start of the array if end reached', () => {
     const chunk = 'START ${BITBUCKET_PASSWORD} END';
-
+    const originalConfig = setConfigAndReturnOriginalConfigForTestOnly(config);
     expect(replace(chunk, config)).toEqual('START 1 END');
 
     expect(replace(chunk, config)).toEqual('START 2 END');
@@ -92,5 +99,6 @@ describe('replace - with arrays', () => {
     expect(replace(chunk, config)).toEqual('START 3 END');
 
     expect(replace(chunk, config)).toEqual('START 1 END');
+    setConfigAndReturnOriginalConfigForTestOnly(originalConfig);
   });
 });

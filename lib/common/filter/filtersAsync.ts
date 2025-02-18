@@ -3,8 +3,6 @@ import pathRegexp from 'path-to-regexp';
 import qs from 'qs';
 import path from 'path';
 import undefsafe from 'undefsafe';
-import { replace } from '../utils/replace-vars';
-import authHeader from '../utils/auth-header';
 import tryJSONParse from '../utils/try-json-parse';
 import { log as logger } from '../../logs/logger';
 import { RequestPayload } from '../types/http';
@@ -14,7 +12,6 @@ import {
   FILTER,
   FiltersType,
   Rule,
-  TestResult,
 } from '../types/filter';
 import { validateHeaders } from './utils';
 import {
@@ -92,13 +89,9 @@ export const loadFilters: LOADEDFILTER = (
 
     let {
       method,
-      origin, // eslint-disable-line prefer-const
       path: entryPath,
       valid, // eslint-disable-line prefer-const
-      requiredCapabilities, // eslint-disable-line prefer-const
     } = entry;
-    const baseOrigin = origin;
-    const { stream } = entry;
     method = (method || 'get').toLowerCase();
 
     const bodyFilters = valid ? valid.filter((v) => !!v.path && !v.regex) : [];
@@ -109,23 +102,19 @@ export const loadFilters: LOADEDFILTER = (
     const headerFilters = valid ? valid.filter((v) => !!v.header) : [];
 
     // now track if there's any values that we need to interpolate later
-    const fromConfig = {};
+
     // load config from config.default.json based on type and config.universal.json based on token
     let localConfig =
       type && configFromApp?.universalBrokerEnabled
         ? Object.assign({}, getConfigForType(type), configFromApp)
         : configFromApp;
-    // slightly bespoke version of replace-vars.js
-    entryPath = (entryPath || '').replace(/(\${.*?})/g, (_, match) => {
-      const key = match.slice(2, -1); // ditch the wrappers
-      fromConfig[key] = localConfig[key] || '';
-      return ':' + key;
-    });
 
+    if (!entryPath) {
+      entryPath = '';
+    }
     if (entryPath[0] !== '/') {
       entryPath = '/' + entryPath;
     }
-
     logger.debug({ method, path: entryPath }, 'adding new filter rule');
     const regexp = pathRegexp(entryPath, keys);
 
@@ -156,19 +145,11 @@ export const loadFilters: LOADEDFILTER = (
 
       // query params might contain additional "?"s, only split on the 1st one
       const parts = mainURI.split('?');
-      let [url, querystring] = [parts[0], parts.slice(1).join('?')];
+      const [url, querystring] = [parts[0], parts.slice(1).join('?')];
       const res = regexp.exec(url);
       if (!res) {
         // no url match
         return false;
-      }
-
-      // reconstruct the url from the user config
-      for (let i = 1; i < res.length; i++) {
-        const val = fromConfig[keys[i - 1].name];
-        if (val) {
-          url = url.replace(res[i], val);
-        }
       }
 
       // if validity filters are present, at least one must be satisfied
@@ -233,48 +214,13 @@ export const loadFilters: LOADEDFILTER = (
           return false;
         }
       }
-
-      if (requiredCapabilities) {
-        let matchedAll = true;
-        for (const c of requiredCapabilities) {
-          if (!req?.locals?.capabilities.includes(c)) {
-            matchedAll = false;
-            logger.warn(
-              {
-                path: entryPath,
-                capability: c,
-                clientCapabilities: req?.locals?.capabilities,
-              },
-              'client does not report support for capability',
-            );
-          }
-        }
-        if (!matchedAll) {
-          // We have to throw to avoid it getting approved by a generic matcher later on
-          throw new Error(
-            'client does not support all required capabilities for endpoint',
-          );
-        }
-      }
-
-      const origin = replace(baseOrigin, localConfig);
-      logger.debug(
-        { path: entryPath, origin, url, querystring },
-        'rule matched',
-      );
-
-      querystring = querystring ? `?${querystring}` : '';
-
-      return {
-        url: origin + url + querystring,
-        auth: entry.auth && authHeader(entry.auth, localConfig),
-        stream,
-      };
+      const entryToReturn = { ...entry, connectionType: type };
+      return entryToReturn as Rule;
     };
   });
 
-  return (payload: RequestPayload): false | TestResult => {
-    let res: false | TestResult = false;
+  return (payload: RequestPayload): false | Rule => {
+    let res: false | Rule = false;
     logger.debug({ rulesCount: tests.length }, 'looking for a rule match');
 
     try {

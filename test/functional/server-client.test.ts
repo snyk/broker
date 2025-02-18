@@ -401,19 +401,6 @@ describe('proxy requests originating from behind the broker server', () => {
     });
   });
 
-  it('block request for url where client does not support required capability', async () => {
-    const response = await axiosClient.get(
-      `http://localhost:${bs.port}/broker/${brokerToken}/client-not-capable`,
-    );
-
-    expect(response.status).toEqual(401);
-    expect(response.data).toStrictEqual({
-      message: 'blocked',
-      reason: 'Request does not match any accept rule, blocking HTTP request',
-      url: '/client-not-capable',
-    });
-  });
-
   it('approved URLs are brokered when escaped as expected', async () => {
     const response = await axiosClient.get(
       `http://localhost:${bs.port}/broker/${brokerToken}/long/nested/partially/encoded%2Fpath%2Fto%2Ffile.ext`,
@@ -541,7 +528,6 @@ describe('proxy requests originating from behind the broker server', () => {
     for (let i = 0; i < 500; i++) {
       buf.writeUInt8(i & 0xff, i);
     }
-
     expect(response.status).toEqual(299);
     expect(response.headers).toHaveProperty('test-orig-url');
     expect(response.headers['test-orig-url']).toEqual('/test-blob/1');

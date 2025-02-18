@@ -10,6 +10,13 @@ let config: Record<string, any> = {};
 export const getConfig = () => {
   return config;
 };
+export const setConfig = (newConfig) => {
+  config = newConfig;
+};
+
+export const setConfigKey = (key: string, value: unknown) => {
+  config[key] = value;
+};
 
 export const findProjectRoot = (startDir: string): string | null => {
   let currentDir = startDir;

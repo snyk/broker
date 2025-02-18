@@ -21,6 +21,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
     actingGroupPublicId: req.headers['snyk-acting-group-public-id'],
     productLine: req.headers['snyk-product-line'],
     flow: req.headers['snyk-flow-name'],
+    payloadSize: 0,
   };
   logger.info(logContext, 'Handling response-data request');
   req['maskedToken'] = desensitizedToken.maskedToken;
@@ -66,7 +67,6 @@ export const handlePostResponse = (req: Request, res: Response) => {
   }
   let statusAndHeaders = '';
   let statusAndHeadersSize = -1;
-
   req
     .on('data', function (data) {
       try {
@@ -135,7 +135,6 @@ export const handlePostResponse = (req: Request, res: Response) => {
             );
           }
         }
-
         if (bytesRead < data.length) {
           logger.trace(
             logContext,

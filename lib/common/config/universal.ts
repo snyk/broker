@@ -85,7 +85,7 @@ export const overloadConfigWithConnectionSpecificConfig = (
   connectionIdentifier,
   localConfig,
 ) => {
-  const config = getConfig();
+  const config = { ...localConfig, ...getConfig() };
   let overloadedConfig = Object.assign(
     {},
     {

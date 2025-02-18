@@ -3,6 +3,10 @@ import { HybridClientRequestHandler } from '../hybrid-sdk/clientRequestHelpers';
 import { incrementHttpRequestsTotal } from '../common/utils/metrics';
 import { filterClientRequest } from './requestFiltering';
 import { log as logger } from '../logs/logger';
+import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
+import { ExtendedLogContext } from '../common/types/log';
+import { hashToken, maskToken } from '../common/utils/token';
+import { randomUUID } from 'node:crypto';
 
 export class BrokerClientRequestWorkload {
   req: Request;
@@ -19,13 +23,33 @@ export class BrokerClientRequestWorkload {
       this.req,
       this.res,
     );
-    const filterResponse = filterClientRequest(
+    const matchedFilterRule = filterClientRequest(
       this.req,
       this.options,
       this.res.locals.websocket,
     );
 
-    if (!filterResponse) {
+    const logContext: ExtendedLogContext = {
+      url: this.req.url,
+      connectionName: '',
+      requestMethod: this.req.method,
+      requestHeaders: this.req.headers,
+      streamingID: '',
+      maskedToken: this.res.locals.websocket.connectionIdentifier
+        ? maskToken(this.res.locals.websocket.connectionIdentifier)
+        : '',
+      hashedToken: this.res.locals.websocket.connectionIdentifier
+        ? hashToken(this.res.locals.websocket.connectionIdentifier)
+        : '',
+      transport:
+        this.res.locals.websocket?.socket?.transport?.name ?? 'unknown',
+      responseMedium: this.req.headers['x-broker-ws-response']
+        ? 'websocket'
+        : 'http',
+      requestId: randomUUID(),
+    };
+
+    if (!matchedFilterRule) {
       incrementHttpRequestsTotal(true, 'inbound-request');
       const reason =
         'Request does not match any accept rule, blocking HTTP request';
@@ -37,7 +61,14 @@ export class BrokerClientRequestWorkload {
         .send({ message: 'blocked', reason, url: this.req.url });
     } else {
       hybridClientRequestHandler.makeRequest(
-        filterResponse,
+        getInterpolatedRequest(
+          null,
+          matchedFilterRule,
+          this.req,
+          logContext,
+          this.options.config,
+          'upstream',
+        ),
         makeRequestOverHttp,
       );
       incrementHttpRequestsTotal(false, 'inbound-request');

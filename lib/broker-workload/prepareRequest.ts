@@ -1,9 +1,6 @@
 import { format, parse } from 'url';
 import { TestResult } from '../common/types/filter';
 import version from '../common/utils/version';
-import tryJSONParse from '../common/utils/try-json-parse';
-import { replace } from '../common/utils/replace-vars';
-import undefsafe from 'undefsafe';
 import { log as logger } from '../logs/logger';
 import {
   gitHubCommitSigningEnabled,
@@ -32,7 +29,7 @@ export interface PostFilterPreparedRequest {
   timeoutMs?: number;
 }
 
-export const prepareRequestFromFilterResult = async (
+export const prepareRequest = async (
   result: TestResult,
   payload,
   logContext,
@@ -41,7 +38,6 @@ export const prepareRequestFromFilterResult = async (
   socketType,
 ) => {
   let errorPreparing: PostFilterPreparingRequestError | null = null;
-
   if (result.url.startsWith('http') === false) {
     result.url = 'https://' + result.url;
     logContext.resultUrlSchemeAdded = true;
@@ -77,54 +73,6 @@ export const prepareRequestFromFilterResult = async (
       }
 
       logContext.authHeaderSetByRuleUrl = true;
-    }
-  }
-
-  // if the request is all good - and at this point it is, we'll check
-  // whether we want to do variable substitution on the body
-  //
-  // Variable substitution - for those who forgot - is substituting a part
-  // of a given string (e.g. "${SOME_ENV_VAR}/rest/of/string")
-  // with an env var of the same name (SOME_ENV_VAR).
-  // This is used (for example) to substitute the snyk url
-  // with the broker's url when defining the target for an incoming webhook.
-  if (!options.config.disableBodyVarsSubstitution && payload.body) {
-    const parsedBody = tryJSONParse(payload.body);
-
-    if (parsedBody.BROKER_VAR_SUB) {
-      logContext.bodyVarsSubstitution = parsedBody.BROKER_VAR_SUB;
-      for (const path of parsedBody.BROKER_VAR_SUB) {
-        let source = undefsafe(parsedBody, path); // get the value
-        source = replace(
-          source,
-          options.config.universalBrokerEnabled
-            ? getConfigForIdentifier(brokerToken, options.config)
-            : options.config,
-        ); // replace the variables
-        undefsafe(parsedBody, path, source); // put it back in
-      }
-      //Remove the BROKER_VAR_SUB for the request body
-      delete parsedBody.BROKER_VAR_SUB;
-      payload.body = JSON.stringify(parsedBody);
-    }
-  }
-
-  if (
-    !options.config.disableHeaderVarsSubstitution &&
-    payload.headers &&
-    payload.headers['x-broker-var-sub']
-  ) {
-    // check whether we want to do variable substitution on the headers
-    logContext.headerVarsSubstitution = payload.headers['x-broker-var-sub'];
-    for (const path of payload.headers['x-broker-var-sub'].split(',')) {
-      let source = undefsafe(payload.headers, path.trim()); // get the value
-      source = replace(
-        source,
-        options.config.universalBrokerEnabled
-          ? getConfigForIdentifier(brokerToken, options.config)
-          : options.config,
-      ); // replace the variables
-      undefsafe(payload.headers, path.trim(), source); // put it back in
     }
   }
 
@@ -174,6 +122,7 @@ export const prepareRequestFromFilterResult = async (
   if (payload.body?.type === 'Buffer')
     payload.body = Buffer.of(payload.body.data);
 
+  // TODO: Move github commit signing to a plugin
   if (
     gitHubTreeCheckNeeded(options.config, {
       method: payload.method,
@@ -216,6 +165,8 @@ export const prepareRequestFromFilterResult = async (
       logger.error({ error }, 'error while signing github commit');
     }
   }
+  // TODO: Move github commit signing to a plugin
+
   payload.headers['connection'] = 'Keep-Alive';
   payload.headers['Keep-Alive'] = 'timeout=60, max=1000';
   if (
