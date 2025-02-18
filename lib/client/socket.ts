@@ -29,7 +29,7 @@ import { addServerIdAndRoleQS } from '../hybrid-sdk/http/utils';
 const getAuthExpirationTimeout = (config: CONFIGURATION) => {
   return (
     config.AUTH_EXPIRATION_OVERRIDE ??
-    (getAuthConfig().accessToken.expiresIn - 60) * 1000
+    (getAuthConfig().accessToken?.expiresIn - 60) * 1000
   );
 };
 

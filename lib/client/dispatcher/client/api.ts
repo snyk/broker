@@ -27,7 +27,8 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
       const url = new URL(path, this.baseUrl);
       url.searchParams.append('version', this.version);
       const headers = { 'Content-type': 'application/vnd.api+json' };
-      if (getAuthConfig().accessToken.authHeader) {
+      const authConfig = getAuthConfig();
+      if (authConfig.accessToken && getAuthConfig().accessToken.authHeader) {
         headers['Authorization'] = getAuthConfig().accessToken.authHeader;
       }
       const req: PostFilterPreparedRequest = {
