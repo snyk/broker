@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import { loadFilters } from '../../lib/common/filter/filtersAsync';
+import { loadFilters } from '../../lib/hybrid-sdk/common/filter/filtersAsync';
 
 const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 

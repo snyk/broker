@@ -1,11 +1,11 @@
-import { LOADEDFILTERSET } from '../../lib/common/types/filter';
+import { LOADEDFILTERSET } from '../../lib/hybrid-sdk/common/types/filter';
 const nock = require('nock');
-import { retrieveAndLoadFilters } from '../../lib/client/utils/filterLoading';
-import { ClientOpts } from '../../lib/common/types/options';
+import { retrieveAndLoadFilters } from '../../lib/hybrid-sdk/client/utils/filterLoading';
+import { ClientOpts } from '../../lib/hybrid-sdk/common/types/options';
 import {
   getFilterConfig,
   setFilterConfig,
-} from '../../lib/client/config/filters';
+} from '../../lib/hybrid-sdk/client/config/filters';
 
 const scmRulesToTest = [
   'azure-repos',

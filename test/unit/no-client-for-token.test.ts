@@ -1,9 +1,11 @@
-import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../lib/server/routesHandlers/httpRequestHandler';
+import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
 import express from 'express';
 import request from 'supertest';
 
-jest.mock('../../lib/server/socket', () => {
-  const originalModule = jest.requireActual('../../lib/server/socket');
+jest.mock('../../lib/hybrid-sdk/server/socket', () => {
+  const originalModule = jest.requireActual(
+    '../../lib/hybrid-sdk/server/socket',
+  );
 
   return {
     __esModule: true,

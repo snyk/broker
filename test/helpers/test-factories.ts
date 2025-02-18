@@ -1,7 +1,13 @@
-import { CheckResult, HttpCheck } from '../../lib/client/checks/types';
-import { Config } from '../../lib/client/types/config';
-import { executeHttpRequest } from '../../lib/client/checks/http/http-executor';
-import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
+import {
+  CheckResult,
+  HttpCheck,
+} from '../../lib/hybrid-sdk/client/checks/types';
+import { Config } from '../../lib/hybrid-sdk/client/types/config';
+import { executeHttpRequest } from '../../lib/hybrid-sdk/client/checks/http/http-executor';
+import {
+  getConfig,
+  loadBrokerConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
 
 export const aHttpCheck = (fields: Partial<HttpCheck>): HttpCheck => {
   const id = `check_${Date.now()}`;

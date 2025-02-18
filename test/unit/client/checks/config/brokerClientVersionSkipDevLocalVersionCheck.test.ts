@@ -1,12 +1,12 @@
-import { validateBrokerClientVersionAgainstServer } from '../../../../../lib/client/checks/config/brokerClientVersionCheck';
+import { validateBrokerClientVersionAgainstServer } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerClientVersionCheck';
 import { aConfig } from '../../../../helpers/test-factories';
 import nock from 'nock';
 
 const brokerServerUrl = 'https://brokerServer';
 
-jest.mock('../../../../../lib/common/utils/version', () => {
+jest.mock('../../../../../lib/hybrid-sdk/common/utils/version', () => {
   const originalModule = jest.requireActual(
-    '../../../../../lib/common/utils/version',
+    '../../../../../lib/hybrid-sdk/common/utils/version',
   );
 
   return {

@@ -1,10 +1,10 @@
+import { PostFilterPreparedRequest } from '../../../lib/broker-workload/prepareRequest';
 import {
   loadPlugins,
   runPreRequestPlugins,
   runStartupPlugins,
-} from '../../../lib/client/brokerClientPlugins/pluginManager';
-import { findProjectRoot } from '../../../lib/common/config/config';
-import { PostFilterPreparedRequest } from '../../../lib/broker-workload/prepareRequest';
+} from '../../../lib/hybrid-sdk/client/brokerClientPlugins/pluginManager';
+import { findProjectRoot } from '../../../lib/hybrid-sdk/common/config/config';
 
 describe('Plugin Manager', () => {
   const pluginsFolderPath = `${findProjectRoot(

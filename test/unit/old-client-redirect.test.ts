@@ -1,16 +1,18 @@
 import bodyParser from 'body-parser';
-import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../lib/server/routesHandlers/httpRequestHandler';
+import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
 import express from 'express';
 import request from 'supertest';
 import nock from 'nock';
 import path from 'path';
 import { readFileSync } from 'node:fs';
-import { connectionStatusHandler } from '../../lib/server/routesHandlers/connectionStatusHandler';
+import { connectionStatusHandler } from '../../lib/hybrid-sdk/server/routesHandlers/connectionStatusHandler';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 
-jest.mock('../../lib/server/socket', () => {
-  const originalModule = jest.requireActual('../../lib/server/socket');
+jest.mock('../../lib/hybrid-sdk/server/socket', () => {
+  const originalModule = jest.requireActual(
+    '../../lib/hybrid-sdk/server/socket',
+  );
 
   return {
     __esModule: true,

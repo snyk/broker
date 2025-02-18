@@ -2,8 +2,11 @@ const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
 jest.mock('../../lib/hybrid-sdk/http/request');
-import { setFilterConfig } from '../../lib/client/config/filters';
-import { Role, WebSocketConnection } from '../../lib/client/types/client';
+import { setFilterConfig } from '../../lib/hybrid-sdk/client/config/filters';
+import {
+  Role,
+  WebSocketConnection,
+} from '../../lib/hybrid-sdk/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -15,13 +18,13 @@ const mockedFn = makeRequestToDownstream.mockImplementation((data) => {
   return data;
 });
 
-import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
+import { forwardWebSocketRequest as relay } from '../../lib/hybrid-sdk/common/connectionToWorkloadInterface/forwardWebsocketRequest';
 import {
   CONFIGURATION,
   LoadedClientOpts,
   LoadedServerOpts,
-} from '../../lib/common/types/options';
-import { AuthObject } from '../../lib/common/types/filter';
+} from '../../lib/hybrid-sdk/common/types/options';
+import { AuthObject } from '../../lib/hybrid-sdk/common/types/filter';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -80,6 +83,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientLocalRequests',
       HOST: 'localhost',
       PORT: '8001',
       brokerType: 'client',
@@ -146,6 +153,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientLocalRequests',
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,
@@ -206,6 +217,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientLocalRequests',
       HOST: 'localhost',
       PORT: '8001',
       disableBodyVarsSubstitution: true,

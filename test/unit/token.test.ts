@@ -1,4 +1,4 @@
-import { hashToken, maskToken } from '../../lib/common/utils/token';
+import { hashToken, maskToken } from '../../lib/hybrid-sdk/common/utils/token';
 
 describe('token', () => {
   describe('hashToken', () => {

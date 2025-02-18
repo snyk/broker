@@ -1,9 +1,12 @@
 import {
   getClientConfigMetadata,
   reloadConfig,
-} from '../../lib/client/config/configHelpers';
-import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
-import { LoadedClientOpts } from '../../lib/common/types/options';
+} from '../../lib/hybrid-sdk/client/config/configHelpers';
+import {
+  getConfig,
+  loadBrokerConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
+import { LoadedClientOpts } from '../../lib/hybrid-sdk/common/types/options';
 
 describe('config', () => {
   beforeAll(async () => {

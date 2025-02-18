@@ -16,7 +16,7 @@ import {
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from '../setup/constants';
-import { maskToken } from '../../lib/common/utils/token';
+import { maskToken } from '../../lib/hybrid-sdk/common/utils/token';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters-webhook.json');

@@ -1,5 +1,5 @@
-import { validateMinimalConfig } from '../../../lib/client/hooks/startup/processHooks';
-import { ClientOpts } from '../../../lib/common/types/options';
+import { validateMinimalConfig } from '../../../lib/hybrid-sdk/client/hooks/startup/processHooks';
+import { ClientOpts } from '../../../lib/hybrid-sdk/common/types/options';
 
 describe('Client Config validations', () => {
   it('validateMinimalConfig standard', async () => {

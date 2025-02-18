@@ -8,11 +8,14 @@ process.env.GITHUB_PASSWORD_POOL = '9012, 3456';
 process.env.GITHUB_AUTH = 'Basic $GITHUB_USERNAME:$GITHUB_PASSWORD';
 process.env.COMPLEX_TOKEN = '1234$$%#@!$!$@$$$';
 
-import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
+import {
+  getConfig,
+  loadBrokerConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
 import {
   getConfigForType,
   getConfigForIdentifier,
-} from '../../lib/common/config/universal';
+} from '../../lib/hybrid-sdk/common/config/universal';
 
 describe('config', () => {
   beforeAll(async () => {

@@ -1,10 +1,10 @@
 import path from 'path';
-import loadFilterRules from '../../lib/common/filter/filter-rules-loading';
+import loadFilterRules from '../../lib/hybrid-sdk/common/filter/filter-rules-loading';
 import camelcase from 'camelcase';
-import { FiltersType } from '../../lib/common/types/filter';
+import { FiltersType } from '../../lib/hybrid-sdk/common/types/filter';
 const nock = require('nock');
 import fs from 'fs';
-import { CONFIGURATION } from '../../lib/common/types/options';
+import { CONFIGURATION } from '../../lib/hybrid-sdk/common/types/options';
 
 const scmRulesToTest = [
   'azure-repos',
