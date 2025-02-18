@@ -35,6 +35,7 @@ export async function getServerId(
           }`,
           broker_token_first_char: `${brokerToken[0]}`,
         },
+        config,
       );
     } catch (err) {
       const timeout = 2 ** attempt * 30000;

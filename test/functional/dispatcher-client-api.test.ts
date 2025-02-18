@@ -1,5 +1,6 @@
 import { MockServer } from 'jest-mock-server';
 import { HttpDispatcherServiceClient } from '../../lib/client/dispatcher/client/api';
+import { setAuthConfigKey } from '../../lib/client/auth/oauth';
 
 describe('Broker Dispatcher API client', () => {
   const server = new MockServer();
@@ -9,6 +10,9 @@ describe('Broker Dispatcher API client', () => {
 
   let dispatcherServerBaseUrl: string;
 
+  const config = {
+    DISPATCHER_URL_PREFIX: `/hidden/broker`,
+  };
   beforeAll(() => server.start());
   afterAll(() => {
     server.stop();
@@ -16,6 +20,7 @@ describe('Broker Dispatcher API client', () => {
   beforeEach(() => {
     server.reset();
     dispatcherServerBaseUrl = server.getURL().toString();
+    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
   });
 
   it('should return undefined when no allocation found', async () => {
@@ -34,6 +39,7 @@ describe('Broker Dispatcher API client', () => {
           brokerClientId: '1',
         },
         { deployment_location: 'test', broker_token_first_char: 'a' },
+        config,
       );
     } catch (err) {
       expect(err).toEqual(Error('Error getting connection allocation.'));
@@ -62,6 +68,7 @@ describe('Broker Dispatcher API client', () => {
         brokerClientId: '1',
       },
       { deployment_location: 'test', broker_token_first_char: 'a' },
+      config,
     );
 
     expect(serverId).toEqual('server-id-from-dispatcher');

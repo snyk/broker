@@ -1,12 +1,10 @@
 const nock = require('nock');
-import { setAuthConfigKey } from '../../../../lib/client/auth/oauth';
 import { getServerId } from '../../../../lib/client/dispatcher';
 
 const serverUrl = 'http://broker-server-dispatcher';
 
-describe('Dispatcher', () => {
+describe('Dispatcher classic', () => {
   beforeAll(async () => {
-    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
     nock(`${serverUrl}`)
       .persist()
       .post(

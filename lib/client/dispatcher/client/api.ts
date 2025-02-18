@@ -7,7 +7,7 @@ import {
   DispatcherServiceClient,
   ServerId,
 } from '../dispatcher-service';
-import { getClientOpts } from '../../config/configHelpers';
+import { getAuthConfig } from '../../auth/oauth';
 
 export class HttpDispatcherServiceClient implements DispatcherServiceClient {
   private readonly version = '2022-12-01~experimental';
@@ -20,14 +20,16 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
   async createConnection(
     params: CreateConnectionRequestParams,
     data: CreateConnectionRequestData,
+    config,
   ): Promise<ServerId> {
     try {
-      const path = `/hidden/broker/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
+      const path = `${config.DISPATCHER_URL_PREFIX}/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
       const url = new URL(path, this.baseUrl);
       url.searchParams.append('version', this.version);
       const headers = { 'Content-type': 'application/vnd.api+json' };
-      if (getClientOpts().accessToken) {
-        headers['Authorization'] = getClientOpts().accessToken?.authHeader;
+      const authConfig = getAuthConfig();
+      if (authConfig.accessToken && getAuthConfig().accessToken.authHeader) {
+        headers['Authorization'] = getAuthConfig().accessToken.authHeader;
       }
       const req: PostFilterPreparedRequest = {
         url: url.toString(),

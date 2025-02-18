@@ -2,11 +2,13 @@ import { unlinkSync, writeFileSync } from 'fs';
 import { retrieveConnectionsForDeployment } from '../../lib/client/config/remoteConfig';
 import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
 import { ClientOpts, CONFIGURATION } from '../../lib/common/types/options';
+import { setAuthConfigKey } from '../../lib/client/auth/oauth';
 const nock = require('nock');
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 
 describe('Remote config helpers', () => {
   beforeAll(() => {
+    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
     writeFileSync(universalFilePathLocationForTests, `{}`);
     nock('http://restapihostname')
       .persist()

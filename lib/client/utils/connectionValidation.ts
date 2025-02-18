@@ -1,6 +1,5 @@
 import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
-import version from '../../common/utils/version';
 import { ConnectionConfig } from '../types/config';
 import { log as logger } from '../../logs/logger';
 export const validateConnection = async (config: ConnectionConfig) => {
@@ -11,7 +10,6 @@ export const validateConnection = async (config: ConnectionConfig) => {
     const method = validation?.method ?? 'GET';
     const { auth, url } = validation;
     const headers: Record<string, string> = validation?.headers ?? {};
-    headers['user-agent'] = `Snyk Broker client ${version}`;
     switch (auth?.type) {
       case 'basic':
         headers['Authorization'] = `Basic ${Buffer.from(

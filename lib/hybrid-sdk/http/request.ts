@@ -7,6 +7,7 @@ import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest'
 import { getConfig } from '../../common/config/config';
 import { switchToInsecure } from './utils';
 import { maskToken, extractBrokerTokenFromUrl } from '../../common/utils/token';
+import version from '../../common/utils/version';
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
@@ -40,6 +41,7 @@ export const makeRequestToDownstream = async (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
     method: localRequest.method,
@@ -166,6 +168,7 @@ export const makeStreamingRequestToDownstream = (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
     method: localRequest.method,
@@ -282,6 +285,7 @@ export const makeSingleRawRequestToDownstream = async (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const timeoutMs = req.timeoutMs ?? 0;
   const options: http.RequestOptions = {

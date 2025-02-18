@@ -16,12 +16,22 @@ import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
-import { LoadedClientOpts } from '../common/types/options';
+import { CONFIGURATION, LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
-import { fetchJwt } from './auth/oauth';
+import { getAuthConfig } from './auth/oauth';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
+import { renewBrokerServerConnection } from './auth/brokerServerConnection';
+import version from '../common/utils/version';
+import { addServerIdAndRoleQS } from '../hybrid-sdk/http/utils';
+
+const getAuthExpirationTimeout = (config: CONFIGURATION) => {
+  return (
+    config.AUTH_EXPIRATION_OVERRIDE ??
+    (getAuthConfig().accessToken?.expiresIn - 60) * 1000
+  );
+};
 
 export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
@@ -66,7 +76,7 @@ export const createWebSocketConnectionPairs = async (
   } else {
     logger.info(
       {
-        connection: socketIdentifyingMetadata.friendlyName,
+        connection: maskToken(socketIdentifyingMetadata.identifier),
         serverId: serverId,
       },
       'received server id',
@@ -97,6 +107,11 @@ export const createWebSocket = (
   const localClientOps = Object.assign({}, clientOpts);
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
+  if (!identifyingMetadata.identifier) {
+    throw new Error(
+      `Invalid Broker Identifier/Token in websocket tunnel creation step.`,
+    );
+  }
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -108,16 +123,15 @@ export const createWebSocket = (
       : `/primus/${localClientOps.config.brokerToken}`,
   });
 
-  const urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
+  let urlWithServerIdAndRole = new URL(localClientOps.config.brokerServerUrl);
   const serverId =
     localClientOps.config.serverId ?? identifyingMetadata.serverId;
-  if (serverId && serverId > -1) {
-    urlWithServerIdAndRole.searchParams.append('server_id', serverId);
-  }
-  urlWithServerIdAndRole.searchParams.append(
-    'connection_role',
+  urlWithServerIdAndRole = addServerIdAndRoleQS(
+    urlWithServerIdAndRole,
+    serverId,
     role ?? Role.primary,
   );
+
   localClientOps.config.brokerServerUrlForSocket =
     urlWithServerIdAndRole.toString();
 
@@ -133,13 +147,13 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-
-  if (clientOpts.accessToken) {
+  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
     socketSettings['transport'] = {
       extraHeaders: {
-        Authorization: clientOpts.accessToken?.authHeader,
+        Authorization: getAuthConfig().accessToken.authHeader,
         'x-snyk-broker-client-id': identifyingMetadata.clientId,
         'x-snyk-broker-client-role': identifyingMetadata.role,
+        'x-broker-client-version': version,
       },
     };
   }
@@ -161,32 +175,63 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (clientOpts.accessToken) {
-    let timeoutHandlerId;
+  if (getAuthConfig().accessToken) {
     let timeoutHandler = async () => {};
     timeoutHandler = async () => {
-      logger.debug({}, 'Refreshing oauth access token');
-      clearTimeout(timeoutHandlerId);
-      clientOpts.accessToken = await fetchJwt(
-        clientOpts.config.API_BASE_URL,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientId,
-        clientOpts.config.brokerClientConfiguration.common.oauth!.clientSecret,
-      );
+      clearTimeout(websocket.timeoutHandlerId);
 
-      websocket.transport.extraHeaders['Authorization'] =
-        clientOpts.accessToken!.authHeader;
-      // websocket.end();
-      // websocket.open();
-      timeoutHandlerId = setTimeout(
-        timeoutHandler,
-        (clientOpts.accessToken!.expiresIn - 60) * 1000,
-      );
+      if (clientOpts.config.UNIVERSAL_BROKER_GA) {
+        websocket.transport.extraHeaders = {
+          Authorization: getAuthConfig().accessToken.authHeader,
+          'x-snyk-broker-client-id': identifyingMetadata.clientId,
+          'x-snyk-broker-client-role': identifyingMetadata.role,
+          'x-broker-client-version': version,
+        };
+
+        logger.debug(
+          {
+            connection: maskToken(identifyingMetadata.identifier),
+            role: identifyingMetadata.role,
+          },
+          'Renewing auth.',
+        );
+        const renewResponse = await renewBrokerServerConnection(
+          {
+            connectionIdentifier: identifyingMetadata.identifier!,
+            brokerClientId: identifyingMetadata.clientId,
+            authorization: getAuthConfig().accessToken.authHeader,
+            role: identifyingMetadata.role,
+            serverId: serverId,
+          },
+          clientOpts.config,
+        );
+        if (renewResponse.statusCode != 201) {
+          logger.debug(
+            {
+              connection: identifyingMetadata.identifier,
+              role: identifyingMetadata.role,
+              responseCode: renewResponse.statusCode,
+            },
+            'Failed to renew connection',
+          );
+        } else {
+          logger.debug(
+            {
+              connection: maskToken(identifyingMetadata.identifier),
+              role: identifyingMetadata.role,
+            },
+            'Auth renewed',
+          );
+          websocket.timeoutHandlerId = setTimeout(async () => {
+            await timeoutHandler();
+          }, getAuthExpirationTimeout(clientOpts.config));
+        }
+      }
     };
 
-    timeoutHandlerId = setTimeout(
-      timeoutHandler,
-      (clientOpts.accessToken!.expiresIn - 60) * 1000,
-    );
+    websocket.timeoutHandlerId = setTimeout(async () => {
+      await timeoutHandler();
+    }, getAuthExpirationTimeout(clientOpts.config));
   }
 
   websocket.on('incoming::error', (e) => {
@@ -235,11 +280,13 @@ export const createWebSocket = (
     openHandler(websocket, localClientOps, identifyingMetadata),
   );
 
-  websocket.on('close', () =>
-    closeHandler(localClientOps, identifyingMetadata),
-  );
+  websocket.on('service', (msg) => {
+    logger.info({ msg }, 'service message received');
+  });
 
-  // only required if we're manually opening the connection
-  // websocket.open();
+  websocket.on('close', () => {
+    closeHandler(localClientOps, identifyingMetadata);
+  });
+
   return websocket;
 };

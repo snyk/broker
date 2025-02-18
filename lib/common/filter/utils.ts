@@ -2,7 +2,6 @@ import path from 'node:path';
 import fs from 'fs';
 import { makeSingleRawRequestToDownstream } from '../../hybrid-sdk/http/request';
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
-import version from '../utils/version';
 import { findProjectRoot } from '../config/config';
 import { log as logger } from '../../logs/logger';
 import { Rule } from '../types/filter';
@@ -44,7 +43,7 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
     if (isValidURI(location)) {
       const req: PostFilterPreparedRequest = {
         url: location,
-        headers: { 'user-agent': `Snyk Broker Client ${version}` },
+        headers: {},
         method: 'GET',
       };
       logger.debug({ location }, `Downloading ${key} filter`);

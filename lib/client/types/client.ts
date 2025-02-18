@@ -79,6 +79,7 @@ export interface WebSocketConnection {
   capabilities?: any;
   on: (string, any) => any;
   readyState: any;
+  timeoutHandlerId?: any;
 }
 // export interface WebSocketConnection {
 //   websocket: Connection;
