@@ -25,7 +25,7 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
         config.validations,
         config,
       );
-      logger.info({ connectionName }, '[System Check] Validating connection');
+      logger.info({ connectionName }, '[System Check] Validating connection.');
       const { passing, data } = await validateConnection(config);
       const result = {
         connectionName: connectionName,
@@ -35,7 +35,7 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       if (!passing) {
         result[
           'message'
-        ] = `Validation failed, please review connection details for ${connectionName}`;
+        ] = `Validation failed, please review connection details for ${connectionName}.`;
         isValidationPassing = false;
       }
       validationResults.push(result);
@@ -55,7 +55,7 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
     let errorOccurred = true;
     if (auths.length > 0) {
       for (let i = 0; i < auths.length; i++) {
-        logger.info(`Checking if credentials at index ${i} are valid`);
+        logger.info(`Checking if credentials at index ${i} are valid.`);
         const auth = auths[i];
         const rawCred = rawCreds[i];
         const { data, errorOccurred: err } = await checkCredentials(
@@ -72,11 +72,11 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
               )}`;
         validationResults.push(data);
         errorOccurred = err;
-        logger.info('Credentials checked');
+        logger.info('Credentials checked.');
       }
     } else {
       logger.info(
-        'No credentials specified - checking if target can be accessed without credentials',
+        'No credentials specified - checking if target can be accessed without credentials.',
       );
       const { data, errorOccurred: err } = await checkCredentials(
         null,

@@ -27,19 +27,19 @@ export const handleConnectionCloseOnSocket = (
           hashedToken,
           remainingConnectionsCount: clientPool?.length || 0,
         },
-        'client connection closed',
+        'Client connection closed.',
       );
       if (filteredClientPool?.length) {
         connections.set(token, filteredClientPool);
       } else {
-        logger.info({ maskedToken, hashedToken }, 'removing client');
+        logger.info({ maskedToken, hashedToken }, 'Removing client.');
         connections.delete(token);
       }
       decrementSocketConnectionGauge();
     } else {
       logger.warn(
         { maskedToken, hashedToken },
-        'client disconnected before identifying itself',
+        'Client disconnected before identifying itself.',
       );
     }
     setImmediate(async () => await clientDisconnected(token, clientId));

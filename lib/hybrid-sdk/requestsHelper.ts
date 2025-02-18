@@ -78,7 +78,7 @@ export const makeLegacyRequest = async (
           responseHeaders: response.headers,
           url: req.url,
         },
-        `[Websocket Flow][Inbound] Unexpected status code for relayed request`,
+        `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
       );
     }
     logResponse(logContext, status, response, options);
@@ -96,7 +96,7 @@ export const legacyStreaming = (logContext, rqst, config, io, streamingID) => {
   let isResponseJson;
   logger.warn(
     logContext,
-    'server did not advertise received-post-streams capability - falling back to legacy streaming',
+    'Server did not advertise received-post-streams capability - falling back to legacy streaming.',
   );
   // Fall back to older streaming method if somehow connected to older server version
   rqst

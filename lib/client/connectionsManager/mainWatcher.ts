@@ -22,7 +22,7 @@ export const setMainWatcher = async (
     if (integrationsKeys.length < 1) {
       logger.info(
         {},
-        `Found deployment ${clientOpts.config.deploymentId}. Waiting for connections. (polling)`,
+        `Found deployment ${clientOpts.config.deploymentId}. Waiting for connections (polling).`,
       );
     }
     for (let i = 0; i < integrationsKeys.length; i++) {
@@ -49,7 +49,7 @@ export const setMainWatcher = async (
               name: clientOpts.config.connections[`${integrationsKeys[i]}`]
                 .friendlyName,
             },
-            `Shutting down unused connection`,
+            `Shutting down unused connection.`,
           );
           shutDownConnectionPair(websocketConnections, i);
         } else {
@@ -119,7 +119,7 @@ export const setMainWatcher = async (
       ),
     );
   } else {
-    console.log('Disabling main watcher interval for testing');
+    console.log('Disabling main watcher interval for testing.');
   }
   await watcher();
 };

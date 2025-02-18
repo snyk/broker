@@ -188,13 +188,13 @@ export const makeStreamingRequestToDownstream = (
           ) {
             const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
             const maskedToken = maskToken(brokerToken);
-            logger.info(
+            logger.debug(
               {
                 statusCode: response.statusCode,
                 url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
               },
-              `Successful downstream request`,
+              `Successful downstream request.`,
             );
           } else {
             const brokerToken = extractBrokerTokenFromUrl(localRequest.url);

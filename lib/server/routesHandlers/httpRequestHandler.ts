@@ -61,7 +61,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
-      logger.warn({ desensitizedToken }, 'no matching connection found');
+      logger.warn({ desensitizedToken }, 'No matching connection found.');
       res.setHeader('x-broker-failure', 'no-connection');
       return res.status(404).json({ ok: false });
     }

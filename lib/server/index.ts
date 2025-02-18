@@ -17,12 +17,12 @@ import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 
 export const main = async (serverOpts: ServerOpts) => {
-  logger.info({ version }, 'Broker starting in server mode');
+  logger.info({ version }, 'Broker starting in server mode.');
 
   const filters = await filterRulesLoader(serverOpts.config);
   if (!filters) {
     const error = new ReferenceError(
-      `Server mode - No Filters found. A Broker requires filters to run. Review config.default.json or ACCEPT env var. Shutting down.`,
+      `Server mode - no filters found. A Broker requires filters to run. Review config.default.json or ACCEPT env var. Shutting down.`,
     );
     error['code'] = 'MISSING_FILTERS';
     logger.error({ error }, error.message);
@@ -38,12 +38,12 @@ export const main = async (serverOpts: ServerOpts) => {
     ...serverOpts,
   };
   if (!loadedServerOpts.loadedFilters) {
-    logger.error({ serverOpts }, 'Unable to load filters');
-    throw new Error('Unable to load filters');
+    logger.error({ serverOpts }, 'Unable to load filters.');
+    throw new Error('Unable to load filters.');
   }
 
   const onSignal = async () => {
-    logger.debug('received exit signal, closing server');
+    logger.debug('Received exit signal, closing server.');
     await serverStopping(() => {
       process.exit(0);
     });
@@ -94,10 +94,10 @@ export const main = async (serverOpts: ServerOpts) => {
   return {
     websocket: websocket,
     close: (done) => {
-      logger.info('server websocket is closing');
+      logger.info('Server websocket is closing.');
       server.close();
       websocket.destroy(function () {
-        logger.info('server websocket is closed');
+        logger.info('Server websocket is closed.');
         if (done) {
           return done();
         }

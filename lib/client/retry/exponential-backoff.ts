@@ -19,7 +19,7 @@ export const retry = async <T>(
 
     logger.warn(
       { attempt, operation, timeout },
-      `waiting for ${timeout}ms before next try`,
+      `Waiting for ${timeout}ms before next try.`,
     );
 
     await sleep(timeout);
