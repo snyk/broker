@@ -20,7 +20,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
         headers['Authorization'] = `${auth.value}`;
         break;
       default:
-        logger.warn({ validation }, 'No auth validation');
+        logger.warn({ validation }, 'No auth validation.');
     }
     const request: PostFilterPreparedRequest = {
       method: method,

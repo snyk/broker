@@ -33,7 +33,7 @@ export const openHandler = (
         : clientOps.config.brokerToken,
       // metadata,
     },
-    'successfully established a websocket connection to the broker server',
+    'Successfully established a websocket connection to the broker server.',
   );
   logger.debug(
     {

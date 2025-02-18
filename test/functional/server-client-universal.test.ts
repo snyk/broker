@@ -144,7 +144,7 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(spyLogWarn).toHaveBeenCalledTimes(2);
     expect(spyLogWarn).toHaveBeenCalledWith(
       expect.any(Object),
-      'Error: Request does not contain the x-snyk-broker-type header',
+      'Error: Request does not contain the x-snyk-broker-type header.',
     );
   });
 });

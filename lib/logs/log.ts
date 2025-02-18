@@ -6,7 +6,7 @@ export const logResponse = (logContext, status, response, config) => {
   logContext.responseBody =
     config && config.LOG_ENABLE_BODY === 'true' ? response.body : null;
 
-  logger.info(logContext, 'sending response back to websocket connection');
+  logger.info(logContext, 'Sending response back to websocket connection.');
 };
 
 export const logError = (logContext, error) => {
@@ -16,6 +16,6 @@ export const logError = (logContext, error) => {
       error,
       stackTrace: new Error('stacktrace generator').stack,
     },
-    'error while sending websocket request over HTTP connection',
+    'Error while sending websocket request over HTTP connection.',
   );
 };

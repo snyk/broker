@@ -35,7 +35,7 @@ export const loadAllFilters = (
     for (let i = 0; i < filtersKeys.length; i++) {
       logger.info(
         { type: filtersKeys[i] },
-        `Loading ruleset (private + public rules) for ${filtersKeys[i]}`,
+        `Loading ruleset (private + public rules) for ${filtersKeys[i]}.`,
       );
       const loadedFilterSet = {
         public: loadFilters(
@@ -54,7 +54,7 @@ export const loadAllFilters = (
         { type: filtersKeys[i] },
         `Loaded ${filters[filtersKeys[i]].private.length} private & ${
           filters[filtersKeys[i]].public.length
-        } public rules`,
+        } public rules.`,
       );
     }
     return filtersMap;
@@ -231,7 +231,7 @@ export const loadFilters: LOADEDFILTER = (
         }
       }
     } catch (e: unknown) {
-      logger.warn({ error: e }, 'caught error checking request against rules');
+      logger.warn({ error: e }, 'Caught error checking request against rules.');
       res = false;
     }
     return res;

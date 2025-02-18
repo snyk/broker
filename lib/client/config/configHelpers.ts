@@ -68,7 +68,10 @@ export function highAvailabilityModeEnabled(config: any): boolean {
       highAvailabilityModeEnabledValue.toLowerCase() === 'yes';
   }
 
-  logger.info({ enabled: highAvailabilityModeEnabled }, 'checking for HA mode');
+  logger.debug(
+    { enabled: highAvailabilityModeEnabled },
+    'Checking for HA mode.',
+  );
 
   return highAvailabilityModeEnabled;
 }

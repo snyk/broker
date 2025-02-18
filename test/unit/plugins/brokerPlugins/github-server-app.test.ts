@@ -35,7 +35,7 @@ describe('Github Server App Plugin', () => {
     } catch (err) {
       expect(err).toEqual(
         Error(
-          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)',
+          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID)..',
         ),
       );
     }
@@ -57,7 +57,7 @@ describe('Github Server App Plugin', () => {
     } catch (err) {
       expect(err).toEqual(
         Error(
-          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: Pem file path is invalid /invalid/path',
+          'Error in Github Server App Authentication Plugin-GITHUB_SERVER_APP_PLUGIN startup. Error: PEM file path is invalid /invalid/path..',
         ),
       );
     }

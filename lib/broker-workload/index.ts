@@ -167,7 +167,7 @@ export class BrokerWorkload {
                 responseHeaders: response.headers,
                 url: preparedRequest.req.url,
               },
-              `[Websocket Flow][Inbound] Unexpected status code for relayed request`,
+              `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
             );
           }
           responseHandler.sendDataResponse(response, logContext);

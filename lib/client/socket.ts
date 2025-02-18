@@ -57,7 +57,7 @@ export const createWebSocketConnectionPairs = async (
 
   if (!socketIdentifyingMetadata.identifier) {
     throw new Error(
-      `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier`,
+      `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier.`,
     );
   }
   let serverId: string | null = null;
@@ -70,7 +70,7 @@ export const createWebSocketConnectionPairs = async (
   }
   if (serverId === null) {
     if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
-      logger.warn({}, 'could not receive server id from Broker Dispatcher');
+      logger.warn({}, 'Could not receive server id from Broker Dispatcher.');
     }
     serverId = '';
   } else {
@@ -79,7 +79,7 @@ export const createWebSocketConnectionPairs = async (
         connection: maskToken(socketIdentifyingMetadata.identifier),
         serverId: serverId,
       },
-      'received server id',
+      'Received server id.',
     );
     clientOpts.config.connections[
       `${socketIdentifyingMetadata.friendlyName}`
@@ -109,7 +109,7 @@ export const createWebSocket = (
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
   if (!identifyingMetadata.identifier) {
     throw new Error(
-      `Invalid Broker Identifier/Token in websocket tunnel creation step.`,
+      `Invalid Broker identifier in websocket tunnel creation step.`,
     );
   }
   const Socket = Primus.createSocket({
@@ -212,7 +212,7 @@ export const createWebSocket = (
               role: identifyingMetadata.role,
               responseCode: renewResponse.statusCode,
             },
-            'Failed to renew connection',
+            'Failed to renew connection.',
           );
         } else {
           logger.debug(
@@ -243,7 +243,7 @@ export const createWebSocket = (
       url: localClientOps.config.brokerServerUrlForSocket,
       serverId: serverId,
     },
-    `broker client is connecting to broker server ${role}`,
+    `Broker client is connecting to broker server ${role}.`,
   );
   initializeSocketHandlers(websocket, localClientOps);
 
@@ -281,7 +281,7 @@ export const createWebSocket = (
   );
 
   websocket.on('service', (msg) => {
-    logger.info({ msg }, 'service message received');
+    logger.info({ msg }, 'Service message received.');
   });
 
   websocket.on('close', () => {

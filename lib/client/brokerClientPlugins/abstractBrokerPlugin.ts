@@ -37,7 +37,7 @@ export default abstract class BrokerPlugin {
   isDisabled(config): boolean {
     let isDisabled = false;
     if (config[`DISABLE_${this.pluginCode}_PLUGIN`]) {
-      logger.info({ plugin: this.pluginName }, `Plugin disabled`);
+      logger.info({ plugin: this.pluginName }, `Plugin disabled.`);
       isDisabled = true;
     }
     return isDisabled;

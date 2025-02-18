@@ -33,12 +33,12 @@ export const legacyStreamResponseHandler = (token) => {
           });
         }
       } else {
-        logger.warn({ streamingID, token }, 'discarding binary chunk');
+        logger.warn({ streamingID, token }, 'Discarding binary chunk.');
       }
     } else {
       logger.warn(
         { streamingID, token },
-        'trying to write into a closed stream',
+        'Trying to write into a closed stream.',
       );
     }
   };
