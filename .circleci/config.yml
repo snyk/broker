@@ -129,7 +129,7 @@ commands:
     parameters:
       channel:
         type: string
-        default: broker-alerts-cicd
+        default: hybrid-cicd-alerts
     steps:
       - slack/notify:
           channel: <<parameters.channel>>
@@ -403,7 +403,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts-cicd
+          channel: hybrid-cicd-alerts
           trusted-branch: master
 
       - install-npm-packages:
@@ -486,7 +486,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts-cicd
+          channel: hybrid-cicd-alerts
           trusted-branch: master
           <<: *filter-tags-only
 
@@ -513,7 +513,7 @@ workflows:
           project_name: broker-rhel-ubi
           post-steps:
             - notify-slack-on-failure:
-                channel: broker-alerts-vulns
+                channel: hybrid-cicd-alerts
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push base UBI image
@@ -967,7 +967,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: broker-alerts-cicd
+          channel: hybrid-cicd-alerts
           trusted-branch: master
           filters:
             tags:
@@ -999,7 +999,7 @@ workflows:
           project_name: broker
           post-steps:
             - notify-slack-on-failure:
-                channel: broker-alerts-vulns
+                channel: hybrid-cicd-alerts
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push base image
@@ -1042,7 +1042,7 @@ workflows:
           project_name: broker-nlatest
           post-steps:
             - notify-slack-on-failure:
-                channel: broker-alerts-vulns
+                channel: hybrid-cicd-alerts
           <<: *filter-tags-only
       - tag-and-push-docker-image:
           name: Push base image (nlatest)
