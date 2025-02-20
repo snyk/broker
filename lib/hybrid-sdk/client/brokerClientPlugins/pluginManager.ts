@@ -52,7 +52,6 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
     }
     return clientOpts.config['plugins'];
   } catch (err) {
-    console.log(err);
     const errMsg = `Error loading plugins from ${pluginsFolderPath}`;
     logger.error({ err }, `Error loading plugins from ${pluginsFolderPath}`);
     throw new Error(errMsg);

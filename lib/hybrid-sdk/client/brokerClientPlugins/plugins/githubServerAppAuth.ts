@@ -1,4 +1,3 @@
-// import { PostFilterPreparedRequest } from '../../../common/connectionToWorkloadInterface/prepareRequest';
 import { existsSync, readFileSync } from 'node:fs';
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { createPrivateKey } from 'node:crypto';
