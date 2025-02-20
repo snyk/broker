@@ -2,7 +2,6 @@ import path from 'node:path';
 import fs from 'fs';
 import { findProjectRoot } from '../config/config';
 import { log as logger } from '../../../logs/logger';
-import { Rule } from '../types/filter';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeSingleRawRequestToDownstream } from '../../http/request';
 
@@ -70,65 +69,3 @@ export const retrieveFilters = async (locations: Map<string, string>) => {
 
   return retrievedFiltersMap;
 };
-
-export function deepMergeRules(arr1: Rule[], arr2: Rule[]): Rule[] {
-  const isObject = (item: any): item is Record<string, any> =>
-    item && typeof item === 'object' && !Array.isArray(item);
-
-  const mergeArrays = (target: any[], source: any[]): any[] => {
-    const result = [...target];
-
-    for (const item of source) {
-      if (isObject(item) && item.queryParam) {
-        const existing = result.find(
-          (i) => isObject(i) && i.queryParam === item.queryParam,
-        );
-        if (existing) {
-          existing.values = [
-            ...new Set([...(existing.values || []), ...(item.values || [])]),
-          ];
-        } else {
-          result.push(item);
-        }
-      } else if (!result.includes(item)) {
-        result.push(item);
-      }
-    }
-
-    return result;
-  };
-
-  const mergeObjects = (
-    target: Record<string, any>,
-    source: Record<string, any>,
-  ): Record<string, any> => {
-    for (const key of Object.keys(source)) {
-      if (isObject(target[key]) && isObject(source[key])) {
-        target[key] = mergeObjects(target[key], source[key]);
-      } else if (Array.isArray(target[key]) && Array.isArray(source[key])) {
-        target[key] = mergeArrays(target[key], source[key]);
-      } else {
-        target[key] = source[key];
-      }
-    }
-    return target;
-  };
-
-  const grouped: Record<string, Rule> = {};
-
-  for (const rule of [...arr1, ...arr2]) {
-    if (!rule || !isObject(rule)) continue;
-
-    if ('method' in rule && 'path' in rule && 'origin' in rule) {
-      const key = `${rule.method}:${rule.path}:${rule.origin}`;
-
-      if (grouped[key]) {
-        grouped[key] = mergeObjects(grouped[key], rule) as Rule;
-      } else {
-        grouped[key] = rule;
-      }
-    }
-  }
-
-  return Object.values(grouped);
-}

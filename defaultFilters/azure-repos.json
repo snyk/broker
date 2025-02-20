@@ -149,7 +149,11 @@
               "**/go.sum",
               "**%2Fgo.sum",
               "**/*Dockerfile*",
-              "**%2F*Dockerfile*"
+              "**%2F*Dockerfile*",
+              "**/*.json",
+              "**%2F*.json",
+              "**/.azuredevops/snyk_pull_request_template.yaml",
+              "**%2F.azuredevops%2Fsnyk_pull_request_template.yaml"
             ]
           },
           {
@@ -242,7 +246,11 @@
               "**/go.sum",
               "**%2Fgo.sum",
               "**/*Dockerfile*",
-              "**%2F*Dockerfile*"
+              "**%2F*Dockerfile*",
+              "**/*.json",
+              "**%2F*.json",
+              "**/.azuredevops/snyk_pull_request_template.yaml",
+              "**%2F.azuredevops%2Fsnyk_pull_request_template.yaml"
             ]
           },
           {
