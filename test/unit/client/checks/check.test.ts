@@ -1,6 +1,6 @@
 import { aConfig } from '../../../helpers/test-factories';
-import { getConfigChecks } from '../../../../lib/client/checks/config';
-import { getHttpChecks } from '../../../../lib/client/checks/http';
+import { getConfigChecks } from '../../../../lib/hybrid-sdk/client/checks/config';
+import { getHttpChecks } from '../../../../lib/hybrid-sdk/client/checks/http';
 
 describe('client/checks', () => {
   describe('preflightChecksEnabled()', () => {

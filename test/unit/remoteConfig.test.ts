@@ -1,8 +1,14 @@
 import { unlinkSync, writeFileSync } from 'fs';
-import { retrieveConnectionsForDeployment } from '../../lib/client/config/remoteConfig';
-import { getConfig, loadBrokerConfig } from '../../lib/common/config/config';
-import { ClientOpts, CONFIGURATION } from '../../lib/common/types/options';
-import { setAuthConfigKey } from '../../lib/client/auth/oauth';
+import { retrieveConnectionsForDeployment } from '../../lib/hybrid-sdk/client/config/remoteConfig';
+import {
+  getConfig,
+  loadBrokerConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
+import {
+  ClientOpts,
+  CONFIGURATION,
+} from '../../lib/hybrid-sdk/common/types/options';
+import { setAuthConfigKey } from '../../lib/hybrid-sdk/client/auth/oauth';
 const nock = require('nock');
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 

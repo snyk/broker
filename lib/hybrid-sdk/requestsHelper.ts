@@ -2,11 +2,11 @@ import {
   makeRequestToDownstream,
   makeStreamingRequestToDownstream,
 } from './http/request';
-import { PostFilterPreparedRequest } from '../broker-workload/prepareRequest';
 import { log as logger } from '../logs/logger';
 import { logError, logResponse } from '../logs/log';
-import { isJson } from '../common/utils/json';
-import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { isJson } from './common/utils/json';
+import { replaceUrlPartialChunk } from './common/utils/replace-vars';
+import { PostFilterPreparedRequest } from '../broker-workload/prepareRequest';
 
 export const makePostStreamingRequest = async (
   req: PostFilterPreparedRequest,

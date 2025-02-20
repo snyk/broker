@@ -3,7 +3,7 @@ import {
   StreamResponse,
 } from './http/server-post-stream-handler';
 import { log as logger } from '../logs/logger';
-import { observeResponseSize } from '../common/utils/metrics';
+import { observeResponseSize } from './common/utils/metrics';
 
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */

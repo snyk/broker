@@ -1,6 +1,6 @@
 const nock = require('nock');
-import { setAuthConfigKey } from '../../../../lib/client/auth/oauth';
-import { getServerId } from '../../../../lib/client/dispatcher';
+import { setAuthConfigKey } from '../../../../lib/hybrid-sdk/client/auth/oauth';
+import { getServerId } from '../../../../lib/hybrid-sdk/client/dispatcher';
 
 const serverUrl = 'http://broker-server-dispatcher';
 

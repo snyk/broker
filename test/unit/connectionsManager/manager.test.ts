@@ -1,6 +1,9 @@
-import { manageWebsocketConnections } from '../../../lib/client/connectionsManager/manager';
-import { IdentifyingMetadata, Role } from '../../../lib/client/types/client';
-import { LoadedClientOpts } from '../../../lib/common/types/options';
+import { manageWebsocketConnections } from '../../../lib/hybrid-sdk/client/connectionsManager/manager';
+import {
+  IdentifyingMetadata,
+  Role,
+} from '../../../lib/hybrid-sdk/client/types/client';
+import { LoadedClientOpts } from '../../../lib/hybrid-sdk/common/types/options';
 
 describe('Connections Manager', () => {
   it('Returns websocket connections empty array by default', async () => {

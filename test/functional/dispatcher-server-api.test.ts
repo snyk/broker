@@ -1,4 +1,4 @@
-import { loadBrokerConfig } from '../../lib/common/config/config';
+import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
 
 const PORT = 9999;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
@@ -56,7 +56,7 @@ describe('Broker Server Dispatcher API interaction', () => {
       process.env.DISPATCHER_URL = `${serverUrl}`;
       process.env.hostname = '0';
       await loadBrokerConfig();
-      const dispatcher = require('../../lib/server/infra/dispatcher');
+      const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
       await expect(
         dispatcher.clientConnected(token, clientId, clientVersion),
       ).resolves.not.toThrowError();
@@ -123,7 +123,7 @@ describe('Broker Server Dispatcher API interaction', () => {
     try {
       process.env.DISPATCHER_URL = `${serverUrl}`;
       process.env.hostname = '0';
-      const dispatcher = require('../../lib/server/infra/dispatcher');
+      const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
       await expect(
         dispatcher.clientConnected(token, clientId, clientVersion),
       ).resolves.not.toThrowError();

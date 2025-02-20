@@ -1,18 +1,18 @@
 import { Request, Response } from 'express';
 import { log as logger } from '../logs/logger';
-import { getConfig } from '../common/config/config';
+import { getConfig } from './common/config/config';
 
 import {
   incrementWebSocketRequestsTotal,
   observeResponseSize,
   incrementUnableToSizeResponse,
-} from '../common/utils/metrics';
+} from './common/utils/metrics';
 import undefsafe from 'undefsafe';
-import { ExtendedLogContext } from '../common/types/log';
+import { ExtendedLogContext } from './common/types/log';
 import { v4 as uuid } from 'uuid';
 import stream from 'stream';
 import { streamsStore } from './http/server-post-stream-handler';
-import { maskToken } from '../common/utils/token';
+import { maskToken } from './common/utils/token';
 import { makeRequestToDownstream } from './http/request';
 
 export class HybridClientRequestHandler {

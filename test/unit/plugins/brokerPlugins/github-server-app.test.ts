@@ -1,8 +1,8 @@
-import { Plugin } from '../../../../lib/client/brokerClientPlugins/plugins/githubServerAppAuth';
-import { findProjectRoot } from '../../../../lib/common/config/config';
+import { Plugin } from '../../../../lib/hybrid-sdk/client/brokerClientPlugins/plugins/githubServerAppAuth';
+import { findProjectRoot } from '../../../../lib/hybrid-sdk/common/config/config';
 import nock from 'nock';
 import { delay } from '../../../helpers/utils';
-import { getConfig } from '../../../../lib/common/config/config';
+import { getConfig } from '../../../../lib/hybrid-sdk/common/config/config';
 
 describe('Github Server App Plugin', () => {
   const pluginsFixturesFolderPath = `${findProjectRoot(

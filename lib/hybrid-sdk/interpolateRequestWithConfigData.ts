@@ -1,13 +1,13 @@
-import { getConfig } from '../common/config/config';
+import { getConfig } from './common/config/config';
 import {
   getConfigForIdentifier,
   getConfigForType,
   overloadConfigWithConnectionSpecificConfig,
-} from '../common/config/universal';
-import { Rule } from '../common/types/filter';
-import authHeader from '../common/utils/auth-header';
-import { replace } from '../common/utils/replace-vars';
-import tryJSONParse from '../common/utils/try-json-parse';
+} from './common/config/universal';
+import { Rule } from './common/types/filter';
+import authHeader from './common/utils/auth-header';
+import { replace } from './common/utils/replace-vars';
+import tryJSONParse from './common/utils/try-json-parse';
 import undefsafe from 'undefsafe';
 
 export const getInterpolatedRequest = (

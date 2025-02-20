@@ -1,4 +1,4 @@
-import { validateBrokerToken } from '../../../../../lib/client/checks/config/brokerTokenCheck';
+import { validateBrokerToken } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerTokenCheck';
 import { aConfig } from '../../../../helpers/test-factories';
 
 const checks = [

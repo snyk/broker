@@ -1,7 +1,7 @@
 import http from 'http';
 import { MockServer } from 'jest-mock-server';
 import { aHttpCheck } from '../../../../helpers/test-factories';
-import { executeHttpRequest } from '../../../../../lib/client/checks/http/http-executor';
+import { executeHttpRequest } from '../../../../../lib/hybrid-sdk/client/checks/http/http-executor';
 import { setTimeout } from 'node:timers/promises';
 
 describe('client/checks/http/http-executor.ts', () => {

@@ -1,7 +1,7 @@
 import 'clarify'; // clean the stacktraces
 import { log as logger } from './logs/logger';
-import { getConfig, loadBrokerConfig } from './common/config/config';
-import { CONFIGURATION } from './common/types/options';
+import { getConfig, loadBrokerConfig } from './hybrid-sdk/common/config/config';
+import { CONFIGURATION } from './hybrid-sdk/common/types/options';
 
 process.on('uncaughtExceptionMonitor', (error, origin) => {
   logger.error({ error, origin }, 'found unhandled exception');
@@ -22,7 +22,9 @@ export const app = async ({ port = 7341, client = false, config }) => {
   try {
     // note: the config is loaded in the main function to allow us to mock in tests
     if (process.env.JEST_WORKER_ID) {
-      delete require.cache[require.resolve('./common/config/config')];
+      delete require.cache[
+        require.resolve('./hybrid-sdk/common/config/config')
+      ];
     }
 
     const method = client ? 'client' : 'server';
@@ -41,14 +43,14 @@ export const app = async ({ port = 7341, client = false, config }) => {
     localConfig.brokerType = method;
     if (method == 'client') {
       return await (
-        await import('./client')
+        await import('./hybrid-sdk/client')
       ).main({
         config: localConfig,
         port: localConfig.port || port,
       });
     } else {
       return await (
-        await import('./server')
+        await import('./hybrid-sdk/server')
       ).main({
         config: localConfig,
         port: localConfig.port || port,

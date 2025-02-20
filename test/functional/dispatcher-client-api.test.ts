@@ -1,6 +1,6 @@
 import { MockServer } from 'jest-mock-server';
-import { HttpDispatcherServiceClient } from '../../lib/client/dispatcher/client/api';
-import { setAuthConfigKey } from '../../lib/client/auth/oauth';
+import { HttpDispatcherServiceClient } from '../../lib/hybrid-sdk/client/dispatcher/client/api';
+import { setAuthConfigKey } from '../../lib/hybrid-sdk/client/auth/oauth';
 
 describe('Broker Dispatcher API client', () => {
   const server = new MockServer();

@@ -2,8 +2,8 @@ import stream from 'stream';
 
 import { Response } from 'express';
 import NodeCache from 'node-cache';
-import { getConfig } from '../../common/config/config';
-import { observeResponseSize } from '../../common/utils/metrics';
+import { getConfig } from '../common/config/config';
+import { observeResponseSize } from '../common/utils/metrics';
 
 export const streamsStore = new NodeCache({
   stdTTL: parseInt(getConfig().cacheExpiry) || 3600, // 1 hour

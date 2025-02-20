@@ -1,5 +1,5 @@
 import { aConfig } from '../../../../helpers/test-factories';
-import { validateBrokerServerUrl } from '../../../../../lib/client/checks/config/brokerServerUrlCheck';
+import { validateBrokerServerUrl } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerServerUrlCheck';
 
 describe('client/checks/config', () => {
   describe('validateBrokerClientUrl()', () => {

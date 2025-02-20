@@ -1,4 +1,4 @@
-import { validateAcceptFlagsConfig } from '../../../../../lib/client/checks/config/customAcceptFile';
+import { validateAcceptFlagsConfig } from '../../../../../lib/hybrid-sdk/client/checks/config/customAcceptFile';
 import { aConfig } from '../../../../helpers/test-factories';
 
 describe('client/checks/config', () => {

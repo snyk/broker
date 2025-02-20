@@ -1,5 +1,5 @@
 import { parse } from 'url';
-// import { loadBrokerConfig } from '../../lib/common/config';
+// import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config';
 
 describe('Proxy decision', () => {
   afterEach(() => {

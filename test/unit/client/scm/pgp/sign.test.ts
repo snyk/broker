@@ -3,9 +3,9 @@ import {
   createSignature,
   normalizeArmoredKeyIfNeeded,
   validatePrivateKey,
-} from '../../../../../lib/client/scm/pgp/sign';
+} from '../../../../../lib/hybrid-sdk/client/scm/pgp/sign';
 import { Fixtures } from '../../../../helpers/fixtures';
-import { PgpPrivateKeyValidationError } from '../../../../../lib/client/scm/pgp/errors';
+import { PgpPrivateKeyValidationError } from '../../../../../lib/hybrid-sdk/client/scm/pgp/errors';
 
 const pgpFixturesRoot = path.resolve(Fixtures.getPathToClientFixtures(), 'pgp');
 const pgpPrivateKey = Fixtures.get('pgp-private-key.pem', pgpFixturesRoot);

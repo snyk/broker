@@ -1,5 +1,5 @@
 import { aConfig } from '../../../../helpers/test-factories';
-import { validateBrokerClientUrl } from '../../../../../lib/client/checks/config/brokerClientUrlCheck';
+import { validateBrokerClientUrl } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerClientUrlCheck';
 const nock = require('nock');
 
 describe('client/checks/config', () => {
