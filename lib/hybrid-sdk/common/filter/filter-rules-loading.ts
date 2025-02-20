@@ -208,6 +208,9 @@ function injectRulesAtRuntime(
           templateGET.path = '*/info/refs*';
           templateGETForSnippets.path =
             '/:owner/_apis/git/repositories/:repo/items';
+          templateGETForSnippets.valid = [
+            { queryParam: 'path', values: ['*'] },
+          ];
           templatePOST.path = '*/git-upload-pack';
           break;
         case 'GITHUB':

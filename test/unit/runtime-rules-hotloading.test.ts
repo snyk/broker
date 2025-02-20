@@ -507,18 +507,67 @@ describe('filter Rules Loading', () => {
         config,
         path.join(__dirname, '../..', `client-templates/${folder}`),
       );
-
       for (const rule of [
         'allow git-upload-pack (for git clone)',
         'allow info refs (for git clone)',
-        'needed to load code snippets',
       ]) {
         expect(
           loadedRules['private'].filter((x) => x['//'] === rule),
         ).toHaveLength(1);
       }
+      if (folder == 'azure-repos') {
+        const snippetRules = loadedRules['private'].filter(
+          (x) => x.path === '/:owner/_apis/git/repositories/:repo/items',
+        );
+        expect(snippetRules).toHaveLength(1);
+        expect(
+          snippetRules[0].valid.some(
+            (x) => x.queryParam === 'path' && x.values.some((y) => y == '*'),
+          ),
+        ).toBeTruthy();
+      } else {
+        for (const rule of [
+          'allow git-upload-pack (for git clone)',
+          'allow info refs (for git clone)',
+          'needed to load code snippets',
+        ]) {
+          expect(
+            loadedRules['private'].filter((x) => x['//'] === rule),
+          ).toHaveLength(1);
+        }
+      }
+
       delete process.env.ACCEPT_GIT;
       delete process.env.ACCEPT_ESSENTIALS;
+    },
+  );
+
+  test.each(scmRulesToTest)(
+    'Injection of rules with all enabled - Testing %s',
+    async (folder) => {
+      process.env.ACCEPT_GIT = 'true';
+      process.env.ACCEPT_ESSENTIALS = 'true';
+      process.env.CUSTOM_PR_TEMPLATE = 'true';
+      process.env.ACCEPT_IAC = 'tf,yaml,yml,json,tpl';
+      process.env.ACCEPT_LARGE_MANIFESTS = 'true';
+      const config: CONFIGURATION = {
+        brokerType: 'client',
+        supportedBrokerTypes: scmRulesToTest,
+        accept: 'accept.json.sample',
+        filterRulesPaths: {},
+      };
+      config[camelcase(`BROKER_DOWNSTREAM_TYPE_${folder}`)] = 'true';
+      const loadedRules = await loadFilterRules(
+        config,
+        path.join(__dirname, '../..', `client-templates/${folder}`),
+      );
+      expect(loadedRules).toMatchSnapshot();
+
+      delete process.env.ACCEPT_GIT;
+      delete process.env.ACCEPT_ESSENTIALS;
+      delete process.env.CUSTOM_PR_TEMPLATE;
+      delete process.env.ACCEPT_IAC;
+      delete process.env.ACCEPT_LARGE_MANIFESTS;
     },
   );
 });
