@@ -53,7 +53,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       responseMedium: this.req.headers['x-broker-ws-response']
         ? 'websocket'
         : 'http',
-      requestId: randomUUID(),
+      requestId: `${this.req.headers['snyk-request-id'] ?? randomUUID()}`,
     };
 
     if (!matchedFilterRule) {
