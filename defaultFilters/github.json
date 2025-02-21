@@ -2140,6 +2140,12 @@
         "method": "PATCH",
         "path": "/repos/:name/:repo/hooks/:id/config",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "allow webhooks to be updated, to allow for event upgrades",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/hooks/:id",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       }
     ]
   }
