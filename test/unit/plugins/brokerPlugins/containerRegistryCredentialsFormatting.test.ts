@@ -1,4 +1,4 @@
-import { Plugin } from '../../../../lib/client/brokerClientPlugins/plugins/containerRegistryCredentialsFormatting';
+import { Plugin } from '../../../../lib/hybrid-sdk/client/brokerClientPlugins/plugins/containerRegistryCredentialsFormatting';
 describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Instantiate plugin', () => {
     const config = {};

@@ -3,8 +3,8 @@ import { legacyStreaming } from './requestsHelper';
 import { log as logger } from '../logs/logger';
 import { IncomingMessage } from 'node:http';
 import { logError, logResponse } from '../logs/log';
-import { isJson } from '../common/utils/json';
-import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { isJson } from './common/utils/json';
+import { replaceUrlPartialChunk } from './common/utils/replace-vars';
 import { RequestMetadata } from './types';
 
 export interface HybridResponse {

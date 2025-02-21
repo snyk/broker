@@ -11,6 +11,10 @@
   "ACCEPT_IAC": "tf,yaml,yml,json,tpl",
   "ACCEPT_LARGE_MANIFESTS": true,
   "ACCEPT_CUSTOM_PR_TEMPLATES": true,
+  "REMOTE_WORKLOAD_NAME":"BrokerWorkload",
+  "REMOTE_WORKLOAD_MODULE_PATH":"../broker-workload/websocketRequests",
+  "CLIENT_WORKLOAD_NAME": "BrokerClientRequestWorkload",
+  "CLIENT_WORKLOAD_MODULE_PATH": "../broker-workload/clientLocalRequests",
   "BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED": false,
   "SUPPORTED_BROKER_TYPES": [
     "apprisk",
@@ -187,6 +191,7 @@
         }
       ],
       "default": {
+        "BITBUCKET_GIT": "$BITBUCKET",
         "BITBUCKET_API": "$BITBUCKET/rest/api/1.0",
         "BROKER_CLIENT_VALIDATION_URL": "https://$BITBUCKET/rest/api/1.0/projects",
         "BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER": "Bearer $BITBUCKET_PAT",

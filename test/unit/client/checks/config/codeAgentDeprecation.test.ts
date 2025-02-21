@@ -1,4 +1,4 @@
-import { validateCodeAgentDeprecation } from '../../../../../lib/client/checks/config/codeAgentDeprecation';
+import { validateCodeAgentDeprecation } from '../../../../../lib/hybrid-sdk/client/checks/config/codeAgentDeprecation';
 import { aConfig } from '../../../../helpers/test-factories';
 
 describe('client/checks/config', () => {

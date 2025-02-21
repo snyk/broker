@@ -1,18 +1,21 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
-import { Role, WebSocketConnection } from '../../lib/client/types/client';
-import { loadBrokerConfig } from '../../lib/common/config/config';
-import { loadAllFilters } from '../../lib/common/filter/filtersAsync';
+import {
+  Role,
+  WebSocketConnection,
+} from '../../lib/hybrid-sdk/client/types/client';
+import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
+import { loadAllFilters } from '../../lib/hybrid-sdk/common/filter/filtersAsync';
 const nock = require('nock');
 
-import { forwardWebSocketRequest as relay } from '../../lib/common/relay/forwardWebsocketRequest';
+import { forwardWebSocketRequest as relay } from '../../lib/hybrid-sdk/common/connectionToWorkloadInterface/forwardWebsocketRequest';
 import {
   CONFIGURATION,
   LoadedClientOpts,
   LoadedServerOpts,
-} from '../../lib/common/types/options';
-import { setFilterConfig } from '../../lib/client/config/filters';
+} from '../../lib/hybrid-sdk/common/types/options';
+import { setFilterConfig } from '../../lib/hybrid-sdk/client/config/filters';
 
 const dummyWebsocketHandler: WebSocketConnection = {
   destroy: () => {
@@ -84,6 +87,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientLocalRequests',
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),
       brokerType: 'client',
@@ -157,6 +164,10 @@ describe('body relay', () => {
     const brokerToken = 'test-broker';
 
     const config: CONFIGURATION = {
+      remoteWorkloadName: 'BrokerWorkload',
+      remoteWorkloadModulePath: '../broker-workload/websocketRequests',
+      clientWorkloadName: 'BrokerClientRequestWorkload',
+      clientWorkloadModulePath: '../broker-workload/clientLocalRequests',
       disableBodyVarsSubstitution: true,
       universalBrokerEnabled: true,
       plugins: new Map<string, any>(),

@@ -2,7 +2,7 @@ import { aConfig } from '../../../helpers/test-factories';
 import {
   commitSigningEnabled,
   signGitHubCommit,
-} from '../../../../lib/client/scm';
+} from '../../../../lib/hybrid-sdk/client/scm';
 
 describe('client/scm', () => {
   describe('commitSigningEnabled()', () => {

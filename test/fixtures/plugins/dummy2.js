@@ -1,4 +1,4 @@
-import BrokerPlugin from '../../../lib/client/brokerClientPlugins/abstractBrokerPlugin';
+import BrokerPlugin from '../../../lib/hybrid-sdk/client/brokerClientPlugins/abstractBrokerPlugin';
 
 export class Plugin extends BrokerPlugin {
   pluginCode = 'DUMMY2';

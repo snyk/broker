@@ -1,16 +1,18 @@
 import { log as logger } from '../../logs/logger';
 import stream from 'stream';
 import { pipeline } from 'stream/promises';
-import { replaceUrlPartialChunk } from '../../common/utils/replace-vars';
-import version from '../../common/utils/version';
+
+import version from '../common/utils/version';
 
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
-import { getConfig } from '../../common/config/config';
-import { getAuthConfig } from '../../client/auth/oauth';
+
+import { getAuthConfig } from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
+import { getConfig } from '../common/config/config';
+import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 

@@ -2033,5 +2033,15 @@
           "token": "${GHA_ACCESS_TOKEN}"
         }
       },
+      {
+        "//": "allow webhooks to be updated, to allow for event upgrades",
+        "method": "PATCH",
+        "path": "/repos/:name/:repo/hooks/:id",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      }
     ]
   }

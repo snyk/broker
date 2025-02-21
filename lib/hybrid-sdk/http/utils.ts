@@ -1,4 +1,4 @@
-import { Role } from '../../client/types/client';
+import { Role } from '../client/types/client';
 import { log as logger } from '../../logs/logger';
 export const switchToInsecure = (url: string) => {
   const urlToSwitch = new URL(url);

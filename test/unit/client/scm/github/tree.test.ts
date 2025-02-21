@@ -2,9 +2,9 @@ import {
   convertBodyToGitHubTreePayload,
   isGitHubCreateTreeEndpoint,
   validateForSymlinksInCreateTree,
-} from '../../../../../lib/client/scm/github/tree';
-import type { GitHubCreateTreePayload } from '../../../../../lib/client/scm/github/types';
-import { GitHubTreeValidationError } from '../../../../../lib/client/scm/github/errors';
+} from '../../../../../lib/hybrid-sdk/client/scm/github/tree';
+import type { GitHubCreateTreePayload } from '../../../../../lib/hybrid-sdk/client/scm/github/types';
+import { GitHubTreeValidationError } from '../../../../../lib/hybrid-sdk/client/scm/github/errors';
 
 describe('client/scm/github/tree.ts', () => {
   describe('isGitHubCreateTreeEndpoint()', () => {

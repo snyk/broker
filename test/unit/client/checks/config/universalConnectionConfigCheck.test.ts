@@ -1,5 +1,5 @@
-import { validateUniversalConnectionsConfig } from '../../../../../lib/client/checks/config/universalConnectionConfigCheck';
-import { getConfigForConnectionsFromConfig } from '../../../../../lib/common/config/universal';
+import { validateUniversalConnectionsConfig } from '../../../../../lib/hybrid-sdk/client/checks/config/universalConnectionConfigCheck';
+import { getConfigForConnectionsFromConfig } from '../../../../../lib/hybrid-sdk/common/config/universal';
 import { aUniversalDefaultConfig } from '../../../../helpers/test-factories';
 
 describe('client/checks/config', () => {

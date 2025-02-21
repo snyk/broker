@@ -1,8 +1,11 @@
-import { getConfig, setConfig } from '../../lib/common/config/config';
+import {
+  getConfig,
+  setConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
 import {
   replace,
   replaceUrlPartialChunk,
-} from '../../lib/common/utils/replace-vars';
+} from '../../lib/hybrid-sdk/common/utils/replace-vars';
 const config = getConfig();
 const setConfigAndReturnOriginalConfigForTestOnly = (configObject) => {
   const originalConfig = Object.assign({}, config);

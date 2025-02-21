@@ -1,5 +1,5 @@
+import { computeContentLength } from '../../lib/broker-workload/content-length';
 import { PostFilterPreparedRequest } from '../../lib/broker-workload/prepareRequest';
-import { computeContentLength } from '../../lib/common/utils/content-length';
 
 describe('utils', () => {
   it('computeContentLength 0 for bodylessr requests', () => {

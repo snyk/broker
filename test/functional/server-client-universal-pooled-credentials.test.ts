@@ -1,5 +1,5 @@
 import path from 'path';
-import version from '../../lib/common/utils/version';
+import version from '../../lib/hybrid-sdk/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
 import { BrokerClient, closeBrokerClient } from '../setup/broker-client';
 import {

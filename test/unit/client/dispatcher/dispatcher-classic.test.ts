@@ -1,5 +1,5 @@
 const nock = require('nock');
-import { getServerId } from '../../../../lib/client/dispatcher';
+import { getServerId } from '../../../../lib/hybrid-sdk/client/dispatcher';
 
 const serverUrl = 'http://broker-server-dispatcher';
 

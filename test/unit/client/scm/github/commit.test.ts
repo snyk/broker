@@ -2,8 +2,8 @@ import {
   convertBodyToGitHubCommitPayload,
   isGitHubCreateCommitEndpoint,
   stringifyGitHubCommitPayload,
-} from '../../../../../lib/client/scm/github/commit';
-import type { GitHubCommitPayload } from '../../../../../lib/client/scm/github/types';
+} from '../../../../../lib/hybrid-sdk/client/scm/github/commit';
+import type { GitHubCommitPayload } from '../../../../../lib/hybrid-sdk/client/scm/github/types';
 
 describe('client/scm/github/commit.ts', () => {
   describe('isGitHubCreateCommitEndpoint()', () => {
