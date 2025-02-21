@@ -220,25 +220,6 @@
     }
   },
   {
-    "//": "get organization context from file",
-    "method": "GET",
-    "path": "/:org/_apis/git/repositories/:repo/items",
-    "origin": "https://${AZURE_REPOS_HOST}",
-    "auth": {
-      "scheme": "basic",
-      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
-    },
-    "valid": [
-      {
-        "queryParam": "path",
-        "values": [
-          "**/*.json",
-          "**%2F*.json"
-        ]
-      }
-    ]
-  },
-  {
     "//": "get organization context from file without org",
     "method": "GET",
     "path": "/_apis/git/repositories/:repo/items",

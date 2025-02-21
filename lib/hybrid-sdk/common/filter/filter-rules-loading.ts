@@ -6,7 +6,7 @@ import { log as logger } from '../../../logs/logger';
 import { findProjectRoot } from '../config/config';
 import camelcase from 'camelcase';
 import { FiltersType, Rule } from '../types/filter';
-import { retrieveFilters, isValidURI, deepMergeRules } from './utils';
+import { retrieveFilters, isValidURI } from './utils';
 import { CONFIGURATION } from '../types/options';
 
 const SUPPORTED_IAC_EXTENSIONS = ['tf', 'yaml', 'yml', 'tpl', 'json'];
@@ -208,6 +208,7 @@ function injectRulesAtRuntime(
           templateGET.path = '*/info/refs*';
           templateGETForSnippets.path =
             '/:owner/_apis/git/repositories/:repo/items';
+          delete templateGETForSnippets.valid;
           templatePOST.path = '*/git-upload-pack';
           break;
         case 'GITHUB':
@@ -280,7 +281,20 @@ function injectRulesAtRuntime(
         `defaultFilters/apprisk/${type}.json`,
       )) as Rule[];
 
-      filters.private = deepMergeRules(filters.private, appRiskRules);
+      const appRiskRulesMethodPattern = appRiskRules.map(
+        (x) => `${x.method}|${x.path}`,
+      );
+
+      const possibleOverlappingRules = filters.private.filter((x) => {
+        return !appRiskRulesMethodPattern.includes(`${x.method}|${x.path}`);
+      });
+      if (possibleOverlappingRules.length > 0) {
+        logger.debug(
+          { possibleOverlappingRules },
+          `Caution, possible overlapping rules with apprisk rules extension.`,
+        );
+      }
+      filters.private.push(...appRiskRules);
     }
   }
 
@@ -312,7 +326,21 @@ function injectRulesAtRuntime(
         `defaultFilters/customPrTemplates/${type}.json`,
       )) as Rule[];
 
-      filters.private = deepMergeRules(filters.private, customPRTemplatesRules);
+      const customPRTemplatesRulesMethodPattern = customPRTemplatesRules.map(
+        (x) => `${x.method}|${x.path}`,
+      );
+      const possibleOverlappingRules = filters.private.filter((x) => {
+        return !customPRTemplatesRulesMethodPattern.includes(
+          `${x.method}|${x.path}`,
+        );
+      });
+      if (possibleOverlappingRules.length > 0) {
+        logger.debug(
+          { possibleOverlappingRules },
+          `Caution, possible overlapping rules with custom PR templates.`,
+        );
+      }
+      filters.private.push(...customPRTemplatesRules);
     }
   }
 
