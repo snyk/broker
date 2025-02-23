@@ -3,6 +3,7 @@ import { log as logger } from '../../../logs/logger';
 import { clientDisconnected } from '../infra/dispatcher';
 import { getSocketConnections } from '../socket';
 import { getDesensitizedToken } from '../utils/token';
+import { rmClientIdFromTerminationMap } from './identifyHandler';
 
 export const handleConnectionCloseOnSocket = (
   closeReason,
@@ -42,6 +43,7 @@ export const handleConnectionCloseOnSocket = (
         'Client disconnected before identifying itself.',
       );
     }
+    rmClientIdFromTerminationMap(token, clientId);
     setImmediate(async () => await clientDisconnected(token, clientId));
   }
 };

@@ -47,6 +47,10 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
   }
 });
+export let websocketConnections: WebSocketConnection[];
+export const getWebsocketConnections = () => {
+  return websocketConnections;
+};
 
 export const main = async (clientOpts: ClientOpts) => {
   try {
@@ -55,6 +59,7 @@ export const main = async (clientOpts: ClientOpts) => {
     clientOpts.config.brokerClientId = uuidv4();
     clientOpts.config.logEnableBody = 'false';
     clientOpts.config.LOG_ENABLE_BODY = 'false';
+    websocketConnections = [];
     logger.info(
       { brokerClientId: clientOpts.config.brokerClientId },
       'Generated broker client id.',
@@ -117,7 +122,6 @@ export const main = async (clientOpts: ClientOpts) => {
       isDisabled: false,
     };
 
-    let websocketConnections: WebSocketConnection[] = [];
     if (clientOpts.config.universalBrokerEnabled) {
       websocketConnections = await manageWebsocketConnections(
         clientOpts,
