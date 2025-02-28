@@ -35,8 +35,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
         request as PostFilterPreparedRequest,
       );
       if (response && response.statusCode) {
-        passing =
-          response.statusCode < 300 && response.statusCode > 200 ? true : false;
+        passing = response.statusCode > 200 && response.statusCode < 300;
       }
       data.push({
         url: url,
