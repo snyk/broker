@@ -48,6 +48,12 @@
     "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
   },
   {
+    "//": "used to get repo's custom properties",
+    "method": "GET",
+    "path": "/repos/:owner/:repo/properties/values",
+    "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+  },
+  {
     "//": "used to get repo's topics list",
     "method": "GET",
     "path": "/repos/:owner/:repo/topics",

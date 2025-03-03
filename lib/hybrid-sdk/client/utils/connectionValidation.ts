@@ -1,7 +1,8 @@
 import { makeSingleRawRequestToDownstream } from '../../http/request';
 import { ConnectionConfig } from '../types/config';
-import { log as logger } from '../../../logs/logger';
+import { log as logger, sanitise } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
+
 export const validateConnection = async (config: ConnectionConfig) => {
   let passing = false;
   const data: Object[] = [];
@@ -30,21 +31,22 @@ export const validateConnection = async (config: ConnectionConfig) => {
     if (validation.body) {
       request.body = validation.body;
     }
+    // make sure that credentials in url are sanitised
+    const sanitisedUrl = sanitise(url);
     try {
       const response = await makeSingleRawRequestToDownstream(
         request as PostFilterPreparedRequest,
       );
       if (response && response.statusCode) {
-        passing =
-          response.statusCode < 300 && response.statusCode > 200 ? true : false;
+        passing = response.statusCode > 200 && response.statusCode < 300;
       }
       data.push({
-        url: url,
+        url: sanitisedUrl,
         data: response.body,
         statusCode: response.statusCode,
       });
     } catch (err) {
-      data.push({ url: url, data: err });
+      data.push({ url: sanitisedUrl, data: err });
     }
   }
   return { passing, data };

@@ -42,7 +42,7 @@ export const createWebSocketConnectionPairs = async (
   const socketIdentifyingMetadata = structuredClone(globalIdentifyingMetadata);
   socketIdentifyingMetadata.friendlyName = connectionKey;
   socketIdentifyingMetadata.id =
-    clientOpts.config.connections[`${connectionKey}`].id;
+    clientOpts.config.connections[`${connectionKey}`].id ?? '';
   socketIdentifyingMetadata.identifier =
     clientOpts.config.connections[`${connectionKey}`]['identifier'];
   socketIdentifyingMetadata.isDisabled =

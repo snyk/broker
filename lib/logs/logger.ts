@@ -100,6 +100,7 @@ export const sanitise = (raw) => {
     'GIT_CLIENT_URL',
     'NEXUS_URL',
     'BASE_NEXUS_URL',
+    'BASE_NEXUS2_URL',
     'CHECKMARX_PASSWORD',
     'SONARQUBE_API_TOKEN',
   ];
