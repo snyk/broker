@@ -88,6 +88,11 @@ export abstract class Workload<
   ): Promise<
     Workload<WorkloadType.localClient> | Workload<WorkloadType.remoteServer>
   > {
+    if (!path) {
+      throw new Error(
+        `Unable to instantiate workload, path is undefined. Please check config.default.json to contain workload directives. Refer to https://github.com/snyk/broker/blob/master/config.default.json.`,
+      );
+    }
     switch (type) {
       case WorkloadType.remoteServer:
         return await this.instantiateRemoteServerWorkload(name, path, params);

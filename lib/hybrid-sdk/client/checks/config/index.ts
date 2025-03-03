@@ -6,6 +6,7 @@ import { validateCodeAgentDeprecation } from './codeAgentDeprecation';
 import { validateUniversalConnectionsConfig } from './universalConnectionConfigCheck';
 import { validateBrokerClientVersionAgainstServer } from './brokerClientVersionCheck';
 import { validateBrokerToken } from './brokerTokenCheck';
+import { validateWorkloadConfig } from './workloadConfiguration';
 
 export function getConfigChecks(config: Config): Check[] {
   return [
@@ -15,6 +16,7 @@ export function getConfigChecks(config: Config): Check[] {
     codeAgentDeprecationCheck(config),
     brokerClientVersionCheck(config),
     brokerTokenCheck(config),
+    workloadConfigurationCheck(config),
   ];
 }
 
@@ -57,6 +59,17 @@ const acceptFlagsConfigurationCheck = (config: Config): Check => {
         { id: this.id, name: this.name },
         config,
       );
+    },
+  } satisfies Check;
+};
+
+const workloadConfigurationCheck = (config: Config): Check => {
+  return {
+    id: 'workload-config-validation',
+    name: 'Workload Configuration Check',
+    enabled: true,
+    check: function (): CheckResult {
+      return validateWorkloadConfig({ id: this.id, name: this.name }, config);
     },
   } satisfies Check;
 };
