@@ -548,4 +548,95 @@ describe('broker client systemcheck endpoint', () => {
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
   });
+
+  it('should sanitise validation url (artifactory, nexus, nexus2)', async () => {
+    process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest8';
+    process.env.BROKER_TOKEN_1 = 'brokertoken1';
+    process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    process.env.MY_ARTIFACTORY_URL = 'user:name@artifactory.local/artifactory';
+    process.env.MY_BASE_NEXUS_URL = 'user:name@nexus.local';
+    process.env.MY_BASE_NEXUS2_URL = 'user:name@nexus2.local';
+
+    process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
+    process.env.SNYK_FILTER_RULES_PATHS__artifactory = clientAccept;
+    bc = await createUniversalBrokerClient();
+    await waitForUniversalBrokerClientsConnection(bs, 3);
+
+    nock('https://artifactory.local')
+      .persist()
+      .get('/artifactory/api/system/ping')
+      .reply(() => {
+        return [500, 'artifactory - failed healthcheck'];
+      });
+    nock('https://nexus.local')
+      .persist()
+      .get('/service/rest/v1/status/check/api/system/ping')
+      .reply(() => {
+        return [500, 'nexus - failed healthcheck'];
+      });
+    nock('https://nexus2.local')
+      .persist()
+      .get('/nexus/service/local/status')
+      .reply(() => {
+        return [500, 'nexus2 - failed healthcheck'];
+      });
+
+    const response = await axiosClient.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      { timeout: 10_000 },
+    );
+
+    expect(response.data).toBeInstanceOf(Array);
+    const systemCheckBody = response.data;
+    expect(response.status).toEqual(500);
+    expect(systemCheckBody).toMatchObject([
+      {
+        connectionName: 'my artifactory credentials-in-url connection',
+        message:
+          'Validation failed, please review connection details for my artifactory credentials-in-url connection.',
+        results: [
+          {
+            data: 'artifactory - failed healthcheck',
+            statusCode: 500,
+            url: 'https://${ARTIFACTORY_URL}/api/system/ping',
+          },
+        ],
+        validated: false,
+      },
+      {
+        connectionName: 'my nexus credentials-in-url connection',
+        message:
+          'Validation failed, please review connection details for my nexus credentials-in-url connection.',
+        results: [
+          {
+            data: 'nexus - failed healthcheck',
+            statusCode: 500,
+            url: 'https://${BASE_NEXUS_URL}/service/rest/v1/status/check/api/system/ping',
+          },
+        ],
+        validated: false,
+      },
+      {
+        connectionName: 'my nexus2 credentials-in-url connection',
+        message:
+          'Validation failed, please review connection details for my nexus2 credentials-in-url connection.',
+        results: [
+          {
+            data: 'nexus2 - failed healthcheck',
+            statusCode: 500,
+            url: 'https://${BASE_NEXUS2_URL}/nexus/service/local/status',
+          },
+        ],
+        validated: false,
+      },
+    ]);
+
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
 });

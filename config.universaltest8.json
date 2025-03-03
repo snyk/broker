@@ -1,0 +1,28 @@
+{
+    "BROKER_CLIENT_CONFIGURATION": {
+      "common": {
+        "default": {
+          "BROKER_SERVER_URL": "https://broker2.dev.snyk.io",
+          "BROKER_HA_MODE_ENABLED": "false",
+          "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+        }
+      }
+    },
+    "CONNECTIONS": {
+      "my artifactory credentials-in-url connection": {
+        "type": "artifactory",
+        "identifier": "${BROKER_TOKEN_1}",
+        "ARTIFACTORY_URL": "${MY_ARTIFACTORY_URL}"
+      },
+      "my nexus credentials-in-url connection": {
+        "type": "nexus",
+        "identifier": "${BROKER_TOKEN_2}",
+        "BASE_NEXUS_URL": "${MY_BASE_NEXUS_URL}"
+      },
+      "my nexus2 credentials-in-url connection": {
+        "type": "nexus2",
+        "identifier": "${BROKER_TOKEN_3}",
+        "BASE_NEXUS2_URL": "${MY_BASE_NEXUS2_URL}"
+      }
+    }
+  }

@@ -481,7 +481,7 @@
         "BROKER_CLIENT_VALIDATION_URL": "$BASE_NEXUS2_URL/nexus/service/local/status"
       },
       "required": {
-        "BASE_NEXUS_URL": "https://<username>:<password>@<your.nexus.hostname>"
+        "BASE_NEXUS2_URL": "https://<username>:<password>@<your.nexus.hostname>"
       }
     },
     "nexus-cr": {
