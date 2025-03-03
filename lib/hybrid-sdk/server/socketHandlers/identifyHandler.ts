@@ -19,6 +19,36 @@ export const initIdentifyHandler = () => {
   response = getForwardWebSocketRequestHandler();
 };
 
+const terminatingClientIdsPerToken = new Map<string, string[]>();
+
+export const addClientIdToTerminationMap = (
+  token: string,
+  clientId: string,
+) => {
+  const existingTerminatedClients =
+    terminatingClientIdsPerToken.get(token) ?? [];
+  if (existingTerminatedClients.length > 0) {
+    existingTerminatedClients.push(clientId);
+    terminatingClientIdsPerToken.set(token, existingTerminatedClients);
+  } else {
+    terminatingClientIdsPerToken.set(token, [clientId]);
+  }
+};
+
+export const rmClientIdFromTerminationMap = (
+  token: string,
+  clientId: string,
+) => {
+  if (terminatingClientIdsPerToken.has(token)) {
+    const existingTerminatedClients =
+      terminatingClientIdsPerToken.get(token) ?? [];
+    terminatingClientIdsPerToken.set(
+      token,
+      existingTerminatedClients.filter((x) => x != clientId),
+    );
+  }
+};
+
 // TODO decide if the socket doesn't identify itself within X period,
 // should we toss it away?
 export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
@@ -102,6 +132,15 @@ export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
   socket.on('chunk', streamingResponse(token));
   socket.on('request', response(token));
   socket.on('incoming::ping', (time) => {
+    const isTerminating =
+      terminatingClientIdsPerToken.get(token)?.includes(clientId) ?? false;
+    if (isTerminating) {
+      logger.debug(
+        { clientId },
+        'Disabling client Ping since client is terminating.',
+      );
+      return;
+    }
     setImmediate(
       async () => await clientPinged(token, clientId, clientVersion, time),
     );

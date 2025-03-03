@@ -3,6 +3,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { handleIdentifyOnSocket } from './identifyHandler';
 import { handleConnectionCloseOnSocket } from './closeHandler';
 import { handleSocketError } from './errorHandler';
+import { handleTerminationSignalOnSocket } from './terminateHandler';
 
 export const handleSocketConnection = (socket) => {
   let clientId = null;
@@ -28,6 +29,14 @@ export const handleSocketConnection = (socket) => {
       handleConnectionCloseOnSocket(e, socket, token, clientId, identified),
     ),
   );
+
+  socket.on('terminate', (data) => {
+    logger.info(
+      { token, clientId, signal: data.signal },
+      'Socket termination signal received',
+    );
+    handleTerminationSignalOnSocket(token, clientId);
+  });
 
   socket.on('error', (error) => handleSocketError(error));
 };
