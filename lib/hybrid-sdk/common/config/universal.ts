@@ -42,7 +42,11 @@ export const getValidationConfigForType = (type) => {
     validations: config.brokerClientConfiguration[`${type}`].validations,
   };
 };
-export const getConfigForIdentifier = (identifier: string, config) => {
+export const getConfigForIdentifier = (
+  identifier: string,
+  config,
+  contextId?: string | null,
+) => {
   const connection = findConnectionWithIdentifier(
     config.connections,
     identifier,
@@ -67,13 +71,34 @@ export const getConfigForIdentifier = (identifier: string, config) => {
     //   `Unable to find configuration type for ${identifier}. Please review config.`,
     // );
   }
+  if (
+    connectionKey &&
+    contextId &&
+    (!config.connections[connectionKey].contexts ||
+      !config.connections[connectionKey].contexts[contextId])
+  ) {
+    logger.error(
+      { connectionKey, contextId },
+      `Unable to find context ${contextId} for ${connectionKey}. Please review config.`,
+    );
+    throw new Error(
+      `Interrupting request. Unable to find context ${contextId} for ${connectionKey}. Please review config.`,
+    );
+  }
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
     ...(connectionKey ? config.connections[connectionKey] : {}),
+    ...(connectionKey && contextId
+      ? config.connections[connectionKey].contexts[contextId]
+      : {}),
     ...(getPluginsConfig() && getPluginsConfig()[connectionKey!]
       ? getPluginsConfig()[connectionKey!]
       : {}),
   };
+  if (connectionKey && config.connections[connectionKey].contexts) {
+    delete configToOverload.contexts;
+  }
+
   const configOverloaded = expandPlaceholderValuesInFlatList(
     configToOverload,
     configToOverload,
@@ -84,13 +109,14 @@ export const getConfigForIdentifier = (identifier: string, config) => {
 export const overloadConfigWithConnectionSpecificConfig = (
   connectionIdentifier,
   localConfig,
+  contextId?: string | null,
 ) => {
   const config = { ...localConfig, ...getConfig() };
   let overloadedConfig = Object.assign(
     {},
     {
       ...localConfig,
-      ...getConfigForIdentifier(connectionIdentifier, config),
+      ...getConfigForIdentifier(connectionIdentifier, config, contextId),
     },
   );
   overloadedConfig = expandPlaceholderValuesInFlatList(

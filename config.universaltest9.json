@@ -1,0 +1,70 @@
+{
+    "BROKER_CLIENT_CONFIGURATION": {
+      "common": {
+        "default": {
+          "BROKER_SERVER_URL": "https://broker2.dev.snyk.io",
+          "BROKER_HA_MODE_ENABLED": "false",
+          "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+        },
+        "oauth": {
+          "clientId": "${CLIENT_ID}",
+          "clientSecret": "${CLIENT_SECRET}"
+        }
+      },
+      "github": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      },
+      "gitlab": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      },
+      "azure-repos": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      },
+      "jira-bearer-auth": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      }
+    },
+    "CONNECTIONS": {
+      "my github connection": {
+        "type": "github",
+        "id": "1",
+        "identifier": "${BROKER_TOKEN_1}",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "contexts": {
+          "test-context": {
+            "GITHUB_TOKEN": "${GITHUB_TOKEN2}"
+          }
+        }
+      },
+      "my gitlab connection": {
+        "type": "gitlab",
+        "id": "2",
+        "identifier": "${BROKER_TOKEN_2}",
+        "GITLAB_TOKEN": "${GITLAB_TOKEN}",
+        "GITLAB":"gitlab.dev.snyk.io"
+      },
+      "my azure connection": {
+        "type": "azure-repos",
+        "id": "3",
+        "identifier": "${BROKER_TOKEN_3}",
+        "AZURE_REPOS_TOKEN": "${AZURE_REPOS_TOKEN}",
+        "AZURE_REPOS_ORG":"${AZURE_REPOS_ORG}",
+        "AZURE_REPOS_HOST":"${AZURE_REPOS_HOST}"
+      },
+      "my jira pat": {
+        "type": "jira",
+        "id": "4",
+        "identifier": "${BROKER_TOKEN_4}",
+        "JIRA_PAT": "${JIRA_PAT}",
+        "JIRA_HOSTNAME":"${JIRA_HOSTNAME}"
+      }
+    }
+  }

@@ -30,9 +30,11 @@ export const getInterpolatedRequest = (
     config?.universalBrokerEnabled &&
     connectionIdentifier
   ) {
+    const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
     localConfig = overloadConfigWithConnectionSpecificConfig(
       connectionIdentifier,
       localConfig,
+      contextId,
     );
   }
 

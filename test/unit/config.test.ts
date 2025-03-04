@@ -217,4 +217,129 @@ describe('config', () => {
       expect(err.message).toContain('Missing env var');
     }
   });
+
+  it('getConfigByidentifier with null Context', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest';
+    process.env.GITHUB_TOKEN = '123';
+    process.env.GITLAB_TOKEN = '123';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
+    const configData = getConfigForIdentifier(
+      'dummyBrokerIdentifier',
+      getConfig(),
+      null,
+    );
+    expect(configData).toEqual({
+      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
+      BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
+      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_HA_MODE_ENABLED: 'false',
+      BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
+      BROKER_HEALTHCHECK_PATH: '/healthcheck',
+      GITHUB: 'github.com',
+      GITHUB_API: 'api.github.com',
+      GITHUB_GRAPHQL: 'api.github.com',
+      GITHUB_RAW: 'raw.githubusercontent.com',
+      GITHUB_TOKEN: '123',
+      GIT_PASSWORD: '123',
+      GIT_URL: 'github.com',
+      GIT_USERNAME: 'x-access-token',
+      id: '1',
+      identifier: 'dummyBrokerIdentifier',
+      type: 'github',
+    });
+    delete process.env.UNIVERSAL_BROKER_ENABLED;
+    delete process.env.SERVICE_ENV;
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GITLAB_TOKEN;
+    delete process.env.BROKER_TOKEN_1;
+    delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
+
+  it('getConfigByidentifier with Context', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest9';
+    process.env.GITHUB_TOKEN = '123';
+    process.env.GITHUB_TOKEN2 = '456';
+    process.env.GITLAB_TOKEN = '123';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
+    const configData = getConfigForIdentifier(
+      'dummyBrokerIdentifier',
+      getConfig(),
+      'test-context',
+    );
+    expect(configData).toEqual({
+      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 456',
+      BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
+      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_HA_MODE_ENABLED: 'false',
+      BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
+      BROKER_HEALTHCHECK_PATH: '/healthcheck',
+      GITHUB: 'github.com',
+      GITHUB_API: 'api.github.com',
+      GITHUB_GRAPHQL: 'api.github.com',
+      GITHUB_RAW: 'raw.githubusercontent.com',
+      GITHUB_TOKEN: '456',
+      GIT_PASSWORD: '456',
+      GIT_URL: 'github.com',
+      GIT_USERNAME: 'x-access-token',
+      id: '1',
+      identifier: 'dummyBrokerIdentifier',
+      type: 'github',
+    });
+    delete process.env.UNIVERSAL_BROKER_ENABLED;
+    delete process.env.SERVICE_ENV;
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GITHUB_TOKEN2;
+    delete process.env.GITLAB_TOKEN;
+    delete process.env.BROKER_TOKEN_1;
+    delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
+
+  it('getConfigByidentifier with non existing Context should throw', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest10';
+    process.env.GITHUB_TOKEN = '123';
+    process.env.GITLAB_TOKEN = '123';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
+    expect(() =>
+      getConfigForIdentifier(
+        'dummyBrokerIdentifier',
+        getConfig(),
+        'test-context',
+      ),
+    ).toThrowError(
+      'Interrupting request. Unable to find context test-context for my github connection. Please review config.',
+    );
+  });
 });
