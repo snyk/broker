@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  prodsec: snyk/prodsec-orb@1.0
+  prodsec: snyk/prodsec-orb@1.2
   slack: circleci/slack@4.12.5
   snyk: snyk/snyk@2.2.0
 
@@ -235,6 +235,15 @@ jobs:
           command: npm test && npm run test:bin
       - store_test_results:
           path: reports
+  security-scans:
+    <<: *defaults
+    steps:
+      - prepare
+      - attach_workspace:
+          at: ~/broker
+      - prodsec/security_scans:
+          mode: auto
+          open-source-additional-arguments: --exclude=test
   build-and-save-docker-image:
     <<: *defaults
     environment:
@@ -426,6 +435,14 @@ workflows:
           requires:
             - Install NPM packages
 
+      - security-scans:
+          name: Snyk Security Scans
+          context:
+            - snyk-bot-slack
+            - team-broker-snyk
+          requires:
+            - Install NPM packages
+
       - build-and-save-docker-image:
           name: Build base image (Ubuntu)
           requires:
@@ -470,6 +487,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-snyk
           requires:
+            - Snyk Security Scans
             - Scan base image (Ubuntu)
             - Scan base image (RHEL)
             - Test

@@ -50,6 +50,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         'Making request to primary',
       );
       try {
+        // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
         const httpResponse = await makeStreamingRequestToDownstream(
           postFilterPreparedRequest,
         );
