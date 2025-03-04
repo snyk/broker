@@ -93,6 +93,7 @@ export const prepareRequest = async (
     'snyk-product-line',
     'snyk-project-type',
     'snyk-integration-type',
+    'x-snyk-broker-context-id',
   ];
   Object.keys(payload.headers).map((header) => {
     if (headersToRemove.includes(header.toLowerCase())) {
