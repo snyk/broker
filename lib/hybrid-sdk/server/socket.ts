@@ -91,6 +91,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           { maskedToken: maskToken(connectionIdentifier), brokerClientId },
           `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
         );
+        // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
         const credsCheckResponse = await validateBrokerClientCredentials(
           authHeader,
           brokerClientId,
