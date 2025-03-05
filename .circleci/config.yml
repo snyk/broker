@@ -244,6 +244,7 @@ jobs:
       - prodsec/security_scans:
           mode: auto
           open-source-additional-arguments: --exclude=test
+          release-branch: master
   build-and-save-docker-image:
     <<: *defaults
     environment:
