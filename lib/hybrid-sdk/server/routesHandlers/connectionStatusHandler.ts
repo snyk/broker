@@ -46,6 +46,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
         'Making request to primary',
       );
       try {
+        // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
         const httpResponse = await makeStreamingRequestToDownstream(
           postFilterPreparedRequest,
         );

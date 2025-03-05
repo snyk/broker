@@ -52,6 +52,7 @@ export const makeRequestToDownstream = async (
 
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
+      // deepcode ignore Ssrf: re-ignore after http client refactoring
       const request = httpClient.request(
         localRequest.url,
         options,
@@ -179,6 +180,7 @@ export const makeStreamingRequestToDownstream = (
 
   return new Promise<http.IncomingMessage>((resolve, reject) => {
     try {
+      // deepcode ignore Ssrf: re-ignore after http client refactoring
       const request = httpClient.request(
         localRequest.url,
         options,
@@ -297,6 +299,7 @@ export const makeSingleRawRequestToDownstream = async (
   };
   return new Promise<HttpResponse>((resolve, reject) => {
     try {
+      // deepcode ignore Ssrf: re-ignore after http client refactoring
       const request = httpClient.request(
         localRequest.url,
         options,
