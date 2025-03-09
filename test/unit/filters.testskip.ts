@@ -395,6 +395,31 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow creating a pull request comment (general or inline)', () => {
+        const url = '/_apis/git/repositories/test-repo/pullRequests/1/threads';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating/resolving a pull request comment (general or inline)', () => {
+        const url =
+          '/_apis/git/repositories/test-repo/pullRequests/1/threads/1/comments/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'PATCH',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for gitlab', () => {

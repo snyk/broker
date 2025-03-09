@@ -432,6 +432,46 @@
           "scheme": "basic",
           "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
         }
+      },
+      {
+        "//": "create a general pull request comment",
+        "method": "POST",
+        "path": "/_apis/git/repositories/:repo/pullRequests/:pullRef/threads",
+        "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+        "auth": {
+          "scheme": "basic",
+          "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+        }
+      },
+      {
+        "//": "update a general pull request comment",
+        "method": "PATCH",
+        "path": "/_apis/git/repositories/:repo/pullRequests/:pullRef/threads/:threadId/comments/:commentId",
+        "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+        "auth": {
+          "scheme": "basic",
+          "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+        }
+      },
+      {
+        "//": "create an inline pull request comment",
+        "method": "POST",
+        "path": "/_apis/git/repositories/:repo/pullRequests/:pullRef/threads",
+        "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+        "auth": {
+          "scheme": "basic",
+          "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+        }
+      },
+      {
+        "//": "resolve an inline pull request comment",
+        "method": "PATCH",
+        "path": "/_apis/git/repositories/:repo/pullRequests/:pullRef/threads/{comment_id}",
+        "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+        "auth": {
+          "scheme": "basic",
+          "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
+        }
       }
     ]
   }
