@@ -448,6 +448,29 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+      it('should allow creating a summary merge request comment', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/notes';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating a general pull request comment', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/notes/12345';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
   });
 
