@@ -49,6 +49,7 @@
         "path": "/api/v4/projects/:project/repository/tree",
         "origin": "https://${GITLAB}"
       },
+  
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
@@ -169,6 +170,7 @@
         "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
         "origin": "https://${GITLAB}"
       },
+  
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
@@ -552,6 +554,7 @@
           }
         ]
       },
+  
       {
         "//": "used to create manifest file",
         "method": "POST",
@@ -1482,6 +1485,7 @@
           }
         ]
       },
+  
       {
         "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
         "method": "POST",
