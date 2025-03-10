@@ -395,6 +395,31 @@ describe('filters', () => {
         const filterResponseUrl = filterResponse ? filterResponse.url : '';
         expect(filterResponseUrl).toMatch(url);
       });
+
+      it('should allow creating a pull request comment (general or inline)', () => {
+        const url = '/_apis/git/repositories/test-repo/pullRequests/1/threads';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating/resolving a pull request comment (general or inline)', () => {
+        const url =
+          '/_apis/git/repositories/test-repo/pullRequests/1/threads/1/comments/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'PATCH',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
     });
 
     describe('for gitlab', () => {
@@ -439,6 +464,66 @@ describe('filters', () => {
 
       it('should allow updating webhook info', () => {
         const url = '/api/v4/projects/test-project/hooks/1';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+      it('should allow creating a summary merge request comment', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/notes';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow updating a general pull request comment', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/notes/12345';
+
+        const filterResponse = filter({
+          url,
+          method: 'PUT',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow retrieving diff version for a given commit SHA', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/versions';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow creating an inline comment', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/discussions';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseUrl = filterResponse ? filterResponse.url : '';
+        expect(filterResponseUrl).toMatch(url);
+      });
+
+      it('should allow resolving an inline comment', () => {
+        const url =
+          '/api/v4/projects/123/merge_requests/1/discussions/abcd1234';
 
         const filterResponse = filter({
           url,
