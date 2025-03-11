@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { loadFilters } from '../../lib/hybrid-sdk/common/filter/filtersAsync';
+import { Rule } from '../../lib/hybrid-sdk/common/types/filter';
+import { getInterpolatedRequest } from '../../lib/hybrid-sdk/interpolateRequestWithConfigData';
 
 const jsonBuffer = (body) => Buffer.from(JSON.stringify(body));
 
@@ -19,7 +21,7 @@ function loadDefaultFilter(name: string) {
   return filter;
 }
 
-describe('filters', () => {
+describe('filters and interpolates', () => {
   describe('on URL', () => {
     describe('for GitHub private filters', () => {
       const rules = JSON.parse(loadFixture(path.join('accept', 'github.json')));
@@ -33,8 +35,25 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        expect(filterResponse).toStrictEqual({
+          '//': 'used to determine the full dependency tree',
+          method: 'GET',
+          path: '/repos/:name/:repo/contents/:path*/package.json',
+          origin: 'https://${GITHUB_TOKEN}@${GITHUB_API}',
+          connectionType: 'default',
+        });
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should block when manifest appears after fragment identifier', () => {
@@ -61,8 +80,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating a general pull request comment', () => {
@@ -73,8 +102,18 @@ describe('filters', () => {
           method: 'PATCH',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow creating a pull request review', () => {
@@ -85,8 +124,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating webhook config', () => {
@@ -98,8 +147,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
     });
 
@@ -116,8 +175,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating a general pull request comment', () => {
@@ -129,8 +198,18 @@ describe('filters', () => {
           method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow getting a general pull request comment', () => {
@@ -142,8 +221,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow creating an inline pull request comment', () => {
@@ -155,8 +244,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow resolving a pull request comment', () => {
@@ -168,8 +267,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow searching permissions', () => {
@@ -181,8 +290,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching single PR info', () => {
@@ -194,8 +313,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
     });
 
@@ -214,8 +343,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating a general pull request comment', () => {
@@ -227,8 +366,18 @@ describe('filters', () => {
           method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow getting a general pull request comment', () => {
@@ -240,8 +389,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow creating an inline pull request comment', () => {
@@ -253,8 +412,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow resolving a pull request comment', () => {
@@ -266,8 +435,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow searching permissions', () => {
@@ -279,8 +458,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching pr info', () => {
@@ -292,8 +481,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching webook info', () => {
@@ -305,8 +504,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating webhook config', () => {
@@ -319,8 +528,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
     });
 
@@ -336,8 +555,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow listing fixtures', () => {
@@ -350,8 +579,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching single pr info', () => {
@@ -364,8 +603,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching pr info with api-version', () => {
@@ -378,8 +627,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating webhooks', () => {
@@ -392,8 +651,18 @@ describe('filters', () => {
         });
 
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow creating a pull request comment (general or inline)', () => {
@@ -404,8 +673,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating/resolving a pull request comment (general or inline)', () => {
@@ -417,8 +696,18 @@ describe('filters', () => {
           method: 'PATCH',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
     });
 
@@ -434,8 +723,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching PR info', () => {
@@ -446,8 +745,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow fetching webhook info', () => {
@@ -458,8 +767,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating webhook info', () => {
@@ -470,8 +789,18 @@ describe('filters', () => {
           method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
       it('should allow creating a summary merge request comment', () => {
         const url = '/api/v4/projects/123/merge_requests/1/notes';
@@ -481,8 +810,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow updating a general pull request comment', () => {
@@ -493,8 +832,18 @@ describe('filters', () => {
           method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow retrieving diff version for a given commit SHA', () => {
@@ -505,8 +854,18 @@ describe('filters', () => {
           method: 'GET',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow creating an inline comment', () => {
@@ -517,8 +876,18 @@ describe('filters', () => {
           method: 'POST',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
 
       it('should allow resolving an inline comment', () => {
@@ -530,8 +899,18 @@ describe('filters', () => {
           method: 'PUT',
         });
         expect(filterResponse).not.toEqual(false);
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toMatch(url);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
       });
     });
   });
@@ -552,8 +931,18 @@ describe('filters', () => {
           ],
         }),
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual('/');
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url: '/',
+          method: 'GET',
+        },
+        {},
+        {},
+      );
+      expect(result.url).toMatch('/');
     });
 
     it('allows requests with partial matches across multiple commits', () => {
@@ -571,8 +960,18 @@ describe('filters', () => {
           ],
         }),
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual('/');
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url: '/',
+          method: 'GET',
+        },
+        {},
+        {},
+      );
+      expect(result.url).toMatch('/');
     });
 
     it('blocks files if not explicitly allowed by filter rules', () => {
@@ -642,8 +1041,18 @@ describe('filters', () => {
       }`,
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual('/graphql');
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url: '/graphql',
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch('/graphql');
       });
 
       it('find globs - noSQL injection', () => {
@@ -713,8 +1122,18 @@ describe('filters', () => {
             ).toString('utf-8'),
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual('/graphql');
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url: '/graphql',
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch('/graphql');
       });
 
       it('find pull requests - closed', () => {
@@ -728,8 +1147,18 @@ describe('filters', () => {
             ).toString('utf-8'),
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual('/graphql');
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url: '/graphql',
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch('/graphql');
       });
 
       it('find pull request threads', () => {
@@ -743,8 +1172,18 @@ describe('filters', () => {
             ).toString('utf-8'),
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual('/graphql');
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url: '/graphql',
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch('/graphql');
       });
 
       it('resolve pull request thread', () => {
@@ -758,8 +1197,18 @@ describe('filters', () => {
             ).toString('utf-8'),
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual('/graphql');
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url: '/graphql',
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch('/graphql');
       });
     });
   });
@@ -769,58 +1218,104 @@ describe('filters', () => {
     const filter = loadFilters(rules);
 
     it('permits requests to an allowed path', () => {
+      const url = '/filtered-on-query?filePath=yarn.lock';
       const filterResponse = filter({
-        url: '/filtered-on-query?filePath=yarn.lock',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query?filePath=yarn.lock',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('permits requests with a path to an allowed nested directory', () => {
+      const url = '/filtered-on-query?filePath=/path/to/package.json';
       const filterResponse = filter({
-        url: '/filtered-on-query?filePath=/path/to/package.json',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query?filePath=/path/to/package.json',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('permits requests with path that is a dot file', () => {
+      const url = '/filtered-on-query-with-dot?filePath=.Dockerfile';
       const filterResponse = filter({
-        url: '/filtered-on-query-with-dot?filePath=.Dockerfile',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query-with-dot?filePath=.Dockerfile',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('permits requests with path that contains a dot file', () => {
+      const url = '/filtered-on-query-with-dot?filePath=folder/.Dockerfile';
       const filterResponse = filter({
-        url: '/filtered-on-query-with-dot?filePath=folder/.Dockerfile',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query-with-dot?filePath=folder/.Dockerfile',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('permits requests with path that contains a dot directory', () => {
+      const url =
+        '/filtered-on-query-with-dot?filePath=.hidden-folder/Dockerfile';
       const filterResponse = filter({
-        url: '/filtered-on-query-with-dot?filePath=.hidden-folder/Dockerfile',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query-with-dot?filePath=.hidden-folder/Dockerfile',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('blocks requests to files that are not allowed by the rules', () => {
@@ -840,14 +1335,24 @@ describe('filters', () => {
     });
 
     it('permits requests with multiple valid query params', () => {
+      const url =
+        '/filtered-on-multiple-queries?filePath=package.json&download=true';
       const filterResponse = filter({
-        url: '/filtered-on-multiple-queries?filePath=package.json&download=true',
+        url,
         method: 'GET',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-multiple-queries?filePath=package.json&download=true',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('blocks requests with valid query params when at least one query param is invalid', () => {
@@ -876,14 +1381,24 @@ describe('filters', () => {
       });
 
       it('should ignore any non-manifest files after the fragment identifier', () => {
+        const url =
+          '/filtered-on-query?filePath=/path/to/package.json#/some-other-file';
         const filterResponse = filter({
-          url: '/filtered-on-query?filePath=/path/to/package.json#/some-other-file',
+          url,
           method: 'GET',
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual(
-          '/filtered-on-query?filePath=/path/to/package.json',
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
         );
+        expect(result.url).toMatch(url);
       });
     });
   });
@@ -893,8 +1408,9 @@ describe('filters', () => {
     const filter = loadFilters(rules);
 
     it('allows a request filtered on query and body', () => {
+      const url = '/filtered-on-query-and-body';
       const filterResponse = filter({
-        url: '/filtered-on-query-and-body',
+        url,
         method: 'POST',
         body: jsonBuffer({
           commits: [
@@ -904,19 +1420,38 @@ describe('filters', () => {
           ],
         }),
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual('/filtered-on-query-and-body');
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
+      );
+      expect(result.url).toMatch(url);
     });
 
     it('allows a request on query with no body', () => {
+      const url = '/filtered-on-query-and-body?filePath=/path/to/package.json';
       const filterResponse = filter({
-        url: '/filtered-on-query-and-body?filePath=/path/to/package.json',
+        url,
         method: 'POST',
       });
-      const filterResponseUrl = filterResponse ? filterResponse.url : '';
-      expect(filterResponseUrl).toEqual(
-        '/filtered-on-query-and-body?filePath=/path/to/package.json',
+      const filterResponseAsRule = filterResponse as Rule;
+      const result = getInterpolatedRequest(
+        null,
+        filterResponseAsRule,
+        {
+          url,
+          method: 'GET',
+        },
+        {},
+        {},
       );
+      expect(result.url).toMatch(url);
     });
 
     it('blocks the request if both body and query path are not allowed', () => {
@@ -961,17 +1496,27 @@ describe('filters', () => {
       });
 
       it('should ignore any non-manifest files after the fragment identifier', () => {
+        const url =
+          '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js';
         const filterResponse = filter({
-          url: '/filtered-on-query-and-body?filePath=/path/to/package.json#/sensitive/file.js',
+          url,
           method: 'POST',
           body: jsonBuffer({
             commits: [],
           }),
         });
-        const filterResponseUrl = filterResponse ? filterResponse.url : '';
-        expect(filterResponseUrl).toEqual(
-          '/filtered-on-query-and-body?filePath=/path/to/package.json',
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
         );
+        expect(result.url).toMatch(url);
       });
     });
   });
@@ -1069,23 +1614,45 @@ describe('with auth', () => {
   const filter = loadFilters(rules);
 
   it('allows correct basic auth requests', () => {
+    const url = '/basic-auth';
     const filterResponse = filter({
-      url: '/basic-auth',
+      url,
       method: 'GET',
     });
-    const filterResponseAuth = filterResponse ? filterResponse.auth : '';
-    expect(filterResponseAuth).toEqual(
+    const filterResponseAsRule = filterResponse as Rule;
+    const result = getInterpolatedRequest(
+      null,
+      filterResponseAsRule,
+      {
+        url,
+        method: 'GET',
+      },
+      {},
+      {},
+    );
+    expect(result.auth).toEqual(
       `Basic ${Buffer.from('user:pass').toString('base64')}`,
     );
   });
 
   it('allows requests with a correct token', () => {
+    const url = '/token-auth';
     const filterResponse = filter({
-      url: '/token-auth',
+      url,
       method: 'GET',
     });
-    const filterResponseAuth = filterResponse ? filterResponse.auth : '';
-    expect(filterResponseAuth).toEqual('Token 1234');
+    const filterResponseAsRule = filterResponse as Rule;
+    const result = getInterpolatedRequest(
+      null,
+      filterResponseAsRule,
+      {
+        url,
+        method: 'GET',
+      },
+      {},
+      {},
+    );
+    expect(result.auth).toEqual('Token 1234');
   });
 });
 
@@ -1096,15 +1663,26 @@ describe('Github big files (optional rules)', () => {
   const filter = loadFilters(rules.private);
 
   it('should allow the get file sha API', () => {
+    const url = '/graphql';
     const filterResponse = filter({
-      url: '/graphql',
+      url,
       method: 'POST',
       body: jsonBuffer({
         query:
           '{\n        repository(owner: "some-owner", name: "some-name") {\n          object(expression: "refs/heads/some-thing:a/path/to/package-lock.json") {\n            ... on Blob {\n              oid,\n            }\n          }\n        }\n      }',
       }),
     });
-    const filterResponseUrl = filterResponse ? filterResponse.url : '';
-    expect(filterResponseUrl).toEqual('/graphql');
+    const filterResponseAsRule = filterResponse as Rule;
+    const result = getInterpolatedRequest(
+      null,
+      filterResponseAsRule,
+      {
+        url,
+        method: 'GET',
+      },
+      {},
+      {},
+    );
+    expect(result.url).toEqual('/graphql');
   });
 });
