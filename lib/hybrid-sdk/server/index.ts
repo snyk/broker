@@ -8,7 +8,10 @@ import { serverStarting, serverStopping } from './infra/dispatcher';
 import { handlePostResponse } from './routesHandlers/postResponseHandler';
 import { connectionStatusHandler } from './routesHandlers/connectionStatusHandler';
 import { ServerOpts } from '../common/types/options';
-import { overloadHttpRequestWithConnectionDetailsMiddleware } from './routesHandlers/httpRequestHandler';
+import {
+  extractPossibleContextFromHttpRequestToHeader,
+  overloadHttpRequestWithConnectionDetailsMiddleware,
+} from './routesHandlers/httpRequestHandler';
 import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
 import { loadAllFilters } from '../common/filter/filtersAsync';
 import { FiltersType } from '../common/types/filter';
@@ -61,6 +64,7 @@ export const main = async (serverOpts: ServerOpts) => {
   app.get('/connection-status/:token', connectionStatusHandler);
   app.all(
     '/broker/:token/*',
+    extractPossibleContextFromHttpRequestToHeader,
     overloadHttpRequestWithConnectionDetailsMiddleware,
     validateBrokerTypeMiddleware,
     getForwardHttpRequestHandler(),
