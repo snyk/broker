@@ -666,7 +666,8 @@ describe('filters and interpolates', () => {
       });
 
       it('should allow creating a pull request comment (general or inline)', () => {
-        const url = '/_apis/git/repositories/test-repo/pullRequests/1/threads';
+        const url =
+          '/test-owner/_apis/git/repositories/test-repo/pullRequests/1/threads';
 
         const filterResponse = filter({
           url,
@@ -689,7 +690,7 @@ describe('filters and interpolates', () => {
 
       it('should allow updating/resolving a pull request comment (general or inline)', () => {
         const url =
-          '/_apis/git/repositories/test-repo/pullRequests/1/threads/1/comments/1';
+          '/test-owner/_apis/git/repositories/test-repo/pullRequests/1/threads/1/comments/1';
 
         const filterResponse = filter({
           url,
