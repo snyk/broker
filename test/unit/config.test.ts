@@ -342,4 +342,39 @@ describe('config', () => {
       'Interrupting request. Unable to find context test-context for my github connection. Please review config.',
     );
   });
+
+  it('getConfigByidentifier with Context discard unauthorized env vars', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest11';
+    process.env.GITHUB_TOKEN = '123';
+    process.env.GITHUB_TOKEN2 = '456';
+    process.env.GITLAB_TOKEN = '123';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BROKER_TOKEN_2 = 'dummyBrokerIdentifier2';
+    process.env.BROKER_TOKEN_3 = 'dummyBrokerIdentifier3';
+    process.env.BROKER_TOKEN_4 = 'brokertoken4';
+    process.env.JIRA_PAT = 'jirapat';
+    process.env.JIRA_HOSTNAME = 'hostname';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
+    const configData = getConfigForIdentifier(
+      'dummyBrokerIdentifier',
+      getConfig(),
+      'test-context',
+    );
+    expect(configData['UNAUTHORIZED']).toBeUndefined();
+    expect(configData['GITHUB_TOKEN']).toEqual(process.env.GITHUB_TOKEN2);
+
+    delete process.env.UNIVERSAL_BROKER_ENABLED;
+    delete process.env.SERVICE_ENV;
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GITHUB_TOKEN2;
+    delete process.env.GITLAB_TOKEN;
+    delete process.env.BROKER_TOKEN_1;
+    delete process.env.BROKER_TOKEN_2;
+    delete process.env.BROKER_TOKEN_3;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
 });
