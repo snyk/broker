@@ -26,7 +26,7 @@ describe('Testing ctx extraction logic from url', () => {
     expect(response.body.headers['x-snyk-broker-context-id']).toBeUndefined;
   });
 
-  it('Testing context less classic urls', async () => {
+  it('Testing url with context', async () => {
     const url =
       '/broker/0000000-0000-0000-0000-000000000000/ctx/11111111-0000-0000-0000-000000000000/path?myqs=test&my_qs2=test2';
     const expectedUrl =

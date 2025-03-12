@@ -14,6 +14,16 @@ export const getConfigForType = (type: string) => {
   };
 };
 
+export const getAllowedKeysForType = (type: string) => {
+  const config = getConfig();
+  return Object.keys({
+    ...config.brokerClientConfiguration.common.default,
+    ...config.brokerClientConfiguration.common.required,
+    ...config.brokerClientConfiguration[`${type}`]?.default,
+    ...config.brokerClientConfiguration[`${type}`].required,
+  });
+};
+
 export const getConfigForConnections = () => {
   const config = getConfig();
   return getConfigForConnectionsFromConfig(config);
@@ -85,12 +95,27 @@ export const getConfigForIdentifier = (
       `Interrupting request. Unable to find context ${contextId} for ${connectionKey}. Please review config.`,
     );
   }
+
+  const contextToInject = {};
+  if (connectionKey && contextId) {
+    const context = config.connections[connectionKey].contexts[contextId];
+    const allowedContextKeys = getAllowedKeysForType(connectionType);
+    for (const key in context) {
+      if (allowedContextKeys.includes(key)) {
+        contextToInject[key] = context[key];
+      } else {
+        logger.debug(
+          { key, connectionKey },
+          'Env var in context not allowed for injection in request.',
+        );
+      }
+    }
+  }
+
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
     ...(connectionKey ? config.connections[connectionKey] : {}),
-    ...(connectionKey && contextId
-      ? config.connections[connectionKey].contexts[contextId]
-      : {}),
+    ...contextToInject,
     ...(getPluginsConfig() && getPluginsConfig()[connectionKey!]
       ? getPluginsConfig()[connectionKey!]
       : {}),
