@@ -75,7 +75,7 @@
     "dotenv": "^16.4.5",
     "ejson": "^2.2.0",
     "engine.io": "^6.6.4",
-    "engine.io-client": "^5.2.0",
+    "engine.io-client": "^6.5.4",
     "express": "^4.21.1",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
