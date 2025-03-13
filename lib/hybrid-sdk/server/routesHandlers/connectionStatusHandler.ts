@@ -5,6 +5,14 @@ import { log as logger } from '../../../logs/logger';
 import { hostname } from 'node:os';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeStreamingRequestToDownstream } from '../../http/request';
+import { hashToken, maskToken } from '../../common/utils/token';
+
+export interface ClientSummary {
+  brokerClientIds: string[];
+  versions: string[];
+  identifier: string;
+  hashedIdentifier: string;
+}
 
 export const connectionStatusHandler = async (req: Request, res: Response) => {
   const token = req.params.token;
@@ -63,4 +71,18 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
       return res.status(404).json({ ok: false });
     }
   }
+};
+
+export const connectionsStatusHandler = async (req: Request, res: Response) => {
+  const connectionSummary: ClientSummary[] = [];
+  const connections = getSocketConnections();
+  for (const [key, value] of connections) {
+    connectionSummary.push({
+      identifier: maskToken(key),
+      hashedIdentifier: hashToken(key),
+      versions: [...new Set(value.map((x) => x.metadata.version))],
+      brokerClientIds: [...new Set(value.map((x) => x.brokerClientId))],
+    });
+  }
+  res.status(200).json(connectionSummary);
 };

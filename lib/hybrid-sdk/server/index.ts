@@ -6,7 +6,10 @@ import { validateBrokerTypeMiddleware } from './broker-middleware';
 import { webserver } from '../common/http/webserver';
 import { serverStarting, serverStopping } from './infra/dispatcher';
 import { handlePostResponse } from './routesHandlers/postResponseHandler';
-import { connectionStatusHandler } from './routesHandlers/connectionStatusHandler';
+import {
+  connectionsStatusHandler,
+  connectionStatusHandler,
+} from './routesHandlers/connectionStatusHandler';
 import { ServerOpts } from '../common/types/options';
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from './routesHandlers/httpRequestHandler';
 import { getForwardHttpRequestHandler } from './socketHandlers/initHandlers';
@@ -59,6 +62,7 @@ export const main = async (serverOpts: ServerOpts) => {
     app.use(applyPrometheusMiddleware());
   }
   app.get('/connection-status/:token', connectionStatusHandler);
+  app.get('/connections-status', connectionsStatusHandler);
   app.all(
     '/broker/:token/*',
     overloadHttpRequestWithConnectionDetailsMiddleware,
