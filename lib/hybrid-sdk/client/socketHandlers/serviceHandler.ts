@@ -26,16 +26,16 @@ export const serviceHandler = async (msg, cb) => {
         cb({
           status: 200,
           headers: { requestId },
-          body: JSON.stringify({ msg: `Filters reloaded.` }),
+          body: JSON.stringify({ ok: true, msg: `Filters reloaded.` }),
         });
         break;
       case '/config/reload':
         logger.debug({}, 'Reloading config.');
-        if (clientOptions.config.universalBrokerEnabled) {
+        if (clientOptions.config?.universalBrokerEnabled) {
           cb({
             status: 200,
             headers: { requestId },
-            body: JSON.stringify({ msg: `Synchronizing Config.` }),
+            body: JSON.stringify({ ok: true, msg: `Synchronizing Config.` }),
           });
           await syncClientConfig(
             clientOptions,
@@ -43,11 +43,14 @@ export const serviceHandler = async (msg, cb) => {
             getGlobalIdentifyingMetadata(),
           );
         } else {
-          logger.debug({}, 'Service command not active in classic broker.');
+          logger.debug({}, 'Service command not available in classic broker.');
           cb({
             status: 501,
             headers: { requestId },
-            body: 'Service command not active in classic broker.',
+            body: JSON.stringify({
+              ok: false,
+              msg: 'Service command not available in classic broker.',
+            }),
           });
         }
         break;
@@ -59,7 +62,7 @@ export const serviceHandler = async (msg, cb) => {
         cb({
           status: 400,
           headers: { requestId },
-          body: 'Unknown service command.',
+          body: JSON.stringify({ ok: false, msg: 'Unknown service command.' }),
         });
     }
   }
