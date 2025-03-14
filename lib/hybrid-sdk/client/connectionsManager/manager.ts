@@ -10,12 +10,25 @@ import { existsSync, writeFileSync } from 'fs';
 import { setfetchAndUpdateJwt } from '../auth/oauth';
 import { reloadConfig } from '../config/configHelpers';
 import { processStartUpHooks } from '../hooks/startup/processHooks';
-import { setMainWatcher } from './mainWatcher';
+import { setBackupWatcher, syncClientConfig } from './synchronizer';
+
+export const websocketConnections: WebSocketConnection[] = [];
+
+export const getWebsocketConnections = () => {
+  return websocketConnections;
+};
+
+export let globalMetadata: IdentifyingMetadata;
+
+export const getGlobalIdentifyingMetadata = () => {
+  return globalMetadata;
+};
 
 export const manageWebsocketConnections = async (
   clientOpts: LoadedClientOpts,
   globalIdentifyingMetadata: IdentifyingMetadata,
 ): Promise<WebSocketConnection[]> => {
+  globalMetadata = globalIdentifyingMetadata;
   try {
     if (!process.env.SKIP_REMOTE_CONFIG) {
       if (!existsSync(`${findProjectRoot(__dirname)}/config.universal.json`)) {
@@ -71,8 +84,12 @@ export const manageWebsocketConnections = async (
 
   // At that point, plugins startup methods have executred and connections objects were mutated if needed
 
-  const websocketConnections: WebSocketConnection[] = [];
+  setBackupWatcher(clientOpts, websocketConnections, globalIdentifyingMetadata);
+  await syncClientConfig(
+    clientOpts,
+    websocketConnections,
+    globalIdentifyingMetadata,
+  );
 
-  setMainWatcher(clientOpts, websocketConnections, globalIdentifyingMetadata);
   return websocketConnections;
 };

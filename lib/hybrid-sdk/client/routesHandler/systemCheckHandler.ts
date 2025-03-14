@@ -14,7 +14,6 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
   // Systemcheck is the broker client's ability to assert the network
   // reachability and some correctness of credentials for the service
   // being proxied by the broker client.
-
   const clientOpts = res.locals.clientOpts as LoadedClientOpts;
   if (clientOpts.config.universalBrokerEnabled) {
     const configForAllConnections = getConfigForConnections();
