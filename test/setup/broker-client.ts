@@ -21,6 +21,7 @@ interface CreateBrokerClientOptions {
   passwordPool?: Array<string>;
   port?: number;
   type?: string;
+  universalBrokerEnabled?: string;
 }
 
 export type BrokerClient = {
@@ -74,6 +75,7 @@ export const createBrokerClient = async (
         : undefined,
       BROKER_TYPE: params.type ? params.type : undefined,
       removeXForwardedHeaders: 'true',
+      universalBrokerEnabled: params.universalBrokerEnabled ?? false,
     },
   };
 
