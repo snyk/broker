@@ -25,6 +25,7 @@ import { notificationHandler } from './socketHandlers/notificationHandler';
 import { renewBrokerServerConnection } from './auth/brokerServerConnection';
 import version from '../common/utils/version';
 import { addServerIdAndRoleQS } from '../http/utils';
+import { serviceHandler } from './socketHandlers/serviceHandler';
 
 const getAuthExpirationTimeout = (config: CONFIGURATION) => {
   return (
@@ -280,9 +281,7 @@ export const createWebSocket = (
     openHandler(websocket, localClientOps, identifyingMetadata),
   );
 
-  websocket.on('service', (msg) => {
-    logger.info({ msg }, 'Service message received.');
-  });
+  websocket.on('service', serviceHandler);
 
   websocket.on('close', () => {
     closeHandler(localClientOps, identifyingMetadata);
