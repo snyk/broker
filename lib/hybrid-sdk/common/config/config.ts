@@ -34,6 +34,22 @@ export const findProjectRoot = (startDir: string): string | null => {
   return null;
 };
 
+export const findFactoryRoot = (startDir: string): string | null => {
+  let currentDir = startDir;
+
+  while (currentDir !== '/') {
+    const snykConfigPath = path.join(currentDir, 'workloadFactory.js');
+
+    if (fs.existsSync(snykConfigPath)) {
+      return currentDir;
+    }
+
+    currentDir = path.dirname(currentDir);
+  }
+
+  return null;
+};
+
 export const findPluginFolder = async (
   dirPath: string,
   targetFolder: string,
