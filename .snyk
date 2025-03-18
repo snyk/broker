@@ -15,7 +15,7 @@ ignore:
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
-        expires: 2025-03-13T12:03:16.272Z
+        expires: 2025-06-13T12:03:16.272Z
         created: 2025-02-11T12:03:16.275Z
   SNYK-JS-CROSSSPAWN-8303230:
     - '*':
