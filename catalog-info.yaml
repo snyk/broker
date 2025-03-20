@@ -4,8 +4,8 @@ metadata:
   name: broker
   annotations:
     github.com/project-slug: snyk/broker
-    github.com/team-slug: snyk/team-broker
+    github.com/team-slug: snyk/hybrid
 spec:
   type: snyk-deployed-fedramp
   lifecycle: "-"
-  owner: team-broker
+  owner: hybrid
