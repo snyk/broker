@@ -32,18 +32,16 @@ describe('Broker Dispatcher API client', () => {
 
     const client = new HttpDispatcherServiceClient(dispatcherServerBaseUrl);
 
-    try {
-      await client.createConnection(
+    await expect(
+      client.createConnection(
         {
           hashedBrokerToken: hashedToken,
           brokerClientId: '1',
         },
         { deployment_location: 'test', broker_token_first_char: 'a' },
         config,
-      );
-    } catch (err) {
-      expect(err).toEqual(Error('Error getting connection allocation.'));
-    }
+      ),
+    ).rejects.toThrow('Error getting connection allocation.');
   });
 
   it('should return server_id for 201', async () => {
