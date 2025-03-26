@@ -11,7 +11,7 @@ export const syncClientConfig = async (
   clientOpts,
   websocketConnections: WebSocketConnection[],
   globalIdentifyingMetadata: IdentifyingMetadata,
-) => {
+): Promise<void> => {
   if (
     !process.env.SKIP_REMOTE_CONFIG &&
     !process.env.REMOTE_CONFIG_POLLING_MODE
@@ -24,11 +24,12 @@ export const syncClientConfig = async (
     ? Object.keys(clientOpts.config.connections)
     : [];
 
-  if (
-    clientOpts.config.UNIVERSAL_BROKER_GA != 'true' ||
+  const isPollingRequired =
+    clientOpts.config.UNIVERSAL_BROKER_GA !== 'true' ||
     integrationsKeys.length < 1 ||
-    websocketConnections.length === 0
-  ) {
+    websocketConnections.length === 0;
+
+  if (isPollingRequired) {
     logger.info({}, `Waiting for connections (polling).`);
     if (process.env.NODE_ENV != 'test') {
       setTimeout(
@@ -45,87 +46,83 @@ export const syncClientConfig = async (
     logger.debug({}, 'Disabling polling in favor of server notification.');
   }
 
-  for (let i = 0; i < integrationsKeys.length; i++) {
+  for (const key of integrationsKeys) {
+    const connectionConfig = clientOpts.config.connections[key];
     const currentWebsocketConnectionIndex = websocketConnections.findIndex(
-      (websocketConnection) =>
-        websocketConnection.friendlyName == integrationsKeys[i],
+      (conn) => conn.friendlyName === key,
     );
-    if (clientOpts.config.connections[`${integrationsKeys[i]}`].isDisabled) {
+    if (connectionConfig.isDisabled) {
       logger.error(
         {
-          id: clientOpts.config.connections[`${integrationsKeys[i]}`].id,
-          name: clientOpts.config.connections[`${integrationsKeys[i]}`]
-            .friendlyName,
+          id: connectionConfig.id,
+          name: connectionConfig.friendlyName,
         },
         `Connection is disabled due to (a) missing environment variable(s). Please provide the value and restart the broker client.`,
       );
-    } else if (
-      !clientOpts.config.connections[`${integrationsKeys[i]}`].identifier
-    ) {
+      continue;
+    }
+    if (!connectionConfig.identifier) {
       if (currentWebsocketConnectionIndex > -1) {
         logger.info(
           {
-            id: clientOpts.config.connections[`${integrationsKeys[i]}`].id,
-            name: clientOpts.config.connections[`${integrationsKeys[i]}`]
-              .friendlyName,
+            id: connectionConfig.id,
+            name: connectionConfig.friendlyName,
           },
           `Shutting down unused connection.`,
         );
-        shutDownConnectionPair(websocketConnections, i);
+        shutDownConnectionPair(
+          websocketConnections,
+          integrationsKeys.indexOf(key),
+        );
       } else {
         logger.info(
           {
-            id: clientOpts.config.connections[`${integrationsKeys[i]}`].id,
-            name: clientOpts.config.connections[`${integrationsKeys[i]}`]
-              .friendlyName,
+            id: connectionConfig.id,
+            name: connectionConfig.friendlyName,
           },
-          `Connection (${
-            clientOpts.config.connections[`${integrationsKeys[i]}`].friendlyName
-          }) not in use by any orgs. Will check periodically and create connection when in use.`,
+          `Connection (${connectionConfig.friendlyName}) not in use by any orgs. Will check periodically and create connection when in use.`,
         );
       }
+      continue;
+    }
+
+    if (currentWebsocketConnectionIndex < 0) {
+      logger.info({ connectionName: key }, 'Creating configured connection.');
+      await runStartupPlugins(clientOpts, key);
+
+      await createWebSocketConnectionPairs(
+        websocketConnections,
+        clientOpts,
+        globalIdentifyingMetadata,
+        key,
+      );
+    } else if (
+      // Token rotation for the connection at hand
+      connectionConfig.identifier !=
+      websocketConnections[currentWebsocketConnectionIndex].identifier
+    ) {
+      logger.info(
+        { connectionName: key },
+        'Updating configured connection for new identifier.',
+      );
+      // shut down previous tunnels
+      shutDownConnectionPair(
+        websocketConnections,
+        integrationsKeys.indexOf(key),
+      );
+
+      // setup new tunnels
+
+      await runStartupPlugins(clientOpts, key);
+
+      await createWebSocketConnectionPairs(
+        websocketConnections,
+        clientOpts,
+        globalIdentifyingMetadata,
+        key,
+      );
     } else {
-      if (currentWebsocketConnectionIndex < 0) {
-        logger.info(
-          { connectionName: integrationsKeys[i] },
-          'Creating configured connection.',
-        );
-        await runStartupPlugins(clientOpts, integrationsKeys[i]);
-
-        await createWebSocketConnectionPairs(
-          websocketConnections,
-          clientOpts,
-          globalIdentifyingMetadata,
-          integrationsKeys[i],
-        );
-      } else if (
-        // Token rotation for the connection at hand
-        clientOpts.config.connections[`${integrationsKeys[i]}`].identifier !=
-        websocketConnections[currentWebsocketConnectionIndex].identifier
-      ) {
-        logger.info(
-          { connectionName: integrationsKeys[i] },
-          'Updating configured connection for new identifier.',
-        );
-        // shut down previous tunnels
-        shutDownConnectionPair(websocketConnections, i);
-
-        // setup new tunnels
-
-        await runStartupPlugins(clientOpts, integrationsKeys[i]);
-
-        await createWebSocketConnectionPairs(
-          websocketConnections,
-          clientOpts,
-          globalIdentifyingMetadata,
-          integrationsKeys[i],
-        );
-      } else {
-        logger.debug(
-          { connectionName: integrationsKeys[i] },
-          'Connection already configured.',
-        );
-      }
+      logger.debug({ connectionName: key }, 'Connection already configured.');
     }
   }
   if (integrationsKeys.length != websocketConnections.length) {
