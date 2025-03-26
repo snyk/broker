@@ -23,7 +23,12 @@ export const syncClientConfig = async (
   const integrationsKeys = clientOpts.config.connections
     ? Object.keys(clientOpts.config.connections)
     : [];
-  if (integrationsKeys.length < 1 || websocketConnections.length === 0) {
+
+  if (
+    clientOpts.config.UNIVERSAL_BROKER_GA != 'true' ||
+    integrationsKeys.length < 1 ||
+    websocketConnections.length === 0
+  ) {
     logger.info({}, `Waiting for connections (polling).`);
     if (process.env.NODE_ENV != 'test') {
       setTimeout(
