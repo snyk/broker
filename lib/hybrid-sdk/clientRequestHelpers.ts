@@ -114,8 +114,10 @@ export class HybridClientRequestHandler {
       '[HTTP Flow] Brokering request through Websocket and response through Websocket.',
     );
     // relay the http request over the websocket, handle websocket response
+    const requestType =
+      this.req.headers['x-broker-service'] === 'true' ? 'service' : 'request';
     this.res.locals.websocket.send(
-      'request',
+      requestType,
       {
         url: this.req.url,
         method: this.req.method,

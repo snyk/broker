@@ -72,13 +72,22 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   res.locals.websocket = connections.get(token)![0].socket;
   res.locals.socketVersion = connections.get(token)![0].socketVersion;
   res.locals.capabilities = connections.get(token)![0].metadata.capabilities;
+  res.locals.clientVersion = connections.get(token)![0].metadata.version;
   res.locals.brokerAppClientId =
     connections.get(token)![0].brokerAppClientId ?? '';
   req['locals'] = {};
   req['locals']['capabilities'] =
     connections.get(token)![0].metadata.capabilities;
+
+  const isServiceRequest = req.url.startsWith(`/service/${token}`);
+  if (isServiceRequest) {
+    req.headers['x-broker-service'] = 'true';
+  }
   // strip the leading url
-  req.url = req.url.slice(`/broker/${token}`.length);
+  req.url = isServiceRequest
+    ? req.url.slice(`/service/${token}`.length)
+    : req.url.slice(`/broker/${token}`.length);
+
   if (req.url.includes('connection_role')) {
     const urlParts = req.url.split('?');
     if (urlParts.length > 1) {

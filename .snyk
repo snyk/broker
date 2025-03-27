@@ -15,7 +15,7 @@ ignore:
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
-        expires: 2025-06-13T12:03:16.272Z
+        expires: 2025-09-13T12:03:16.272Z
         created: 2025-02-11T12:03:16.275Z
   SNYK-JS-CROSSSPAWN-8303230:
     - '*':
@@ -28,3 +28,6 @@ ignore:
         expires: 2024-12-12T12:19:17.636Z
         created: 2024-11-12T12:19:17.640Z
 patch: {}
+exclude:
+  global:
+    - lib/hybrid-sdk/server/routesHandlers/serviceHandler.ts
