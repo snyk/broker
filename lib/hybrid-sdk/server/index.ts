@@ -18,6 +18,7 @@ import { FiltersType } from '../common/types/filter';
 import filterRulesLoader from '../common/filter/filter-rules-loading';
 import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
+import { serviceHandler } from './routesHandlers/serviceHandler';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode.');
@@ -63,6 +64,11 @@ export const main = async (serverOpts: ServerOpts) => {
   }
   app.get('/connection-status/:token', connectionStatusHandler);
   app.get('/connections-status', connectionsStatusHandler);
+  app.get(
+    '/service/:token/*',
+    overloadHttpRequestWithConnectionDetailsMiddleware,
+    serviceHandler,
+  );
   app.all(
     '/broker/:token/*',
     overloadHttpRequestWithConnectionDetailsMiddleware,
