@@ -8,7 +8,8 @@ import {
 
 export const serviceHandler = async (msg, cb) => {
   const clientOptions = getClientOpts();
-  const command = msg.url;
+  // strip off any query strings
+  const command = msg.url.indexOf('?') < 0 ? msg.url : msg.url.split('?')[0];
   const requestId = msg.headers['snyk-request-id'];
   logger.debug({ command, requestId }, 'Service message received.');
   if (!clientOptions) {
