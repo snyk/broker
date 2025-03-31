@@ -1,5 +1,5 @@
-ARG BASE_IMAGE=ubuntu:20.04
-ARG NODE_VERSION=20.11.0
+ARG BASE_IMAGE=ubuntu:24.04
+ARG NODE_VERSION=20.19.0
 
 
 FROM ${BASE_IMAGE} AS node-base
@@ -13,6 +13,8 @@ ARG USER_GID=${USER_UID}
 
 RUN <<EOF
     set -ex
+    # remove ubuntu user with user id 1000
+    touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel -r ubuntu
     groupadd --gid ${USER_GID} node
     useradd --uid ${USER_UID} --gid node --shell /bin/bash --create-home node
     apt update

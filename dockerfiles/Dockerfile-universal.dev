@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=snyk/broker:base
 
+
 FROM ${BASE_IMAGE} as broker-builder
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
