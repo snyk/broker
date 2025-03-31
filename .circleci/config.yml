@@ -1052,44 +1052,44 @@ workflows:
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build base image (nlatest)
+          name: Build base image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
             - Scan repository for secrets
-          additional_arguments: "--build-arg BASE_IMAGE=ubuntu:24.04 --build-arg USER_UID=2000"
+          additional_arguments: "--build-arg BASE_IMAGE=ubuntu:24.10"
           dockerfile: dockerfiles/base/Dockerfile
           nodejs_cycle: "23"
-          project_name: broker-nlatest
+          project_name: broker-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - scan-docker-image:
-          name: Scan base image (nlatest)
+          name: Scan base image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Build base image (nlatest)
+            - Build base image (edge)
           project: snyk/broker
-          project_name: broker-nlatest
+          project_name: broker-edge
           post-steps:
             - notify-slack-on-failure:
                 channel: hybrid-cicd-alerts
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push base image (nlatest)
+          name: Push base image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Scan base image (nlatest)
+            - Scan base image (edge)
           image_name: snyk/broker
-          image_tag: base-nlatest
-          project_name: broker-nlatest
+          image_tag: base-edge
+          project_name: broker-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
@@ -1530,440 +1530,296 @@ workflows:
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build apprisk image (nlatest)
+          name: Build apprisk image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=apprisk"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=apprisk"
           dockerfile: dockerfiles/Dockerfile
-          project_name: apprisk-nlatest
+          project_name: apprisk-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push apprisk image (nlatest)
+          name: Push apprisk image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build apprisk image (nlatest)
+            - Build apprisk image (edge)
           image_name: snyk/broker
-          image_tag: apprisk-nlatest
-          project_name: apprisk-nlatest
+          image_tag: apprisk-edge
+          project_name: apprisk-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build artifactory image (nlatest)
+          name: Build azure-repos image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=artifactory"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=azure-repos"
           dockerfile: dockerfiles/Dockerfile
-          project_name: artifactory-nlatest
+          project_name: azure-repos-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push artifactory image (nlatest)
+          name: Push azure-repos image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build artifactory image (nlatest)
+            - Build azure-repos image (edge)
           image_name: snyk/broker
-          image_tag: artifactory-nlatest
-          project_name: artifactory-nlatest
+          image_tag: azure-repos-edge
+          project_name: azure-repos-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build azure-repos image (nlatest)
+          name: Build bitbucket-server image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=azure-repos"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=bitbucket-server"
           dockerfile: dockerfiles/Dockerfile
-          project_name: azure-repos-nlatest
+          project_name: bitbucket-server-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push azure-repos image (nlatest)
+          name: Push bitbucket-server image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build azure-repos image (nlatest)
+            - Build bitbucket-server image (edge)
           image_name: snyk/broker
-          image_tag: azure-repos-nlatest
-          project_name: azure-repos-nlatest
+          image_tag: bitbucket-server-edge
+          project_name: bitbucket-server-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build bitbucket-server image (nlatest)
+          name: Build bitbucket-server-bearer-auth image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
           dockerfile: dockerfiles/Dockerfile
-          project_name: bitbucket-server-nlatest
+          project_name: bitbucket-server-bearer-auth-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push bitbucket-server image (nlatest)
+          name: Push bitbucket-server-bearer-auth image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build bitbucket-server image (nlatest)
+            - Build bitbucket-server-bearer-auth image (edge)
           image_name: snyk/broker
-          image_tag: bitbucket-server-nlatest
-          project_name: bitbucket-server-nlatest
+          image_tag: bitbucket-server-bearer-auth-edge
+          project_name: bitbucket-server-bearer-auth-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build bitbucket-server-bearer-auth image (nlatest)
+          name: Build container-registry-agent image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
-          dockerfile: dockerfiles/Dockerfile
-          project_name: bitbucket-server-bearer-auth-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-      - tag-and-push-docker-image:
-          name: Push bitbucket-server-bearer-auth image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - Build bitbucket-server-bearer-auth image (nlatest)
-          image_name: snyk/broker
-          image_tag: bitbucket-server-bearer-auth-nlatest
-          project_name: bitbucket-server-bearer-auth-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-
-      - build-and-save-docker-image:
-          name: Build container-registry-agent image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-hybrid-snyk
-          requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=container-registry-agent"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=container-registry-agent"
           dockerfile: dockerfiles/container-registry-agent/Dockerfile
-          project_name: container-registry-agent-nlatest
+          project_name: container-registry-agent-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push container-registry-agent image (nlatest)
+          name: Push container-registry-agent image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build container-registry-agent image (nlatest)
+            - Build container-registry-agent image (edge)
           image_name: snyk/broker
-          image_tag: container-registry-agent-nlatest
-          project_name: container-registry-agent-nlatest
+          image_tag: container-registry-agent-edge
+          project_name: container-registry-agent-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build github-com image (nlatest)
+          name: Build github-com image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-com"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=github-com"
           dockerfile: dockerfiles/Dockerfile
-          project_name: github-com-nlatest
+          project_name: github-com-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push github-com image (nlatest)
+          name: Push github-com image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build github-com image (nlatest)
+            - Build github-com image (edge)
           image_name: snyk/broker
-          image_tag: github-com-nlatest
-          project_name: github-com-nlatest
+          image_tag: github-com-edge
+          project_name: github-com-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build github-enterprise image (nlatest)
+          name: Build github-enterprise image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-enterprise"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=github-enterprise"
           dockerfile: dockerfiles/Dockerfile
-          project_name: github-enterprise-nlatest
+          project_name: github-enterprise-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push github-enterprise image (nlatest)
+          name: Push github-enterprise image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build github-enterprise image (nlatest)
+            - Build github-enterprise image (edge)
           image_name: snyk/broker
-          image_tag: github-enterprise-nlatest
-          project_name: github-enterprise-nlatest
+          image_tag: github-enterprise-edge
+          project_name: github-enterprise-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build github-server-app image (nlatest)
+          name: Build github-server-app image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-server-app"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=github-server-app"
           dockerfile: dockerfiles/Dockerfile
-          project_name: github-server-app-nlatest
+          project_name: github-server-app-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push github-server-app image (nlatest)
+          name: Push github-server-app image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build github-server-app image (nlatest)
+            - Build github-server-app image (edge)
           image_name: snyk/broker
-          image_tag: github-server-app-nlatest
-          project_name: github-server-app-nlatest
+          image_tag: github-server-app-edge
+          project_name: github-server-app-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build gitlab image (nlatest)
+          name: Build gitlab image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=gitlab"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge --build-arg BROKER_TYPE=gitlab"
           dockerfile: dockerfiles/Dockerfile
-          project_name: gitlab-nlatest
+          project_name: gitlab-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push gitlab image (nlatest)
+          name: Push gitlab image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build gitlab image (nlatest)
+            - Build gitlab image (edge)
           image_name: snyk/broker
-          image_tag: gitlab-nlatest
-          project_name: gitlab-nlatest
+          image_tag: gitlab-edge
+          project_name: gitlab-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
-          name: Build jira image (nlatest)
+          name: Build universal image (edge)
           context:
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=jira"
-          dockerfile: dockerfiles/Dockerfile
-          project_name: jira-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-      - tag-and-push-docker-image:
-          name: Push jira image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - Build jira image (nlatest)
-          image_name: snyk/broker
-          image_tag: jira-nlatest
-          project_name: jira-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-
-      - build-and-save-docker-image:
-          name: Build jira bearer auth image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-hybrid-snyk
-          requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=jira-bearer-auth"
-          dockerfile: dockerfiles/Dockerfile
-          project_name: jira-bearer-auth-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-      - tag-and-push-docker-image:
-          name: Push jira bearer auth image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - Build jira bearer auth image (nlatest)
-          image_name: snyk/broker
-          image_tag: jira-bearer-auth-nlatest
-          project_name: jira-bearer-auth-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-
-      - build-and-save-docker-image:
-          name: Build nexus image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-hybrid-snyk
-          requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus"
-          dockerfile: dockerfiles/Dockerfile
-          project_name: nexus-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-      - tag-and-push-docker-image:
-          name: Push nexus image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - Build nexus image (nlatest)
-          image_name: snyk/broker
-          image_tag: nexus-nlatest
-          project_name: nexus-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-
-      - build-and-save-docker-image:
-          name: Build nexus2 image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-hybrid-snyk
-          requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus2"
-          dockerfile: dockerfiles/Dockerfile
-          project_name: nexus2-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-      - tag-and-push-docker-image:
-          name: Push nexus2 image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - Build nexus2 image (nlatest)
-          image_name: snyk/broker
-          image_tag: nexus2-nlatest
-          project_name: nexus2-nlatest
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-tags-only
-
-      - build-and-save-docker-image:
-          name: Build universal image (nlatest)
-          context:
-            - snyk-bot-slack
-            - team-hybrid-snyk
-          requires:
-            - Push base image (nlatest)
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest"
+            - Push base image (edge)
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge"
           dockerfile: dockerfiles/Dockerfile-universal
-          project_name: universal-nlatest
+          project_name: universal-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
       - tag-and-push-docker-image:
-          name: Push universal image (nlatest)
+          name: Push universal image (edge)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - Build universal image (nlatest)
+            - Build universal image (edge)
           image_name: snyk/broker
-          image_tag: universal-nlatest
-          project_name: universal-nlatest
+          image_tag: universal-edge
+          project_name: universal-edge
           post-steps:
             - notify-slack-on-failure
           <<: *filter-tags-only
 
+      # dev images for testing (with edge variations)
       - approve-build-github-com-dev:
           name: github-com-dev image
           type: approval
@@ -1987,27 +1843,20 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
-
-      - approve-build-github-com-nlatest-dev:
-          name: github-com-nlatest-dev image
-          type: approval
-          requires:
-            - Scan repository for secrets
-          <<: *filter-dev-branch-only
       - build-and-push-dev-docker-image:
-          name: Build and push github-com-nlatest image (dev)
+          name: Build and push github-com-edge image (dev)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - github-com-nlatest-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-com"
+            - github-com-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=github-com"
           dockerfile: dockerfiles/Dockerfile.dev
           image_name: snyk/broker
-          image_tag: github-com-nlatest-dev
-          project_name: github-com-nlatest-dev
+          image_tag: github-com-edge-dev
+          project_name: github-com-edge-dev
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
@@ -2032,6 +1881,23 @@ workflows:
           image_name: snyk/broker
           image_tag: gitlab-dev
           project_name: gitlab-dev
+          post-steps:
+            - notify-slack-on-failure
+          <<: *filter-dev-branch-only
+      - build-and-push-dev-docker-image:
+          name: Build and push gitlab-edge image (dev)
+          context:
+            - snyk-bot-slack
+            - team-broker-cosign
+            - team-broker-docker-hub
+            - team-hybrid-snyk
+          requires:
+            - gitlab-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=gitlab"
+          dockerfile: dockerfiles/Dockerfile.dev
+          image_name: snyk/broker
+          image_tag: gitlab-edge-dev
+          project_name: gitlab-edge-dev
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
@@ -2060,30 +1926,6 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
 
-      - approve-build-gitlab-nlatest-dev:
-          name: gitlab-nlatest-dev image
-          type: approval
-          requires:
-            - Scan repository for secrets
-          <<: *filter-dev-branch-only
-      - build-and-push-dev-docker-image:
-          name: Build and push gitlab-nlatest image (dev)
-          context:
-            - snyk-bot-slack
-            - team-broker-cosign
-            - team-broker-docker-hub
-            - team-hybrid-snyk
-          requires:
-            - gitlab-nlatest-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=gitlab"
-          dockerfile: dockerfiles/Dockerfile.dev
-          image_name: snyk/broker
-          image_tag: gitlab-nlatest-dev
-          project_name: gitlab-nlatest-dev
-          post-steps:
-            - notify-slack-on-failure
-          <<: *filter-dev-branch-only
-
       - approve-build-nexus-dev:
           name: nexus-dev image
           type: approval
@@ -2107,27 +1949,20 @@ workflows:
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
-
-      - approve-build-nexus-nlatest-dev:
-          name: nexus-nlatest-dev image
-          type: approval
-          requires:
-            - Scan repository for secrets
-          <<: *filter-dev-branch-only
       - build-and-push-dev-docker-image:
-          name: Build and push nexus-nlatest image (dev)
+          name: Build and push nexus-edge image (dev)
           context:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
             - team-hybrid-snyk
           requires:
-            - nexus-nlatest-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus"
+            - nexus-dev image
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=nexus"
           dockerfile: dockerfiles/Dockerfile.dev
           image_name: snyk/broker
-          image_tag: nexus-nlatest-dev
-          project_name: nexus-nlatest-dev
+          image_tag: nexus-edge-dev
+          project_name: nexus-edge-dev
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
@@ -2156,7 +1991,7 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
       - build-and-push-dev-docker-image:
-          name: Build and push universal-nlatest image (dev)
+          name: Build and push universal-edge image (dev)
           context:
             - snyk-bot-slack
             - team-broker-cosign
@@ -2164,11 +1999,11 @@ workflows:
             - team-hybrid-snyk
           requires:
             - universal-dev image
-          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"
+          additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge"
           dockerfile: dockerfiles/Dockerfile-universal.dev
           image_name: snyk/broker
-          image_tag: universal-nlatest-dev
-          project_name: universal-nlatest-dev
+          image_tag: universal-edge-dev
+          project_name: universal-edge-dev
           post-steps:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
