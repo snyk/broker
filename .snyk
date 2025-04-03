@@ -12,6 +12,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2024-05-14T11:13:13.154Z
         created: 2024-05-07T11:13:13.157Z
+  SNYK-RHEL8-KRB5LIBS-9620338:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-05-03T12:01:13.134Z
+        created: 2025-04-03T12:01:13.137Z
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
