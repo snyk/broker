@@ -4,6 +4,7 @@ import { handleIdentifyOnSocket } from './identifyHandler';
 import { handleConnectionCloseOnSocket } from './closeHandler';
 import { handleSocketError } from './errorHandler';
 import { handleTerminationSignalOnSocket } from './terminateHandler';
+import { hashToken, maskToken } from '../../common/utils/token';
 
 export const handleSocketConnection = (socket) => {
   let clientId = null;
@@ -32,7 +33,12 @@ export const handleSocketConnection = (socket) => {
 
   socket.on('terminate', (data) => {
     logger.info(
-      { token, clientId, signal: data.signal },
+      {
+        maskedToken: maskToken(token),
+        hashedToken: hashToken(token),
+        clientId,
+        signal: data.signal,
+      },
       'Socket termination signal received',
     );
     handleTerminationSignalOnSocket(token, clientId);
