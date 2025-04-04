@@ -27,4 +27,5 @@ export interface BrokerConnectionAttributes {
       nonce: string;
     };
   };
+  contexts?: Record<string, Record<string, string>>;
 }
