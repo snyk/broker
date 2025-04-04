@@ -51,7 +51,9 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
           { apiResponse },
           'Unexpected Connection Allocation Server response',
         );
-        throw new Error('Unexpected connection allocation server response');
+        throw new Error(
+          `Unexpected connection allocation server response - ${response.statusCode}: ${response.body}`,
+        );
       }
       const snykRequestId = response.headers['snyk-request-id'] || '';
       logger.trace(
@@ -63,7 +65,7 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
       return serverId;
     } catch (err) {
       logger.trace({ err }, 'Error getting connection allocation.');
-      throw new Error('Error getting connection allocation.');
+      throw new Error(`Error getting connection allocation. ${err}`);
     }
   }
 }

@@ -57,6 +57,7 @@ export class HybridClientRequestHandler {
     delete this.simplifiedContext.requestHeaders;
     logger.info(this.simplifiedContext, '[HTTP Flow] Received request.');
   }
+
   private makeWebsocketRequestWithStreamingResponse() {
     const streamingID = uuid();
     const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
@@ -101,6 +102,7 @@ export class HybridClientRequestHandler {
     incrementWebSocketRequestsTotal(false, 'outbound-request');
     return;
   }
+
   private makeWebsocketRequestWithWebsocketResponse() {
     logger.debug(
       this.logContext,
@@ -112,8 +114,10 @@ export class HybridClientRequestHandler {
       '[HTTP Flow] Brokering request through Websocket and response through Websocket.',
     );
     // relay the http request over the websocket, handle websocket response
+    const requestType =
+      this.req.headers['x-broker-service'] === 'true' ? 'service' : 'request';
     this.res.locals.websocket.send(
-      'request',
+      requestType,
       {
         url: this.req.url,
         method: this.req.method,
@@ -186,6 +190,7 @@ export class HybridClientRequestHandler {
     );
     incrementWebSocketRequestsTotal(false, 'outbound-request');
   }
+
   private makeHttpRequest() {
     const apiDomain = new URL(
       this.options.API_BASE_URL ||
@@ -207,6 +212,7 @@ export class HybridClientRequestHandler {
       headers: this.req.headers,
     };
 
+    // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
     makeRequestToDownstream(filteredReq)
       .then((resp) => {
         if (resp.statusCode) {

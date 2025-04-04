@@ -1,4 +1,9 @@
-import { hashToken, maskToken } from '../../lib/hybrid-sdk/common/utils/token';
+import { randomUUID } from 'node:crypto';
+import {
+  extractBrokerTokenFromUrl,
+  hashToken,
+  maskToken,
+} from '../../lib/hybrid-sdk/common/utils/token';
 
 describe('token', () => {
   describe('hashToken', () => {
@@ -31,6 +36,36 @@ describe('token', () => {
 
       expect(maskedToken).toEqual('1234-...-2345');
       expect(maskedUUIDToken).toEqual('aaaa-...-dddd');
+    });
+  });
+
+  describe('extractBrokerTokenFromUrl', () => {
+    it('should extract token successfully', async () => {
+      const brokerToken = randomUUID();
+      const testUri = `/broker/${brokerToken}/rest/of/path`;
+
+      expect(extractBrokerTokenFromUrl(testUri)).toEqual(brokerToken);
+    });
+
+    it('should extract token successfully in full url', async () => {
+      const brokerToken = randomUUID();
+      const testUri = `http://my.hostname/broker/${brokerToken}/rest/of/path`;
+
+      expect(extractBrokerTokenFromUrl(testUri)).toEqual(brokerToken);
+    });
+
+    it('should not extract token for other format', async () => {
+      const brokerToken = 'invalidToken';
+      const testUri = `/broker/${brokerToken}/rest/of/path`;
+
+      expect(extractBrokerTokenFromUrl(testUri)).toBeNull();
+    });
+
+    it('should not extract token for other format in full url', async () => {
+      const brokerToken = 'invalidToken';
+      const testUri = `http://my.hostname/broker/${brokerToken}/rest/of/path`;
+
+      expect(extractBrokerTokenFromUrl(testUri)).toBeNull();
     });
   });
 });

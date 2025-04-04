@@ -100,7 +100,7 @@ FROM node-base
 
 ARG BROKER_VERSION
 
-LABEL org.opencontainers.image.authors="team-broker" \
+LABEL org.opencontainers.image.authors="hybrid" \
       org.opencontainers.image.documentation="https://docs.snyk.io/enterprise-setup/snyk-broker" \
       org.opencontainers.image.ref.name="snyk-broker" \
       org.opencontainers.image.source="https://github.com/snyk/broker" \

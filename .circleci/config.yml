@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  prodsec: snyk/prodsec-orb@1.0
+  prodsec: snyk/prodsec-orb@1.2
   slack: circleci/slack@4.12.5
   snyk: snyk/snyk@2.2.0
 
@@ -235,6 +235,16 @@ jobs:
           command: npm test && npm run test:bin
       - store_test_results:
           path: reports
+  security-scans:
+    <<: *defaults
+    steps:
+      - prepare
+      - attach_workspace:
+          at: ~/broker
+      - prodsec/security_scans:
+          mode: auto
+          open-source-additional-arguments: --exclude=test
+          release-branch: master
   build-and-save-docker-image:
     <<: *defaults
     environment:
@@ -312,7 +322,7 @@ jobs:
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
           monitor-on-build: <<parameters.monitor_on_build>>
-          organization: platform-broker
+          organization: platformeng_hybrid
           project: <<parameters.project>>
           severity-threshold: <<parameters.severity_threshold>>
   tag-and-push-docker-image:
@@ -375,7 +385,7 @@ jobs:
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: false
           monitor-on-build: false
-          organization: platform-broker
+          organization: platformeng_hybrid
           project: <<parameters.project_name>>
           severity-threshold: <<parameters.severity_threshold>>
       - install-cosign
@@ -426,6 +436,14 @@ workflows:
           requires:
             - Install NPM packages
 
+      - security-scans:
+          name: Snyk Security Scans
+          context:
+            - snyk-bot-slack
+            - team-hybrid-snyk
+          requires:
+            - Install NPM packages
+
       - build-and-save-docker-image:
           name: Build base image (Ubuntu)
           requires:
@@ -438,7 +456,7 @@ workflows:
           name: Scan base image (Ubuntu)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build base image (Ubuntu)
           project: snyk/broker
@@ -456,7 +474,7 @@ workflows:
           name: Scan base image (RHEL)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build base image (RHEL)
           project: snyk/broker-rhel-ubi
@@ -468,8 +486,9 @@ workflows:
           context:
             - nodejs-lib-release
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
+            - Snyk Security Scans
             - Scan base image (Ubuntu)
             - Scan base image (RHEL)
             - Test
@@ -494,7 +513,7 @@ workflows:
           name: Build base UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile.ubi
@@ -506,7 +525,7 @@ workflows:
           name: Scan base UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build base UBI image
           project: snyk/broker-rhel-ubi
@@ -521,7 +540,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan base UBI image
           image_name: snyk/broker
@@ -535,7 +554,7 @@ workflows:
           name: Build apprisk UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=apprisk"
@@ -548,7 +567,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build apprisk UBI image
           image_name: snyk/broker
@@ -562,7 +581,7 @@ workflows:
           name: Build artifactory UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=artifactory"
@@ -575,7 +594,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build artifactory UBI image
           image_name: snyk/broker
@@ -589,7 +608,7 @@ workflows:
           name: Build azure-repos UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=azure-repos"
@@ -604,7 +623,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build azure-repos UBI image
           image_name: snyk/broker
@@ -618,7 +637,7 @@ workflows:
           name: Build bitbucket-server UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=bitbucket-server"
@@ -633,7 +652,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server UBI image
           image_name: snyk/broker
@@ -646,7 +665,7 @@ workflows:
           name: Build bitbucket-server-bearer-auth UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
@@ -661,7 +680,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server-bearer-auth UBI image
           image_name: snyk/broker
@@ -675,7 +694,7 @@ workflows:
           name: Build container-registry-agent UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=container-registry-agent"
@@ -690,7 +709,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build container-registry-agent UBI image
           image_name: snyk/broker
@@ -704,7 +723,7 @@ workflows:
           name: Build github-com UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=github-com"
@@ -719,7 +738,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-com UBI image
           image_name: snyk/broker
@@ -733,7 +752,7 @@ workflows:
           name: Build github-enterprise UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=github-enterprise"
@@ -748,7 +767,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-enterprise UBI image
           image_name: snyk/broker
@@ -762,7 +781,7 @@ workflows:
           name: Build github-server-app UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=github-server-app"
@@ -777,7 +796,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-server-app UBI image
           image_name: snyk/broker
@@ -791,7 +810,7 @@ workflows:
           name: Build gitlab UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=gitlab"
@@ -806,7 +825,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build gitlab UBI image
           image_name: snyk/broker
@@ -820,7 +839,7 @@ workflows:
           name: Build jira UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=jira"
@@ -835,7 +854,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira UBI image
           image_name: snyk/broker
@@ -849,7 +868,7 @@ workflows:
           name: Build jira bearer auth UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=jira-bearer-auth"
@@ -864,7 +883,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira bearer auth UBI image
           image_name: snyk/broker
@@ -878,7 +897,7 @@ workflows:
           name: Build nexus UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=nexus"
@@ -893,7 +912,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus UBI image
           image_name: snyk/broker
@@ -907,7 +926,7 @@ workflows:
           name: Build nexus2 UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi --build-arg BROKER_TYPE=nexus2"
@@ -922,7 +941,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus2 UBI image
           image_name: snyk/broker
@@ -936,7 +955,7 @@ workflows:
           name: Build universal UBI image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base UBI image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-rhel-ubi"
@@ -951,7 +970,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build universal UBI image
           image_name: snyk/broker
@@ -979,7 +998,7 @@ workflows:
           name: Build base image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan repository for secrets
           dockerfile: dockerfiles/base/Dockerfile
@@ -992,7 +1011,7 @@ workflows:
           name: Scan base image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build base image
           project: snyk/broker
@@ -1007,7 +1026,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan base image
           image_name: snyk/broker
@@ -1021,7 +1040,7 @@ workflows:
           name: Build base image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan repository for secrets
           additional_arguments: "--build-arg BASE_IMAGE=ubuntu:24.04 --build-arg USER_UID=2000"
@@ -1035,7 +1054,7 @@ workflows:
           name: Scan base image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build base image (nlatest)
           project: snyk/broker
@@ -1050,7 +1069,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Scan base image (nlatest)
           image_name: snyk/broker
@@ -1064,7 +1083,7 @@ workflows:
           name: Build apprisk image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=apprisk"
@@ -1079,7 +1098,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build apprisk image
           image_name: snyk/broker
@@ -1093,7 +1112,7 @@ workflows:
           name: Build artifactory image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=artifactory"
@@ -1108,7 +1127,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build artifactory image
           image_name: snyk/broker
@@ -1122,7 +1141,7 @@ workflows:
           name: Build azure-repos image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=azure-repos"
@@ -1137,7 +1156,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build azure-repos image
           image_name: snyk/broker
@@ -1151,7 +1170,7 @@ workflows:
           name: Build bitbucket-server image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=bitbucket-server"
@@ -1166,7 +1185,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server image
           image_name: snyk/broker
@@ -1180,7 +1199,7 @@ workflows:
           name: Build bitbucket-server-bearer-auth image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
@@ -1195,7 +1214,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server-bearer-auth image
           image_name: snyk/broker
@@ -1209,7 +1228,7 @@ workflows:
           name: Build container-registry-agent image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=container-registry-agent"
@@ -1224,7 +1243,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build container-registry-agent image
           image_name: snyk/broker
@@ -1238,7 +1257,7 @@ workflows:
           name: Build github-com image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=github-com"
@@ -1253,7 +1272,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-com image
           image_name: snyk/broker
@@ -1267,7 +1286,7 @@ workflows:
           name: Build github-enterprise image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=github-enterprise"
@@ -1282,7 +1301,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-enterprise image
           image_name: snyk/broker
@@ -1296,7 +1315,7 @@ workflows:
           name: Build github-server-app image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=github-server-app"
@@ -1311,7 +1330,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-server-app image
           image_name: snyk/broker
@@ -1325,7 +1344,7 @@ workflows:
           name: Build gitlab image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=gitlab"
@@ -1340,7 +1359,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build gitlab image
           image_name: snyk/broker
@@ -1354,7 +1373,7 @@ workflows:
           name: Build jira image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=jira"
@@ -1369,7 +1388,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira image
           image_name: snyk/broker
@@ -1383,7 +1402,7 @@ workflows:
           name: Build jira bearer auth image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=jira-bearer-auth"
@@ -1398,7 +1417,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira bearer auth image
           image_name: snyk/broker
@@ -1412,7 +1431,7 @@ workflows:
           name: Build nexus image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=nexus"
@@ -1427,7 +1446,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus image
           image_name: snyk/broker
@@ -1441,7 +1460,7 @@ workflows:
           name: Build nexus2 image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base --build-arg BROKER_TYPE=nexus2"
@@ -1456,7 +1475,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus2 image
           image_name: snyk/broker
@@ -1470,7 +1489,7 @@ workflows:
           name: Build universal image
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base"
@@ -1485,7 +1504,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build universal image
           image_name: snyk/broker
@@ -1499,7 +1518,7 @@ workflows:
           name: Build apprisk image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=apprisk"
@@ -1514,7 +1533,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build apprisk image (nlatest)
           image_name: snyk/broker
@@ -1528,7 +1547,7 @@ workflows:
           name: Build artifactory image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=artifactory"
@@ -1543,7 +1562,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build artifactory image (nlatest)
           image_name: snyk/broker
@@ -1557,7 +1576,7 @@ workflows:
           name: Build azure-repos image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=azure-repos"
@@ -1572,7 +1591,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build azure-repos image (nlatest)
           image_name: snyk/broker
@@ -1586,7 +1605,7 @@ workflows:
           name: Build bitbucket-server image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server"
@@ -1601,7 +1620,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server image (nlatest)
           image_name: snyk/broker
@@ -1615,7 +1634,7 @@ workflows:
           name: Build bitbucket-server-bearer-auth image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=bitbucket-server-bearer-auth"
@@ -1630,7 +1649,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build bitbucket-server-bearer-auth image (nlatest)
           image_name: snyk/broker
@@ -1644,7 +1663,7 @@ workflows:
           name: Build container-registry-agent image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=container-registry-agent"
@@ -1659,7 +1678,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build container-registry-agent image (nlatest)
           image_name: snyk/broker
@@ -1673,7 +1692,7 @@ workflows:
           name: Build github-com image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-com"
@@ -1688,7 +1707,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-com image (nlatest)
           image_name: snyk/broker
@@ -1702,7 +1721,7 @@ workflows:
           name: Build github-enterprise image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-enterprise"
@@ -1717,7 +1736,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-enterprise image (nlatest)
           image_name: snyk/broker
@@ -1731,7 +1750,7 @@ workflows:
           name: Build github-server-app image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=github-server-app"
@@ -1746,7 +1765,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build github-server-app image (nlatest)
           image_name: snyk/broker
@@ -1760,7 +1779,7 @@ workflows:
           name: Build gitlab image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=gitlab"
@@ -1775,7 +1794,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build gitlab image (nlatest)
           image_name: snyk/broker
@@ -1789,7 +1808,7 @@ workflows:
           name: Build jira image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=jira"
@@ -1804,7 +1823,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira image (nlatest)
           image_name: snyk/broker
@@ -1818,7 +1837,7 @@ workflows:
           name: Build jira bearer auth image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=jira-bearer-auth"
@@ -1833,7 +1852,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build jira bearer auth image (nlatest)
           image_name: snyk/broker
@@ -1847,7 +1866,7 @@ workflows:
           name: Build nexus image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus"
@@ -1862,7 +1881,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus image (nlatest)
           image_name: snyk/broker
@@ -1876,7 +1895,7 @@ workflows:
           name: Build nexus2 image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest --build-arg BROKER_TYPE=nexus2"
@@ -1891,7 +1910,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build nexus2 image (nlatest)
           image_name: snyk/broker
@@ -1905,7 +1924,7 @@ workflows:
           name: Build universal image (nlatest)
           context:
             - snyk-bot-slack
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Push base image (nlatest)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-nlatest"
@@ -1920,7 +1939,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - Build universal image (nlatest)
           image_name: snyk/broker
@@ -1942,7 +1961,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - github-com-dev image
           additional_arguments: "--build-arg BROKER_TYPE=github-com"
@@ -1966,7 +1985,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - github-com-nlatest-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=github-com"
@@ -1990,7 +2009,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - gitlab-dev image
           additional_arguments: "--build-arg BROKER_TYPE=gitlab"
@@ -2014,7 +2033,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - bitbucket-server-dev image
           additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
@@ -2038,7 +2057,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - gitlab-nlatest-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=gitlab"
@@ -2062,7 +2081,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - nexus-dev image
           additional_arguments: "--build-arg BROKER_TYPE=nexus"
@@ -2086,7 +2105,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - nexus-nlatest-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest --build-arg BROKER_TYPE=nexus"
@@ -2110,7 +2129,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - universal-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base"
@@ -2127,7 +2146,7 @@ workflows:
             - snyk-bot-slack
             - team-broker-cosign
             - team-broker-docker-hub
-            - team-broker-snyk
+            - team-hybrid-snyk
           requires:
             - universal-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-nlatest"

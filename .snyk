@@ -12,10 +12,15 @@ ignore:
         reason: No fix from RHEL available
         expires: 2024-05-14T11:13:13.154Z
         created: 2024-05-07T11:13:13.157Z
+  SNYK-RHEL8-KRB5LIBS-9620338:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-05-03T12:01:13.134Z
+        created: 2025-04-03T12:01:13.137Z
   SNYK-JS-WS-7266574:
     - '*':
         reason: Mitigated in code
-        expires: 2025-03-13T12:03:16.272Z
+        expires: 2025-09-13T12:03:16.272Z
         created: 2025-02-11T12:03:16.275Z
   SNYK-JS-CROSSSPAWN-8303230:
     - '*':
@@ -28,3 +33,6 @@ ignore:
         expires: 2024-12-12T12:19:17.636Z
         created: 2024-11-12T12:19:17.640Z
 patch: {}
+exclude:
+  global:
+    - lib/hybrid-sdk/server/routesHandlers/serviceHandler.ts

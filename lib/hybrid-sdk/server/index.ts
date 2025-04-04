@@ -6,7 +6,10 @@ import { validateBrokerTypeMiddleware } from './broker-middleware';
 import { webserver } from '../common/http/webserver';
 import { serverStarting, serverStopping } from './infra/dispatcher';
 import { handlePostResponse } from './routesHandlers/postResponseHandler';
-import { connectionStatusHandler } from './routesHandlers/connectionStatusHandler';
+import {
+  connectionsStatusHandler,
+  connectionStatusHandler,
+} from './routesHandlers/connectionStatusHandler';
 import { ServerOpts } from '../common/types/options';
 import {
   extractPossibleContextFromHttpRequestToHeader,
@@ -18,6 +21,7 @@ import { FiltersType } from '../common/types/filter';
 import filterRulesLoader from '../common/filter/filter-rules-loading';
 import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
+import { serviceHandler } from './routesHandlers/serviceHandler';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode.');
@@ -62,6 +66,12 @@ export const main = async (serverOpts: ServerOpts) => {
     app.use(applyPrometheusMiddleware());
   }
   app.get('/connection-status/:token', connectionStatusHandler);
+  app.get('/connections-status', connectionsStatusHandler);
+  app.get(
+    '/service/:token/*',
+    overloadHttpRequestWithConnectionDetailsMiddleware,
+    serviceHandler,
+  );
   app.all(
     '/broker/:token/*',
     extractPossibleContextFromHttpRequestToHeader,

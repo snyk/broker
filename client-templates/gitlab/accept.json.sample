@@ -1599,6 +1599,36 @@
         "method": "GET",
         "path": "/api/v4/projects/:project/merge_requests/:pullRef",
         "origin": "https://${GITLAB}"
-      }
+    },
+    {
+      "//": "create a new MR summary comment (note)",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/notes",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "update an existing MR summary comment (note)",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/notes/:noteId",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "get diff version for a given commit SHA in a merge request",
+      "method": "GET",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/versions",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "create an inline MR comment (discussion)",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/discussions",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "resolve an inline MR comment (discussion)",
+      "method": "PUT",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/discussions/:discussion",
+      "origin": "https://${GITLAB}"
+    }
   ]
 }

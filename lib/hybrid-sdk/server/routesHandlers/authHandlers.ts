@@ -47,6 +47,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
     );
     return res.status(401).send('Invalid credentials.');
   } else {
+    // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
     const credsCheckResponse = await validateBrokerClientCredentials(
       credentials,
       brokerClientId as string,

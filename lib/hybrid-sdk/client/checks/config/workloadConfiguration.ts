@@ -1,7 +1,7 @@
 import { Config } from '../../types/config';
 import { CheckOptions, CheckResult } from '../types';
 import { existsSync, readFileSync } from 'node:fs';
-import { findProjectRoot } from '../../../common/config/config';
+import { findFactoryRoot } from '../../../common/config/config';
 import { resolve } from 'node:path';
 export const validateWorkloadConfig = (
   checkOptions: CheckOptions,
@@ -46,12 +46,11 @@ export const validateWorkloadConfig = (
 
 function verifyClassAndHandler(className, filePath) {
   try {
-    const root = findProjectRoot(__dirname);
+    const root = findFactoryRoot(__dirname);
     if (!root) {
       return false;
     }
-    const absolutePath =
-      resolve(`${root}/dist/lib/`, filePath.replace('../', '')) + '.js';
+    const absolutePath = resolve(`${root}`, filePath) + '.js';
     if (!existsSync(absolutePath)) {
       return false;
     }

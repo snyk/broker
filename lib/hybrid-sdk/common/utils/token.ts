@@ -23,6 +23,6 @@ export function maskSCMToken(token) {
 }
 
 export const extractBrokerTokenFromUrl = (urlString) => {
-  const regex = /^\/broker\/([a-z0-9-]+)\//;
+  const regex = /\/broker\/([a-z0-9-]+)\//;
   return urlString.match(regex) ? urlString.match(regex)[1] : null;
 };
