@@ -97,14 +97,16 @@ export const main = async (clientOpts: ClientOpts) => {
         `${pluginsFolderPath}/plugins`,
         clientOpts,
       );
+      await retrieveAndLoadFilters(clientOpts);
     } else {
+      await retrieveAndLoadFilters(clientOpts);
       // universal broker logic is in connection manager
       hookResults = await processStartUpHooks(
         clientOpts,
         clientOpts.config.brokerClientId,
       );
     }
-    await retrieveAndLoadFilters(clientOpts);
+
     if (process.env.NODE_ENV != 'test') {
       setInterval(async () => {
         await retrieveAndLoadFilters(clientOpts);
