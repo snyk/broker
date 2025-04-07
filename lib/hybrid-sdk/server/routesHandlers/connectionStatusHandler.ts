@@ -5,7 +5,7 @@ import { log as logger } from '../../../logs/logger';
 import { hostname } from 'node:os';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeStreamingRequestToDownstream } from '../../http/request';
-import { hashToken, maskToken } from '../../common/utils/token';
+import { hashToken } from '../../common/utils/token';
 
 export interface ClientSummary {
   brokerClientIds: string[];
@@ -78,7 +78,7 @@ export const connectionsStatusHandler = async (req: Request, res: Response) => {
   const connections = getSocketConnections();
   for (const [key, value] of connections) {
     connectionSummary.push({
-      identifier: maskToken(key),
+      identifier: key,
       hashedIdentifier: hashToken(key),
       versions: [...new Set(value.map((x) => x.metadata.version))],
       brokerClientIds: [...new Set(value.map((x) => x.brokerClientId))],
