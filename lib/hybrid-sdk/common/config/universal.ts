@@ -85,11 +85,12 @@ export const getConfigForIdentifier = (
     connectionKey &&
     contextId &&
     (!config.connections[connectionKey].contexts ||
-      !config.connections[connectionKey].contexts[contextId])
+      !config.connections[connectionKey].contexts[contextId] ||
+      config.connections[connectionKey].contexts[contextId].isDisabled)
   ) {
     logger.error(
       { connectionKey, contextId },
-      `Unable to find context ${contextId} for ${connectionKey}. Please review config.`,
+      `Unable to find active context ${contextId} for ${connectionKey}. Please review config.`,
     );
     throw new Error(
       `Interrupting request. Unable to find context ${contextId} for ${connectionKey}. Please review config.`,

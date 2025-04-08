@@ -42,6 +42,16 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
 
   async handler(data: RemoteServerWorkloadRuntimeParams) {
     const { payload, websocketHandler } = data;
+
+    // Safety cleanup
+    const contextIdRegex =
+      /^\/ctx\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/;
+    const contextMatch = payload.url.match(contextIdRegex);
+    if (contextMatch) {
+      payload.url = payload.url.replace(contextIdRegex, '');
+    }
+    // End of safety cleanup
+
     const websocketResponseHandler = websocketHandler;
     if (this.options.config.universalBrokerEnabled) {
       payload.connectionIdentifier = this.connectionIdentifier;
