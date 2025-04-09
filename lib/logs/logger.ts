@@ -41,6 +41,36 @@ const sanitiseConnectionConfigVariables = (
   return raw;
 };
 
+const sanitiseConnectionContextConfigVariables = (
+  raw,
+  variable,
+  connections,
+  connectionKey,
+) => {
+  if (connections[connectionKey].contexts) {
+    const contextKeys = Object.keys(connections[connectionKey].contexts);
+    for (const contextKey of contextKeys) {
+      for (const cfgVar of Object.keys(
+        connections[connectionKey].contexts[contextKey],
+      )) {
+        if (cfgVar == variable) {
+          raw = raw.replace(
+            new RegExp(
+              escapeRegExp(
+                connections[connectionKey].contexts[contextKey][cfgVar],
+              ),
+              'igm',
+            ),
+            '${' + variable + '}',
+          );
+        }
+      }
+    }
+  }
+
+  return raw;
+};
+
 const sanitisePluginsConfigVariables = (raw, variable, pluginConfig) => {
   for (const cfgVar of Object.keys(pluginConfig)) {
     if (cfgVar == variable) {
@@ -127,6 +157,12 @@ export const sanitise = (raw) => {
     for (const variable of universalBrokerConnectionsVariables) {
       for (const connectionKey of Object.keys(config.connections)) {
         raw = sanitiseConnectionConfigVariables(
+          raw,
+          variable,
+          config.connections,
+          connectionKey,
+        );
+        raw = sanitiseConnectionContextConfigVariables(
           raw,
           variable,
           config.connections,
