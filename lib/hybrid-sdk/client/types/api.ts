@@ -4,6 +4,13 @@ export interface BrokerConnectionApiResponse {
   id: string;
   type: string;
   attributes: BrokerConnectionAttributes;
+  relationships?: {
+    id: string;
+    type: string;
+    attributes: {
+      context: Record<string, string>;
+    };
+  }[];
 }
 export interface BrokerConnectionAttributes {
   configuration: {

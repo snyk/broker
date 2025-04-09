@@ -101,3 +101,53 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   logger.debug({ url: req.url }, 'request');
   next();
 };
+
+export const extractPossibleContextFromHttpRequestToHeader = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
+    const ctxPrefix = '/ctx/';
+    const ctxIndex = url.pathname.indexOf(ctxPrefix);
+
+    if (ctxIndex !== -1) {
+      const ctxValueStart = ctxIndex + ctxPrefix.length;
+      const ctxValueEnd = url.pathname.indexOf('/', ctxValueStart);
+
+      if (ctxValueEnd === -1) {
+        logger.error(
+          { url },
+          'Error processing URL for context extraction. Unexpected pattern.',
+        );
+        throw new Error(
+          `Error processing URL for context extraction. Unexpected pattern in ${url}.`,
+        );
+      }
+
+      const ctxValue = url.pathname.substring(ctxValueStart, ctxValueEnd);
+      const newPathname =
+        url.pathname.substring(0, ctxIndex) +
+        url.pathname.substring(ctxValueEnd);
+
+      if (newPathname === '') {
+        logger.error(
+          { url },
+          'Error processing URL for context extraction. Unexpected empty pathname.',
+        );
+        throw new Error(
+          `Error processing URL for context extraction. Unexpected empty pathname in url ${url}.`,
+        );
+      }
+
+      url.pathname = newPathname;
+      req.headers['x-snyk-broker-context-id'] = ctxValue;
+      req.url = url.pathname + url.search;
+    }
+  } catch (error) {
+    logger.error({ error }, 'Error processing URL for context extraction.');
+  }
+
+  next();
+};

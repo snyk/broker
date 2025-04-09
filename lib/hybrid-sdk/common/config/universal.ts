@@ -14,6 +14,16 @@ export const getConfigForType = (type: string) => {
   };
 };
 
+export const getAllowedKeysForType = (type: string) => {
+  const config = getConfig();
+  return Object.keys({
+    ...config.brokerClientConfiguration.common.default,
+    ...config.brokerClientConfiguration.common.required,
+    ...config.brokerClientConfiguration[`${type}`]?.default,
+    ...config.brokerClientConfiguration[`${type}`].required,
+  });
+};
+
 export const getConfigForConnections = () => {
   const config = getConfig();
   return getConfigForConnectionsFromConfig(config);
@@ -42,7 +52,11 @@ export const getValidationConfigForType = (type) => {
     validations: config.brokerClientConfiguration[`${type}`].validations,
   };
 };
-export const getConfigForIdentifier = (identifier: string, config) => {
+export const getConfigForIdentifier = (
+  identifier: string,
+  config,
+  contextId?: string | null,
+) => {
   const connection = findConnectionWithIdentifier(
     config.connections,
     identifier,
@@ -67,13 +81,50 @@ export const getConfigForIdentifier = (identifier: string, config) => {
     //   `Unable to find configuration type for ${identifier}. Please review config.`,
     // );
   }
+  if (
+    connectionKey &&
+    contextId &&
+    (!config.connections[connectionKey].contexts ||
+      !config.connections[connectionKey].contexts[contextId] ||
+      config.connections[connectionKey].contexts[contextId].isDisabled)
+  ) {
+    logger.error(
+      { connectionKey, contextId },
+      `Unable to find active context ${contextId} for ${connectionKey}. Please review config.`,
+    );
+    throw new Error(
+      `Interrupting request. Unable to find context ${contextId} for ${connectionKey}. Please review config.`,
+    );
+  }
+
+  const contextToInject = {};
+  if (connectionKey && contextId) {
+    const context = config.connections[connectionKey].contexts[contextId];
+    const allowedContextKeys = getAllowedKeysForType(connectionType);
+    for (const key in context) {
+      if (allowedContextKeys.includes(key)) {
+        contextToInject[key] = context[key];
+      } else {
+        logger.debug(
+          { key, connectionKey },
+          'Env var in context not allowed for injection in request.',
+        );
+      }
+    }
+  }
+
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
     ...(connectionKey ? config.connections[connectionKey] : {}),
+    ...contextToInject,
     ...(getPluginsConfig() && getPluginsConfig()[connectionKey!]
       ? getPluginsConfig()[connectionKey!]
       : {}),
   };
+  if (connectionKey && config.connections[connectionKey].contexts) {
+    delete configToOverload.contexts;
+  }
+
   const configOverloaded = expandPlaceholderValuesInFlatList(
     configToOverload,
     configToOverload,
@@ -84,13 +135,14 @@ export const getConfigForIdentifier = (identifier: string, config) => {
 export const overloadConfigWithConnectionSpecificConfig = (
   connectionIdentifier,
   localConfig,
+  contextId?: string | null,
 ) => {
   const config = { ...localConfig, ...getConfig() };
   let overloadedConfig = Object.assign(
     {},
     {
       ...localConfig,
-      ...getConfigForIdentifier(connectionIdentifier, config),
+      ...getConfigForIdentifier(connectionIdentifier, config, contextId),
     },
   );
   overloadedConfig = expandPlaceholderValuesInFlatList(

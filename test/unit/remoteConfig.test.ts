@@ -119,6 +119,7 @@ describe('Remote config helpers', () => {
         friendlyName: 'my github connection',
         id: 'CONNECTION_ID_1',
         type: 'github',
+        contexts: {},
       },
     });
   });
@@ -156,6 +157,7 @@ describe('Remote config helpers', () => {
         friendlyName: 'my github connection',
         id: 'CONNECTION_ID_1',
         type: 'github',
+        contexts: {},
       },
     });
   });

@@ -9,6 +9,7 @@ import authHeader from './common/utils/auth-header';
 import { replace } from './common/utils/replace-vars';
 import tryJSONParse from './common/utils/try-json-parse';
 import undefsafe from 'undefsafe';
+import { log as logger } from '../logs/logger';
 
 export const getInterpolatedRequest = (
   connectionIdentifier: string | null,
@@ -30,9 +31,17 @@ export const getInterpolatedRequest = (
     config?.universalBrokerEnabled &&
     connectionIdentifier
   ) {
+    const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
+    if (contextId) {
+      logger.debug(
+        { url: payload.url, connectionIdentifier, contextId },
+        `Using specific context for request.`,
+      );
+    }
     localConfig = overloadConfigWithConnectionSpecificConfig(
       connectionIdentifier,
       localConfig,
+      contextId,
     );
   }
 
