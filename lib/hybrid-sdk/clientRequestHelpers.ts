@@ -61,7 +61,8 @@ export class HybridClientRequestHandler {
   private makeWebsocketRequestWithStreamingResponse() {
     const streamingID = uuid();
     const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
-    streamBuffer.on('error', (error) => {
+
+    const handleError = (error: Error) => {
       // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
       logger.error(
         {
@@ -71,7 +72,20 @@ export class HybridClientRequestHandler {
         },
         '[HTTP Flow][Relay] Error piping POST response stream through to HTTP response',
       );
-      this.res.destroy(error);
+      if (!this.res.headersSent) {
+        this.res
+          .status(500)
+          .setHeader('x-broker-failure', 'streaming-error')
+          .send('data reponse streaming error.');
+      } else {
+        this.res.end();
+      }
+      streamBuffer.destroy();
+    };
+
+    streamBuffer.on('error', handleError);
+    this.res.on('close', () => {
+      streamBuffer.destroy();
     });
     this.logContext.streamingID = streamingID;
     logger.debug(
