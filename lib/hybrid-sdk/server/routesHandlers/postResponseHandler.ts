@@ -67,6 +67,24 @@ export const handlePostResponse = (req: Request, res: Response) => {
   }
   let statusAndHeaders = '';
   let statusAndHeadersSize = -1;
+
+  const handleError = (err: Error) => {
+    logger.error(
+      { ...logContext, error: err },
+      'Received error handling POST from client.',
+    );
+    streamHandler.destroy(err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: `Snyk Connection Error: ${err.message}` });
+    } else {
+      res.end();
+    }
+    // Ensure the request stream is destroyed to prevent hanging
+    if (!req.destroyed) {
+      req.destroy(err);
+    }
+  };
+
   req
     .on('data', function (data) {
       try {
@@ -153,10 +171,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
           );
         }
       } catch (e) {
-        logger.error(
-          { ...logContext, statusAndHeaders, statusAndHeadersSize, error: e },
-          'Caught error handling data event for streaming HTTP response.',
-        );
+        handleError(e as Error);
       }
     })
     .on('end', function () {
@@ -164,12 +179,5 @@ export const handlePostResponse = (req: Request, res: Response) => {
       streamHandler.finished();
       res.status(200).json({});
     })
-    .on('error', (err) => {
-      logger.error(
-        { ...logContext, error: err },
-        'Received error handling POST from client.',
-      );
-      streamHandler.destroy(err);
-      res.status(500).json({ err });
-    });
+    .on('error', handleError);
 };
