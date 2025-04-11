@@ -65,10 +65,15 @@ export const main = async (serverOpts: ServerOpts) => {
   if (!process.env.JEST_WORKER_ID) {
     app.use(applyPrometheusMiddleware());
   }
-  app.get('/connection-status/:token', connectionStatusHandler);
+  app.get(
+    ['/connection-status/:token', '/connection-status/:token/ctx/:ctxId'],
+    extractPossibleContextFromHttpRequestToHeader,
+    connectionStatusHandler,
+  );
   app.get('/connections-status', connectionsStatusHandler);
   app.get(
     '/service/:token/*',
+    extractPossibleContextFromHttpRequestToHeader,
     overloadHttpRequestWithConnectionDetailsMiddleware,
     serviceHandler,
   );

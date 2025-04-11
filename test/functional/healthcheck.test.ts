@@ -110,6 +110,32 @@ describe('proxy requests originating from behind the broker client', () => {
     });
   });
 
+  it('check connection-status with context enabled connected client', async () => {
+    bc = await createBrokerClient({
+      brokerServerUrl: `http://localhost:${bs.port}`,
+      brokerToken: '00000000-0000-0000-0000-00000000002',
+      filters: clientAccept,
+    });
+    await waitForBrokerClientConnection(bs);
+
+    const response = await axiosClient.get(
+      `http://localhost:${bs.port}/connection-status/00000000-0000-0000-0000-00000000002/ctx/00000000-0000-0000-0000-00000000003`,
+    );
+    const expectedFilters = require(clientAccept);
+
+    expect(response.status).toEqual(200);
+    expect(response.data).toStrictEqual({
+      ok: true,
+      clients: expect.any(Array),
+    });
+
+    const connectionStatusBody = response.data.clients[0];
+    expect(connectionStatusBody).toStrictEqual({
+      version: version,
+      filters: expectedFilters,
+    });
+  });
+
   it('check connection-status after client disconnected', async () => {
     bc = await createBrokerClient({
       brokerServerUrl: `http://localhost:${bs.port}`,
