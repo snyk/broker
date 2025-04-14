@@ -1,5 +1,9 @@
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
-import { getPluginsConfig } from '../../common/config/pluginsConfig';
+import {
+  getPluginsConfig,
+  setPluginConfig,
+  setPluginConfigSubKey,
+} from '../../common/config/pluginsConfig';
 import { HttpResponse, makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
 
@@ -39,6 +43,22 @@ export default abstract class BrokerPlugin {
     }
     return isDisabled;
   }
+
+  getPluginConfig() {
+    return getPluginsConfig();
+  }
+
+  getPluginConfigSubKey(key: string, subKey: string) {
+    return getPluginsConfig()[key][subKey];
+  }
+
+  setPluginConfigKey(key: string, value: any) {
+    setPluginConfig(key, value);
+  }
+  setPluginConfigSubKey(key: string, subKey: string, value: any) {
+    setPluginConfigSubKey(key, subKey, value);
+  }
+
   abstract isPluginActive(): boolean;
 
   abstract startUp(
