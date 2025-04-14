@@ -514,7 +514,7 @@ workflows:
           type: approval
           requires:
             - Scan repository for secrets
-          <<: *filter-dev-branch-only
+          <<: *filter-tags-only
       - build-and-save-docker-ubi-image:
           name: Build base UBI image
           context:
@@ -1006,7 +1006,7 @@ workflows:
           type: approval
           requires:
             - Scan repository for secrets
-          <<: *filter-dev-branch-only
+          <<: *filter-tags-only
 
       - build-and-save-docker-image:
           name: Build base image
