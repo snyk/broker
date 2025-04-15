@@ -134,7 +134,7 @@ describe('Github Server App Plugin', () => {
     const plugin = new Plugin(config);
     plugin.JWT_TTL = 10; // overriding for testing
     const now = Date.now();
-    plugin._setJWTLifecycleHandler(now, config);
+    plugin._setJWTLifecycleHandler('test connection', now, config);
     await delay(100);
     expect(config.JWT_TOKEN).not.toEqual(jwt);
     expect(config.JWT_TOKEN.length).toBeGreaterThan(400);
@@ -178,7 +178,7 @@ describe('Github Server App Plugin', () => {
     const globalConfig = getConfig();
     globalConfig['connections'] = { 'test connection': {} };
     const plugin = new Plugin(config);
-    plugin._setAccessTokenLifecycleHandler(config);
+    plugin._setAccessTokenLifecycleHandler('test connection', config);
     await delay(100);
     expect(JSON.parse(config.ghaAccessToken)).toEqual(renewedDummyAccessToken);
     clearTimeout(config['ghaAccessTokenTimeoutHandlerId']);
