@@ -4,7 +4,10 @@ import {
   runPreRequestPlugins,
   runStartupPlugins,
 } from '../../../lib/hybrid-sdk/client/brokerClientPlugins/pluginManager';
-import { findProjectRoot } from '../../../lib/hybrid-sdk/common/config/config';
+import {
+  findProjectRoot,
+  setConfig,
+} from '../../../lib/hybrid-sdk/common/config/config';
 
 describe('Plugin Manager', () => {
   const pluginsFolderPath = `${findProjectRoot(
@@ -103,14 +106,75 @@ describe('Plugin Manager', () => {
     ];
   });
 
+  it('should run startup plugins with context successfully', async () => {
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy-context'],
+        connections: {
+          'my connection': {
+            type: 'dummy-context',
+            contexts: {
+              'test-context': {
+                GITHUB_TOKEN: '${GITHUB_TOKEN}',
+              },
+              'test-context2': {
+                GITHUB_TOKEN: '${GITHUB_TOKEN2}',
+              },
+            },
+          },
+        },
+      },
+    };
+    try {
+      const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
+      expect(plugins.get('dummy-context').length).toBeGreaterThanOrEqual(1);
+      expect(plugins.get('dummy-context')[0].pluginName).toEqual(
+        'Dummy Context Plugin',
+      );
+
+      await runStartupPlugins(clientOpts, 'my connection');
+      expect(
+        clientOpts.config.connections['my connection'][
+          'NEW_VAR_ADDED_TO_CONNECTION'
+        ],
+      ).toEqual('access-token');
+      expect(
+        clientOpts.config.connections['my connection'].contexts['test-context'],
+      ).toEqual({
+        NEW_VAR_ADDED_TO_CONNECTION: 'access-token-context',
+        GITHUB_TOKEN: '${GITHUB_TOKEN}',
+      });
+      expect(
+        clientOpts.config.connections['my connection'].contexts[
+          'test-context2'
+        ],
+      ).toEqual({
+        NEW_VAR_ADDED_TO_CONNECTION: 'access-token-context',
+        GITHUB_TOKEN: '${GITHUB_TOKEN2}',
+      });
+    } catch (err) {
+      // we should not error
+      expect(err).toBeNull();
+    }
+    delete clientOpts.config.connections['my connection'][
+      'NEW_VAR_ADDED_TO_CONNECTION'
+    ];
+  });
+
   it('should run prerequest plugins successfully', async () => {
     const clientOpts = {
       config: {
         universalBrokerEnabled: true,
         supportedBrokerTypes: ['dummy'],
         connections: { 'my connection': { type: 'dummy', identifier: '123' } },
+        brokerClientConfiguration: {
+          common: {},
+        },
       },
     };
+    // Simulating client config
+    setConfig(clientOpts.config);
     try {
       const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
       expect(plugins.get('dummy').length).toBeGreaterThanOrEqual(1);
@@ -135,6 +199,80 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection'].identifier,
         requestDetails,
+        null,
+      );
+      expect(request.body).not.toEqual(requestBodyDetailsOriginal);
+      expect(request.body).toEqual(expectedRequestBody);
+    } catch (err) {
+      // we should not error
+      expect(err).toBeNull();
+    }
+    delete clientOpts.config.connections['my connection'][
+      'NEW_VAR_ADDED_TO_CONNECTION'
+    ];
+  });
+
+  it('should run prerequest plugins with context successfully', async () => {
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy-context'],
+        connections: {
+          'my connection': {
+            identifier: '123',
+            type: 'dummy-context',
+            contexts: {
+              'test-context': {
+                GITHUB_TOKEN: '${GITHUB_TOKEN}',
+                NEW_VAR_ADDED_TO_CONNECTION: 'access-token-context',
+              },
+              'test-context2': {
+                GITHUB_TOKEN: '${GITHUB_TOKEN2}',
+              },
+            },
+          },
+        },
+        brokerClientConfiguration: {
+          common: {},
+          'dummy-context': {
+            required: {
+              NEW_VAR_ADDED_TO_CONNECTION:
+                'dummy_placeholder_in_config_default_json_to_be_replaced_by_value_from_context',
+            },
+          },
+        },
+      },
+    };
+    // Simulating client config
+    setConfig(clientOpts.config);
+    try {
+      const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
+      expect(plugins.get('dummy-context').length).toBeGreaterThanOrEqual(1);
+      expect(plugins.get('dummy-context')[0].pluginName).toEqual(
+        'Dummy Context Plugin',
+      );
+
+      await runStartupPlugins(clientOpts, 'my connection');
+      expect(
+        clientOpts.config.connections['my connection'][
+          'NEW_VAR_ADDED_TO_CONNECTION'
+        ],
+      ).toEqual('access-token');
+      const requestDetails: PostFilterPreparedRequest = {
+        url: 'http://bla',
+        headers: { myHeader: 'my_value' },
+        method: 'POST',
+        body: { myField: 'my field value' },
+      };
+      const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
+      const expectedRequestBody = Object.assign({}, requestDetails.body);
+      expectedRequestBody['NEW_VAR_ADDED_TO_CONNECTION'] =
+        'access-token-context';
+      const request = await runPreRequestPlugins(
+        clientOpts,
+        clientOpts.config.connections['my connection'].identifier,
+        requestDetails,
+        'test-context',
       );
       expect(request.body).not.toEqual(requestBodyDetailsOriginal);
       expect(request.body).toEqual(expectedRequestBody);
@@ -155,8 +293,13 @@ describe('Plugin Manager', () => {
         connections: {
           'my connection 2': { type: 'dummy2', identifier: '456' },
         },
+        brokerClientConfiguration: {
+          common: {},
+        },
       },
     };
+    // Simulating client config
+    setConfig(clientOpts.config);
     try {
       const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
       expect(plugins.get('dummy2').length).toBeGreaterThanOrEqual(1);
@@ -179,6 +322,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection 2'].identifier,
         requestDetails,
+        null,
       );
       expect(request.body).toEqual(requestBodyDetailsOriginal);
     } catch (err) {
@@ -199,8 +343,13 @@ describe('Plugin Manager', () => {
           'my connection': { type: 'dummy', identifier: '123' },
           'my connection 2': { type: 'dummy2', identifier: '456' },
         },
+        brokerClientConfiguration: {
+          common: {},
+        },
       },
     };
+    // Simulating client config
+    setConfig(clientOpts.config);
     try {
       const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
       expect(plugins.get('dummy').length).toBeGreaterThanOrEqual(1);
@@ -234,6 +383,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection'].identifier,
         requestDetails,
+        null,
       );
       expect(request.body).not.toEqual(requestBodyDetailsOriginal);
       expect(request.body).toEqual(expectedRequestBody);
@@ -252,6 +402,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection 2'].identifier,
         requestDetails2,
+        null,
       );
       expect(request2.body).toEqual(requestBodyDetailsOriginal2);
     } catch (err) {
@@ -276,8 +427,13 @@ describe('Plugin Manager', () => {
           'my connection 2': { type: 'dummy2', identifier: '456' },
           'my connection 3': { type: 'dummy3', identifier: '789' },
         },
+        brokerClientConfiguration: {
+          common: {},
+        },
       },
     };
+    // Simulating client config
+    setConfig(clientOpts.config);
     try {
       const plugins = await loadPlugins(pluginsFolderPath, clientOpts);
       expect(plugins.get('dummy').length).toBeGreaterThanOrEqual(1);
@@ -327,6 +483,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection'].identifier,
         requestDetails,
+        null,
       );
       expect(request.body).not.toEqual(requestBodyDetailsOriginal);
       expect(request.body).toEqual(expectedRequestBody);
@@ -345,6 +502,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection 2'].identifier,
         requestDetails2,
+        null,
       );
       expect(request2.body).toEqual(requestBodyDetailsOriginal2);
 
@@ -368,6 +526,7 @@ describe('Plugin Manager', () => {
         clientOpts,
         clientOpts.config.connections['my connection 3'].identifier,
         requestDetails3,
+        null,
       );
       expect(request3).not.toEqual(requestBodyDetailsOriginal3);
       expect(request3.body).toEqual(expectedRequestBody3);

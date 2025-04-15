@@ -4,6 +4,7 @@ import BrokerPlugin from './abstractBrokerPlugin';
 import { existsSync } from 'fs';
 import { getPluginsConfig } from '../../common/config/pluginsConfig';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
+import { getConfigForIdentifier } from '../../common/config/universal';
 
 export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
   clientOpts.config['plugins'] = new Map<string, unknown>();
@@ -77,6 +78,16 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
         clientOpts.config.connections[connectionKey],
         pluginsConfig[connectionKey],
       );
+      const contextIds = clientOpts.config.connections[connectionKey].contexts
+        ? Object.keys(clientOpts.config.connections[connectionKey].contexts)
+        : [];
+      for (const contextId of contextIds) {
+        await pluginInstances[i].startUpContext(
+          contextId,
+          clientOpts.config.connections[connectionKey],
+          pluginsConfig[connectionKey],
+        );
+      }
     }
   }
 };
@@ -85,6 +96,7 @@ export const runPreRequestPlugins = async (
   clientOpts,
   connectionIdentifier,
   pristinePreRequest: PostFilterPreparedRequest,
+  contextId: string | null,
 ) => {
   let preRequest = pristinePreRequest;
   const loadedPlugins = clientOpts.config.plugins as Map<
@@ -92,7 +104,9 @@ export const runPreRequestPlugins = async (
     BrokerPlugin[]
   >;
   const pluginsConfig = getPluginsConfig();
-  const connectionsKeys = Object.keys(clientOpts.config.connections);
+  const connectionsKeys = clientOpts.config.connections
+    ? Object.keys(clientOpts.config.connections)
+    : [];
   let connectionKey;
   for (let i = 0; i < connectionsKeys.length; i++) {
     if (
@@ -118,7 +132,11 @@ export const runPreRequestPlugins = async (
       ) ?? [];
     for (let i = 0; i < pluginInstances.length; i++) {
       preRequest = await pluginInstances[i].preRequest(
-        clientOpts.config.connections[connectionKey],
+        getConfigForIdentifier(
+          connectionIdentifier,
+          clientOpts.config,
+          contextId,
+        ),
         preRequest,
         pluginsConfig[connectionKey] ?? {},
       );

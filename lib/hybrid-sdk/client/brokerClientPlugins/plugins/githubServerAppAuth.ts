@@ -119,6 +119,15 @@ export class Plugin extends BrokerPlugin {
     }
   }
 
+  startUpContext(
+    contextId: string,
+    connectionConfiguration: Record<string, any>,
+    pluginsConfig: Record<any, string>,
+  ): Promise<void> {
+    this.logger.debug({ contextId, connectionConfiguration, pluginsConfig });
+    throw new Error('Method not implemented.');
+  }
+
   _getJWT(
     nowInSeconds: number,
     privatePemPath: string,

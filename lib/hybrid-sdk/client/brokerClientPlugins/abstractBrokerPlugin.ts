@@ -66,6 +66,12 @@ export default abstract class BrokerPlugin {
     pluginsConfig?: Record<any, string>,
   ): Promise<void>;
 
+  abstract startUpContext(
+    _contextId: string,
+    _connectionConfiguration: Record<string, any>,
+    _pluginsConfig: Record<any, string>,
+  ): Promise<void>;
+
   async preRequest(
     connectionConfiguration: Record<string, any>,
     postFilterPreparedRequest: PostFilterPreparedRequest,
