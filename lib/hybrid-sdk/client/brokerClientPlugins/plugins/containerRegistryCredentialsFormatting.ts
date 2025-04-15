@@ -5,7 +5,7 @@ export class Plugin extends BrokerPlugin {
   pluginName = 'Container Registry Credentials Formatting Plugin';
   description =
     'Plugin that formats the container registry credentials for the targeted registry type';
-  version = '0.1';
+  version = '0.2';
   applicableBrokerTypes = [
     'docker-hub',
     'ecr',
@@ -36,41 +36,10 @@ export class Plugin extends BrokerPlugin {
         }.`,
       );
     }
-    let credentials;
-    switch (connectionConfiguration.type) {
-      case 'ecr':
-        if (
-          !connectionConfiguration.CR_ROLE_ARN ||
-          !connectionConfiguration.CR_REGION ||
-          !connectionConfiguration.CR_EXTERNAL_ID
-        ) {
-          throw new Error(
-            `Plugin ${this.pluginCode} startup failure: ${connectionConfiguration.type} requires the following parameters: CR_ROLE_ARN, CR_REGION and CR_EXTERNAL_ID.`,
-          );
-        }
-        credentials = `{"type":"${connectionConfiguration.type}","roleArn":"${connectionConfiguration.CR_ROLE_ARN}","extra":{"region":"${connectionConfiguration.CR_REGION}","externalId":"${connectionConfiguration.CR_EXTERNAL_ID}"}}\n`;
-        break;
-      case 'digitalocean-cr':
-        if (!connectionConfiguration.CR_TOKEN) {
-          throw new Error(
-            `Plugin ${this.pluginCode} startup failure: ${connectionConfiguration.type} requires the following parameters: CR_TOKEN.`,
-          );
-        }
-        credentials = `{"type":"${connectionConfiguration.type}", "username":"${connectionConfiguration.CR_TOKEN}", "password":"${connectionConfiguration.CR_TOKEN}", "registryBase":"${connectionConfiguration.CR_BASE}"}\n`;
-        break;
-      default:
-        if (
-          !connectionConfiguration.CR_USERNAME ||
-          !connectionConfiguration.CR_PASSWORD
-        ) {
-          throw new Error(
-            `Plugin ${this.pluginCode} startup failure: ${connectionConfiguration.type} requires the following parameters: CR_USERNAME,CR_PASSWORD.`,
-          );
-        }
-        credentials = `{"type":"${connectionConfiguration.type}", "username":"${connectionConfiguration.CR_USERNAME}", "password":"${connectionConfiguration.CR_PASSWORD}", "registryBase":"${connectionConfiguration.CR_BASE}"}\n`;
-    }
-    connectionConfiguration.CR_CREDENTIALS =
-      Buffer.from(credentials).toString('base64');
+
+    connectionConfiguration.CR_CREDENTIALS = Buffer.from(
+      this._getCredentials(connectionConfiguration),
+    ).toString('base64');
     connectionConfiguration.craCompatible = true;
 
     if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
@@ -78,12 +47,71 @@ export class Plugin extends BrokerPlugin {
         connectionConfiguration.CR_CREDENTIALS;
     }
   }
-  startUpContext(
+  async startUpContext(
     contextId: string,
     connectionConfiguration: Record<string, any>,
     pluginsConfig: Record<any, string>,
   ): Promise<void> {
     this.logger.debug({ contextId, connectionConfiguration, pluginsConfig });
-    throw new Error('Method not implemented.');
+    if (
+      !connectionConfiguration.type ||
+      !this.applicableBrokerTypes.includes(connectionConfiguration.type)
+    ) {
+      throw new Error(
+        `Plugin ${
+          this.pluginCode
+        } startup failure: unknown container registry type: ${
+          connectionConfiguration.type ?? '<not provided>'
+        }.`,
+      );
+    }
+    // Important Note:
+    // - connectionConfiguration is a shallow copy from the various items compiled in getConfigForIdentifier
+    // - connectionConfiguration.contexts[contextId] still holds a reference to the main config object
+    // therefore "writing" in the main config object
+    // While connectionConfiguration['test']='value' does not get persisted
+    // connectionConfiguration.contexts[contextId]['test]='value' does.
+    connectionConfiguration.contexts[contextId].CR_CREDENTIALS = Buffer.from(
+      this._getCredentials(connectionConfiguration),
+    ).toString('base64');
+    connectionConfiguration.contexts[contextId].craCompatible = true;
+
+    if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
+      connectionConfiguration.BROKER_CLIENT_VALIDATION_URL =
+        connectionConfiguration.contexts[contextId].CR_CREDENTIALS;
+    }
+  }
+  _getCredentials(config) {
+    let credentials;
+    switch (config.type) {
+      case 'ecr':
+        if (
+          !config.CR_ROLE_ARN ||
+          !config.CR_REGION ||
+          !config.CR_EXTERNAL_ID
+        ) {
+          throw new Error(
+            `Plugin ${this.pluginCode} startup failure: ${config.type} requires the following parameters: CR_ROLE_ARN, CR_REGION and CR_EXTERNAL_ID.`,
+          );
+        }
+        credentials = `{"type":"${config.type}","roleArn":"${config.CR_ROLE_ARN}","extra":{"region":"${config.CR_REGION}","externalId":"${config.CR_EXTERNAL_ID}"}}\n`;
+        break;
+      case 'digitalocean-cr':
+        if (!config.CR_TOKEN) {
+          throw new Error(
+            `Plugin ${this.pluginCode} startup failure: ${config.type} requires the following parameters: CR_TOKEN.`,
+          );
+        }
+        credentials = `{"type":"${config.type}", "username":"${config.CR_TOKEN}", "password":"${config.CR_TOKEN}", "registryBase":"${config.CR_BASE}"}\n`;
+        break;
+      default:
+        if (!config.CR_USERNAME || !config.CR_PASSWORD) {
+          throw new Error(
+            `Plugin ${this.pluginCode} startup failure: ${config.type} requires the following parameters: CR_USERNAME,CR_PASSWORD.`,
+          );
+        }
+        credentials = `{"type":"${config.type}", "username":"${config.CR_USERNAME}", "password":"${config.CR_PASSWORD}", "registryBase":"${config.CR_BASE}"}\n`;
+    }
+    return credentials;
   }
 }

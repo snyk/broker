@@ -66,6 +66,12 @@ export default abstract class BrokerPlugin {
     pluginsConfig?: Record<any, string>,
   ): Promise<void>;
 
+  // Important Note:
+  // - connectionConfiguration is a shallow copy from the various items compiled in getConfigForIdentifier
+  // - connectionConfiguration.contexts[contextId] still holds a reference to the main config object
+  // therefore "writing" in the main config object
+  // While connectionConfiguration['test']='value' does not get persisted
+  // connectionConfiguration.contexts[contextId]['test]='value' does.
   abstract startUpContext(
     _contextId: string,
     _connectionConfiguration: Record<string, any>,
