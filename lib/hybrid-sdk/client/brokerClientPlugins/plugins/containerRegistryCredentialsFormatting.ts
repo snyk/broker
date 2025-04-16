@@ -1,3 +1,4 @@
+import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 
@@ -62,6 +63,12 @@ export class Plugin extends BrokerPlugin {
       credentials,
     );
 
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'craCompatible',
+      true,
+    );
+
     if (connectionConfig && connectionConfig.BROKER_CLIENT_VALIDATION_URL) {
       this.setPluginConfigParamForConnection(
         connectionKey,
@@ -105,7 +112,12 @@ export class Plugin extends BrokerPlugin {
       'CR_CREDENTIALS',
       credentials,
     );
-
+    this.setPluginConfigParamForConnectionContext(
+      connectionKey,
+      contextId,
+      'craCompatible',
+      true,
+    );
     if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
       this.setPluginConfigParamForConnectionContext(
         connectionKey,
