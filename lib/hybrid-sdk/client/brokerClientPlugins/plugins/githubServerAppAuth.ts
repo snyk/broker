@@ -364,6 +364,91 @@ export class Plugin extends BrokerPlugin {
       throw err;
     }
   }
+  _setContextJWTLifecycleHandler(
+    connectionName: string,
+    contextId: string,
+    now: number,
+    connectionConfig,
+  ) {
+    try {
+      if (
+        this.getPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
+          'JWT_TOKEN',
+        )
+      ) {
+        let timeoutHandlerId;
+        let timeoutHandler = async () => {};
+        timeoutHandler = async () => {
+          try {
+            this.logger.debug(
+              { plugin: this.pluginCode },
+              'Refreshing github app JWT token.',
+            );
+            clearTimeout(timeoutHandlerId);
+            const timeoutHandlerNow = Date.now();
+            this.setPluginConfigParamForConnectionContext(
+              connectionName,
+              contextId,
+              'JWT_TOKEN',
+              await this._getJWT(
+                Math.floor(timeoutHandlerNow / 1000),
+                connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
+                connectionConfig.GITHUB_APP_ID,
+              ),
+            );
+            if (
+              !this.getPluginConfigParamForConnectionContext(
+                connectionName,
+                contextId,
+                'JWT_TOKEN',
+              )
+            ) {
+              throw new Error(
+                `Github app plugin error: could not refresh JWT.`,
+              );
+            }
+            timeoutHandlerId = setTimeout(
+              timeoutHandler,
+              this._getTimeDifferenceInMsToFutureDate(
+                timeoutHandlerNow + this.JWT_TTL,
+              ) - 10000,
+            );
+            this.setPluginConfigParamForConnectionContext(
+              connectionName,
+              contextId,
+              'jwtTimeoutHandlerId',
+              timeoutHandlerId,
+            );
+          } catch (err) {
+            this.logger.error(
+              { plugin: this.pluginCode, err },
+              `Error refreshing JWT.`,
+            );
+            throw err;
+          }
+        };
+
+        timeoutHandlerId = setTimeout(
+          timeoutHandler,
+          this._getTimeDifferenceInMsToFutureDate(now + this.JWT_TTL) - 10000,
+        );
+        this.setPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
+          'jwtTimeoutHandlerId',
+          timeoutHandlerId,
+        );
+      }
+    } catch (err) {
+      this.logger.error(
+        { plugin: this.pluginCode, err },
+        `Error setting JWT lifecycle handler.`,
+      );
+      throw err;
+    }
+  }
 
   _setContextJWTLifecycleHandler(
     connectionName: string,
