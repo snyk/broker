@@ -1,10 +1,10 @@
 import { Plugin } from '../../../../lib/hybrid-sdk/client/brokerClientPlugins/plugins/containerRegistryCredentialsFormatting';
 import {
   getPluginConfigByConnectionKey,
+  getPluginConfigParamByConnectionKeyAndContextId,
   getPluginsConfig,
   PluginConnectionConfig,
 } from '../../../../lib/hybrid-sdk/common/config/pluginsConfig';
-
 describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Instantiate plugin', () => {
     const config = {};
@@ -35,9 +35,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Plugins fail if missing parameters', async () => {
     const config = {
       connections: {
-        'test-connection': {
-          CR_CREDENTIALS: '',
-        },
+        'test connection': { CR_CREDENTIALS: '' },
       },
     };
     const plugin = new Plugin(config);
@@ -57,10 +55,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Plugins fail if missing parameters for ECR', async () => {
     const config = {
       connections: {
-        'test-connection': {
-          CR_CREDENTIALS: '',
-          type: 'ecr',
-        },
+        'test connection': { CR_CREDENTIALS: '', type: 'ecr' },
       },
     };
     const plugin = new Plugin(config);
@@ -198,13 +193,13 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
   it.skip('Plugins creates credentials for any type of CR with context', async () => {
     const config = {
       connections: {
-        'test-connection': {
+        'test connection': {
           CR_CREDENTIALS: '',
           type: 'gitlab-cr',
           CR_USERNAME: 'test-username',
           CR_PASSWORD: 'test-password',
           contexts: {
-            'test-context': {
+            'test context': {
               CR_PASSWORD: 'test-password-context',
             },
           },
@@ -224,8 +219,8 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
       'test connection',
       'test context',
       {
-        ...config.connections['test-connection'],
-        ...config.connections['test-connection'].contexts['test-context'],
+        ...config.connections['test connection'],
+        ...config.connections['test connection'].contexts['test context'],
         test: 'value',
       },
       getPluginConfigByConnectionKey(
@@ -234,9 +229,11 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
     );
 
     expect(
-      config.connections['test-connection'].contexts['test-context'][
-        'CR_CREDENTIALS'
-      ],
+      getPluginConfigParamByConnectionKeyAndContextId(
+        'test connection',
+        'test context',
+        'CR_CREDENTIALS',
+      ),
     ).toEqual(
       'eyJ0eXBlIjoiZ2l0bGFiLWNyIiwgInVzZXJuYW1lIjoidGVzdC11c2VybmFtZSIsICJwYXNzd29yZCI6InRlc3QtcGFzc3dvcmQtY29udGV4dCIsICJyZWdpc3RyeUJhc2UiOiJ1bmRlZmluZWQifQo=',
     );
