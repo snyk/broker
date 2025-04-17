@@ -16,13 +16,17 @@ export class Plugin extends BrokerPlugin {
     }
     return true;
   }
-  async startUp(connectionConfig) {
+  async startUp(connectionKey, connectionConfig) {
     this.logger.info({ plugin: this.pluginName }, 'Running Startup');
     this.logger.info(
       { config: connectionConfig },
       'Connection Config passed to the plugin',
     );
-    connectionConfig['NEW_VAR_ADDED_TO_CONNECTION'] = 'access-token';
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'NEW_VAR_ADDED_TO_CONNECTION',
+      'access-token',
+    );
   }
 
   async preRequest(connectionConfiguration, postFilterPreparedRequest) {

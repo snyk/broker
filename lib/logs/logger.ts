@@ -4,7 +4,7 @@ import mapValues from 'lodash.mapvalues';
 import { getConfig } from '../hybrid-sdk/common/config/config';
 import {
   getPluginsConfig,
-  getPluginsConfigByConnectionKey,
+  getPluginConfigByConnectionKey,
 } from '../hybrid-sdk/common/config/pluginsConfig';
 
 const sanitiseConfigVariable = (raw, variable) =>
@@ -175,7 +175,7 @@ export const sanitise = (raw) => {
         raw = sanitisePluginsConfigVariables(
           raw,
           variable,
-          getPluginsConfigByConnectionKey(connectionKey),
+          getPluginConfigByConnectionKey(connectionKey),
         );
       }
     }

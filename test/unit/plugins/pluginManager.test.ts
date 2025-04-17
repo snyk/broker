@@ -8,6 +8,11 @@ import {
   findProjectRoot,
   setConfig,
 } from '../../../lib/hybrid-sdk/common/config/config';
+import {
+  getPluginConfigParamByConnectionKey,
+  getPluginConfigParamByConnectionKeyAndContextId,
+  getPluginsConfig,
+} from '../../../lib/hybrid-sdk/common/config/pluginsConfig';
 
 describe('Plugin Manager', () => {
   const pluginsFolderPath = `${findProjectRoot(
@@ -93,17 +98,15 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
       ).toEqual('access-token');
     } catch (err) {
       // we should not error
       expect(err).toBeNull();
     }
-    delete clientOpts.config.connections['my connection'][
-      'NEW_VAR_ADDED_TO_CONNECTION'
-    ];
   });
 
   it('should run startup plugins with context successfully', async () => {
@@ -135,14 +138,15 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
       ).toEqual('access-token');
+      // Connections contexts remain untouched
       expect(
         clientOpts.config.connections['my connection'].contexts['test-context'],
       ).toEqual({
-        NEW_VAR_ADDED_TO_CONNECTION: 'access-token-context',
         GITHUB_TOKEN: '${GITHUB_TOKEN}',
       });
       expect(
@@ -150,16 +154,27 @@ describe('Plugin Manager', () => {
           'test-context2'
         ],
       ).toEqual({
-        NEW_VAR_ADDED_TO_CONNECTION: 'access-token-context',
         GITHUB_TOKEN: '${GITHUB_TOKEN2}',
       });
+      // Connections contexts remain untouched
+      expect(
+        getPluginConfigParamByConnectionKeyAndContextId(
+          'my connection',
+          'test-context',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
+      ).toEqual('access-token-context');
+      expect(
+        getPluginConfigParamByConnectionKeyAndContextId(
+          'my connection',
+          'test-context2',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
+      ).toEqual('access-token-context');
     } catch (err) {
       // we should not error
       expect(err).toBeNull();
     }
-    delete clientOpts.config.connections['my connection'][
-      'NEW_VAR_ADDED_TO_CONNECTION'
-    ];
   });
 
   it('should run prerequest plugins successfully', async () => {
@@ -182,9 +197,10 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
       ).toEqual('access-token');
       const requestDetails: PostFilterPreparedRequest = {
         url: 'http://bla',
@@ -254,9 +270,7 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginsConfig()['my connection']['NEW_VAR_ADDED_TO_CONNECTION'],
       ).toEqual('access-token');
       const requestDetails: PostFilterPreparedRequest = {
         url: 'http://bla',
@@ -307,9 +321,10 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
-        clientOpts.config.connections['my connection 2'][
-          'NEW_VAR_ADDED_TO_CONNECTION_2'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection 2',
+          'NEW_VAR_ADDED_TO_CONNECTION_2',
+        ),
       ).toEqual('access-token');
       const requestDetails: PostFilterPreparedRequest = {
         url: 'http://bla',
@@ -329,9 +344,6 @@ describe('Plugin Manager', () => {
       // we should not error
       expect(err).toBeNull();
     }
-    delete clientOpts.config.connections['my connection 2'][
-      'NEW_VAR_ADDED_TO_CONNECTION_2'
-    ];
   });
 
   it('Multiple connections keeping things in their own swim lane', async () => {
@@ -359,15 +371,17 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
       ).toEqual('access-token');
       await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
-        clientOpts.config.connections['my connection 2'][
-          'NEW_VAR_ADDED_TO_CONNECTION_2'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection 2',
+          'NEW_VAR_ADDED_TO_CONNECTION_2',
+        ),
       ).toEqual('access-token');
 
       const requestDetails: PostFilterPreparedRequest = {
@@ -409,12 +423,6 @@ describe('Plugin Manager', () => {
       // we should not error
       expect(err).toBeNull();
     }
-    delete clientOpts.config.connections['my connection'][
-      'NEW_VAR_ADDED_TO_CONNECTION'
-    ];
-    delete clientOpts.config.connections['my connection 2'][
-      'NEW_VAR_ADDED_TO_CONNECTION_2'
-    ];
   });
 
   it('Multiple connections and multiple plugins for a given type keep things in their own swim lane', async () => {
@@ -448,26 +456,31 @@ describe('Plugin Manager', () => {
 
       await runStartupPlugins(clientOpts, 'my connection');
       expect(
-        clientOpts.config.connections['my connection'][
-          'NEW_VAR_ADDED_TO_CONNECTION'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection',
+          'NEW_VAR_ADDED_TO_CONNECTION',
+        ),
       ).toEqual('access-token');
       await runStartupPlugins(clientOpts, 'my connection 2');
       expect(
-        clientOpts.config.connections['my connection 2'][
-          'NEW_VAR_ADDED_TO_CONNECTION_2'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection 2',
+          'NEW_VAR_ADDED_TO_CONNECTION_2',
+        ),
       ).toEqual('access-token');
+
       await runStartupPlugins(clientOpts, 'my connection 3');
       expect(
-        clientOpts.config.connections['my connection 3'][
-          'NEW_VAR_ADDED_TO_CONNECTION_FROM_DUMMY3_PLUGIN'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection 3',
+          'NEW_VAR_ADDED_TO_CONNECTION_FROM_DUMMY3_PLUGIN',
+        ),
       ).toEqual('access-token-dummy3');
       expect(
-        clientOpts.config.connections['my connection 3'][
-          'NEW_VAR_ADDED_TO_CONNECTION_FROM_SECOND_DUMMY3_PLUGIN'
-        ],
+        getPluginConfigParamByConnectionKey(
+          'my connection 3',
+          'NEW_VAR_ADDED_TO_CONNECTION_FROM_SECOND_DUMMY3_PLUGIN',
+        ),
       ).toEqual('access-token-dummy3');
 
       const requestDetails: PostFilterPreparedRequest = {
