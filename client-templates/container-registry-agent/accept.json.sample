@@ -34,6 +34,11 @@
       "//": "(api hosts) image scan result callback (v2)",
       "method": "POST",
       "path": "/v2/import/result"
+    },
+    {
+      "//": "(api hosts) image scan result callback - code lineage service",
+      "method": "POST",
+      "path": "/rest/scan/result"
     }
   ],
   "private": [
