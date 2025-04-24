@@ -32,6 +32,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2024-12-12T12:19:17.636Z
         created: 2024-11-12T12:19:17.640Z
+  SNYK-RHEL8-SQLITELIBS-9711861:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-05-24T15:32:17.640Z
+        created: 2025-04-24T15:32:17.640Z
 patch: {}
 exclude:
   global:
