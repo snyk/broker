@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=snyk/broker:base-rhel-ubi
 
+
 FROM ${BASE_IMAGE}
 
 USER snyk

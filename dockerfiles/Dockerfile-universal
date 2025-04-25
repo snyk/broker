@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=snyk/broker:base
 
+
 FROM ${BASE_IMAGE}
 
 # Support for OpenShift - have to run after init to get accept.json and .env

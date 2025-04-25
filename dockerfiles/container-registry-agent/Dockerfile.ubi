@@ -1,5 +1,6 @@
 FROM snyk/broker:base-rhel-ubi
 
+
 ARG BROKER_TYPE
 
 # Prepare image entrypoint
