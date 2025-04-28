@@ -12,8 +12,6 @@ The Broker server and client establish an applicative tunnel, proxying requests 
 
 The Broker client runs within the user's internal network, keeping sensitive data such as Git tokens within the network perimeter. The applicative tunnel scans and adds only relevant requests to an approved list, narrowing down the access permissions to the bare minimum required for Snyk to actively monitor a repository.
 
-[More details here](https://docs.snyk.io/enterprise-setup/snyk-broker/components-of-snyk-broker)
-
 ## Usage
 
-Please refer to our [extensive documentation](https://docs.snyk.io/enterprise-setup/snyk-broker/install-and-configure-snyk-broker).
+Please refer to our [extensive documentation](https://docs.snyk.io/enterprise-setup/snyk-broker).
