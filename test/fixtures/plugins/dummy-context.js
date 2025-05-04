@@ -16,16 +16,20 @@ export class Plugin extends BrokerPlugin {
     }
     return true;
   }
-  async startUp(connectionConfig) {
+  async startUp(connectionKey, connectionConfig) {
     this.logger.info({ plugin: this.pluginName }, 'Running Startup');
     this.logger.info(
       { config: connectionConfig },
       'Connection Config passed to the plugin',
     );
-    connectionConfig['NEW_VAR_ADDED_TO_CONNECTION'] = 'access-token';
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'NEW_VAR_ADDED_TO_CONNECTION',
+      'access-token',
+    );
   }
 
-  async startUpContext(contextId, connectionConfig) {
+  async startUpContext(connectionKey, contextId, connectionConfig) {
     this.logger.info(
       { plugin: this.pluginName, contextId },
       'Running Context Startup',
@@ -34,8 +38,12 @@ export class Plugin extends BrokerPlugin {
       { config: connectionConfig },
       'Connection Config passed to the plugin',
     );
-    connectionConfig.contexts[contextId]['NEW_VAR_ADDED_TO_CONNECTION'] =
-      'access-token-context';
+    this.setPluginConfigParamForConnectionContext(
+      connectionKey,
+      contextId,
+      'NEW_VAR_ADDED_TO_CONNECTION',
+      'access-token-context',
+    );
   }
 
   async preRequest(connectionConfiguration, postFilterPreparedRequest) {

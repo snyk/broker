@@ -1,7 +1,7 @@
 import { log as logger } from '../../../logs/logger';
 import { Config, ConnectionConfig } from '../../client/types/config';
 import { expandPlaceholderValuesInFlatList, getConfig } from './config';
-import { getPluginsConfig } from './pluginsConfig';
+import { getPluginsConfig, getPluginsContextConfig } from './pluginsConfig';
 import { determineFilterType } from '../../client/utils/filterSelection';
 
 export const getConfigForType = (type: string) => {
@@ -112,6 +112,21 @@ export const getConfigForIdentifier = (
       }
     }
   }
+  const pluginContextToInject = {};
+  if (connectionKey && contextId) {
+    const pluginContext = getPluginsContextConfig(connectionKey, contextId);
+    const allowedContextKeys = getAllowedKeysForType(connectionType);
+    for (const key in pluginContext) {
+      if (allowedContextKeys.includes(key)) {
+        pluginContextToInject[key] = pluginContext[key];
+      } else {
+        logger.debug(
+          { key, connectionKey },
+          'Env var in context not allowed for injection in request.',
+        );
+      }
+    }
+  }
 
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
@@ -120,6 +135,7 @@ export const getConfigForIdentifier = (
     ...(getPluginsConfig() && getPluginsConfig()[connectionKey!]
       ? getPluginsConfig()[connectionKey!]
       : {}),
+    ...pluginContextToInject,
   };
   if (connectionKey && config.connections[connectionKey].contexts) {
     delete configToOverload.contexts;

@@ -1,8 +1,12 @@
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import {
   getPluginsConfig,
-  setPluginConfig,
-  setPluginConfigSubKey,
+  getPluginConfigByConnectionKey,
+  getPluginConfigParamByConnectionKey,
+  PluginConnectionConfig,
+  getPluginConfigParamByConnectionKeyAndContextId,
+  setPluginConfigParamByConnectionKeyAndContextId,
+  setPluginConfigParamByConnectionKey,
 } from '../../common/config/pluginsConfig';
 import { HttpResponse, makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
@@ -48,22 +52,51 @@ export default abstract class BrokerPlugin {
     return getPluginsConfig();
   }
 
-  getPluginConfigSubKey(key: string, subKey: string) {
-    return getPluginsConfig()[key][subKey];
+  getPluginConfigForConnection(connectionKey: string) {
+    return getPluginConfigByConnectionKey(connectionKey);
+  }
+  getPluginConfigParamForConnection(connectionKey: string, paramName: string) {
+    return getPluginConfigParamByConnectionKey(connectionKey, paramName);
+  }
+  getPluginConfigParamForConnectionContext(
+    connectionKey: string,
+    contextId: string,
+    paramName: string,
+  ) {
+    return getPluginConfigParamByConnectionKeyAndContextId(
+      connectionKey,
+      contextId,
+      paramName,
+    );
   }
 
-  setPluginConfigKey(key: string, value: any) {
-    setPluginConfig(key, value);
+  setPluginConfigParamForConnection(
+    connectionKey: string,
+    paramName: string,
+    value: any,
+  ) {
+    setPluginConfigParamByConnectionKey(connectionKey, paramName, value);
   }
-  setPluginConfigSubKey(key: string, subKey: string, value: any) {
-    setPluginConfigSubKey(key, subKey, value);
+  setPluginConfigParamForConnectionContext(
+    connectionKey: string,
+    contextId: string,
+    paramName: string,
+    value: any,
+  ) {
+    setPluginConfigParamByConnectionKeyAndContextId(
+      connectionKey,
+      contextId,
+      paramName,
+      value,
+    );
   }
 
   abstract isPluginActive(): boolean;
 
   abstract startUp(
+    connectionKey: string,
     connectionConfiguration: Record<string, any>,
-    pluginsConfig?: Record<any, string>,
+    pluginConfig?: PluginConnectionConfig,
   ): Promise<void>;
 
   // Important Note:
@@ -72,21 +105,28 @@ export default abstract class BrokerPlugin {
   // therefore "writing" in the main config object
   // While connectionConfiguration['test']='value' does not get persisted
   // connectionConfiguration.contexts[contextId]['test]='value' does.
+
+  // Very Important Note:
+  // - Plugins should store/mutate pluginsConfig object (getPluginsConfig())
+  // - Data stored should be stored in plugins config object
+  // - General config and connections specifics, including contexts, should not be mutated
+  // - Plugins conf is reserved for plugins, whereas config can be reloaded at anytime
   abstract startUpContext(
-    _contextId: string,
-    _connectionConfiguration: Record<string, any>,
-    _pluginsConfig: Record<any, string>,
+    connectionKey: string,
+    contextId: string,
+    connectionConfiguration: Record<string, any>,
+    pluginConfig: PluginConnectionConfig,
   ): Promise<void>;
 
   async preRequest(
     connectionConfiguration: Record<string, any>,
     postFilterPreparedRequest: PostFilterPreparedRequest,
-    pluginsConfig?: Record<any, string>,
+    pluginConfig?: PluginConnectionConfig,
   ): Promise<PostFilterPreparedRequest> {
     logger.trace(
       {
         connectionConfig: connectionConfiguration,
-        pluginsConfig: pluginsConfig,
+        pluginsConfig: pluginConfig,
       },
       'Abstract preRequest Plugin',
     );

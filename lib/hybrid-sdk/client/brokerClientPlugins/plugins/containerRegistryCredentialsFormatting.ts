@@ -1,3 +1,4 @@
+import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 import BrokerPlugin from '../abstractBrokerPlugin';
 
 export class Plugin extends BrokerPlugin {
@@ -23,7 +24,11 @@ export class Plugin extends BrokerPlugin {
   isPluginActive(): boolean {
     return true;
   }
-  async startUp(connectionConfiguration: Record<string, any>): Promise<void> {
+  async startUp(
+    connectionKey: string,
+    connectionConfiguration: Record<string, any>,
+    // pluginConfig: PluginConnectionConfig,
+  ): Promise<void> {
     if (
       !connectionConfiguration.type ||
       !this.applicableBrokerTypes.includes(connectionConfiguration.type)
@@ -36,23 +41,35 @@ export class Plugin extends BrokerPlugin {
         }.`,
       );
     }
-
-    connectionConfiguration.CR_CREDENTIALS = Buffer.from(
+    const credentials = Buffer.from(
       this._getCredentials(connectionConfiguration),
     ).toString('base64');
-    connectionConfiguration.craCompatible = true;
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'CR_CREDENTIALS',
+      credentials,
+    );
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'craCompatible',
+      true,
+    );
 
     if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
-      connectionConfiguration.BROKER_CLIENT_VALIDATION_URL =
-        connectionConfiguration.CR_CREDENTIALS;
+      this.setPluginConfigParamForConnection(
+        connectionKey,
+        'BROKER_CLIENT_VALIDATION_URL',
+        credentials,
+      );
     }
   }
   async startUpContext(
+    connectionKey: string,
     contextId: string,
     connectionConfiguration: Record<string, any>,
-    pluginsConfig: Record<any, string>,
+    pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
-    this.logger.debug({ contextId, connectionConfiguration, pluginsConfig });
+    this.logger.debug({ contextId, connectionConfiguration, pluginConfig });
     if (
       !connectionConfiguration.type ||
       !this.applicableBrokerTypes.includes(connectionConfiguration.type)
@@ -71,14 +88,28 @@ export class Plugin extends BrokerPlugin {
     // therefore "writing" in the main config object
     // While connectionConfiguration['test']='value' does not get persisted
     // connectionConfiguration.contexts[contextId]['test]='value' does.
-    connectionConfiguration.contexts[contextId].CR_CREDENTIALS = Buffer.from(
+    const credentials = Buffer.from(
       this._getCredentials(connectionConfiguration),
     ).toString('base64');
-    connectionConfiguration.contexts[contextId].craCompatible = true;
-
+    this.setPluginConfigParamForConnectionContext(
+      connectionKey,
+      contextId,
+      'CR_CREDENTIALS',
+      credentials,
+    );
+    this.setPluginConfigParamForConnectionContext(
+      connectionKey,
+      contextId,
+      'craCompatible',
+      true,
+    );
     if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
-      connectionConfiguration.BROKER_CLIENT_VALIDATION_URL =
-        connectionConfiguration.contexts[contextId].CR_CREDENTIALS;
+      this.setPluginConfigParamForConnectionContext(
+        connectionKey,
+        contextId,
+        'BROKER_CLIENT_VALIDATION_URL',
+        credentials,
+      );
     }
   }
   _getCredentials(config) {
