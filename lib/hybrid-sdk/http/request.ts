@@ -43,6 +43,8 @@ export const makeRequestToDownstream = async (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['x-broker-origin-ua'] =
+    localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
@@ -171,6 +173,8 @@ export const makeStreamingRequestToDownstream = (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['x-broker-origin-ua'] =
+    localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
@@ -289,6 +293,8 @@ export const makeSingleRawRequestToDownstream = async (
       environmentVariableNamespace: '',
     });
   }
+  localRequest.headers['x-broker-origin-ua'] =
+    localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const timeoutMs = req.timeoutMs ?? 0;
