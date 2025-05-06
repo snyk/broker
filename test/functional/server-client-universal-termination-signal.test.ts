@@ -63,6 +63,7 @@ describe('client send termination signal to broker server', () => {
     process.env.CLIENT_ID = 'clienid';
     process.env.CLIENT_SECRET = 'clientsecret';
     process.env.SKIP_REMOTE_CONFIG = 'true';
+    process.env.ACCEPT_APPRISK = 'false';
 
     bc = await createUniversalBrokerClient();
     await waitForUniversalBrokerClientsConnection(bs, 2);

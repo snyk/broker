@@ -294,7 +294,7 @@ function injectRulesAtRuntime(
           `Caution, possible overlapping rules with apprisk rules extension.`,
         );
       }
-      filters.private.push(...appRiskRules);
+      filters.private.unshift(...appRiskRules);
     }
   }
 
@@ -340,7 +340,7 @@ function injectRulesAtRuntime(
           `Caution, possible overlapping rules with custom PR templates.`,
         );
       }
-      filters.private.push(...customPRTemplatesRules);
+      filters.private.unshift(...customPRTemplatesRules);
     }
   }
 
