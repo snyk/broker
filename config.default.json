@@ -44,6 +44,16 @@
     "google-artifact-cr",
     "workload"
   ],
+  "CRA_COMPATIBLE_TYPES": [
+    "artifactory-cr",
+    "digitalocean-cr",
+    "github-cr",
+    "gitlab-cr",
+    "google-artifact-cr",
+    "harbor-cr",
+    "nexus-cr",
+    "quay-cr"
+  ],
   "BROKER_CLIENT_CONFIGURATION": {
     "common": {
       "default": {

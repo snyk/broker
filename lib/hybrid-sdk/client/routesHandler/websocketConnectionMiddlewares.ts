@@ -74,13 +74,7 @@ export const websocketConnectionSelectorMiddleware = (
       req.path.startsWith('/v1/') ||
       req.path.startsWith('/v2/')
     ) {
-      const connections = Object.values(config.connections) as Record<
-        string,
-        string
-      >[];
-
-      const craCompatibleAvailableTypes =
-        connections.filter((x) => x.craCompatible).map((x) => x.type) ?? [];
+      const craCompatibleAvailableTypes = getCraCompatibleTypes(config);
       if (craCompatibleAvailableTypes.length > 0) {
         inboundRequestType = craCompatibleAvailableTypes[0];
       } else {
@@ -116,3 +110,14 @@ export const websocketConnectionSelectorMiddleware = (
     next();
   }
 };
+
+export function getCraCompatibleTypes(config: Record<string, any>): string[] {
+  const connectionsList = Object.values(config.connections) as Record<
+    string,
+    string
+  >[];
+  const craCompatibleTypeNames = config.CRA_COMPATIBLE_TYPES as string[];
+  return connectionsList
+    .filter((x) => x && craCompatibleTypeNames.includes(x.type))
+    .map((x) => x.type);
+}
