@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest: current test file",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "${file}",
+        "--runInBand",
+        "--config",
+        "jest.config.ts"
+      ],
+      "console": "integratedTerminal",
+      "disableOptimisticBPs": true,
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "cwd": "${workspaceFolder}",
+      "smartStep": true // Step over library code
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch dev:client with Universal Broker",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:client"
+      ],
+      "env": {
+        "UNIVERSAL_BROKER_ENABLED": "true"
+      },
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "smartStep": true
+    }
+  ]
+}
