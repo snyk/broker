@@ -45,8 +45,12 @@
     "workload"
   ],
   "CRA_COMPATIBLE_TYPES": [
+    "acr",
     "artifactory-cr",
     "digitalocean-cr",
+    "docker-hub",
+    "ecr",
+    "gcr",
     "github-cr",
     "gitlab-cr",
     "google-artifact-cr",
