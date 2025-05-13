@@ -135,6 +135,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       );
 
       incrementWebSocketRequestsTotal(false, 'inbound-request');
+      const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
       const preparedRequest = await prepareRequest(
         urlInterpolated,
         payload,
@@ -144,7 +145,6 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
         this.websocketConnectionHandler?.socketType,
       );
       if (this.options.config.universalBrokerEnabled) {
-        const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
         preparedRequest.req = await runPreRequestPlugins(
           this.options,
           this.connectionIdentifier,

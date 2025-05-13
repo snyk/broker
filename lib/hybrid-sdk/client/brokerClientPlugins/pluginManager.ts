@@ -2,7 +2,10 @@ import { readdir } from 'fs/promises';
 import { log as logger } from '../../../logs/logger';
 import BrokerPlugin from './abstractBrokerPlugin';
 import { existsSync } from 'fs';
-import { getPluginsConfig } from '../../common/config/pluginsConfig';
+import {
+  getPluginsConfig,
+  PluginConnectionConfig,
+} from '../../common/config/pluginsConfig';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { getConfigForIdentifier } from '../../common/config/universal';
 
@@ -73,19 +76,20 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
         `${clientOpts.config.connections[connectionKey].type}`,
       ) ?? [];
     for (let i = 0; i < pluginInstances.length; i++) {
-      pluginsConfig[connectionKey] = {};
       await pluginInstances[i].startUp(
+        connectionKey,
         clientOpts.config.connections[connectionKey],
-        pluginsConfig[connectionKey],
+        pluginsConfig[connectionKey] as unknown as PluginConnectionConfig,
       );
       const contextIds = clientOpts.config.connections[connectionKey].contexts
         ? Object.keys(clientOpts.config.connections[connectionKey].contexts)
         : [];
       for (const contextId of contextIds) {
         await pluginInstances[i].startUpContext(
+          connectionKey,
           contextId,
           clientOpts.config.connections[connectionKey],
-          pluginsConfig[connectionKey],
+          pluginsConfig[connectionKey] as unknown as PluginConnectionConfig,
         );
       }
     }
@@ -138,7 +142,7 @@ export const runPreRequestPlugins = async (
           contextId,
         ),
         preRequest,
-        pluginsConfig[connectionKey] ?? {},
+        pluginsConfig[connectionKey] as unknown as PluginConnectionConfig,
       );
     }
   }

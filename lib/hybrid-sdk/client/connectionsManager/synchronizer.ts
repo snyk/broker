@@ -46,6 +46,8 @@ export const syncClientConfig = async (
     logger.debug({}, 'Disabling polling in favor of server notification.');
   }
 
+  // TODO: add logic to handle connection contexts changes and rerun plugins
+
   for (const key of integrationsKeys) {
     const connectionConfig = clientOpts.config.connections[key];
     const currentWebsocketConnectionIndex = websocketConnections.findIndex(

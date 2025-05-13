@@ -6,6 +6,7 @@ import { makeRequestToDownstream } from '../../../http/request';
 import { maskSCMToken } from '../../../common/utils/token';
 import { replace } from '../../../common/utils/replace-vars';
 import { PostFilterPreparedRequest } from '../../../../broker-workload/prepareRequest';
+import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 
 export class Plugin extends BrokerPlugin {
   // Plugin Code and Name must be unique across all plugins.
@@ -29,7 +30,11 @@ export class Plugin extends BrokerPlugin {
 
   // Function running upon broker client startup
   // Useful for credentials retrieval, initial setup, etc...
-  async startUp(connectionConfig, pluginsConfig?): Promise<void> {
+  async startUp(
+    connectionKey: string,
+    connectionConfig,
+    pluginConfig: PluginConnectionConfig,
+  ): Promise<void> {
     try {
       const connectionName = connectionConfig.friendlyName;
       this.logger.info(
@@ -41,7 +46,7 @@ export class Plugin extends BrokerPlugin {
         {
           plugin: this.pluginCode,
           config: connectionConfig,
-          pluginConfig: pluginsConfig ? pluginsConfig[connectionName] : {},
+          pluginConfig: pluginConfig,
         },
         'Connection Config passed to the plugin',
       );
@@ -68,7 +73,7 @@ export class Plugin extends BrokerPlugin {
 
       // Generate the JWT
       const now = Date.now();
-      this.setPluginConfigSubKey(
+      this.setPluginConfigParamForConnection(
         connectionName,
         'JWT_TOKEN',
         this._getJWT(
@@ -77,31 +82,48 @@ export class Plugin extends BrokerPlugin {
           connectionConfig.GITHUB_APP_ID,
         ),
       );
-      if (!this.getPluginConfigSubKey(connectionName, 'JWT_TOKEN')) {
+      if (
+        !this.getPluginConfigParamForConnection(connectionName, 'JWT_TOKEN')
+      ) {
         throw new Error(`Github app plugin error: could not get JWT.`);
       }
       this._setJWTLifecycleHandler(connectionName, now, connectionConfig);
 
-      this.setPluginConfigSubKey(
+      const jwtToken = this.getPluginConfigParamForConnection(
+        connectionKey,
+        'JWT_TOKEN',
+      );
+      if (!jwtToken) {
+        throw new Error(`Github app plugin error: could not get JWT.`);
+      }
+      this.setPluginConfigParamForConnection(
         connectionName,
         'ghaAccessToken',
         await this._getAccessToken(
           connectionConfig.GITHUB_API,
           connectionConfig.GITHUB_APP_INSTALLATION_ID,
-          this.getPluginConfigSubKey(connectionName, 'JWT_TOKEN'),
+          jwtToken,
         ),
       );
-      if (!this.getPluginConfigSubKey(connectionName, 'ghaAccessToken')) {
+      const ghaAccessToken = this.getPluginConfigParamForConnection(
+        connectionKey,
+        'ghaAccessToken',
+      );
+      if (!ghaAccessToken) {
         throw new Error(`Github app plugin error: could not get access token.`);
       }
 
-      this.setPluginConfigSubKey(
+      this.setPluginConfigParamForConnection(
         connectionName,
         'GHA_ACCESS_TOKEN',
-        JSON.parse(this.getPluginConfigSubKey(connectionName, 'ghaAccessToken'))
-          .token,
+        JSON.parse(ghaAccessToken).token,
       );
-      if (this.getPluginConfigSubKey(connectionName, 'GHA_ACCESS_TOKEN')) {
+      if (
+        this.getPluginConfigParamForConnection(
+          connectionName,
+          'GHA_ACCESS_TOKEN',
+        )
+      ) {
         this._setAccessTokenLifecycleHandler(connectionName, connectionConfig);
       } else {
         throw new Error(
@@ -119,13 +141,138 @@ export class Plugin extends BrokerPlugin {
     }
   }
 
-  startUpContext(
+  async startUpContext(
+    connectionKey: string,
     contextId: string,
     connectionConfiguration: Record<string, any>,
-    pluginsConfig: Record<any, string>,
+    pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
-    this.logger.debug({ contextId, connectionConfiguration, pluginsConfig });
-    throw new Error('Method not implemented.');
+    this.logger.debug({ contextId, connectionConfiguration, pluginConfig });
+    try {
+      this.logger.info(
+        { plugin: this.pluginName, connectionKey },
+        'Running Startup.',
+      );
+
+      this.logger.trace(
+        {
+          plugin: this.pluginCode,
+          config: connectionConfiguration,
+          pluginConfig: pluginConfig,
+        },
+        'Connection Config passed to the plugin',
+      );
+      if (
+        connectionConfiguration &&
+        (!connectionConfiguration.GITHUB_APP_CLIENT_ID ||
+          !connectionConfiguration.GITHUB_APP_PRIVATE_PEM_PATH ||
+          !connectionConfiguration.GITHUB_APP_INSTALLATION_ID ||
+          !connectionConfiguration.GITHUB_APP_ID)
+      ) {
+        throw new Error(
+          `Missing environment variable(s) for plugin (GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_PEM_PATH, GITHUB_APP_INSTALLATION_ID).`,
+        );
+      }
+      if (
+        connectionConfiguration &&
+        connectionConfiguration.GITHUB_APP_PRIVATE_PEM_PATH &&
+        !existsSync(connectionConfiguration.GITHUB_APP_PRIVATE_PEM_PATH)
+      ) {
+        throw new Error(
+          `PEM file path is invalid ${connectionConfiguration.GITHUB_APP_PRIVATE_PEM_PATH}.`,
+        );
+      }
+
+      // Generate the JWT
+      const now = Date.now();
+      this.setPluginConfigParamForConnectionContext(
+        connectionKey,
+        contextId,
+        'JWT_TOKEN',
+        this._getJWT(
+          Math.floor(now / 1000), // Current time in seconds
+          connectionConfiguration.GITHUB_APP_PRIVATE_PEM_PATH,
+          connectionConfiguration.GITHUB_APP_ID,
+        ),
+      );
+      if (
+        !this.getPluginConfigParamForConnectionContext(
+          connectionKey,
+          contextId,
+          'JWT_TOKEN',
+        )
+      ) {
+        throw new Error(`Github app plugin error: could not get JWT.`);
+      }
+      this._setContextJWTLifecycleHandler(
+        connectionKey,
+        contextId,
+        now,
+        connectionConfiguration,
+      );
+
+      this.setPluginConfigParamForConnectionContext(
+        connectionKey,
+        contextId,
+        'ghaAccessToken',
+        await this._getAccessToken(
+          connectionConfiguration.GITHUB_API,
+          connectionConfiguration.GITHUB_APP_INSTALLATION_ID,
+          this.getPluginConfigParamForConnectionContext(
+            connectionKey,
+            contextId,
+            'JWT_TOKEN',
+          ),
+        ),
+      );
+      if (
+        !this.getPluginConfigParamForConnectionContext(
+          connectionKey,
+          contextId,
+          'ghaAccessToken',
+        )
+      ) {
+        throw new Error(`Github app plugin error: could not get access token.`);
+      }
+
+      this.setPluginConfigParamForConnectionContext(
+        connectionKey,
+        contextId,
+        'GHA_ACCESS_TOKEN',
+        JSON.parse(
+          this.getPluginConfigParamForConnectionContext(
+            connectionKey,
+            contextId,
+            'ghaAccessToken',
+          ),
+        ).token,
+      );
+      if (
+        this.getPluginConfigParamForConnectionContext(
+          connectionKey,
+          contextId,
+          'GHA_ACCESS_TOKEN',
+        )
+      ) {
+        this._setContextAccessTokenLifecycleHandler(
+          connectionKey,
+          contextId,
+          connectionConfiguration,
+        );
+      } else {
+        throw new Error(
+          `Github app plugin Error: could not extract access token.`,
+        );
+      }
+    } catch (err) {
+      this.logger.error(
+        { err },
+        `Error in ${this.pluginName}-${this.pluginCode} startup.`,
+      );
+      throw new Error(
+        `Error in ${this.pluginName}-${this.pluginCode} startup. ${err}.`,
+      );
+    }
   }
 
   _getJWT(
@@ -152,7 +299,7 @@ export class Plugin extends BrokerPlugin {
     connectionConfig,
   ) {
     try {
-      if (this.getPluginConfigSubKey(connectionName, 'JWT_TOKEN')) {
+      if (this.getPluginConfigParamForConnection(connectionName, 'JWT_TOKEN')) {
         let timeoutHandlerId;
         let timeoutHandler = async () => {};
         timeoutHandler = async () => {
@@ -163,7 +310,7 @@ export class Plugin extends BrokerPlugin {
             );
             clearTimeout(timeoutHandlerId);
             const timeoutHandlerNow = Date.now();
-            this.setPluginConfigSubKey(
+            this.setPluginConfigParamForConnection(
               connectionName,
               'JWT_TOKEN',
               await this._getJWT(
@@ -172,24 +319,28 @@ export class Plugin extends BrokerPlugin {
                 connectionConfig.GITHUB_APP_ID,
               ),
             );
-            if (!this.getPluginConfigSubKey(connectionName, 'JWT_TOKEN')) {
+            if (
+              !this.getPluginConfigParamForConnection(
+                connectionName,
+                'JWT_TOKEN',
+              )
+            ) {
               throw new Error(
                 `Github app plugin error: could not refresh JWT.`,
               );
             }
-            if (process.env.NODE_ENV != 'test') {
-              timeoutHandlerId = setTimeout(
-                timeoutHandler,
-                this._getTimeDifferenceInMsToFutureDate(
-                  timeoutHandlerNow + this.JWT_TTL,
-                ) - 10000,
-              );
-              this.setPluginConfigSubKey(
-                connectionName,
-                'jwtTimeoutHandlerId',
-                timeoutHandlerId,
-              );
-            }
+
+            timeoutHandlerId = setTimeout(
+              timeoutHandler,
+              this._getTimeDifferenceInMsToFutureDate(
+                timeoutHandlerNow + this.JWT_TTL,
+              ) - 10000,
+            );
+            this.setPluginConfigParamForConnection(
+              connectionName,
+              'jwtTimeoutHandlerId',
+              timeoutHandlerId,
+            );
           } catch (err) {
             this.logger.error(
               { plugin: this.pluginCode, err },
@@ -203,8 +354,93 @@ export class Plugin extends BrokerPlugin {
           timeoutHandler,
           this._getTimeDifferenceInMsToFutureDate(now + this.JWT_TTL) - 10000,
         );
-        this.setPluginConfigSubKey(
+        this.setPluginConfigParamForConnection(
           connectionName,
+          'jwtTimeoutHandlerId',
+          timeoutHandlerId,
+        );
+      }
+    } catch (err) {
+      this.logger.error(
+        { plugin: this.pluginCode, err },
+        `Error setting JWT lifecycle handler.`,
+      );
+      throw err;
+    }
+  }
+  _setContextJWTLifecycleHandler(
+    connectionName: string,
+    contextId: string,
+    now: number,
+    connectionConfig,
+  ) {
+    try {
+      if (
+        this.getPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
+          'JWT_TOKEN',
+        )
+      ) {
+        let timeoutHandlerId;
+        let timeoutHandler = async () => {};
+        timeoutHandler = async () => {
+          try {
+            this.logger.debug(
+              { plugin: this.pluginCode },
+              'Refreshing github app JWT token.',
+            );
+            clearTimeout(timeoutHandlerId);
+            const timeoutHandlerNow = Date.now();
+            this.setPluginConfigParamForConnectionContext(
+              connectionName,
+              contextId,
+              'JWT_TOKEN',
+              await this._getJWT(
+                Math.floor(timeoutHandlerNow / 1000),
+                connectionConfig.GITHUB_APP_PRIVATE_PEM_PATH,
+                connectionConfig.GITHUB_APP_ID,
+              ),
+            );
+            if (
+              !this.getPluginConfigParamForConnectionContext(
+                connectionName,
+                contextId,
+                'JWT_TOKEN',
+              )
+            ) {
+              throw new Error(
+                `Github app plugin error: could not refresh JWT.`,
+              );
+            }
+            timeoutHandlerId = setTimeout(
+              timeoutHandler,
+              this._getTimeDifferenceInMsToFutureDate(
+                timeoutHandlerNow + this.JWT_TTL,
+              ) - 10000,
+            );
+            this.setPluginConfigParamForConnectionContext(
+              connectionName,
+              contextId,
+              'jwtTimeoutHandlerId',
+              timeoutHandlerId,
+            );
+          } catch (err) {
+            this.logger.error(
+              { plugin: this.pluginCode, err },
+              `Error refreshing JWT.`,
+            );
+            throw err;
+          }
+        };
+
+        timeoutHandlerId = setTimeout(
+          timeoutHandler,
+          this._getTimeDifferenceInMsToFutureDate(now + this.JWT_TTL) - 10000,
+        );
+        this.setPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
           'jwtTimeoutHandlerId',
           timeoutHandlerId,
         );
@@ -252,7 +488,9 @@ export class Plugin extends BrokerPlugin {
   }
 
   _setAccessTokenLifecycleHandler(connectionName, connectionConfig) {
-    if (this.getPluginConfigSubKey(connectionName, 'ghaAccessToken')) {
+    if (
+      this.getPluginConfigParamForConnection(connectionName, 'ghaAccessToken')
+    ) {
       let timeoutHandlerId;
       let timeoutHandler = async () => {};
       timeoutHandler = async () => {
@@ -262,64 +500,54 @@ export class Plugin extends BrokerPlugin {
             'Refreshing github app access token.',
           );
           clearTimeout(timeoutHandlerId);
-          this.setPluginConfigSubKey(
+          const jwt = this.getPluginConfigParamForConnection(
+            connectionName,
+            'JWT_TOKEN',
+          );
+          if (!jwt) {
+            throw new Error(`Github app plugin error: could not refresh JWT.`);
+          }
+          const accessToken = await this._getAccessToken(
+            connectionConfig.GITHUB_API,
+            connectionConfig.GITHUB_APP_INSTALLATION_ID,
+            jwt,
+          );
+          this.setPluginConfigParamForConnection(
             connectionName,
             'ghaAccessToken',
-
-            await this._getAccessToken(
-              connectionConfig.GITHUB_API,
-              connectionConfig.GITHUB_APP_INSTALLATION_ID,
-              this.getPluginConfigSubKey(connectionName, 'JWT_TOKEN'),
-            ),
+            accessToken,
           );
-          this.setPluginConfigSubKey(
+          this.setPluginConfigParamForConnection(
             connectionName,
             'GHA_ACCESS_TOKEN',
-            JSON.parse(
-              this.getPluginConfigSubKey(connectionName, 'ghaAccessToken'),
-            ).token,
+            JSON.parse(accessToken).token,
           );
 
-          if (!this.getPluginConfigSubKey(connectionName, 'ghaAccessToken')) {
-            throw new Error(
-              `Github app plugin error: could not get refreshed access token.`,
-            );
-          } else {
-            this.logger.debug(
-              {
-                accessToken: maskSCMToken(
-                  this.getPluginConfigSubKey(
-                    connectionName,
-                    'GHA_ACCESS_TOKEN',
-                  ),
-                ),
-              },
-              `Access token renewed!`,
-            );
-          }
+          this.logger.debug(
+            {
+              accessToken: maskSCMToken(JSON.parse(accessToken).token),
+            },
+            `Access token renewed!`,
+          );
+
           this.logger.debug(
             { plugin: this.pluginCode },
             `Refreshed access token expires at ${
-              JSON.parse(
-                this.getPluginConfigSubKey(connectionName, 'ghaAccessToken'),
-              ).expires_at
+              JSON.parse(accessToken).expires_at
             }.`,
           );
-          if (process.env.NODE_ENV != 'test') {
-            timeoutHandlerId = setTimeout(
-              timeoutHandler,
-              this._getTimeDifferenceInMsToFutureDate(
-                JSON.parse(
-                  this.getPluginConfigSubKey(connectionName, 'ghaAccessToken'),
-                ).expires_at,
-              ) - 10000,
-            );
-            this.setPluginConfigSubKey(
-              connectionName,
-              'ghaAccessTokenTimeoutHandlerId',
-              timeoutHandlerId,
-            );
-          }
+
+          timeoutHandlerId = setTimeout(
+            timeoutHandler,
+            this._getTimeDifferenceInMsToFutureDate(
+              JSON.parse(accessToken).expires_at,
+            ) - 10000,
+          );
+          this.setPluginConfigParamForConnection(
+            connectionName,
+            'ghaAccessTokenTimeoutHandlerId',
+            timeoutHandlerId,
+          );
         } catch (err) {
           this.logger.error(
             { plugin: this.pluginCode, err },
@@ -328,16 +556,125 @@ export class Plugin extends BrokerPlugin {
           throw err;
         }
       };
+      const ghaAccessTokenInHandler = this.getPluginConfigParamForConnection(
+        connectionName,
+        'ghaAccessToken',
+      );
+      if (!ghaAccessTokenInHandler) {
+        throw new Error(`Github app plugin error: could not get access token.`);
+      }
       timeoutHandlerId = setTimeout(
         timeoutHandler,
         this._getTimeDifferenceInMsToFutureDate(
-          JSON.parse(
-            this.getPluginConfigSubKey(connectionName, 'ghaAccessToken'),
-          ).expires_at,
+          JSON.parse(ghaAccessTokenInHandler).expires_at,
         ) - 10000,
       );
-      this.setPluginConfigSubKey(
+      this.setPluginConfigParamForConnection(
         connectionName,
+        'ghaAccessTokenTimeoutHandlerId',
+        timeoutHandlerId,
+      );
+    }
+  }
+  _setContextAccessTokenLifecycleHandler(
+    connectionName: string,
+    contextId: string,
+    connectionConfig,
+  ) {
+    if (
+      this.getPluginConfigParamForConnectionContext(
+        connectionName,
+        contextId,
+        'ghaAccessToken',
+      )
+    ) {
+      let timeoutHandlerId;
+      let timeoutHandler = async () => {};
+      timeoutHandler = async () => {
+        try {
+          this.logger.debug(
+            { plugin: this.pluginCode },
+            'Refreshing github app access token.',
+          );
+          clearTimeout(timeoutHandlerId);
+          const jwt = this.getPluginConfigParamForConnectionContext(
+            connectionName,
+            contextId,
+            'JWT_TOKEN',
+          );
+          if (!jwt) {
+            throw new Error(`Github app plugin error: could not refresh JWT.`);
+          }
+          const accessToken = await this._getAccessToken(
+            connectionConfig.GITHUB_API,
+            connectionConfig.GITHUB_APP_INSTALLATION_ID,
+            jwt,
+          );
+          this.setPluginConfigParamForConnectionContext(
+            connectionName,
+            contextId,
+            'ghaAccessToken',
+
+            accessToken,
+          );
+          this.setPluginConfigParamForConnectionContext(
+            connectionName,
+            contextId,
+            'GHA_ACCESS_TOKEN',
+            JSON.parse(accessToken).token,
+          );
+
+          this.logger.debug(
+            {
+              accessToken: maskSCMToken(JSON.parse(accessToken).token),
+            },
+            `Access token renewed!`,
+          );
+
+          this.logger.debug(
+            { plugin: this.pluginCode },
+            `Refreshed access token expires at ${
+              JSON.parse(accessToken).expires_at
+            }.`,
+          );
+          timeoutHandlerId = setTimeout(
+            timeoutHandler,
+            this._getTimeDifferenceInMsToFutureDate(
+              JSON.parse(accessToken).expires_at,
+            ) - 10000,
+          );
+          this.setPluginConfigParamForConnectionContext(
+            connectionName,
+            contextId,
+            'ghaAccessTokenTimeoutHandlerId',
+            timeoutHandlerId,
+          );
+        } catch (err) {
+          this.logger.error(
+            { plugin: this.pluginCode, err },
+            `Error setting access token lifecycle handler.`,
+          );
+          throw err;
+        }
+      };
+      const ghaAccessTokenInHandler =
+        this.getPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
+          'ghaAccessToken',
+        );
+      if (!ghaAccessTokenInHandler) {
+        throw new Error(`Github app plugin error: could not get access token.`);
+      }
+      timeoutHandlerId = setTimeout(
+        timeoutHandler,
+        this._getTimeDifferenceInMsToFutureDate(
+          JSON.parse(ghaAccessTokenInHandler).expires_at,
+        ) - 10000,
+      );
+      this.setPluginConfigParamForConnectionContext(
+        connectionName,
+        contextId,
         'ghaAccessTokenTimeoutHandlerId',
         timeoutHandlerId,
       );
