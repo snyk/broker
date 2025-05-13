@@ -28,7 +28,7 @@ describe('Github Server App Plugin', () => {
     const plugin = new Plugin(config);
 
     try {
-      await plugin.startUp({});
+      await plugin.startUp('', {}, {});
 
       //we shouldn't hit here
       expect(true).toBeFalsy();
@@ -51,7 +51,7 @@ describe('Github Server App Plugin', () => {
     const plugin = new Plugin(config);
 
     try {
-      await plugin.startUp(config);
+      await plugin.startUp('', config, {});
       // we shouldn't hit here
       expect(true).toBeFalsy();
     } catch (err) {
