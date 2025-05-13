@@ -1,4 +1,5 @@
 import BrokerPlugin from '../abstractBrokerPlugin';
+import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 
 export class Plugin extends BrokerPlugin {
   pluginCode = 'CONTAINER_REGISTRY_CREDENTIALS_FORMAT_PLUGIN';
@@ -20,39 +21,63 @@ export class Plugin extends BrokerPlugin {
     'gitlab-cr',
     'google-artifact-cr',
   ];
+
   isPluginActive(): boolean {
     return true;
   }
-  async startUp(connectionConfiguration: Record<string, any>): Promise<void> {
+
+  async startUp(
+    connectionKey: string,
+    connectionConfig,
+    pluginConfig: PluginConnectionConfig,
+  ): Promise<void> {
     if (
-      !connectionConfiguration.type ||
-      !this.applicableBrokerTypes.includes(connectionConfiguration.type)
+      !connectionConfig.type ||
+      !this.applicableBrokerTypes.includes(connectionConfig.type)
     ) {
       throw new Error(
         `Plugin ${
           this.pluginCode
         } startup failure: unknown container registry type: ${
-          connectionConfiguration.type ?? '<not provided>'
+          connectionConfig.type ?? '<not provided>'
         }.`,
       );
     }
 
-    connectionConfiguration.CR_CREDENTIALS = Buffer.from(
-      this._getCredentials(connectionConfiguration),
-    ).toString('base64');
-    connectionConfiguration.craCompatible = true;
+    this.logger.trace(
+      {
+        plugin: this.pluginCode,
+        config: connectionConfig,
+        pluginConfig: pluginConfig,
+      },
+      'Connection Config passed to the plugin',
+    );
 
-    if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
-      connectionConfiguration.BROKER_CLIENT_VALIDATION_URL =
-        connectionConfiguration.CR_CREDENTIALS;
+    const credentials = Buffer.from(
+      this._getCredentials(connectionConfig),
+    ).toString('base64');
+    this.setPluginConfigParamForConnection(
+      connectionKey,
+      'CR_CREDENTIALS',
+      credentials,
+    );
+
+    if (connectionConfig && connectionConfig.BROKER_CLIENT_VALIDATION_URL) {
+      this.setPluginConfigParamForConnection(
+        connectionKey,
+        'BROKER_CLIENT_VALIDATION_URL',
+        credentials,
+      );
     }
   }
+
   async startUpContext(
+    connectionKey: string,
     contextId: string,
     connectionConfiguration: Record<string, any>,
-    pluginsConfig: Record<any, string>,
+    pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
-    this.logger.debug({ contextId, connectionConfiguration, pluginsConfig });
+    this.logger.debug({ contextId, connectionConfiguration, pluginConfig });
     if (
       !connectionConfiguration.type ||
       !this.applicableBrokerTypes.includes(connectionConfiguration.type)
@@ -71,16 +96,26 @@ export class Plugin extends BrokerPlugin {
     // therefore "writing" in the main config object
     // While connectionConfiguration['test']='value' does not get persisted
     // connectionConfiguration.contexts[contextId]['test]='value' does.
-    connectionConfiguration.contexts[contextId].CR_CREDENTIALS = Buffer.from(
+    const credentials = Buffer.from(
       this._getCredentials(connectionConfiguration),
     ).toString('base64');
-    connectionConfiguration.contexts[contextId].craCompatible = true;
+    this.setPluginConfigParamForConnectionContext(
+      connectionKey,
+      contextId,
+      'CR_CREDENTIALS',
+      credentials,
+    );
 
     if (connectionConfiguration.BROKER_CLIENT_VALIDATION_URL) {
-      connectionConfiguration.BROKER_CLIENT_VALIDATION_URL =
-        connectionConfiguration.contexts[contextId].CR_CREDENTIALS;
+      this.setPluginConfigParamForConnectionContext(
+        connectionKey,
+        contextId,
+        'BROKER_CLIENT_VALIDATION_URL',
+        credentials,
+      );
     }
   }
+
   _getCredentials(config) {
     let credentials;
     switch (config.type) {

@@ -48,6 +48,7 @@ export const syncClientConfig = async (
 
   for (const key of integrationsKeys) {
     const connectionConfig = clientOpts.config.connections[key];
+
     const currentWebsocketConnectionIndex = websocketConnections.findIndex(
       (conn) => conn.friendlyName === key,
     );
