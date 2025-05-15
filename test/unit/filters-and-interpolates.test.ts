@@ -913,6 +913,28 @@ describe('filters and interpolates', () => {
         );
         expect(result.url).toMatch(url);
       });
+
+      it('should allow retrieving MR diffs', () => {
+        const url = '/api/v4/projects/123/merge_requests/1/diffs';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
     });
   });
 

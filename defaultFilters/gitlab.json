@@ -1629,6 +1629,12 @@
         "method": "PUT",
         "path": "/api/v4/projects/:project/merge_requests/:pullRef/discussions/:discussion",
         "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get merge request files and diffs",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/merge_requests/:pullRef/diffs",
+        "origin": "https://${GITLAB}"
       }
     ]
   }
