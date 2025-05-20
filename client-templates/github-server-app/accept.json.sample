@@ -1304,6 +1304,12 @@
       ]
     },
     {
+      "//": "creates a new commit",
+      "method": "POST",
+      "path": "/repos/:name/:repo/git/commits",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs",
@@ -1379,6 +1385,12 @@
       "//": "get list of all files in a repo",
       "method": "GET",
       "path": "/repos/:name/:repo/git/trees/:ref",
+      "origin": "https://${GITHUB_API}"
+    },
+    {
+      "//": "commits data via a tree structure (nested entities)",
+      "method": "POST",
+      "path": "/repos/:user/:repo/git/trees",
       "origin": "https://${GITHUB_API}"
     },
     {
