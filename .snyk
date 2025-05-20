@@ -37,6 +37,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2025-05-24T15:32:17.640Z
         created: 2025-04-24T15:32:17.640Z
+  SNYK-RHEL8-ZLIB-10174471:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-06-19T23:59:69.000Z
+        created: 2025-05-20T10:20:00.000Z
 patch: {}
 exclude:
   global:
