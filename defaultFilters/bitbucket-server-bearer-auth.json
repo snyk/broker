@@ -1144,6 +1144,16 @@
       }
     },
     {
+      "//": "create a comment reaction",
+      "method": "PUT",
+      "path": "/rest/comment-likes/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/reactions/:emoji",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+    },
+    {
       "//": "used to validate credentials",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/permissions/search",
