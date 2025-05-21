@@ -87,7 +87,7 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
     "node-cache": "^5.1.0",
-    "openpgp": "^5.11.2",
+    "openpgp": "^5.11.3",
     "path-to-regexp": "^1.9.0",
     "primus": "^6.1.0",
     "primus-emitter": "^3.1.1",
