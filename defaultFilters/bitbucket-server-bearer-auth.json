@@ -814,7 +814,7 @@
       "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
-        "token": "${BITBUCKET_PAT}" 
+        "token": "${BITBUCKET_PAT}"
       }
     },
     {
@@ -1088,6 +1088,16 @@
       "method": "POST",
       "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
       "origin": "https://${BITBUCKET_API}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
+    },
+    {
+      "//": "create a comment reaction",
+      "method": "PUT",
+      "path": "/rest/comment-likes/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/reactions/:emoji",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
