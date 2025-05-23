@@ -42,6 +42,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2025-06-19T23:59:69.000Z
         created: 2025-05-20T10:20:00.000Z
+  SNYK-RHEL8-GLIBC-10216671:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-06-22T23:59:69.000Z
+        created: 2025-05-23T17:28:00.000Z
 patch: {}
 exclude:
   global:
