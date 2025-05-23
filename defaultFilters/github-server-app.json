@@ -2034,9 +2034,29 @@
         }
       },
       {
+        "//": "create a reaction for a pull request comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/comments/:commentId/reactions",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
         "//": "create a pull request review",
         "method": "POST",
         "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "reply to a review comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/:pullRef/comments/:commentId/replies",
         "origin": "https://${GITHUB_API}",
         "auth": {
           "scheme": "bearer",

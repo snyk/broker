@@ -1424,9 +1424,21 @@
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       },
       {
+        "//": "create a reaction for a pull request comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/comments/:commentId/reactions",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
         "//": "create a pull request review",
         "method": "POST",
         "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "reply to a review comment",
+        "method": "POST",
+        "path": "/repos/:name/:repo/pulls/:pullRef/comments/:commentId/replies",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       },
       {
