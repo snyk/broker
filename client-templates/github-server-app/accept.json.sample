@@ -1304,6 +1304,12 @@
       ]
     },
     {
+      "//": "creates a new commit",
+      "method": "POST",
+      "path": "/repos/:name/:repo/git/commits",
+      "origin": "https://${GITHUB_API}"
+    },
+    {
       "//": "get a list of all the refs to match find whether an existing PR is open",
       "method": "GET",
       "path": "/repos/:name/:repo/git/refs",
@@ -1382,6 +1388,12 @@
       "origin": "https://${GITHUB_API}"
     },
     {
+      "//": "commits data via a tree structure (nested entities)",
+      "method": "POST",
+      "path": "/repos/:user/:repo/git/trees",
+      "origin": "https://${GITHUB_API}"
+    },
+    {
       "//": "used to get repo's contributors list",
       "method": "GET",
       "path": "/repos/:owner/:repo/commits",
@@ -1412,9 +1424,21 @@
       "origin": "https://${GITHUB_API}"
     },
     {
+      "//": "create a reaction for a pull request comment",
+      "method": "POST",
+      "path": "/repos/:name/:repo/pulls/comments/:commentId/reactions",
+      "origin": "https://${GITHUB_API}"
+    },
+    {
       "//": "create a pull request review",
       "method": "POST",
       "path": "/repos/:name/:repo/pulls/:pullRef/reviews",
+      "origin": "https://${GITHUB_API}"
+    },
+    {
+      "//": "reply to a review comment",
+      "method": "POST",
+      "path": "/repos/:name/:repo/pulls/:pullRef/comments/:commentId/replies",
       "origin": "https://${GITHUB_API}"
     },
     {
