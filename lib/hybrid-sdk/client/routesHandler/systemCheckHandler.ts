@@ -96,7 +96,9 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       );
       let credsResult;
       if (clientOpts.config.BITBUCKET_PAT) {
-        logger.info('Using Bitbucket PAT credentials check (no explicit auth).');
+        logger.info(
+          'Using Bitbucket PAT credentials check (no explicit auth).',
+        );
         credsResult = await checkBitbucketPatCredentials(
           null, // Pass null for auth as no specific auth from array
           clientOpts.config,

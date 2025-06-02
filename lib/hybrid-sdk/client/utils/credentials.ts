@@ -173,9 +173,7 @@ export const checkBitbucketPatCredentials = async (
         // now we check for the x-ausername header which tells us if
         // the auth actually succeeded
         if (response.headers && response.headers['x-ausername']) {
-          logger.info(
-            'Bitbucket PAT systemcheck credentials are valid',
-          );
+          logger.info('Bitbucket PAT systemcheck credentials are valid');
           data['ok'] = true;
           errorOccurred = false;
         } else {

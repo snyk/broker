@@ -7,18 +7,21 @@ jest.mock('../../../../lib/hybrid-sdk/http/request', () => ({
 
 describe('checkBitbucketPatCredentials', () => {
   const mockConfig = {
-    brokerClientValidationUrl: 'http://fake.bitbucket.server/rest/api/1.0/projects',
+    brokerClientValidationUrl:
+      'http://fake.bitbucket.server/rest/api/1.0/projects',
   };
   const brokerClientValidationMethod = 'GET';
   const brokerClientValidationTimeoutMs = 5000;
 
   const mockedMakeRequestToDownstream = makeRequestToDownstream as jest.Mock;
 
-
   it('should return 200 when validation is successful', async () => {
     mockedMakeRequestToDownstream.mockResolvedValue({
       statusCode: 200,
-      headers: { 'x-ausername': 'testuser', 'content-type': 'application/json' },
+      headers: {
+        'x-ausername': 'testuser',
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({ message: 'success' }),
     });
 
@@ -32,11 +35,13 @@ describe('checkBitbucketPatCredentials', () => {
     expect(errorOccurred).toBe(false);
     expect(data.ok).toBe(true);
     expect(data.brokerClientValidationUrlStatusCode).toBe(200);
-    expect(mockedMakeRequestToDownstream).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockedMakeRequestToDownstream).toHaveBeenCalledWith(
+      expect.objectContaining({
         url: mockConfig.brokerClientValidationUrl,
-        headers: { 'authorization': 'Bearer test-token' },
+        headers: { authorization: 'Bearer test-token' },
         method: brokerClientValidationMethod,
-    }));
+      }),
+    );
   });
 
   it('should return 401 when x-ausername header is missing', async () => {
@@ -56,7 +61,9 @@ describe('checkBitbucketPatCredentials', () => {
     expect(errorOccurred).toBe(true);
     expect(data.ok).toBe(false);
     expect(data.brokerClientValidationUrlStatusCode).toBe(401);
-    expect(data.error).toBe('Bitbucket PAT systemcheck failed, credentials are invalid');
+    expect(data.error).toBe(
+      'Bitbucket PAT systemcheck failed, credentials are invalid',
+    );
   });
 
   it('should return ok: false and errorOccurred: true when makeRequestToDownstream throws an error', async () => {
