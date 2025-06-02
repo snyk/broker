@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
   checkCredentials,
+  checkBitbucketPatCredentials,
   loadCredentialsFromConfig,
 } from '../utils/credentials';
 import { log as logger } from '../../../logs/logger';
@@ -57,12 +58,28 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
         logger.info(`Checking if credentials at index ${i} are valid.`);
         const auth = auths[i];
         const rawCred = rawCreds[i];
-        const { data, errorOccurred: err } = await checkCredentials(
-          auth,
-          clientOpts.config,
-          brokerClientValidationMethod,
-          brokerClientValidationTimeoutMs,
-        );
+        let credsResult;
+        // Bitbucket server always returns a 200 regardless of the validity of the PAT
+        // this function is to look inside the response body and determine if the
+        // credentials really are valid or not.
+        if (clientOpts.config.BITBUCKET_PAT) {
+          logger.info('Using Bitbucket PAT credentials check.');
+          credsResult = await checkBitbucketPatCredentials(
+            auth,
+            clientOpts.config,
+            brokerClientValidationMethod,
+            brokerClientValidationTimeoutMs,
+          );
+        } else {
+          logger.info('Using standard credentials check.');
+          credsResult = await checkCredentials(
+            auth,
+            clientOpts.config,
+            brokerClientValidationMethod,
+            brokerClientValidationTimeoutMs,
+          );
+        }
+        const { data, errorOccurred: err } = credsResult;
         data['maskedCredentials'] =
           rawCred.length <= 6
             ? '***'
@@ -77,12 +94,25 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       logger.info(
         'No credentials specified - checking if target can be accessed without credentials.',
       );
-      const { data, errorOccurred: err } = await checkCredentials(
-        null,
-        clientOpts.config,
-        brokerClientValidationMethod,
-        brokerClientValidationTimeoutMs,
-      );
+      let credsResult;
+      if (clientOpts.config.BITBUCKET_PAT) {
+        logger.info('Using Bitbucket PAT credentials check (no explicit auth).');
+        credsResult = await checkBitbucketPatCredentials(
+          null, // Pass null for auth as no specific auth from array
+          clientOpts.config,
+          brokerClientValidationMethod,
+          brokerClientValidationTimeoutMs,
+        );
+      } else {
+        logger.info('Using standard credentials check (no explicit auth).');
+        credsResult = await checkCredentials(
+          null, // Pass null for auth
+          clientOpts.config,
+          brokerClientValidationMethod,
+          brokerClientValidationTimeoutMs,
+        );
+      }
+      const { data, errorOccurred: err } = credsResult;
       data['maskedCredentials'] = null;
       validationResults.push(data);
       errorOccurred = err;

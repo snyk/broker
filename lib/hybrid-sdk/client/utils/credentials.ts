@@ -113,3 +113,96 @@ export const checkCredentials = async (
 
   return { data, errorOccurred };
 };
+
+export const checkBitbucketPatCredentials = async (
+  auth, // This would be the BITBUCKET_PAT token, likely passed as the authorization header value
+  config,
+  brokerClientValidationMethod,
+  brokerClientValidationTimeoutMs,
+) => {
+  const data = {
+    brokerClientValidationUrl: sanitise(config.brokerClientValidationUrl),
+    brokerClientValidationMethod,
+    brokerClientValidationTimeoutMs,
+    ok: false, // Initialize ok status to false
+  };
+
+  const validationRequestHeaders = {};
+  if (auth) {
+    validationRequestHeaders['authorization'] = auth;
+  }
+
+  let errorOccurred = true;
+
+  try {
+    const response = await makeRequestToDownstream({
+      url: config.brokerClientValidationUrl,
+      headers: validationRequestHeaders,
+      method: brokerClientValidationMethod,
+    });
+
+    const responseStatusCode = response && response.statusCode;
+    if (!responseStatusCode) {
+      logger.error(
+        { response },
+        'Failed Bitbucket PAT systemcheck, missing status code',
+      );
+      throw new Error('Failed Bitbucket PAT systemcheck');
+    } else {
+      data['brokerClientValidationUrlStatusCode'] = responseStatusCode;
+
+      if (responseStatusCode >= 300) {
+        data['error'] =
+          responseStatusCode === 401 || responseStatusCode === 403
+            ? 'Failed due to invalid credentials'
+            : `Status code is not 2xx`;
+        logger.error(
+          data,
+          response && response.body,
+          'Bitbucket PAT systemcheck failed',
+        );
+      } else {
+        // Status code from bitbucket server will always be 200,
+        // now we check for the x-ausername header which tells us if
+        // the auth actually succeeded
+        if (response.headers && response.headers['x-ausername']) {
+          logger.info(
+            'Bitbucket PAT systemcheck credentials are valid',
+          );
+          data['ok'] = true;
+          errorOccurred = false;
+        } else {
+          data['brokerClientValidationUrlStatusCode'] = 401;
+          data['error'] =
+            'Bitbucket PAT systemcheck failed, credentials are invalid';
+          logger.error(
+            data,
+            'Bitbucket PAT systemcheck failed, credentials are invalid , x-ausername header missing',
+          );
+          data['ok'] = false;
+          errorOccurred = true;
+        }
+
+        const parsedBodyResponse = isJson(response.headers)
+          ? JSON.parse(response.body)
+          : response.body;
+        response.body = parsedBodyResponse;
+
+        if (process.env.JEST_WORKER_ID) {
+          data['testResponse'] = response;
+        }
+      }
+    }
+  } catch (error: any) {
+    logger.error(
+      { err: error.message },
+      'Bitbucket PAT systemcheck failed due to an exception.',
+    );
+    if (process.env.JEST_WORKER_ID) {
+      data['testError'] = error;
+    }
+    data['error'] = error.message || 'Systemcheck failed due to an exception';
+  }
+
+  return { data, errorOccurred };
+};
