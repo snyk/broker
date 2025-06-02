@@ -120,11 +120,18 @@ export const checkBitbucketPatCredentials = async (
   brokerClientValidationMethod,
   brokerClientValidationTimeoutMs,
 ) => {
-  const data = {
+  const data: {
+    brokerClientValidationUrl: string;
+    brokerClientValidationMethod: string;
+    brokerClientValidationTimeoutMs: number;
+    ok: boolean;
+    brokerClientValidationUrlStatusCode?: number;
+    error?: string | Error;
+  } = {
     brokerClientValidationUrl: sanitise(config.brokerClientValidationUrl),
     brokerClientValidationMethod,
     brokerClientValidationTimeoutMs,
-    ok: false, // Initialize ok status to false
+    ok: false,
   };
 
   const validationRequestHeaders = {};
