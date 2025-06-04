@@ -1097,7 +1097,7 @@
       "//": "create a general pull request comment",
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
@@ -1107,7 +1107,7 @@
       "//": "update a general pull request comment",
       "method": "PUT",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
@@ -1117,7 +1117,7 @@
       "//": "get a general pull request comment",
       "method": "GET",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
@@ -1127,7 +1127,7 @@
       "//": "create an inline pull request comment",
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
@@ -1137,7 +1137,7 @@
       "//": "resolve a pull request comment",
       "method": "POST",
       "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
-      "origin": "https://${BITBUCKET_API}",
+      "origin": "https://${BITBUCKET}",
       "auth": {
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
