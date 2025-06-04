@@ -42,6 +42,12 @@
     "origin": "https://${GITLAB}"
   },
   {
+    "//": "used to retrieve organization context from backstage-catalog-info.yaml",
+    "method": "GET",
+    "path": "/api/v4/projects/:project/repository/files/backstage-catalog-info.yaml/raw",
+    "origin": "https://${GITLAB}"
+  },
+  {
     "//": "get metadata",
     "method": "GET",
     "path": "/api/v4/metadata",
