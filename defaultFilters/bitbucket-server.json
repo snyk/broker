@@ -1149,61 +1149,6 @@
       {
         "//": "create a general pull request comment",
         "method": "POST",
-        "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
-        "origin": "https://${BITBUCKET_API}",
-        "auth": {
-          "scheme": "basic",
-          "username": "${BITBUCKET_USERNAME}",
-          "password": "${BITBUCKET_PASSWORD}"
-        }
-      },
-      {
-        "//": "update a general pull request comment",
-        "method": "PUT",
-        "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-        "origin": "https://${BITBUCKET_API}",
-        "auth": {
-          "scheme": "basic",
-          "username": "${BITBUCKET_USERNAME}",
-          "password": "${BITBUCKET_PASSWORD}"
-        }
-      },
-      {
-        "//": "get a general pull request comment",
-        "method": "GET",
-        "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId",
-        "origin": "https://${BITBUCKET_API}",
-        "auth": {
-          "scheme": "basic",
-          "username": "${BITBUCKET_USERNAME}",
-          "password": "${BITBUCKET_PASSWORD}"
-        }
-      },
-      {
-        "//": "create an inline pull request comment",
-        "method": "POST",
-        "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/inline-comments",
-        "origin": "https://${BITBUCKET_API}",
-        "auth": {
-          "scheme": "basic",
-          "username": "${BITBUCKET_USERNAME}",
-          "password": "${BITBUCKET_PASSWORD}"
-        }
-      },
-      {
-        "//": "resolve a pull request comment",
-        "method": "POST",
-        "path": "/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments/:commentId/resolve",
-        "origin": "https://${BITBUCKET_API}",
-        "auth": {
-          "scheme": "basic",
-          "username": "${BITBUCKET_USERNAME}",
-          "password": "${BITBUCKET_PASSWORD}"
-        }
-      },
-      {
-        "//": "create a general pull request comment",
-        "method": "POST",
         "path": "/rest/api/1.0/projects/:project/repos/:repo/pull-requests/:pullRequestId/comments",
         "origin": "https://${BITBUCKET}",
         "auth": {
