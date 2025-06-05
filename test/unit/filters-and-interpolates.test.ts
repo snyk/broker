@@ -168,7 +168,7 @@ describe('filters and interpolates', () => {
 
       it('should allow creating a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments';
 
         const filterResponse = filter({
           url,
@@ -191,7 +191,7 @@ describe('filters and interpolates', () => {
 
       it('should allow updating a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
 
         const filterResponse = filter({
           url,
@@ -214,7 +214,7 @@ describe('filters and interpolates', () => {
 
       it('should allow getting a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
 
         const filterResponse = filter({
           url,
@@ -237,7 +237,7 @@ describe('filters and interpolates', () => {
 
       it('should allow creating an inline pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
 
         const filterResponse = filter({
           url,
@@ -260,7 +260,7 @@ describe('filters and interpolates', () => {
 
       it('should allow resolving a pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
 
         const filterResponse = filter({
           url,
@@ -336,7 +336,7 @@ describe('filters and interpolates', () => {
 
       it('should allow creating a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments';
 
         const filterResponse = filter({
           url,
@@ -359,7 +359,7 @@ describe('filters and interpolates', () => {
 
       it('should allow updating a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
 
         const filterResponse = filter({
           url,
@@ -382,7 +382,7 @@ describe('filters and interpolates', () => {
 
       it('should allow getting a general pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345';
 
         const filterResponse = filter({
           url,
@@ -405,7 +405,7 @@ describe('filters and interpolates', () => {
 
       it('should allow creating an inline pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/inline-comments';
 
         const filterResponse = filter({
           url,
@@ -428,7 +428,7 @@ describe('filters and interpolates', () => {
 
       it('should allow resolving a pull request comment', () => {
         const url =
-          '/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
+          '/rest/api/1.0/projects/test-org/repos/test-repo/pull-requests/1/comments/12345/resolve';
 
         const filterResponse = filter({
           url,
