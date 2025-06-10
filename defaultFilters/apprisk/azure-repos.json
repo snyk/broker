@@ -40,16 +40,6 @@
     }
   },
   {
-    "//": "get specific repository for given organisation",
-    "method": "GET",
-    "path": "/:org/_apis/git/repositories/:repo",
-    "origin": "https://${AZURE_REPOS_HOST}",
-    "auth": {
-      "scheme": "basic",
-      "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
-    }
-  },
-  {
     "//": "pull teams",
     "method": "GET",
     "path": "/:org/_apis/teams",
