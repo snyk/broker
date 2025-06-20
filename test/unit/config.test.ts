@@ -92,6 +92,7 @@ describe('config', () => {
       AZURE_REPOS_HOST: 'hostname',
       AZURE_REPOS_ORG: 'org',
       AZURE_REPOS_TOKEN: '123',
+      AZURE_REPOS_USER_ENTITLEMENTS_HOST: 'vsaex.hostname',
       BROKER_CLIENT_VALIDATION_BASIC_AUTH: 'PAT:123',
       BROKER_CLIENT_VALIDATION_URL:
         'https://hostname/org/_apis/git/repositories',
