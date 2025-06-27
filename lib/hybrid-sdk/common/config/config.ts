@@ -18,7 +18,6 @@ export const setConfigKey = (key: string, value: unknown) => {
   config[key] = value;
 };
 
-
 export const findProjectRoot = (startDir: string): string => {
   let currentDir = startDir;
 
@@ -32,7 +31,8 @@ export const findProjectRoot = (startDir: string): string => {
     currentDir = path.dirname(currentDir);
   }
 
-  const errorMessage = 'Error: config.default.json is missing, please ensure the file exists when running the broker.';
+  const errorMessage =
+    'Error: config.default.json is missing, please ensure the file exists when running the broker.';
   logger.error(errorMessage);
   const refError = new ReferenceError(errorMessage);
   refError['code'] = 'MISSING_DEFAULT_CONFIG';
