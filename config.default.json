@@ -119,12 +119,7 @@
     "artifactory": {
       "validations": [
         {
-          "url": "https://$ARTIFACTORY_URL/api/system/ping",
-          "auth": {
-            "type": "basic",
-            "username": "$ARTIFACTORY_USERNAME",
-            "password": "$ARTIFACTORY_PASSWORD"
-          }
+          "url": "https://$ARTIFACTORY_URL/api/system/ping"
         }
       ],
       "default": {
