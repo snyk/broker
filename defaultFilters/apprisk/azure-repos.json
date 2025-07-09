@@ -123,7 +123,7 @@
     "//": "get user entitlements",
     "method": "GET",
     "path": "/:org/_apis/userentitlements",
-    "origin": "https://${AZURE_REPOS_HOST}",
+    "origin": "https://${AZURE_REPOS_USER_ENTITLEMENTS_HOST}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
@@ -133,7 +133,7 @@
     "//": "get user entitlements without org",
     "method": "GET",
     "path": "/_apis/userentitlements",
-    "origin": "https://${AZURE_REPOS_HOST}/${AZURE_REPOS_ORG}",
+    "origin": "https://${AZURE_REPOS_USER_ENTITLEMENTS_HOST}/${AZURE_REPOS_ORG}",
     "auth": {
       "scheme": "basic",
       "token": "${BROKER_CLIENT_VALIDATION_BASIC_AUTH}"
