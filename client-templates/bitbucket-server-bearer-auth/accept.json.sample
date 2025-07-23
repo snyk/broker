@@ -1132,6 +1132,16 @@
         "scheme": "bearer",
         "token": "${BITBUCKET_PAT}"
       }
+    },
+    {
+      "//": "create repository based commit status",
+      "method": "POST",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:commitId/builds",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "bearer",
+        "token": "${BITBUCKET_PAT}"
+      }
     }
   ]
 }

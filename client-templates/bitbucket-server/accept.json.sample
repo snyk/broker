@@ -1244,6 +1244,17 @@
         "username": "${BITBUCKET_USERNAME}",
         "password": "${BITBUCKET_PASSWORD}"
       }
+    },
+    {
+      "//": "create repository based commit status",
+      "method": "POST",
+      "path": "/rest/api/1.0/projects/:project/repos/:repo/commits/:commitId/builds",
+      "origin": "https://${BITBUCKET}",
+      "auth": {
+        "scheme": "basic",
+        "username": "${BITBUCKET_USERNAME}",
+        "password": "${BITBUCKET_PASSWORD}"
+      }
     }
   ]
 }
