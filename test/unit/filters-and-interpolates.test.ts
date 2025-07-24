@@ -326,6 +326,29 @@ describe('filters and interpolates', () => {
         );
         expect(result.url).toMatch(url);
       });
+
+      it('should allow creating repository based commit status', () => {
+        const url =
+          '/rest/api/1.0/projects/test-org/repos/test-repo/commits/12345/builds';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'POST',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
     });
 
     describe('for bitbucket server bearer auth private filters', () => {
