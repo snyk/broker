@@ -25,7 +25,7 @@ describe('replacePartialChunk', () => {
       'Replace the "http://replac.ed/get/some/artifact" url please.';
     const prevPartial = null;
     const expectedChunk =
-      'Replace the "http://internal-broker-server/broker/a-tok-en/get/some/artifact" url please.';
+      'Replace the "http://internal-broker-server-next/broker/a-tok-en/get/some/artifact" url please.';
 
     expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
       newChunk: expectedChunk,
@@ -48,7 +48,7 @@ describe('replacePartialChunk', () => {
     const chunk = 'c.ed/get/some/artifact" url please.';
     const prevPartial = 'http://repla';
     const expectedChunk =
-      'http://internal-broker-server/broker/a-tok-en/get/some/artifact" url please.';
+      'http://internal-broker-server-next/broker/a-tok-en/get/some/artifact" url please.';
 
     expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
       newChunk: expectedChunk,
