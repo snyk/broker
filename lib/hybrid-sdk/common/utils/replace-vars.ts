@@ -41,7 +41,7 @@ export const replaceUrlPartialChunk = (chunk, prevPartial, config) => {
   const replaceRegExp = new RegExp(`(\\w+:)//${protocolFreeURI}`, 'g');
 
   // 3/ create replacement string
-  const replaceWith = `http://internal-broker-server/broker/${config.BROKER_TOKEN}`;
+  const replaceWith = `http://internal-broker-server-next/broker/${config.BROKER_TOKEN}`;
 
   if (prevPartial) {
     chunk = prevPartial + chunk;
