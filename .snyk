@@ -57,6 +57,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2025-08-23T10:00:00.000Z
         created: 2025-07-23T10:00:00.000Z
+  SNYK-RHEL8-PAM-11794982:
+    - '*':
+        reason: No fix from RHEL available
+        expires: 2025-09-14T19:08:00.000Z
+        created: 2025-08-14T19:08:00.000Z
 patch: {}
 exclude:
   global:
