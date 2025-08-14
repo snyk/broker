@@ -37,13 +37,13 @@ export const findProjectRoot = (
   // In server mode, don't require config.default.json
   if (isServerMode) {
     return startDir;
+  } else {
+    const errorMessage =
+      'Error: config.default.json is missing, please ensure the file exists when running the broker.';
+    const refError = new ReferenceError(errorMessage);
+    refError['code'] = 'MISSING_DEFAULT_CONFIG';
+    throw refError;
   }
-
-  const errorMessage =
-    'Error: config.default.json is missing, please ensure the file exists when running the broker.';
-  const refError = new ReferenceError(errorMessage);
-  refError['code'] = 'MISSING_DEFAULT_CONFIG';
-  throw refError;
 };
 
 export const findFactoryRoot = (startDir: string): string | null => {
