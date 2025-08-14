@@ -33,8 +33,8 @@ export const app = async ({ port = 7341, client = false, config }) => {
       process.env.SERVICE_ENV = process.env.SERVICE_ENV || 'universal';
     }
 
-    // loading it "manually" simplifies lot testing
-    await loadBrokerConfig();
+    const isServerMode = !client;
+    await loadBrokerConfig(undefined, isServerMode);
     const globalConfig = getConfig();
     const localConfig = Object.assign({}, globalConfig, config) as Record<
       string,
