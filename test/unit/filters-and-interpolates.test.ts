@@ -616,6 +616,30 @@ describe('filters and interpolates', () => {
         expect(result.url).toMatch(url);
       });
 
+      it('should allow listing fixture changes', () => {
+        const url =
+          '/test-owner/_apis/git/repositories/test-repo/pullRequests/1/iterations/1/changes';
+
+        const filterResponse = filter({
+          url,
+          method: 'GET',
+        });
+
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
+
       it('should allow fetching single pr info', () => {
         const url =
           '/test-owner/_apis/git/repositories/test-repo/pullRequests/1';
