@@ -18,7 +18,10 @@ export const setConfigKey = (key: string, value: unknown) => {
   config[key] = value;
 };
 
-export const findProjectRoot = (startDir: string): string => {
+export const findProjectRoot = (
+  startDir: string,
+  isServerMode = false,
+): string => {
   let currentDir = startDir;
 
   while (currentDir !== '/') {
@@ -29,6 +32,11 @@ export const findProjectRoot = (startDir: string): string => {
     }
 
     currentDir = path.dirname(currentDir);
+  }
+
+  // In server mode, don't require config.default.json
+  if (isServerMode) {
+    return startDir;
   }
 
   const errorMessage =
@@ -78,14 +86,17 @@ export const findPluginFolder = async (
   return null;
 };
 
-export const loadBrokerConfig = async (localConfigForTest?) => {
+export const loadBrokerConfig = async (
+  localConfigForTest?,
+  isServerMode = false,
+) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
   try {
     const localConfig = localConfigForTest
       ? localConfigForTest
-      : loadConfig(findProjectRoot(__dirname) ?? process.cwd());
+      : loadConfig(findProjectRoot(__dirname, isServerMode) ?? process.cwd());
     expand(process.env);
     config = Object.assign({}, camelify(localConfig), camelify(process.env));
     // for each in config.brokerClientConfiguration.common.default check if process env exist and if it does,
