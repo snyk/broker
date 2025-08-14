@@ -18,7 +18,10 @@ export const setConfigKey = (key: string, value: unknown) => {
   config[key] = value;
 };
 
-export const findProjectRoot = (startDir: string, isServerMode = false): string => {
+export const findProjectRoot = (
+  startDir: string,
+  isServerMode = false,
+): string => {
   let currentDir = startDir;
 
   while (currentDir !== '/') {
@@ -83,7 +86,10 @@ export const findPluginFolder = async (
   return null;
 };
 
-export const loadBrokerConfig = async (localConfigForTest?, isServerMode = false) => {
+export const loadBrokerConfig = async (
+  localConfigForTest?,
+  isServerMode = false,
+) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
