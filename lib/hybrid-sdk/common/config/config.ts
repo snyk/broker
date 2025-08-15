@@ -20,7 +20,6 @@ export const setConfigKey = (key: string, value: unknown) => {
 
 export const findProjectRoot = (
   startDir: string,
-  isServerMode = false,
 ): string => {
   let currentDir = startDir;
 
@@ -34,16 +33,12 @@ export const findProjectRoot = (
     currentDir = path.dirname(currentDir);
   }
 
-  // In server mode, don't require config.default.json
-  if (isServerMode) {
-    return startDir;
-  } else {
-    const errorMessage =
-      'Error: config.default.json is missing, please ensure the file exists when running the broker.';
-    const refError = new ReferenceError(errorMessage);
-    refError['code'] = 'MISSING_DEFAULT_CONFIG';
-    throw refError;
-  }
+  const errorMessage =
+    'Error: config.default.json is missing, please ensure the file exists when running the broker.';
+  const refError = new ReferenceError(errorMessage);
+  refError['code'] = 'MISSING_DEFAULT_CONFIG';
+  throw refError;
+
 };
 
 export const findFactoryRoot = (startDir: string): string | null => {
@@ -88,7 +83,6 @@ export const findPluginFolder = async (
 
 export const loadBrokerConfig = async (
   localConfigForTest?,
-  isServerMode = false,
 ) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
@@ -96,7 +90,7 @@ export const loadBrokerConfig = async (
   try {
     const localConfig = localConfigForTest
       ? localConfigForTest
-      : loadConfig(findProjectRoot(__dirname, isServerMode) ?? process.cwd());
+      : loadConfig(findProjectRoot(__dirname) ?? process.cwd());
     expand(process.env);
     config = Object.assign({}, camelify(localConfig), camelify(process.env));
     // for each in config.brokerClientConfiguration.common.default check if process env exist and if it does,
