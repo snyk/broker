@@ -18,9 +18,7 @@ export const setConfigKey = (key: string, value: unknown) => {
   config[key] = value;
 };
 
-export const findProjectRoot = (
-  startDir: string,
-): string => {
+export const findProjectRoot = (startDir: string): string => {
   let currentDir = startDir;
 
   while (currentDir !== '/') {
@@ -38,7 +36,6 @@ export const findProjectRoot = (
   const refError = new ReferenceError(errorMessage);
   refError['code'] = 'MISSING_DEFAULT_CONFIG';
   throw refError;
-
 };
 
 export const findFactoryRoot = (startDir: string): string | null => {
@@ -81,9 +78,7 @@ export const findPluginFolder = async (
   return null;
 };
 
-export const loadBrokerConfig = async (
-  localConfigForTest?,
-) => {
+export const loadBrokerConfig = async (localConfigForTest?) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
   });
