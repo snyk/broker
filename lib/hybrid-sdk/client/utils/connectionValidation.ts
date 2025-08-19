@@ -1,3 +1,4 @@
+import { format, parse } from 'url';
 import { makeSingleRawRequestToDownstream } from '../../http/request';
 import { ConnectionConfig } from '../types/config';
 import { log as logger, sanitise } from '../../../logs/logger';
@@ -11,6 +12,9 @@ export const validateConnection = async (config: ConnectionConfig) => {
     const method = validation?.method ?? 'GET';
     const { auth, url } = validation;
     const headers: Record<string, string> = validation?.headers ?? {};
+    const originalUrl = validation.url;
+    const sanitisedOriginalUrl = sanitise(originalUrl);
+
     switch (auth?.type) {
       case 'basic':
         headers['Authorization'] = `Basic ${Buffer.from(
@@ -20,33 +24,46 @@ export const validateConnection = async (config: ConnectionConfig) => {
       case 'header':
         headers['Authorization'] = `${auth.value}`;
         break;
-      default:
-        logger.warn({ validation }, 'No auth validation.');
+      default: {
+        const parsed = parse(url);
+        if (parsed.auth) {
+          if (parsed.auth.includes(':')) {
+            headers['Authorization'] = `Basic ${Buffer.from(
+              parsed.auth,
+            ).toString('base64')}`;
+          } else {
+            headers['Authorization'] = `Bearer ${parsed.auth}`;
+          }
+          parsed.auth = null;
+          validation.url = format(parsed);
+        } else {
+          logger.warn({ validation }, 'No auth validation.');
+        }
+        break;
+      }
     }
     const request: PostFilterPreparedRequest = {
       method: method,
-      url: url,
+      url: validation.url,
       headers: headers,
     };
     if (validation.body) {
       request.body = validation.body;
     }
-    // make sure that credentials in url are sanitised
-    const sanitisedUrl = sanitise(url);
     try {
       const response = await makeSingleRawRequestToDownstream(
         request as PostFilterPreparedRequest,
       );
       if (response && response.statusCode) {
-        passing = response.statusCode > 200 && response.statusCode < 300;
+        passing = response.statusCode >= 200 && response.statusCode < 300;
       }
       data.push({
-        url: sanitisedUrl,
+        url: sanitisedOriginalUrl,
         data: response.body,
         statusCode: response.statusCode,
       });
     } catch (err) {
-      data.push({ url: sanitisedUrl, data: err });
+      data.push({ url: sanitisedOriginalUrl, data: err });
     }
   }
   return { passing, data };

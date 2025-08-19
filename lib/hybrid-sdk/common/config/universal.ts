@@ -37,14 +37,43 @@ export const getConfigForConnectionsFromConfig = (config) => {
   return connectionsConfig;
 };
 
-export const getConfigForConnection = (key, config) => {
-  return {
+export const getConfigForConnection = (key, config): ConnectionConfig => {
+  const connectionConfig: ConnectionConfig = {
     ...getConfigForType(config.connections[key].type),
     ...config.connections[key],
     ...getValidationConfigForType(
       determineFilterType(config.connections[key].type, config),
     ),
   };
+
+  // If it's a Bitbucket Server connection and a PAT is provided,
+  // override the validation auth to use Bearer token.
+  // This ensures system checks use the PAT instead of defaulting to basic auth.
+  if (
+    connectionConfig.type === 'bitbucket-server' &&
+    connectionConfig.BITBUCKET_PAT &&
+    connectionConfig.validations &&
+    Array.isArray(connectionConfig.validations)
+  ) {
+    logger.debug(
+      { connectionName: key },
+      'Bitbucket Server connection with PAT found. Modifying validation auth to use Bearer token.',
+    );
+    connectionConfig.validations = connectionConfig.validations.map(
+      (validation) => {
+        // Preserve other validation properties, override auth
+        return {
+          ...validation,
+          auth: {
+            type: 'header',
+            value: `Bearer ${connectionConfig.BITBUCKET_PAT}`,
+          },
+        };
+      },
+    );
+  }
+
+  return connectionConfig;
 };
 export const getValidationConfigForType = (type) => {
   const config = getConfig();

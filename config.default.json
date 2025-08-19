@@ -119,12 +119,7 @@
     "artifactory": {
       "validations": [
         {
-          "url": "https://$ARTIFACTORY_URL/api/system/ping",
-          "auth": {
-            "type": "basic",
-            "username": "$ARTIFACTORY_USERNAME",
-            "password": "$ARTIFACTORY_PASSWORD"
-          }
+          "url": "https://$ARTIFACTORY_URL/api/system/ping"
         }
       ],
       "default": {
@@ -158,7 +153,8 @@
         "GIT_URL": "$AZURE_REPOS_HOST/$AZURE_REPOS_ORG",
         "GIT_USERNAME": "PAT",
         "GIT_PASSWORD": "$AZURE_REPOS_TOKEN",
-        "AZURE_REPOS_HOST": "dev.azure.com"
+        "AZURE_REPOS_HOST": "dev.azure.com",
+        "AZURE_REPOS_USER_ENTITLEMENTS_HOST": "vsaex.$AZURE_REPOS_HOST"
       },
       "required": {
         "AZURE_REPOS_TOKEN": "<token>",
