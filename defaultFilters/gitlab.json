@@ -49,7 +49,7 @@
         "path": "/api/v4/projects/:project/repository/tree",
         "origin": "https://${GITLAB}"
       },
-  
+
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
@@ -170,7 +170,7 @@
         "path": "/api/v4/projects/:project/repository/files*%2FPipfile",
         "origin": "https://${GITLAB}"
       },
-  
+
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
@@ -554,7 +554,7 @@
           }
         ]
       },
-  
+
       {
         "//": "used to create manifest file",
         "method": "POST",
@@ -1485,7 +1485,7 @@
           }
         ]
       },
-  
+
       {
         "//": "allow webhooks to be added, to allow commits to be checked by Snyk. Rules for what is sent to Snyk are controlled in the `public` accept filters",
         "method": "POST",
@@ -1634,6 +1634,24 @@
         "//": "get merge request files and diffs",
         "method": "GET",
         "path": "/api/v4/projects/:project/merge_requests/:pullRef/diffs",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "react to an inline MR comment (note)",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/merge_requests/:pullRef/notes/:note/award_emoji",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "reply to an inline MR comment (discussion)",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/merge_requests/:pullRef/discussions/:discussion/notes",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "create commit",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/commits",
         "origin": "https://${GITLAB}"
       }
     ]
