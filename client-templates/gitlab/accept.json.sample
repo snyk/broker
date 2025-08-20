@@ -1635,6 +1635,24 @@
       "method": "GET",
       "path": "/api/v4/projects/:project/merge_requests/:pullRef/diffs",
       "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "react to an inline MR comment (note)",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/notes/:note/award_emoji",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "reply to an inline MR comment (discussion)",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/merge_requests/:pullRef/discussions/:discussion/notes",
+      "origin": "https://${GITLAB}"
+    },
+    {
+      "//": "create commit to apply a fix",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/commits",
+      "origin": "https://${GITLAB}"
     }
   ]
 }
