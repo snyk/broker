@@ -1,5 +1,11 @@
-import { checkBitbucketPatCredentials } from '../../../../lib/hybrid-sdk/client/utils/credentials';
-import { makeRequestToDownstream } from '../../../../lib/hybrid-sdk/http/request';
+import {
+  checkBitbucketPatCredentials,
+  validateResponseForBitbucketPAT,
+} from '../../../../lib/hybrid-sdk/client/utils/credentials';
+import {
+  HttpResponse,
+  makeRequestToDownstream,
+} from '../../../../lib/hybrid-sdk/http/request';
 
 jest.mock('../../../../lib/hybrid-sdk/http/request', () => ({
   makeRequestToDownstream: jest.fn(),
@@ -79,5 +85,49 @@ describe('checkBitbucketPatCredentials', () => {
 
     expect(errorOccurred).toBe(true);
     expect(data.ok).toBe(false);
+  });
+});
+
+describe('validateResponseForBitbucketPAT', () => {
+  it('should return error when status code is missing', () => {
+    expect(() =>
+      validateResponseForBitbucketPAT({} as HttpResponse),
+    ).toThrowError('Failed Bitbucket PAT systemcheck');
+  });
+
+  it('should return 401 when x-ausername header is missing', () => {
+    const response: HttpResponse = {
+      body: {},
+      headers: [],
+      statusCode: 200,
+    };
+
+    const result = validateResponseForBitbucketPAT(response);
+
+    expect(result).toEqual({
+      success: false,
+      data: {
+        data: 'Bitbucket PAT systemcheck failed, credentials are invalid',
+        statusCode: 401,
+      },
+    });
+  });
+
+  it('should return 200 when x-ausername present', () => {
+    const response: HttpResponse = {
+      body: { message: 'success' },
+      headers: { 'x-ausername': 'testuser' },
+      statusCode: 200,
+    };
+
+    const result = validateResponseForBitbucketPAT(response);
+
+    expect(result).toEqual({
+      success: true,
+      data: {
+        data: { message: 'success' },
+        statusCode: 200,
+      },
+    });
   });
 });

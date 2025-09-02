@@ -1,6 +1,6 @@
 import { log as logger } from '../../../logs/logger';
 import { sanitise } from '../../../logs/logger';
-import { makeRequestToDownstream } from '../../http/request';
+import { HttpResponse, makeRequestToDownstream } from '../../http/request';
 import { isJson } from '../../common/utils/json';
 
 const credsFromHeader = (s) => {
@@ -210,4 +210,64 @@ export const checkBitbucketPatCredentials = async (
   }
 
   return { data, errorOccurred };
+};
+
+type SystemCheckResult = {
+  success: boolean;
+  data: {
+    data: unknown;
+    statusCode: number | undefined;
+  };
+};
+/**
+ * Bitbucket server will always reply with 200 status code for valid and invalid credentials.
+ * We have to check for the `x-ausername` header presense which tells if the auth actually succeeded.
+ */
+export const validateResponseForBitbucketPAT = (
+  response: HttpResponse,
+): SystemCheckResult => {
+  const result: SystemCheckResult = {
+    success: false,
+    data: {
+      data: {},
+      statusCode: undefined,
+    },
+  };
+
+  const statusCode = response && response.statusCode;
+  if (!statusCode) {
+    logger.error(
+      { response },
+      'Failed Bitbucket PAT systemcheck, missing status code',
+    );
+    throw new Error('Failed Bitbucket PAT systemcheck');
+  }
+
+  result.success = statusCode >= 200 && statusCode < 300;
+  result.data.statusCode = statusCode;
+
+  if (statusCode >= 300) {
+    result.data.data =
+      statusCode === 401 || statusCode === 403
+        ? 'Failed due to invalid credentials'
+        : 'Status code is not 2xx';
+  } else {
+    if (response.headers && response.headers['x-ausername']) {
+      // presence of 'x-ausername' header which tells us if the auth actually succeeded
+      result.data.data = response.body;
+    } else {
+      logger.error(
+        {},
+        'Bitbucket PAT systemcheck failed, credentials are invalid , x-ausername header missing',
+      );
+
+      result.success = false;
+      result.data = {
+        data: 'Bitbucket PAT systemcheck failed, credentials are invalid',
+        statusCode: 401,
+      };
+    }
+  }
+
+  return result;
 };
