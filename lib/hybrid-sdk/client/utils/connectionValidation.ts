@@ -3,6 +3,7 @@ import { makeSingleRawRequestToDownstream } from '../../http/request';
 import { ConnectionConfig } from '../types/config';
 import { log as logger, sanitise } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
+import { validateResponseForBitbucketPAT } from './credentials';
 
 export const validateConnection = async (config: ConnectionConfig) => {
   let passing = false;
@@ -54,14 +55,25 @@ export const validateConnection = async (config: ConnectionConfig) => {
       const response = await makeSingleRawRequestToDownstream(
         request as PostFilterPreparedRequest,
       );
-      if (response && response.statusCode) {
-        passing = response.statusCode >= 200 && response.statusCode < 300;
+
+      if (config.BITBUCKET_PAT) {
+        const result = validateResponseForBitbucketPAT(response);
+        passing = result.success;
+        data.push({
+          url: sanitisedOriginalUrl,
+          data: result.data.data,
+          statusCode: result.data.statusCode,
+        });
+      } else {
+        if (response && response.statusCode) {
+          passing = response.statusCode >= 200 && response.statusCode < 300;
+        }
+        data.push({
+          url: sanitisedOriginalUrl,
+          data: response.body,
+          statusCode: response.statusCode,
+        });
       }
-      data.push({
-        url: sanitisedOriginalUrl,
-        data: response.body,
-        statusCode: response.statusCode,
-      });
     } catch (err) {
       data.push({ url: sanitisedOriginalUrl, data: err });
     }
