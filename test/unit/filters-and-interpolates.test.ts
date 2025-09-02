@@ -780,6 +780,28 @@ describe('filters and interpolates', () => {
         );
         expect(result.url).toMatch(url);
       });
+
+      it('should allow creating a new commit', () => {
+        const url = '/test-owner/_apis/git/repositories/test-repo/refs';
+
+        const filterResponse = filter({
+          url,
+          method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
     });
 
     describe('for gitlab', () => {
