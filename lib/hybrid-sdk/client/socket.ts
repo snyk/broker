@@ -144,8 +144,6 @@ export const createWebSocket = (
       retries: 30,
       max: 20 * 60 * 1000,
     },
-    ping: parseInt(localClientOps.config.socketPingInterval) || 25000,
-    pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
   if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {

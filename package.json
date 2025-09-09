@@ -89,7 +89,7 @@
     "node-cache": "^5.1.0",
     "openpgp": "^5.11.3",
     "path-to-regexp": "^1.9.0",
-    "primus": "^6.1.0",
+    "primus": "^8.0.9",
     "primus-emitter": "^3.1.1",
     "prom-client": "^11.5.3",
     "proxy-from-env": "^1.1.0",
