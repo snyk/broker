@@ -130,6 +130,9 @@
   },
   "overrides": {
     "form-data": "4.0.4",
-    "ws": "7.5.10"
+    "engine.io-client": {
+      "ws": "7.5.10"
+    }
+
   }
 }
