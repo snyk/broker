@@ -15,13 +15,27 @@ RUN mkdir -p /tmp/node && \
 
 FROM node-base AS broker-builder
 
-ARG BROKER_VERSION
-ENV BROKER_VERSION=${BROKER_VERSION}
+USER root
+RUN <<EOF
+  set -ex
+  # create default user and group
+  groupadd --gid 10001 snyk
+  useradd --gid 10001 --shell /sbin/nologin --uid 10001 snyk
+EOF
 
-RUN npm install --global snyk-broker@${BROKER_VERSION}
+WORKDIR /home/snyk/snyk-broker/
+COPY --chown=snyk:snyk . /home/snyk/snyk-broker/
+RUN <<EOF
+  set -ex
+  NODE_ENV=development npm ci
+  npm run build
+  npm run prepare:templates
+  # remove extraneous packages
+  NODE_ENV=production npm prune
 
-# removing non-used (transitive) dependencies to fix vulnerabilities
-RUN rm -rf /opt/app-root/src/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
+  # removing non-used (transitive) dependencies to fix vulnerabilities
+  rm -rf /home/snyk/snyk-broker/node_modules/setheader/node_modules/debug
+EOF
 
 
 
@@ -29,7 +43,7 @@ FROM registry.access.redhat.com/ubi8/ubi
 
 ARG BROKER_VERSION
 
-LABEL org.opencontainers.image.authors="hybrid" \
+LABEL org.opencontainers.image.authors="access" \
       org.opencontainers.image.documentation="https://docs.snyk.io/enterprise-setup/snyk-broker" \
       org.opencontainers.image.ref.name="snyk-broker" \
       org.opencontainers.image.source="https://github.com/snyk/broker" \
@@ -37,7 +51,7 @@ LABEL org.opencontainers.image.authors="hybrid" \
       org.opencontainers.image.version="${BROKER_VERSION:-local}" \
       io.snyk.containers.image.dockerfile="/dockerfiles/base/Dockerfile.ubi"
 
-ENV PATH="/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin/:/opt/app-root/src/bin:/opt/app-root/bin:${PATH}"
+ENV PATH=$PATH:/home/snyk/snyk-broker/bin
 
 RUN <<EOF
     set -ex
@@ -91,10 +105,18 @@ RUN <<EOF
     rpm --erase --nodeps rpm-libs
 EOF
 
-COPY --from=broker-builder /opt/app-root/src/.npm-global /opt/app-root/src/.npm-global
+COPY --from=broker-builder --chown=snyk:snyk /home/snyk/snyk-broker/dist /home/snyk/snyk-broker/dist
+COPY --from=broker-builder --chown=snyk:snyk /home/snyk/snyk-broker/node_modules /home/snyk/snyk-broker/node_modules
 COPY --from=node-base /tmp/node/bin/node /usr/bin/node
 COPY --chown=snyk:snyk config.default.json /home/snyk/config.default.json
 COPY --chown=snyk:snyk defaultFilters /home/snyk/defaultFilters
+
+RUN <<EOF
+    # symlink for broker (with executable flag)
+    mkdir -p /home/snyk/snyk-broker/bin/
+    ln -sf /home/snyk/snyk-broker/dist/cli/index.js /home/snyk/snyk-broker/bin/broker
+    chmod +x /home/snyk/snyk-broker/dist/cli/index.js
+EOF
 
 WORKDIR /home/snyk
 USER snyk
