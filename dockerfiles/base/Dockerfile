@@ -68,6 +68,7 @@ RUN <<EOF
     npm --version
     # update npm to the latest version globally
     npm install --global npm@latest
+    npm cache clean --force
     npm --version
     # remove non-needed packages and clean apt cache
     apt remove --assume-yes \
