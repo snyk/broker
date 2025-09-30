@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '{lib,test,cli}/**/*.{js,ts}'",
-    "prepare": "npm run build && rm -rf ./dist/client-templates && cp -Rf ./client-templates ./dist",
+    "prepare:templates": "rm -rf ./dist/client-templates && cp -Rf ./client-templates ./dist",
     "start": "node .",
     "dev": "tsc-watch --project tsconfig.json --onSuccess 'node .' | ./node_modules/.bin/bunyan",
     "dev:client": "LOG_LEVEL=debug NODE_ENV=development tsc-watch --project tsconfig.json --onSuccess 'node dist/cli/index.js client' | ./node_modules/.bin/bunyan",

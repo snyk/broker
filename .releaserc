@@ -4,7 +4,7 @@
     {
       "//": "build the linux, macos, and windows binaries",
       "path": "@semantic-release/exec",
-      "cmd": "npm run prepare && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli -t node18-linux-x64,node18-macos-x64,node18-win-x64"
+      "cmd": "npm run build && npm run prepare:templates && rm ./dist/client-templates/github && npx --yes pkg . --compress Brotli -t node18-linux-x64,node18-macos-x64,node18-win-x64"
     },
     {
       "//": "shasum linux binaries",
