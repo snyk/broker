@@ -7,7 +7,7 @@ FROM ${BASE_IMAGE} AS node-base
 ARG NODE_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_VERSION=${NODE_VERSION}
-ENV PATH=$PATH:/home/node/.npm-global/bin
+ENV PATH=$PATH:/home/node/snyk-broker/bin
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
 
@@ -84,17 +84,31 @@ EOF
 FROM node-base AS broker-builder
 
 ARG NODE_VERSION
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-ENV PATH=$PATH:/home/node/.npm-global/bin
 
 USER root
+RUN <<EOF
+  apt update
+  apt install --assume-yes ca-certificates
+EOF
 
-RUN apt update && \
-    apt install --assume-yes ca-certificates
-RUN npm install --global snyk-broker
+USER node
+WORKDIR /home/node/snyk-broker/
+COPY --chown=node:node . /home/node/snyk-broker/
+RUN <<EOF
+  set -ex
+  NODE_ENV=development npm ci
+  npm run build
+  npm run prepare:templates
+  # remove extraneous packages
+  NODE_ENV=production npm prune
+  # symlink for broker (with executable flag)
+  mkdir -p /home/node/snyk-broker/bin/
+  ln -sf /home/node/snyk-broker/dist/cli/index.js /home/node/snyk-broker/bin/broker
+  chmod +x /home/node/snyk-broker/dist/cli/index.js
 
-# removing non-used (transitive) dependencies to fix vulnerabilities
-RUN rm -rf /home/node/.npm-global/lib/node_modules/snyk-broker/node_modules/setheader/node_modules/debug
+  # removing non-used (transitive) dependencies to fix vulnerabilities
+  rm -rf /home/node/snyk-broker/node_modules/setheader/node_modules/debug
+EOF
 
 
 
@@ -110,10 +124,12 @@ LABEL org.opencontainers.image.authors="access" \
       org.opencontainers.image.version="${BROKER_VERSION:-local}" \
       io.snyk.containers.image.dockerfile="/dockerfiles/base/Dockerfile"
 
-COPY --from=broker-builder /home/node/.npm-global /home/node/.npm-global
 COPY --from=broker-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY config.default.json /home/node/config.default.json
-COPY defaultFilters /home/node/defaultFilters
+COPY --from=broker-builder --chown=node:node /home/node/snyk-broker/bin /home/node/snyk-broker/bin
+COPY --from=broker-builder --chown=node:node /home/node/snyk-broker/dist /home/node/snyk-broker/dist
+COPY --from=broker-builder --chown=node:node /home/node/snyk-broker/node_modules /home/node/snyk-broker/node_modules
+COPY --chown=node:node config.default.json /home/node/config.default.json
+COPY --chown=node:node defaultFilters /home/node/defaultFilters
 
 WORKDIR /home/node
 USER node

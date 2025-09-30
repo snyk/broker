@@ -1,0 +1,10 @@
+.circleci/
+.github/
+.git/
+.env
+*.md
+dist/
+dockerfiles/
+compose.yaml
+config.universal.json
+node_modules/
