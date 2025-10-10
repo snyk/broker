@@ -322,7 +322,7 @@ jobs:
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: <<pipeline.parameters.fail_on_issues>>
           monitor-on-build: <<parameters.monitor_on_build>>
-          organization: platformeng_hybrid
+          organization: platformeng_access
           project: <<parameters.project>>
           severity-threshold: <<parameters.severity_threshold>>
   tag-and-push-docker-image:
@@ -385,7 +385,7 @@ jobs:
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
           fail-on-issues: false
           monitor-on-build: false
-          organization: platformeng_hybrid
+          organization: platformeng_access
           project: <<parameters.project_name>>
           severity-threshold: <<parameters.severity_threshold>>
       - install-cosign
@@ -456,7 +456,7 @@ workflows:
           name: Scan base image (Ubuntu)
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base image (Ubuntu)
           project: snyk/broker
@@ -474,7 +474,7 @@ workflows:
           name: Scan base image (RHEL)
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base image (RHEL)
           project: snyk/broker-rhel-ubi
@@ -532,7 +532,7 @@ workflows:
           name: Scan base UBI image
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base UBI image
           project: snyk/broker-rhel-ubi
@@ -1026,7 +1026,7 @@ workflows:
           name: Scan base image
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base image
           project: snyk/broker
@@ -1069,7 +1069,7 @@ workflows:
           name: Scan base image (edge)
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base image (edge)
           project: snyk/broker
@@ -2040,7 +2040,7 @@ Release Preview Docker images:
           name: Scan base image
           context:
             - snyk-bot-slack
-            - team-hybrid-snyk
+            - platformeng_access
           requires:
             - Build base image
           project: snyk/broker
