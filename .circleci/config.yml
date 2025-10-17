@@ -36,8 +36,8 @@ commands:
       - run:
           name: Logout from a Docker registry
           command: docker logout
-  get-tagged-broker-version:
-    description: "Get tagged version of Broker NPM package"
+  get-and-set-tagged-broker-version:
+    description: "Get and set version of Broker NPM package"
     steps:
       - run:
           name: Get tagged version of Broker NPM package
@@ -46,6 +46,10 @@ commands:
             BROKER_VERSION=${CIRCLE_TAG/v/''}
             echo $BROKER_VERSION
             echo "export BROKER_VERSION=$BROKER_VERSION" >> "$BASH_ENV"
+      - run:
+          name: Set Broker version in package.json
+          command: |
+            npm version --commit-hooks false --git-tag-version false ${BROKER_VERSION}
   get-latest-nodejs-version:
     description: "Get latest version of specific Node.js cycle"
     parameters:
@@ -266,7 +270,7 @@ jobs:
       - prepare
       - setup_remote_docker:
           docker_layer_caching: true
-      - get-tagged-broker-version
+      - get-and-set-tagged-broker-version
       - get-latest-nodejs-version:
           cycle: <<parameters.nodejs_cycle>>
       - build-and-save-docker-image:
@@ -291,7 +295,7 @@ jobs:
       - prepare
       - setup_remote_docker:
           docker_layer_caching: false
-      - get-tagged-broker-version
+      - get-and-set-tagged-broker-version
       - get-latest-nodejs-version
       - build-and-save-docker-image:
           additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
