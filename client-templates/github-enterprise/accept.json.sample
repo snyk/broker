@@ -434,6 +434,18 @@
     {
       "//": "used to determine the full dependency tree",
       "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*/pnpm-lock.yaml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpnpm-lock.yaml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to determine the full dependency tree",
+      "method": "GET",
       "path": "/repos/:name/:repo/contents/:path*/Gemfile.lock",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
@@ -861,6 +873,18 @@
       "//": "used to update manifest or lock",
       "method": "PUT",
       "path": "/repos/:name/:repo/contents/:path*%2Fpackage-lock.json",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*/pnpm-lock.yaml",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
+      "//": "used to update manifest or lock",
+      "method": "PUT",
+      "path": "/repos/:name/:repo/contents/:path*%2Fpnpm-lock.yaml",
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {

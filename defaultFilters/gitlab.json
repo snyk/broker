@@ -77,6 +77,18 @@
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*/pnpm-lock.yaml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpnpm-lock.yaml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
         "path": "/api/v4/projects/:project/repository/files*/Gemfile.lock",
         "origin": "https://${GITLAB}"
       },
@@ -498,6 +510,8 @@
               "**%2Fyarn.lock",
               "**/package-lock.json",
               "**%2Fpackage-lock.json",
+              "**/pnpm-lock.yaml",
+              "**%2Fpnpm-lock.yaml",
               "**/Gemfile",
               "**%2FGemfile",
               "**/Gemfile.lock",
@@ -577,6 +591,18 @@
         "//": "used to create manifest file",
         "method": "POST",
         "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*/pnpm-lock.yaml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to create manifest file",
+        "method": "POST",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpnpm-lock.yaml",
         "origin": "https://${GITLAB}"
       },
       {
@@ -966,6 +992,8 @@
               "**%2Fyarn.lock",
               "**/package-lock.json",
               "**%2Fpackage-lock.json",
+              "**/pnpm-lock.yaml",
+              "**%2Fpnpm-lock.yaml",
               "**/Gemfile",
               "**%2FGemfile",
               "**/Gemfile.lock",
@@ -1042,6 +1070,18 @@
         "//": "used to update manifest file",
         "method": "PUT",
         "path": "/api/v4/projects/:project/repository/files*%2Fpackage-lock.json",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*/pnpm-lock.yaml",
+        "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to update manifest file",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/repository/files*%2Fpnpm-lock.yaml",
         "origin": "https://${GITLAB}"
       },
       {
@@ -1431,6 +1471,8 @@
               "**%2Fyarn.lock",
               "**/package-lock.json",
               "**%2Fpackage-lock.json",
+              "**/pnpm-lock.yaml",
+              "**%2Fpnpm-lock.yaml",
               "**/Gemfile",
               "**%2FGemfile",
               "**/Gemfile.lock",
