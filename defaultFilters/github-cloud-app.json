@@ -512,6 +512,26 @@
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*/pnpm-lock.yaml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpnpm-lock.yaml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
         "path": "/repos/:name/:repo/contents/:path*/Gemfile.lock",
         "origin": "https://${GITHUB_API}",
         "auth": {
@@ -1163,6 +1183,26 @@
         "//": "used to update manifest or lock",
         "method": "PUT",
         "path": "/repos/:name/:repo/contents/:path*%2Fpackage-lock.json",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*/pnpm-lock.yaml",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/repos/:name/:repo/contents/:path*%2Fpnpm-lock.yaml",
         "origin": "https://${GITHUB_API}",
         "auth": {
           "scheme": "bearer",
