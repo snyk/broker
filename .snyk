@@ -17,11 +17,6 @@ ignore:
         reason: No fix from RHEL available
         expires: 2025-05-03T12:01:13.134Z
         created: 2025-04-03T12:01:13.137Z
-  SNYK-JS-WS-7266574:
-    - '*':
-        reason: Mitigated in code
-        expires: 2025-09-13T12:03:16.272Z
-        created: 2025-02-11T12:03:16.275Z
   SNYK-JS-CROSSSPAWN-8303230:
     - '*':
         reason: No upstream fix available
@@ -62,6 +57,11 @@ ignore:
         reason: No fix from RHEL available
         expires: 2025-09-14T19:08:00.000Z
         created: 2025-08-14T19:08:00.000Z
+  SNYK-JS-WS-7266574:
+    - '*':
+        reason: Possibly temporary -- need to determine if upgrade caused incident
+        expires: 2026-10-23T19:08:00.000Z
+        created: 2025-10-22T10:00:00.000Z        
 patch: {}
 exclude:
   global:
