@@ -233,7 +233,6 @@ class BrokerServerPostResponseHandler {
         {
           ...this.#logContext,
           responseStatus: status,
-          responseHeaders: response.headers,
         },
         'response received, setting up stream to Broker Server',
       );

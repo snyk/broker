@@ -127,7 +127,6 @@ export class HybridClientRequestHandler {
       },
       (ioResponse) => {
         this.logContext.responseStatus = ioResponse.status;
-        this.logContext.responseHeaders = ioResponse.headers;
         this.logContext.responseBodyType = typeof ioResponse.body;
 
         const logMsg =

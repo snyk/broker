@@ -75,7 +75,6 @@ export const makeLegacyRequest = async (
       logger.warn(
         {
           statusCode: response.statusCode,
-          responseHeaders: response.headers,
           url: req.url,
         },
         `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
