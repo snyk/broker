@@ -86,6 +86,7 @@ export class HybridResponseHandler {
     if (this.config.RES_BODY_URL_SUB && isJson(response.headers)) {
       const replaced = replaceUrlPartialChunk(response.body, null, this.config);
       response.body = replaced.newChunk;
+      response.headers['content-length'] = response.body.length;
     }
     const status = (response && response.statusCode) || 500;
     logResponse(logContext, status, response, this.config);
