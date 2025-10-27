@@ -2,7 +2,6 @@ import { log as logger } from './logger';
 
 export const logResponse = (logContext, status, response, config) => {
   logContext.responseStatus = status;
-  logContext.responseHeaders = response.headers;
   logContext.responseBody =
     config && config.LOG_ENABLE_BODY === 'true' ? response.body : null;
 

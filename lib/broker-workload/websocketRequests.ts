@@ -185,7 +185,6 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
             logger.warn(
               {
                 statusCode: response.statusCode,
-                responseHeaders: response.headers,
                 url: preparedRequest.req.url,
               },
               `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
