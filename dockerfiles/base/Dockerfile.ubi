@@ -85,8 +85,10 @@ RUN <<EOF
     rpm --erase --nodeps openldap
     rpm --erase --nodeps platform-python
     rpm --erase --nodeps platform-python-setuptools
+    rpm --erase --nodeps python3-chardet
     rpm --erase --nodeps python3-cloud-what
     rpm --erase --nodeps python3-gpg
+    rpm --erase --nodeps python3-idna
     rpm --erase --nodeps python3-libs
     rpm --erase --nodeps python3-pip-wheel
     rpm --erase --nodeps python3-rpm
