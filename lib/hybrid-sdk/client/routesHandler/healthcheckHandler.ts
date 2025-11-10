@@ -3,7 +3,7 @@ import version from '../../common/utils/version';
 import { WebSocketConnection } from '../types/client';
 import { maskToken } from '../../common/utils/token';
 
-interface healthcheckData {
+export interface healthcheckData {
   ok: boolean;
   identifier?: string;
   websocketConnectionOpen: boolean;
@@ -19,11 +19,9 @@ export const healthCheckHandler =
     const websocketConnsArray = res.locals
       .websocketConnections as WebSocketConnection[];
     const data: healthcheckData[] = [];
-    // const statuses: Array<number> = [];
     const statusesMap: Map<string, number> = new Map<string, number>();
     for (let i = 0; i < websocketConnsArray.length; i++) {
       const isConnOpen = isWebsocketConnOpen(websocketConnsArray[i]);
-      // statuses.push(isConnOpen ? 200 : 500);
       const tunnelData = {
         ok: isConnOpen,
         websocketConnectionOpen: isConnOpen,
