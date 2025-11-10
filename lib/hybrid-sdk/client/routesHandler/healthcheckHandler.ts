@@ -48,6 +48,6 @@ export const healthCheckHandler =
     // healthcheck state depends on websocket connection status
     // value of primus.Spark.OPEN means the websocket connection is open
     return res
-      .status(statuses.some((status) => status == 500) ? 500 : 200)
+      .status(statuses.some((status) => status == 200) ? 200 : 500)
       .json(data.length == 1 ? data[0] : data); // So we don't break current
   };
