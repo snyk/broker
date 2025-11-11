@@ -6,6 +6,7 @@ import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
 import { getAuthConfig } from '../auth/oauth';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
+import { log as logger } from '../../../logs/logger';
 
 export const retrieveConnectionsForDeployment = async (
   clientOpts: ClientOpts,
@@ -23,7 +24,7 @@ export const retrieveConnectionsForDeployment = async (
     },
     method: 'GET',
   };
-  const connectionsResponse = await makeRequestToDownstream(request);
+  let connectionsResponse = await makeRequestToDownstream(request);
   if (connectionsResponse.statusCode != 200) {
     if (connectionsResponse.statusCode == 404) {
       throw new Error(
@@ -31,9 +32,22 @@ export const retrieveConnectionsForDeployment = async (
       );
     } else {
       const errorBody = JSON.parse(connectionsResponse.body);
-      throw new Error(
-        `${connectionsResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`,
+      logger.error(
+        {},
+        `${connectionsResponse.statusCode}-${errorBody.error}:${errorBody.error_description}. Trying once again.`,
       );
+      connectionsResponse = await makeRequestToDownstream(request);
+      if (connectionsResponse.statusCode != 200) {
+        if (connectionsResponse.statusCode == 404) {
+          throw new Error(
+            `No deployment found. You must create a deployment first.`,
+          );
+        } else {
+          throw new Error(
+            `${connectionsResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`,
+          );
+        }
+      }
     }
   }
   const connections = JSON.parse(connectionsResponse.body)
