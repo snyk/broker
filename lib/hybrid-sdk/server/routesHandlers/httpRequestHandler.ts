@@ -68,16 +68,33 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     }
   }
   // Grab a first (newest) client from the pool
-  // This is really silly...
-  res.locals.websocket = connections.get(token)![0].socket;
-  res.locals.socketVersion = connections.get(token)![0].socketVersion;
-  res.locals.capabilities = connections.get(token)![0].metadata.capabilities;
-  res.locals.clientVersion = connections.get(token)![0].metadata.version;
-  res.locals.brokerAppClientId =
-    connections.get(token)![0].brokerAppClientId ?? '';
+  const connection = connections.get(token)!;
+  // Make sure a connection actually exists before proceeding
+  if (connection.length === 0) {
+    logger.warn({ desensitizedToken }, 'No matching connection found.');
+    res.setHeader('x-broker-failure', 'no-connection');
+    return res.status(404).json({ ok: false });
+  }
+  // Todo: We may not always want to select the first client from the pool
+  const client = connection[0];
+  if (!client.metadata?.version || !client.metadata?.capabilities) {
+    logger.warn(
+      { desensitizedToken },
+      'Connection metadata is missing required properties (version or capabilities).',
+    );
+    res.setHeader('x-broker-failure', 'bad-request');
+    return res
+      .status(400)
+      .json({ ok: false});
+  }
+
+  res.locals.websocket = client.socket;
+  res.locals.socketVersion = client.socketVersion;
+  res.locals.capabilities = client.metadata.capabilities;
+  res.locals.clientVersion = client.metadata.version;
+  res.locals.brokerAppClientId = client.brokerAppClientId ?? '';
   req['locals'] = {};
-  req['locals']['capabilities'] =
-    connections.get(token)![0].metadata.capabilities;
+  req['locals']['capabilities'] = client.metadata.capabilities;
 
   const isServiceRequest = req.url.startsWith(`/service/${token}`);
   if (isServiceRequest) {
