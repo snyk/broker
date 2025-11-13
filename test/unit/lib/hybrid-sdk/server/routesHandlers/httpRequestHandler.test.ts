@@ -45,10 +45,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     expect(json).toHaveBeenCalledWith({
       ok: false,
     });
-    expect(setHeader).toHaveBeenCalledWith(
-      'x-broker-failure',
-      'no-connection',
-    );
+    expect(setHeader).toHaveBeenCalledWith('x-broker-failure', 'no-connection');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -73,10 +70,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     expect(json).toHaveBeenCalledWith({
       ok: false,
     });
-    expect(setHeader).toHaveBeenCalledWith(
-      'x-broker-failure',
-      'bad-request',
-    );
+    expect(setHeader).toHaveBeenCalledWith('x-broker-failure', 'bad-request');
     expect(next).not.toHaveBeenCalled();
   });
 

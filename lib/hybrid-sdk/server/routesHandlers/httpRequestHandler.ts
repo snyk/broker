@@ -83,9 +83,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       'Connection metadata is missing required properties (version or capabilities).',
     );
     res.setHeader('x-broker-failure', 'bad-request');
-    return res
-      .status(400)
-      .json({ ok: false});
+    return res.status(400).json({ ok: false });
   }
 
   res.locals.websocket = client.socket;
