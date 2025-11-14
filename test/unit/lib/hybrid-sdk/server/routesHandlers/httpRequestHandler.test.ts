@@ -1,51 +1,33 @@
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../../../../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
 import { getSocketConnections } from '../../../../../../lib/hybrid-sdk/server/socket';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction } from 'express';
+import httpMocks from 'node-mocks-http';
 
 jest.mock('../../../../../../lib/hybrid-sdk/server/socket');
 
 const mockedGetSocketConnections = getSocketConnections as jest.Mock;
 
 describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
-  let req: Partial<Request>;
-  let res: Partial<Response>;
   let next: NextFunction;
-  let status: jest.Mock;
-  let json: jest.Mock;
-  let setHeader: jest.Mock;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    setHeader = jest.fn();
-    json = jest.fn();
-    status = jest.fn(() => ({ json }));
-    req = {
-      params: { token: 'test-token' },
-      headers: {},
-      url: '/broker/test-token/some/path',
-    };
-    res = {
-      status,
-      setHeader,
-      locals: {},
-    };
     next = jest.fn();
   });
 
   it('should return 404 if no connections are found for the token', async () => {
     mockedGetSocketConnections.mockReturnValue(new Map());
-
-    await overloadHttpRequestWithConnectionDetailsMiddleware(
-      req as Request,
-      res as Response,
-      next,
-    );
-
-    expect(status).toHaveBeenCalledWith(404);
-    expect(json).toHaveBeenCalledWith({
-      ok: false,
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
     });
-    expect(setHeader).toHaveBeenCalledWith('x-broker-failure', 'no-connection');
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(404);
+    expect(res._getJSONData()).toEqual({ ok: false });
+    expect(res.getHeader('x-broker-failure')).toBe('no-connection');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -59,18 +41,17 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
       },
     ]);
     mockedGetSocketConnections.mockReturnValue(mockConnections);
-
-    await overloadHttpRequestWithConnectionDetailsMiddleware(
-      req as Request,
-      res as Response,
-      next,
-    );
-
-    expect(status).toHaveBeenCalledWith(400);
-    expect(json).toHaveBeenCalledWith({
-      ok: false,
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
     });
-    expect(setHeader).toHaveBeenCalledWith('x-broker-failure', 'bad-request');
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(400);
+    expect(res._getJSONData()).toEqual({ ok: false });
+    expect(res.getHeader('x-broker-failure')).toBe('bad-request');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -84,41 +65,42 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
       },
     ]);
     mockedGetSocketConnections.mockReturnValue(mockConnections);
-
-    await overloadHttpRequestWithConnectionDetailsMiddleware(
-      req as Request,
-      res as Response,
-      next,
-    );
-
-    expect(status).toHaveBeenCalledWith(400);
-    expect(json).toHaveBeenCalledWith({
-      ok: false,
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
     });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(400);
+    expect(res._getJSONData()).toEqual({ ok: false });
     expect(next).not.toHaveBeenCalled();
   });
 
   it('should call next() if connection and metadata are valid', async () => {
     const mockConnections = new Map();
-    mockConnections.set('test-token', [
-      {
-        socket: {},
-        socketVersion: '1.0',
-        metadata: { version: '1.2.3', capabilities: ['test'] },
-      },
-    ]);
+    const connection = {
+      socket: {},
+      socketVersion: '1.0',
+      metadata: { version: '1.2.3', capabilities: ['test'] },
+    };
+    mockConnections.set('test-token', [connection]);
     mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
 
-    await overloadHttpRequestWithConnectionDetailsMiddleware(
-      req as Request,
-      res as Response,
-      next,
-    );
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
 
-    expect(status).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(200);
     expect(next).toHaveBeenCalled();
-    expect(res.locals).toHaveProperty('websocket');
-    expect(res.locals).toHaveProperty('clientVersion', '1.2.3');
-    expect(res.locals).toHaveProperty('capabilities', ['test']);
+    expect(res.locals.websocket).toEqual(connection.socket);
+    expect(res.locals.clientVersion).toEqual(connection.metadata.version);
+    expect(res.locals.capabilities).toEqual(connection.metadata.capabilities);
+    expect(res.locals.socketVersion).toEqual(connection.socketVersion);
+    expect(res.locals.brokerAppClientId).toEqual('');
   });
 });
