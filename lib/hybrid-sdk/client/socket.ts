@@ -176,63 +176,70 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (getAuthConfig().accessToken) {
-    let timeoutHandler = async () => {};
-    timeoutHandler = async () => {
-      clearTimeout(websocket.timeoutHandlerId);
+  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
+    // The access token is not sent when making requests over the websocket, so we must re-validate
+    // the token periodically to keep the connection alive. Connections that do not re-validate the
+    // access token will be marked as stale and closed by the server.
+    const timeoutHandler = async () => {
+      const commonLogFields = {
+        connection: maskToken(identifyingMetadata.identifier),
+        role: identifyingMetadata.role,
+      };
 
-      if (clientOpts.config.UNIVERSAL_BROKER_GA) {
-        websocket.transport.extraHeaders = {
-          Authorization: getAuthConfig().accessToken.authHeader,
-          'x-snyk-broker-client-id': identifyingMetadata.clientId,
-          'x-snyk-broker-client-role': identifyingMetadata.role,
-          'x-broker-client-version': version,
-        };
+      websocket.transport.extraHeaders = {
+        Authorization: getAuthConfig().accessToken.authHeader,
+        'x-snyk-broker-client-id': identifyingMetadata.clientId,
+        'x-snyk-broker-client-role': identifyingMetadata.role,
+        'x-broker-client-version': version,
+      };
 
-        logger.debug(
-          {
-            connection: maskToken(identifyingMetadata.identifier),
-            role: identifyingMetadata.role,
-          },
-          'Renewing auth.',
-        );
-        const renewResponse = await renewBrokerServerConnection(
-          {
-            connectionIdentifier: identifyingMetadata.identifier!,
-            brokerClientId: identifyingMetadata.clientId,
-            authorization: getAuthConfig().accessToken.authHeader,
-            role: identifyingMetadata.role,
-            serverId: serverId,
-          },
-          clientOpts.config,
-        );
-        if (renewResponse.statusCode != 201) {
-          logger.debug(
+      logger.debug(commonLogFields, 'Renewing auth.');
+      const renewResponse = await renewBrokerServerConnection(
+        {
+          connectionIdentifier: identifyingMetadata.identifier!,
+          brokerClientId: identifyingMetadata.clientId,
+          authorization: getAuthConfig().accessToken.authHeader,
+          role: identifyingMetadata.role,
+          serverId: serverId,
+        },
+        clientOpts.config,
+      );
+
+      const statusClass = Math.floor((renewResponse.statusCode ?? 0) / 100);
+      switch (statusClass) {
+        case 2: // 2XX - success
+          logger.debug(commonLogFields, 'Auth renewed.');
+          break;
+        case 4: // 4XX - client error - unrecoverable
+          logger.fatal(
             {
-              connection: identifyingMetadata.identifier,
-              role: identifyingMetadata.role,
+              ...commonLogFields,
+              responseCode: renewResponse.statusCode,
+            },
+            'Failed to renew connection due to a client error. Exiting...',
+          );
+          process.exit(1);
+          return; // process.exit is overridden during testing, so we return instead
+        default: // log and retry
+          logger.warn(
+            {
+              ...commonLogFields,
               responseCode: renewResponse.statusCode,
             },
             'Failed to renew connection.',
           );
-        } else {
-          logger.debug(
-            {
-              connection: maskToken(identifyingMetadata.identifier),
-              role: identifyingMetadata.role,
-            },
-            'Auth renewed',
-          );
-          websocket.timeoutHandlerId = setTimeout(async () => {
-            await timeoutHandler();
-          }, getAuthExpirationTimeout(clientOpts.config));
-        }
       }
+
+      websocket.timeoutHandlerId = setTimeout(
+        timeoutHandler,
+        getAuthExpirationTimeout(clientOpts.config),
+      );
     };
 
-    websocket.timeoutHandlerId = setTimeout(async () => {
-      await timeoutHandler();
-    }, getAuthExpirationTimeout(clientOpts.config));
+    websocket.timeoutHandlerId = setTimeout(
+      timeoutHandler,
+      getAuthExpirationTimeout(clientOpts.config),
+    );
   }
 
   websocket.on('incoming::error', (e) => {
