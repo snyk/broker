@@ -9,7 +9,8 @@ import {
   CONFIGURATION,
 } from '../../lib/hybrid-sdk/common/types/options';
 import { setAuthConfigKey } from '../../lib/hybrid-sdk/client/auth/oauth';
-const nock = require('nock');
+import nock from 'nock';
+
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 
 describe('Remote config helpers', () => {
@@ -72,6 +73,24 @@ describe('Remote config helpers', () => {
             ],
           },
         ];
+      })
+      .get(
+        `/hidden/brokers/deployments/67892/connections?version=2024-04-02~experimental`,
+      )
+      .reply(() => {
+        return [
+          500,
+          {
+            error: 'InternalServerError',
+            error_description: 'An internal server error occurred',
+          },
+        ];
+      })
+      .get(
+        `/hidden/brokers/deployments/67893/connections?version=2024-04-02~experimental`,
+      )
+      .reply(() => {
+        return [503, 'Service Unavailable - Invalid JSON Response'];
       });
   });
   beforeEach(() => {});
@@ -160,5 +179,51 @@ describe('Remote config helpers', () => {
         contexts: {},
       },
     });
+  });
+
+  it('Should throw error with valid JSON body when non-404 error occurs', async () => {
+    await loadBrokerConfig();
+    const config = getConfig() as CONFIGURATION;
+
+    config.deploymentId = '67892';
+    config.apiVersion = '2024-04-02~experimental';
+    config.API_BASE_URL = 'http://restapihostname';
+
+    const clientOps: ClientOpts = {
+      port: 0,
+      config,
+      filters: { public: [], private: [] },
+    };
+
+    await expect(
+      retrieveConnectionsForDeployment(
+        clientOps,
+        universalFilePathLocationForTests,
+      ),
+    ).rejects.toThrow(
+      '500-InternalServerError:An internal server error occurred',
+    );
+  });
+
+  it('Should throw error with status code only when non-404 error occurs with invalid JSON body', async () => {
+    await loadBrokerConfig();
+    const config = getConfig() as CONFIGURATION;
+
+    config.deploymentId = '67893';
+    config.apiVersion = '2024-04-02~experimental';
+    config.API_BASE_URL = 'http://restapihostname';
+
+    const clientOps: ClientOpts = {
+      port: 0,
+      config,
+      filters: { public: [], private: [] },
+    };
+
+    await expect(
+      retrieveConnectionsForDeployment(
+        clientOps,
+        universalFilePathLocationForTests,
+      ),
+    ).rejects.toThrow('503');
   });
 });
