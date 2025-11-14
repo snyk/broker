@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { makeRequestToDownstream } from '../../http/request';
 import { ClientOpts } from '../../common/types/options';
+import { isJson } from '../../common/utils/json';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
@@ -30,10 +31,18 @@ export const retrieveConnectionsForDeployment = async (
         `No deployment found. You must create a deployment first.`,
       );
     } else {
-      const errorBody = JSON.parse(connectionsResponse.body);
-      throw new Error(
-        `${connectionsResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`,
-      );
+      let errorMsg = `${connectionsResponse.statusCode}`;
+
+      if (isJson(connectionsResponse.headers)) {
+        try {
+          const errorBody = JSON.parse(connectionsResponse.body);
+          errorMsg = `${connectionsResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`;
+        } catch (_error) {
+          /* use default error message */
+        }
+      }
+
+      throw new Error(errorMsg);
     }
   }
   const connections = JSON.parse(connectionsResponse.body)
