@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   prodsec: snyk/prodsec-orb@1.2
   slack: circleci/slack@4.12.5
-  snyk: snyk/snyk@2.2.0
 
 defaults: &defaults
   docker:
@@ -304,31 +303,26 @@ jobs:
   scan-docker-image:
     <<: *defaults
     parameters:
-      monitor_on_build:
-        type: boolean
-        default: true
+      mode:
+        type: string
+      dockerfile:
+        type: string
       project:
         type: string
       project_name:
         type: string
         default: "broker"
-      severity_threshold:
-        type: string
-        default: "high"
     steps:
       - prepare
       - setup_remote_docker:
           docker_layer_caching: false
       - load-docker-image:
           project_name: <<parameters.project_name>>
-      - snyk/scan:
-          additional-arguments: --policy-path=.snyk
-          docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
-          fail-on-issues: <<pipeline.parameters.fail_on_issues>>
-          monitor-on-build: <<parameters.monitor_on_build>>
-          organization: platformeng_access
-          project: <<parameters.project>>
-          severity-threshold: <<parameters.severity_threshold>>
+      - prodsec/container_scan:
+          mode: <<parameters.mode>>
+          docker-image-name: <<parameters.project_name>>:${CIRCLE_WORKFLOW_ID}
+          docker-file: <<parameters.dockerfile>>
+          project-name: <<parameters.project>>
   tag-and-push-docker-image:
     <<: *defaults
     parameters:
@@ -370,9 +364,6 @@ jobs:
       project_name:
         type: string
         default: "broker"
-      severity_threshold:
-        type: string
-        default: "high"
     steps:
       - prepare
       - setup_remote_docker:
@@ -385,13 +376,11 @@ jobs:
           project_name: <<parameters.project_name>>
       - load-docker-image:
           project_name: <<parameters.project_name>>
-      - snyk/scan:
+      - prodsec/container_scan:
+          mode: gate
           docker-image-name: <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID
-          fail-on-issues: false
-          monitor-on-build: false
-          organization: platformeng_access
-          project: <<parameters.project_name>>
-          severity-threshold: <<parameters.severity_threshold>>
+          docker-file: <<parameters.dockerfile>>
+          project-name: <<parameters.project_name>>
       - install-cosign
       - tag-and-push-docker-image:
           image_name: <<parameters.image_name>>
@@ -463,9 +452,10 @@ workflows:
             - platformeng_access
           requires:
             - Build base image (Ubuntu)
+          mode: "gate"
+          dockerfile: dockerfiles/base/Dockerfile
           project: snyk/broker
           project_name: broker
-          monitor_on_build: false
 
       - build-and-save-docker-ubi-image:
           name: Build base image (RHEL)
@@ -481,9 +471,10 @@ workflows:
             - platformeng_access
           requires:
             - Build base image (RHEL)
+          mode: "gate"
+          dockerfile: dockerfiles/base/Dockerfile.ubi
           project: snyk/broker-rhel-ubi
           project_name: broker-rhel-ubi
-          monitor_on_build: false
 
       - release:
           name: Release to GitHub and NPM
@@ -539,6 +530,8 @@ workflows:
             - platformeng_access
           requires:
             - Build base UBI image
+          mode: "upload"
+          dockerfile: dockerfiles/base/Dockerfile.ubi
           project: snyk/broker-rhel-ubi
           project_name: broker-rhel-ubi
           post-steps:
@@ -1033,6 +1026,8 @@ workflows:
             - platformeng_access
           requires:
             - Build base image
+          mode: "upload"
+          dockerfile: dockerfiles/base/Dockerfile
           project: snyk/broker
           project_name: broker
           post-steps:
@@ -1076,6 +1071,8 @@ workflows:
             - platformeng_access
           requires:
             - Build base image (edge)
+          mode: "upload"
+          dockerfile: dockerfiles/base/Dockerfile
           project: snyk/broker
           project_name: broker-edge
           post-steps:
@@ -2012,8 +2009,7 @@ workflows:
             - notify-slack-on-failure
           <<: *filter-dev-branch-only
 
-
-Release Preview Docker images:
+  Release Preview Docker images:
     jobs:
       - prodsec/secrets-scan:
           name: Scan repository for secrets
@@ -2047,6 +2043,8 @@ Release Preview Docker images:
             - platformeng_access
           requires:
             - Build base image
+          mode: "upload"
+          dockerfile: dockerfiles/base/Dockerfile
           project: snyk/broker
           project_name: broker
           post-steps:
