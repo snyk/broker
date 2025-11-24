@@ -20,6 +20,9 @@ export default async (): Promise<Config> => {
     transform: {
       '^.+\\.(t|j)s$': 'ts-jest',
     },
+    moduleNameMapper: {
+      '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
     verbose: true,
   };
 };
