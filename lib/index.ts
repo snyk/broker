@@ -42,14 +42,14 @@ export const app = async ({ port = 7341, client = false, config }) => {
     localConfig.brokerType = method;
     if (method == 'client') {
       return await (
-        await import('./hybrid-sdk/client')
+        await import('./hybrid-sdk/client/index.js')
       ).main({
         config: localConfig,
         port: localConfig.port || port,
       });
     } else {
       return await (
-        await import('./hybrid-sdk/server')
+        await import('./hybrid-sdk/server/index.js')
       ).main({
         config: localConfig,
         port: localConfig.port || port,
