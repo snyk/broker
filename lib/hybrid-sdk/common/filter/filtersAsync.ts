@@ -166,7 +166,7 @@ export const loadFilters: LOADEDFILTER = (
 
           // validate against the body
           isValid = bodyFilters.some(({ path: filterPath, value }) => {
-            return undefsafe(parsedBody, filterPath, value);
+            return undefsafe(parsedBody, filterPath!, value);
           });
         }
 
@@ -177,7 +177,7 @@ export const loadFilters: LOADEDFILTER = (
           isValid = bodyRegexFilters.some(({ path: filterPath, regex }) => {
             try {
               const re = new RegExp(regex!); //paths without regexes got filtered out earlier, hence the !
-              return re.test(undefsafe(parsedBody, filterPath));
+              return re.test(undefsafe(parsedBody, filterPath!));
             } catch (error) {
               logger.error(
                 { error, path: filterPath, regex },
@@ -197,9 +197,13 @@ export const loadFilters: LOADEDFILTER = (
             // ! because the value is not undefined, queryFilters length to be non zero and array filtered earlier
             return values!.some((value) =>
               // ! because the queryParam is not undefined, queryFilters length to be non zero and array filtered earlier
-              minimatch(parsedQuerystring[queryParam!] || '', value, {
-                dot: true,
-              }),
+              minimatch(
+                (parsedQuerystring[queryParam!] as string) || '',
+                value,
+                {
+                  dot: true,
+                },
+              ),
             );
           });
         }

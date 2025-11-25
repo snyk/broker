@@ -13,7 +13,9 @@ describe('CLI', () => {
     });
 
     it('throws when missing broker id', async () => {
-      const exec = await import('../../cli/exec');
+      const exec = (await import('../../cli/exec.js')) as unknown as {
+        default: (args: any) => Promise<void>;
+      };
       try {
         await exec.default({ _: ['client'], port: 8010 });
         expect(true).toBeFalsy(); // safety check: should fail is the call above doesn't throw
@@ -34,7 +36,9 @@ describe('CLI', () => {
 
     it('cli throws when missing broker server', async () => {
       process.env.BROKER_TOKEN = '1';
-      const exec = await import('../../cli/exec');
+      const exec = (await import('../../cli/exec.js')) as unknown as {
+        default: (args: any) => Promise<void>;
+      };
       try {
         await exec.default({ _: ['client'], port: 8020 });
         expect(true).toBeFalsy(); // safety check: should fail is the call above doesn't throw
@@ -68,7 +72,9 @@ describe('CLI', () => {
       const templateDir = await dir({ unsafeCleanup: true });
       const currentDir = process.cwd();
       process.chdir(templateDir.path);
-      const init = await import('../../cli/init');
+      const init = (await import('../../cli/init.js')) as unknown as {
+        default: (template: string) => Promise<void>;
+      };
       await init.default(template);
 
       const stats = await Promise.all([

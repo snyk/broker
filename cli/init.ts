@@ -53,7 +53,10 @@ export default async (templateName) => {
           const writer = createWriteStream(
             path.resolve(process.cwd(), newfile),
           );
-          reader.pipe(writer).on('finish', resolve).on('error', reject);
+          reader
+            .pipe(writer)
+            .on('finish', resolve as () => void)
+            .on('error', reject);
         }),
     ),
   );

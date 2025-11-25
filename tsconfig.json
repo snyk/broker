@@ -14,5 +14,5 @@
     "esModuleInterop": true,
     "noUnusedLocals": true
   },
-  "include": ["./lib/**/*", "./cli/**/*"],
+  "include": ["./lib/**/*", "./cli/**/*", "./types/**/*"]
 }
