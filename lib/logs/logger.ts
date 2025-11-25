@@ -7,13 +7,13 @@ import {
   getPluginConfigByConnectionKey,
 } from '../hybrid-sdk/common/config/pluginsConfig';
 
-const sanitiseConfigVariable = (raw, variable) =>
+const sanitiseConfigVariable = (raw: string, variable: string) =>
   raw.replace(
     new RegExp(escapeRegExp(getConfig()[variable]), 'igm'),
     '${' + variable + '}',
   );
 
-const sanitiseConfigVariables = (raw, variable) => {
+const sanitiseConfigVariables = (raw: string, variable: string) => {
   for (const pool of getConfig()[variable]) {
     raw = raw.replace(
       new RegExp(escapeRegExp(pool), 'igm'),
@@ -25,8 +25,8 @@ const sanitiseConfigVariables = (raw, variable) => {
 };
 
 const sanitiseConnectionConfigVariables = (
-  raw,
-  variable,
+  raw: string,
+  variable: string,
   connections,
   connectionKey,
 ) => {
@@ -42,8 +42,8 @@ const sanitiseConnectionConfigVariables = (
 };
 
 const sanitiseConnectionContextConfigVariables = (
-  raw,
-  variable,
+  raw: string,
+  variable: string,
   connections,
   connectionKey,
 ) => {
@@ -71,7 +71,11 @@ const sanitiseConnectionContextConfigVariables = (
   return raw;
 };
 
-const sanitisePluginsConfigVariables = (raw, variable, pluginConfig) => {
+const sanitisePluginsConfigVariables = (
+  raw: string,
+  variable: string,
+  pluginConfig,
+) => {
   for (const cfgVar of Object.keys(pluginConfig)) {
     if (cfgVar == variable) {
       raw = raw.replace(
@@ -83,7 +87,7 @@ const sanitisePluginsConfigVariables = (raw, variable, pluginConfig) => {
   return raw;
 };
 
-const sanitiseConfigValue = (raw, value, text) =>
+const sanitiseConfigValue = (raw: string, value: string, text: string) =>
   raw.replace(value, '${' + text + '}');
 
 // sanitises sensitive values, replacing all occurences with label

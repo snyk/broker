@@ -85,7 +85,7 @@ function shouldProxy(uri) {
 if (brokerServer.host && getConfig().httpsProxy && shouldProxy(brokerServer)) {
   const config = getConfig();
   const { hostname, port } = url.parse(config.httpsProxy);
-  const tunnelProxy = { host: hostname, port };
+  const tunnelProxy = { host: hostname!, port: port! as unknown as number };
   if (config.proxyAuth) {
     tunnelProxy['proxyAuth'] = config.proxyAuth;
   }
