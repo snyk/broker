@@ -1,11 +1,11 @@
 export interface PluginConnectionConfig {
-  contexts?: Record<string, Record<string, string>>;
+  contexts?: Record<string, Record<string, unknown>>;
 
-  [key: string]: string | Record<string, Record<string, string>> | undefined; // Allows any key with any value type
+  [key: string]: string | Record<string, Record<string, unknown>> | undefined; // Allows any key with any value type
 }
 
 export interface PluginsConfig {
-  [key: string]: Record<string, PluginConnectionConfig>;
+  [key: string]: Record<string, PluginConnectionConfig | string>;
 }
 
 const pluginsConfig: PluginsConfig = {};
@@ -38,7 +38,7 @@ export const getPluginConfigParamByConnectionKeyAndContextId = (
 export const setPluginConfigParamByConnectionKey = (
   connectionKey: string,
   paramName: string,
-  value: any,
+  value: PluginConnectionConfig | string,
 ) => {
   if (!pluginsConfig[connectionKey]) {
     pluginsConfig[connectionKey] = { contexts: {} };
@@ -50,7 +50,7 @@ export const setPluginConfigParamByConnectionKeyAndContextId = (
   connectionKey: string,
   contextId: string,
   paramName: string,
-  value: any,
+  value: unknown,
 ) => {
   if (!pluginsConfig[connectionKey]) {
     pluginsConfig[connectionKey] = { contexts: {} };
@@ -72,7 +72,10 @@ export const getPluginConfig = (key: string) => {
   return pluginsConfig[key];
 };
 
-export const setPluginConfigKey = (key: string, value: any): void => {
+export const setPluginConfigKey = (
+  key: string,
+  value: Record<string, PluginConnectionConfig>,
+): void => {
   pluginsConfig[key] = value;
 };
 
@@ -94,7 +97,7 @@ export function getPluginConfigSubKey(key: string, subKey: string): any {
 export const setPluginConfigSubKey = (
   key: string,
   subKey: string,
-  value: any,
+  value: PluginConnectionConfig,
 ): void => {
   if (!pluginsConfig[key]) {
     pluginsConfig[key] = {};

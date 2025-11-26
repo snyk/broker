@@ -1,6 +1,5 @@
 import { RequestPayload } from '../types/http';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
-import { BrokerWorkload } from '../../../broker-workload/websocketRequests';
 import {
   Workload,
   WorkloadType,
@@ -9,6 +8,7 @@ import {
 import { WebSocketServer } from '../../server/types/socket';
 import { WebSocketConnection } from '../../client/types/client';
 import { HybridResponse } from '../../responseSenders';
+import { BrokerWorkload } from '../../../broker-workload/websocketRequests';
 
 export const forwardWebSocketRequest = (
   options: LoadedClientOpts | LoadedServerOpts,

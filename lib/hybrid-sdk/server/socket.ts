@@ -11,15 +11,22 @@ import { validateBrokerClientCredentials } from './auth/authHelpers';
 
 import { decode } from 'jsonwebtoken';
 import { Role } from '../client/types/client';
+import { Server } from 'http';
+import { FiltersType } from '../common/types/filter';
 
 export interface ClientSocket {
-  socket?: { end() };
+  socket?: { end: () => void };
   socketType: 'server';
   socketVersion: number;
-  brokerClientId: string;
+  brokerClientId: string | null;
   brokerAppClientId: string;
   role: Role;
-  metadata?: any;
+  metadata?: {
+    version: string;
+    capabilities: string[];
+    clientId?: string;
+    filters?: Map<string, FiltersType>;
+  };
   credsValidationTime?: string;
 }
 const socketConnections = new Map<string, ClientSocket[]>();
@@ -32,7 +39,13 @@ export const getSocketConnectionByIdentifier = (identifier: string) => {
   return socketConnections.get(identifier);
 };
 
-const socket = ({ server, loadedServerOpts }): SocketHandler => {
+const socket = ({
+  server,
+  loadedServerOpts,
+}: {
+  server: Server;
+  loadedServerOpts: any;
+}): SocketHandler => {
   const ioConfig = {
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -61,6 +74,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
       const role =
         (req.headers['x-snyk-broker-client-role'] as string | undefined) ??
         null;
+
       if (
         (!authHeader ||
           !authHeader.toLowerCase().startsWith('bearer') ||
@@ -164,7 +178,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
 };
 
 export const bindSocketToWebserver = (
-  server,
+  server: Server,
   loadedServerOpts: LoadedServerOpts,
 ): SocketHandler => {
   // bind the socket server to the web server

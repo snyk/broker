@@ -5,7 +5,12 @@ import { findFactoryRoot } from '../../../common/config/config';
 import { resolve } from 'node:path';
 export const validateWorkloadConfig = (
   checkOptions: CheckOptions,
-  config: Config,
+  config: Config & {
+    REMOTE_WORKLOAD_NAME: string;
+    REMOTE_WORKLOAD_MODULE_PATH: string;
+    CLIENT_WORKLOAD_NAME: string;
+    CLIENT_WORKLOAD_MODULE_PATH: string;
+  },
 ): CheckResult => {
   const workloadKeys = Object.keys(config).filter((x) =>
     x.includes('_WORKLOAD_'),
@@ -44,7 +49,7 @@ export const validateWorkloadConfig = (
   } satisfies CheckResult;
 };
 
-function verifyClassAndHandler(className, filePath) {
+function verifyClassAndHandler(className: string, filePath: string) {
   try {
     const root = findFactoryRoot(__dirname);
     if (!root) {

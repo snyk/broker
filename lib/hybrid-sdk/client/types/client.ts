@@ -33,10 +33,11 @@ export interface IdentifyingMetadata {
   isDisabled: boolean;
   supportedIntegrationType?: string;
   socketVersion?: number;
-  socketType?: string;
+  socketType?: 'client' | 'server';
   friendlyName?: string;
   clientConfig: ConfigMetadata;
   role: Role;
+  integrationId?: string;
 }
 
 export enum Role {

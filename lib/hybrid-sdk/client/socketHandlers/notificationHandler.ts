@@ -1,6 +1,12 @@
 import { log as logger } from '../../../logs/logger';
 
-export const notificationHandler = ({ level, message }) => {
+export const notificationHandler = ({
+  level,
+  message,
+}: {
+  level: 'error' | 'warning' | 'info';
+  message: string;
+}) => {
   switch (level) {
     case 'error':
       logger.error({ message });

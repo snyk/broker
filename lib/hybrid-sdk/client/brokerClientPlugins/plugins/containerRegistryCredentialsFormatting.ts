@@ -28,7 +28,7 @@ export class Plugin extends BrokerPlugin {
 
   async startUp(
     connectionKey: string,
-    connectionConfig,
+    connectionConfig: { type?: string; BROKER_CLIENT_VALIDATION_URL?: unknown },
     pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
     if (
@@ -116,7 +116,16 @@ export class Plugin extends BrokerPlugin {
     }
   }
 
-  _getCredentials(config) {
+  _getCredentials(config: {
+    type?: string;
+    CR_ROLE_ARN?: string;
+    CR_REGION?: string;
+    CR_EXTERNAL_ID?: string;
+    CR_TOKEN?: string;
+    CR_BASE?: string;
+    CR_USERNAME?: string;
+    CR_PASSWORD?: string;
+  }) {
     let credentials;
     switch (config.type) {
       case 'ecr':

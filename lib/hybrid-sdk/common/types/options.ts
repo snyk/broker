@@ -4,6 +4,9 @@ export interface CONFIG {
   supportedBrokerTypes: string[];
   brokerType: 'client' | 'server';
   filterRulesPaths: { [key: string]: string };
+
+  apiHostname: string;
+  ACCEPT_IAC?: string;
 }
 
 export type CONFIGURATION = CONFIG & Record<string, any>;

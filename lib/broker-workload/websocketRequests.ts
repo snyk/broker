@@ -18,7 +18,6 @@ import {
   WorkloadType,
 } from '../hybrid-sdk/workloadFactory';
 import { prepareRequest } from './prepareRequest';
-import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
@@ -33,10 +32,15 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
   websocketConnectionHandler: WebSocketServer | WebSocketConnection;
   constructor(
     connectionIdentifier: string,
-    options,
+    options: {
+      config: {
+        universalBrokerEnabled?: boolean;
+        brokerType: 'client' | 'server';
+      };
+    },
     websocketConnectionHandler: WebSocketServer | WebSocketConnection,
   ) {
-    super('broker', WorkloadType['remote-server']);
+    super('broker', WorkloadType.remoteServer);
     this.options = options;
     this.connectionIdentifier = connectionIdentifier;
     this.websocketConnectionHandler = websocketConnectionHandler;
@@ -60,7 +64,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
     }
     const correlationHeaders = getCorrelationDataFromHeaders(payload.headers);
 
-    const logContext: ExtendedLogContext = {
+    const logContext: Record<string, unknown> = {
       url: payload.url,
       connectionName: this.websocketConnectionHandler.friendlyName ?? '',
       requestMethod: payload.method,

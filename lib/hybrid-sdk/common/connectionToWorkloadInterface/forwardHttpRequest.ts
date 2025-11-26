@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { BrokerClientRequestWorkload } from '../../../broker-workload/clientLocalRequests';
 import {
   Workload,
   WorkloadType,
@@ -20,12 +19,12 @@ export const forwardHttpRequest = (
     const workloadName = options.config.clientWorkloadName;
     const workloadModulePath = options.config.clientWorkloadModulePath;
 
-    const workload = (await Workload.instantiate(
+    const workload = await Workload.instantiate(
       workloadName,
       workloadModulePath,
       WorkloadType.localClient,
       { req, res, options },
-    )) as BrokerClientRequestWorkload;
+    );
 
     const data: LocalClientWorkloadRuntimeParams = {
       makeRequestOverHttp: makeHttpRequest,

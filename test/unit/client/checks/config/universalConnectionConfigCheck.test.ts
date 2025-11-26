@@ -111,7 +111,7 @@ describe('client/checks/config', () => {
         },
       });
       config.connections['my github connection'] =
-        getConfigForConnectionsFromConfig(config).get('my github connection');
+        getConfigForConnectionsFromConfig(config).get('my github connection')!;
       const checkResult = validateUniversalConnectionsConfig(
         { id: id, name: id },
         config,

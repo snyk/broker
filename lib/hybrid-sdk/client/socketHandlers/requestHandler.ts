@@ -15,6 +15,6 @@ export const initRequestHandler = (
   initializedReqHandler = forwardWebSocketRequest(clientOps, websocket);
 };
 
-export const requestHandler = (webSocketIdentifier) => {
+export const requestHandler = (webSocketIdentifier: string) => {
   return initializedReqHandler(webSocketIdentifier);
 };

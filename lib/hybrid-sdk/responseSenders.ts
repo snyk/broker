@@ -11,15 +11,15 @@ import { WebSocketServer } from './server/types/socket';
 
 export interface HybridResponse {
   status: number;
-  body?: any;
-  headers?: any;
-  errorType?: any;
-  originalBodySize?: any;
+  body?: unknown;
+  headers?: Object;
+  errorType?: string;
+  originalBodySize?: number;
 }
 export class HybridResponseHandler {
   connectionIdentifier;
   websocketConnectionHandler: WebSocketServer | WebSocketConnection;
-  logContext;
+  logContext: Record<string, unknown>;
   config;
   requestMetadata: RequestMetadata;
   websocketResponseHandler: (response: HybridResponse) => void;
@@ -29,7 +29,7 @@ export class HybridResponseHandler {
     websocketConnectionHandler: WebSocketServer | WebSocketConnection,
     websocketResponseHandler: (response: HybridResponse) => void,
     config,
-    logContext,
+    logContext: Record<string, unknown>,
   ) {
     this.logContext = logContext;
     this.websocketResponseHandler = websocketResponseHandler;
@@ -63,7 +63,7 @@ export class HybridResponseHandler {
     this.responseHandler(payload, true);
   };
 
-  sendDataResponse = (response, logContext) => {
+  sendDataResponse = (response, logContext: Record<string, unknown>) => {
     const contentLength = response.body.length;
     // Note that the other side of the request will also check the length and will also reject it if it's too large
     // Set to 20MB even though the server is 21MB because the server looks at the total data travelling through the websocket,
@@ -142,7 +142,7 @@ export class HybridResponseHandler {
   };
 
   private websocketDataResponseHandler = (
-    responseData,
+    responseData: any,
     streamOverWebsocket = false,
   ) => {
     if (responseData) {

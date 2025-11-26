@@ -1,7 +1,7 @@
 import { RequestPayload } from './http';
 
 export interface FILTER {
-  (payload: RequestPayload): boolean | Rule;
+  (payload: RequestPayload): false | Rule;
 }
 export interface LOADEDFILTER {
   (

@@ -11,18 +11,18 @@ import https from 'https';
 import { loadBrokerConfig, getConfig } from '../common/config/config';
 
 loadBrokerConfig();
-const brokerServer = url.parse(getConfig().brokerServerUrl || '');
+const brokerServer = new URL(getConfig().brokerServerUrl || '');
 brokerServer.port =
   brokerServer.port || brokerServer.protocol === 'https:' ? '443' : '80';
 
 // adapted from https://github.com/request/request/master/lib/getProxyFromURI.js
 
-function formatHostname(hostname) {
+function formatHostname(hostname: string) {
   // canonicalize the hostname, so that 'oogle.com' won't match 'google.com'
   return hostname.replace(/^\.*/, '.').toLowerCase();
 }
 
-function parseNoProxyZone(zone) {
+function parseNoProxyZone(zone: string) {
   zone = zone.trim().toLowerCase();
 
   const zoneParts = zone.split(':', 2);
@@ -33,11 +33,11 @@ function parseNoProxyZone(zone) {
   return { hostname: zoneHost, port: zonePort, hasPort: hasPort };
 }
 
-function uriInNoProxy(uri) {
+function uriInNoProxy(uri: url.URL) {
   const config = getConfig();
   const port = uri.port || (uri.protocol === 'https:' ? '443' : '80');
   const hostname = formatHostname(uri.hostname);
-  const noProxyList = config.noProxy.split(',');
+  const noProxyList = config.noProxy!.split(',');
 
   // iterate through the noProxyList until it finds a match.
   return noProxyList.map(parseNoProxyZone).some(function (noProxyZone) {
@@ -54,7 +54,7 @@ function uriInNoProxy(uri) {
   });
 }
 
-function shouldProxy(uri) {
+function shouldProxy(uri: url.URL) {
   // Decide the proper request proxy to use based on the request URI object and the
   // environmental variables (NO_PROXY, HTTP_PROXY, etc.)
   // respect NO_PROXY environment variables (see: http://lynx.isc.org/current/breakout/lynx_help/keystrokes/environments.html)

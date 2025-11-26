@@ -4,16 +4,20 @@ import { findProjectRoot } from '../config/config';
 import { log as logger } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeSingleRawRequestToDownstream } from '../../http/request';
+import { ValidEntryObject } from '../types/filter';
 
-export const validateHeaders = (headerFilters, requestHeaders = []) => {
+export const validateHeaders = (
+  headerFilters: ValidEntryObject[],
+  requestHeaders: Record<string, string> = {},
+) => {
   for (const filter of headerFilters) {
-    const headerValue = requestHeaders[filter.header];
+    const headerValue = requestHeaders[filter.header!];
 
     if (!headerValue) {
       return false;
     }
 
-    if (!filter.values.includes(headerValue)) {
+    if (!filter.values!.includes(headerValue)) {
       return false;
     }
   }
@@ -33,7 +37,7 @@ export const isValidURI = (uri: string) => {
 /* Retrieve filters from list of uris
    Can be uri or local path          */
 export const retrieveFilters = async (locations: Map<string, string>) => {
-  const retrievedFiltersMap = new Map<string, any>();
+  const retrievedFiltersMap = new Map<string, string>();
   for (const key of locations.keys()) {
     const location = locations.get(key);
     if (!location) {

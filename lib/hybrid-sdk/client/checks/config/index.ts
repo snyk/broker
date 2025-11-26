@@ -8,7 +8,14 @@ import { validateBrokerClientVersionAgainstServer } from './brokerClientVersionC
 import { validateBrokerToken } from './brokerTokenCheck';
 import { validateWorkloadConfig } from './workloadConfiguration';
 
-export function getConfigChecks(config: Config): Check[] {
+export function getConfigChecks(
+  config: Config & {
+    REMOTE_WORKLOAD_NAME: string;
+    REMOTE_WORKLOAD_MODULE_PATH: string;
+    CLIENT_WORKLOAD_NAME: string;
+    CLIENT_WORKLOAD_MODULE_PATH: string;
+  },
+): Check[] {
   return [
     brokerClientUrlCheck(config),
     universalBrokerConnectionsCheck(config),
@@ -63,7 +70,14 @@ const acceptFlagsConfigurationCheck = (config: Config): Check => {
   } satisfies Check;
 };
 
-const workloadConfigurationCheck = (config: Config): Check => {
+const workloadConfigurationCheck = (
+  config: Config & {
+    REMOTE_WORKLOAD_NAME: string;
+    REMOTE_WORKLOAD_MODULE_PATH: string;
+    CLIENT_WORKLOAD_NAME: string;
+    CLIENT_WORKLOAD_MODULE_PATH: string;
+  },
+): Check => {
   return {
     id: 'workload-config-validation',
     name: 'Workload Configuration Check',

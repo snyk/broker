@@ -1,9 +1,9 @@
 import { LoadedClientOpts } from '../../common/types/options';
 import { log as logger } from '../../../logs/logger';
 
-export const closeHandler = (
+export const closeHandler = <T extends { integrationId?: string }>(
   clientOps: LoadedClientOpts,
-  identifyingMetadata,
+  identifyingMetadata: T,
 ) => {
   logger.warn(
     {

@@ -16,6 +16,7 @@ import {
 import { getConfigForIdentifier } from '../hybrid-sdk/common/config/universal';
 import { TestResult } from '../hybrid-sdk/common/types/filter';
 import version from '../hybrid-sdk/common/utils/version';
+import { OutgoingHttpHeaders } from 'http';
 
 export interface PostFilterPreparingRequestError {
   status: number;
@@ -24,19 +25,25 @@ export interface PostFilterPreparingRequestError {
 
 export interface PostFilterPreparedRequest {
   url: string;
-  headers: Object;
+  headers: OutgoingHttpHeaders;
   method: string;
-  body?: any;
+  body?: string;
   timeoutMs?: number;
 }
 
 export const prepareRequest = async (
   result: TestResult,
   payload,
-  logContext,
-  options,
-  brokerToken,
-  socketType,
+  logContext: Record<string, unknown>,
+  options: {
+    config: {
+      removeXForwardedHeaders?: string;
+      universalBrokerEnabled?: boolean;
+      LOG_ENABLE_BODY?: string;
+    };
+  },
+  brokerToken: string,
+  socketType: 'client' | 'server',
 ) => {
   let errorPreparing: PostFilterPreparingRequestError | null = null;
   if (result.url.startsWith('http') === false) {
@@ -133,14 +140,17 @@ export const prepareRequest = async (
   ) {
     try {
       validateGitHubTreePayload(payload.body);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(
         { error },
         'error while checking github tree payload for symlinks',
       );
+
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+
       errorPreparing = {
         status: 401,
-        errorMsg: error.message,
+        errorMsg,
       };
     }
   }
@@ -183,7 +193,10 @@ export const prepareRequest = async (
     });
     payload.headers[contentTypeHeader] = urlencoded;
     if (payload.body) {
-      const jsonBody = JSON.parse(payload.body) as Record<string, any>;
+      const jsonBody = JSON.parse(payload.body) as Record<
+        string,
+        { toString: () => string }
+      >;
       const params = new URLSearchParams();
       for (const [key, value] of Object.entries(jsonBody)) {
         params.append(key, value.toString());

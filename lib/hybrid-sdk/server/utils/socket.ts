@@ -1,4 +1,10 @@
-export const metadataWithoutFilters = (metadataWithFilters) => {
+export const metadataWithoutFilters = (metadataWithFilters: {
+  capabilities: unknown;
+  clientId: unknown;
+  preflightChecks: unknown;
+  version: unknown;
+  clientConfig: unknown;
+}) => {
   return {
     capabilities: metadataWithFilters.capabilities,
     clientId: metadataWithFilters.clientId,

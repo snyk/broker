@@ -6,6 +6,7 @@ import {
   getPluginsConfig,
   getPluginConfigByConnectionKey,
 } from '../hybrid-sdk/common/config/pluginsConfig';
+import { ConnectionConfig } from '../hybrid-sdk/client/types/config';
 
 const sanitiseConfigVariable = (raw: string, variable: string) =>
   raw.replace(
@@ -27,8 +28,8 @@ const sanitiseConfigVariables = (raw: string, variable: string) => {
 const sanitiseConnectionConfigVariables = (
   raw: string,
   variable: string,
-  connections,
-  connectionKey,
+  connections: Record<string, ConnectionConfig>,
+  connectionKey: string,
 ) => {
   for (const cfgVar of Object.keys(connections[connectionKey])) {
     if (cfgVar == variable) {
@@ -44,8 +45,8 @@ const sanitiseConnectionConfigVariables = (
 const sanitiseConnectionContextConfigVariables = (
   raw: string,
   variable: string,
-  connections,
-  connectionKey,
+  connections: Record<string, ConnectionConfig>,
+  connectionKey: string,
 ) => {
   if (connections[connectionKey].contexts) {
     const contextKeys = Object.keys(connections[connectionKey].contexts);
@@ -74,10 +75,10 @@ const sanitiseConnectionContextConfigVariables = (
 const sanitisePluginsConfigVariables = (
   raw: string,
   variable: string,
-  pluginConfig,
+  pluginConfig: Record<string, unknown>,
 ) => {
   for (const cfgVar of Object.keys(pluginConfig)) {
-    if (cfgVar == variable) {
+    if (cfgVar == variable && typeof pluginConfig[cfgVar] === 'string') {
       raw = raw.replace(
         new RegExp(escapeRegExp(pluginConfig[cfgVar]), 'igm'),
         '${' + variable + '}',
@@ -91,16 +92,18 @@ const sanitiseConfigValue = (raw: string, value: string, text: string) =>
   raw.replace(value, '${' + text + '}');
 
 // sanitises sensitive values, replacing all occurences with label
-export const sanitise = (raw) => {
+export const sanitise = <T>(raw: T) => {
   if (!raw || typeof raw !== 'string') {
     return raw;
   }
 
+  let rawStr: string = raw; // type checked above
+
   const config = getConfig();
   if (config.universalBrokerEnabled) {
     for (const key in config.connections) {
-      raw = sanitiseConfigValue(
-        raw,
+      rawStr = sanitiseConfigValue(
+        rawStr,
         config.connections[key].identifier,
         `${key} identifier`,
       );
@@ -149,35 +152,35 @@ export const sanitise = (raw) => {
     // Regexp is case-insensitive, global and multiline matching,
     // this way all occurences are replaced.
     if (config[variable]) {
-      raw = sanitiseConfigVariable(raw, variable);
+      rawStr = sanitiseConfigVariable(rawStr, variable);
     }
 
     const pool = `${variable}_POOL`;
     if (config[pool]) {
-      raw = sanitiseConfigVariables(raw, pool);
+      rawStr = sanitiseConfigVariables(rawStr, pool);
     }
   }
   if (config.universalBrokerEnabled) {
     for (const variable of universalBrokerConnectionsVariables) {
-      for (const connectionKey of Object.keys(config.connections)) {
-        raw = sanitiseConnectionConfigVariables(
-          raw,
+      for (const connectionKey of Object.keys(config.connections!)) {
+        rawStr = sanitiseConnectionConfigVariables(
+          rawStr,
           variable,
-          config.connections,
+          config.connections!,
           connectionKey,
         );
-        raw = sanitiseConnectionContextConfigVariables(
-          raw,
+        rawStr = sanitiseConnectionContextConfigVariables(
+          rawStr,
           variable,
-          config.connections,
+          config.connections!,
           connectionKey,
         );
       }
     }
     for (const variable of universalBrokerPluginsVariables) {
       for (const connectionKey of Object.keys(getPluginsConfig())) {
-        raw = sanitisePluginsConfigVariables(
-          raw,
+        rawStr = sanitisePluginsConfigVariables(
+          rawStr,
           variable,
           getPluginConfigByConnectionKey(connectionKey),
         );
@@ -185,22 +188,22 @@ export const sanitise = (raw) => {
     }
   }
 
-  return raw;
+  return rawStr;
 };
 
-function sanitiseObject(obj) {
-  return mapValues(obj, (v) => sanitise(v));
+function sanitiseObject(obj: Record<string, unknown>) {
+  return mapValues(obj, (v: unknown) => sanitise(v));
 }
-function sanitiseConnection(connection) {
+function sanitiseConnection(connection: Record<string, unknown>) {
   const connectionObj = JSON.parse(JSON.stringify(connection));
   return sanitiseObject(connectionObj);
 }
-function sanitisePlugins(pluginData) {
+function sanitisePlugins(pluginData: Record<string, unknown>) {
   const pluginObj = JSON.parse(JSON.stringify(pluginData));
   return sanitiseObject(pluginObj);
 }
 
-function sanitiseHeaders(headers) {
+function sanitiseHeaders(headers: Record<string, unknown>) {
   const hdrs = JSON.parse(JSON.stringify(headers));
   if (hdrs.authorization) {
     hdrs.authorization = '${AUTHORIZATION}';
@@ -214,7 +217,7 @@ function sanitiseHeaders(headers) {
   return sanitiseObject(hdrs);
 }
 
-function serialiseError(error) {
+function serialiseError(error: unknown) {
   if (!(error instanceof Error)) {
     return;
   }

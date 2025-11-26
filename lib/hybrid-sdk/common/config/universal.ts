@@ -7,9 +7,9 @@ import { determineFilterType } from '../../client/utils/filterSelection';
 export const getConfigForType = (type: string) => {
   const config = getConfig();
   return {
-    ...config.brokerClientConfiguration.common.default,
-    ...config.brokerClientConfiguration.common.required,
-    ...config.brokerClientConfiguration[`${type}`]?.default,
+    ...config.brokerClientConfiguration?.common.default,
+    ...config.brokerClientConfiguration?.common.required,
+    ...config.brokerClientConfiguration?.[`${type}`]?.default,
     // ...config.brokerClientConfiguration[`${type}`].required,
   };
 };
@@ -17,10 +17,10 @@ export const getConfigForType = (type: string) => {
 export const getAllowedKeysForType = (type: string) => {
   const config = getConfig();
   return Object.keys({
-    ...config.brokerClientConfiguration.common.default,
-    ...config.brokerClientConfiguration.common.required,
-    ...config.brokerClientConfiguration[`${type}`]?.default,
-    ...config.brokerClientConfiguration[`${type}`].required,
+    ...config.brokerClientConfiguration?.common.default,
+    ...config.brokerClientConfiguration?.common.required,
+    ...config.brokerClientConfiguration?.[`${type}`]?.default,
+    ...config.brokerClientConfiguration?.[`${type}`].required,
   });
 };
 
@@ -29,7 +29,9 @@ export const getConfigForConnections = () => {
   return getConfigForConnectionsFromConfig(config);
 };
 
-export const getConfigForConnectionsFromConfig = (config) => {
+export const getConfigForConnectionsFromConfig = (config: {
+  connections: Record<string, ConnectionConfig>;
+}) => {
   const connectionsConfig = new Map<string, ConnectionConfig>();
   for (const key in config.connections) {
     connectionsConfig.set(key, getConfigForConnection(key, config));
@@ -37,7 +39,10 @@ export const getConfigForConnectionsFromConfig = (config) => {
   return connectionsConfig;
 };
 
-export const getConfigForConnection = (key, config): ConnectionConfig => {
+export const getConfigForConnection = (
+  key: string,
+  config: Record<string, any>,
+): ConnectionConfig => {
   const connectionConfig: ConnectionConfig = {
     ...getConfigForType(config.connections[key].type),
     ...config.connections[key],
@@ -75,10 +80,10 @@ export const getConfigForConnection = (key, config): ConnectionConfig => {
 
   return connectionConfig;
 };
-export const getValidationConfigForType = (type) => {
+export const getValidationConfigForType = (type: string) => {
   const config = getConfig();
   return {
-    validations: config.brokerClientConfiguration[`${type}`].validations,
+    validations: config.brokerClientConfiguration?.[`${type}`].validations,
   };
 };
 export const getConfigForIdentifier = (
@@ -162,7 +167,7 @@ export const getConfigForIdentifier = (
 };
 
 export const overloadConfigWithConnectionSpecificConfig = (
-  connectionIdentifier,
+  connectionIdentifier: string,
   localConfig,
   contextId?: string | null,
 ) => {
@@ -181,7 +186,10 @@ export const overloadConfigWithConnectionSpecificConfig = (
   return overloadedConfig;
 };
 
-const findConnectionWithIdentifier = (connections: Object, identifier) => {
+const findConnectionWithIdentifier = (
+  connections: Object,
+  identifier: string,
+) => {
   if (!connections) {
     const refError = new ReferenceError(
       'Error Finding connections configuration',

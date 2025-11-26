@@ -13,6 +13,7 @@ import { getAuthConfig } from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { Role } from '../client/types/client';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
@@ -35,17 +36,40 @@ if (proxyUri) {
 }
 class BrokerServerPostResponseHandler {
   #buffer;
-  #brokerTransformer;
-  #logContext;
-  #config;
-  #brokerToken;
-  #streamingId;
-  #serverId;
-  #role;
-  #requestId;
-  #brokerSrvPostRequestHandler;
+  #brokerTransformer: stream.Transform | undefined;
+  #logContext: Record<string, unknown>;
+  #config: {
+    universalBrokerEnabled: boolean;
+    universalBrokerGa: boolean;
+    brokerClientPostTimeout?: string;
+    brokerServerUrl: string;
+    LOG_ENABLE_BODY?: string;
+    BROKER_TOKEN: string;
+    RES_BODY_URL_SUB: string;
+  };
+  #brokerToken: string;
+  #streamingId: string | undefined;
+  #serverId: number;
+  #role: Role;
+  #requestId: string;
+  #brokerSrvPostRequestHandler: http.ClientRequest | undefined;
 
-  constructor(logContext, config, brokerToken, serverId, requestId, role) {
+  constructor(
+    logContext: Record<string, unknown>,
+    config: {
+      universalBrokerEnabled: boolean;
+      universalBrokerGa: boolean;
+      brokerClientPostTimeout?: string;
+      brokerServerUrl: string;
+      LOG_ENABLE_BODY?: string;
+      BROKER_TOKEN: string;
+      RES_BODY_URL_SUB: string;
+    },
+    brokerToken: string,
+    serverId: number,
+    requestId: string,
+    role: Role,
+  ) {
     this.#logContext = logContext;
     this.#config = config;
     this.#brokerToken = brokerToken;
@@ -92,6 +116,7 @@ class BrokerServerPostResponseHandler {
           }`,
           'Snyk-product-line': `${this.#logContext.productLine}`,
           'Snyk-flow-name': `${this.#logContext.flow}`,
+          authorization: undefined,
           'Content-Type': BROKER_CONTENT_TYPE,
           Connection: 'close',
           'user-agent': 'Snyk Broker client ' + version,
@@ -112,16 +137,17 @@ class BrokerServerPostResponseHandler {
       );
 
       this.#brokerSrvPostRequestHandler
-        .on('error', (e) => {
+        .on('error', (e: unknown) => {
+          const errMsg = e instanceof Error ? e.message : 'Unknown error';
           logger.error(
             {
-              errMsg: e.message,
+              errMsg,
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
             },
             'received error sending data via POST to Broker Server',
           );
-          this.#buffer.end(e.message);
+          this.#buffer.end(errMsg);
         })
         .on('response', (r) => {
           r.on('error', (err) => {
@@ -140,6 +166,7 @@ class BrokerServerPostResponseHandler {
                 statusCode: r.statusCode,
                 statusMessage: r.statusMessage,
                 headers: r.headers,
+                // @ts-expect-error - body is not present on http.IncomingMessage and will be undefined
                 body: r.body?.toString(),
                 stackTrace: new Error('stacktrace generator').stack,
               },
@@ -160,7 +187,7 @@ class BrokerServerPostResponseHandler {
     }
   }
 
-  #sendIoData(ioData) {
+  #sendIoData(ioData: string) {
     const ioDataLength = ioData.length;
     logger.debug(
       { ...this.#logContext, ioDataLength },
@@ -181,7 +208,7 @@ class BrokerServerPostResponseHandler {
   #handleRequestError() {
     // For reasons unknown, doing foo.on(this.#func)
     // doesn't work - you need return a function from here
-    return (error) => {
+    return (error: unknown) => {
       logger.error(
         {
           ...this.#logContext,
@@ -195,7 +222,8 @@ class BrokerServerPostResponseHandler {
       // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
       // we will forward that directly to the Broker Server
       if (this.#buffer) {
-        this.#buffer.end(error.message);
+        const errMsg = error instanceof Error ? error.message : 'Unknown error';
+        this.#buffer.end(errMsg);
       } else {
         const body = JSON.stringify({ error: error });
         this.#sendIoData(
@@ -207,17 +235,18 @@ class BrokerServerPostResponseHandler {
             },
           }),
         );
+        // buffer is falsey!
         this.#buffer.write(Buffer.from(body));
         this.#buffer.end();
       }
     };
   }
 
-  async forwardRequest(response: http.IncomingMessage, streamingID) {
+  async forwardRequest(response: http.IncomingMessage, streamingID: string) {
     const config = this.#config;
     try {
       this.#streamingId = streamingID;
-      let prevPartialChunk;
+      let prevPartialChunk: string | null | undefined = null;
       response.socket.on('error', (err) => {
         logger.error(
           {
@@ -264,7 +293,7 @@ class BrokerServerPostResponseHandler {
           if (config.RES_BODY_URL_SUB && isResponseJson) {
             const { newChunk, partial } = replaceUrlPartialChunk(
               Buffer.from(chunk).toString(),
-              prevPartialChunk,
+              prevPartialChunk!,
               config,
             );
             prevPartialChunk = partial;
@@ -287,14 +316,14 @@ class BrokerServerPostResponseHandler {
           response,
           this.#buffer,
           this.#brokerTransformer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!,
         );
       } else {
         logger.debug(this.#logContext, 'Pipelining standard');
         await pipeline(
           response,
           this.#buffer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!,
         );
       }
     } catch (err) {
@@ -305,7 +334,7 @@ class BrokerServerPostResponseHandler {
     }
   }
 
-  async sendData(responseData, streamingID) {
+  async sendData(responseData: { body: unknown }, streamingID: string) {
     this.#streamingId = streamingID;
     const body = responseData.body;
     delete responseData.body;
@@ -314,14 +343,14 @@ class BrokerServerPostResponseHandler {
       'posting internal response back to Broker Server as it is expecting streaming response',
     );
     this.#initHttpClientRequest();
-    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler);
+    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!);
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();
   }
 }
 
-function isJson(responseHeaders) {
+function isJson(responseHeaders: { 'content-type'?: string }) {
   return responseHeaders['content-type']?.includes('json') || false;
 }
 

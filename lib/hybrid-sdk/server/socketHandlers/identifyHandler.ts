@@ -9,7 +9,7 @@ import semver from 'semver';
 import { legacyStreamResponseHandler } from '../../LegacyStreamResponseHandler';
 import { ISpark } from 'primus';
 
-let response;
+let response: (token: string) => void;
 const minimalSupportedBrokerVersion =
   process.env.MINIMAL_SUPPORTED_BROKER_VERSION ?? '4.100.0';
 const minimalRecommendedBrokerVersion =

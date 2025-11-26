@@ -205,7 +205,7 @@ export const main = async (clientOpts: ClientOpts) => {
 
     return {
       websocketConnections,
-      close: (done) => {
+      close: (done: () => void) => {
         logger.info('Client websocket is closing.');
         server.close();
         for (let i = 0; i < websocketConnections.length; i++) {

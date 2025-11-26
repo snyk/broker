@@ -62,7 +62,11 @@ export async function fetchAndUpdateJwt(
   }
 }
 
-const refreshJwt = async (clientConfig, clientId, clientSecret) => {
+const refreshJwt = async (
+  clientConfig: { apiHostname: string; AUTH_EXPIRATION_OVERRIDE?: number },
+  clientId: string,
+  clientSecret: string,
+) => {
   logger.debug({}, 'Refreshing oauth access token');
   try {
     const newJwt = await fetchAndUpdateJwt(
@@ -86,9 +90,9 @@ const refreshJwt = async (clientConfig, clientId, clientSecret) => {
 };
 
 export const setfetchAndUpdateJwt = async (
-  clientConfig,
-  clientId,
-  clientSecret,
+  clientConfig: { apiHostname: string; AUTH_EXPIRATION_OVERRIDE?: number },
+  clientId: string,
+  clientSecret: string,
 ) => {
   const newJwt = await fetchAndUpdateJwt(
     clientConfig.apiHostname,

@@ -3,7 +3,7 @@ import { sanitise } from '../../../logs/logger';
 import { HttpResponse, makeRequestToDownstream } from '../../http/request';
 import { isJson } from '../../common/utils/json';
 
-const credsFromHeader = (s) => {
+const credsFromHeader = (s: string) => {
   if (s.indexOf(' ') >= 0) {
     return s.substring(s.indexOf(' ') + 1);
   } else {
@@ -41,8 +41,8 @@ export const loadCredentialsFromConfig = (config) => {
 export const checkCredentials = async (
   auth,
   config,
-  brokerClientValidationMethod,
-  brokerClientValidationTimeoutMs,
+  brokerClientValidationMethod: string,
+  brokerClientValidationTimeoutMs: number,
   // isJsonResponse,
 ) => {
   const data = {
@@ -117,8 +117,8 @@ export const checkCredentials = async (
 export const checkBitbucketPatCredentials = async (
   auth, // This would be the BITBUCKET_PAT token, likely passed as the authorization header value
   config,
-  brokerClientValidationMethod,
-  brokerClientValidationTimeoutMs,
+  brokerClientValidationMethod: string,
+  brokerClientValidationTimeoutMs: number,
 ) => {
   const data: {
     brokerClientValidationUrl: string;
@@ -198,15 +198,20 @@ export const checkBitbucketPatCredentials = async (
         }
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
-      { err: error.message },
+      { err: error instanceof Error ? error.message : undefined },
       'Bitbucket PAT systemcheck failed due to an exception.',
     );
     if (process.env.JEST_WORKER_ID) {
       data['testError'] = error;
     }
-    data['error'] = error.message || 'Systemcheck failed due to an exception';
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Systemcheck failed due to an exception';
+    data['error'] = errorMessage;
   }
 
   return { data, errorOccurred };

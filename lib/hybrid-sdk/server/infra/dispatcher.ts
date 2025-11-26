@@ -6,12 +6,12 @@ import { v4 as uuid } from 'uuid';
 import { axiosInstance } from '../../http/axios';
 
 class DispatcherClient {
-  #url;
-  #hostname;
-  #id;
-  #version;
+  #url: string;
+  #hostname: string;
+  #id: number;
+  #version: string;
 
-  constructor(url, hostname, id, version) {
+  constructor(url: string, hostname: string, id?: number, version?: string) {
     this.#url = url;
     this.#hostname = hostname;
     this.#id = id || 0;
@@ -33,7 +33,7 @@ class DispatcherClient {
     );
   }
 
-  async serverStopping(cb) {
+  async serverStopping(cb?: () => void) {
     await this.#makeRequest(
       { requestType: 'server-stopping' },
       `${this.#url}/internal/brokerservers/${this.#id}`,
@@ -43,9 +43,9 @@ class DispatcherClient {
   }
 
   async clientConnected(
-    token,
-    clientId,
-    clientVersion,
+    token: string,
+    clientId: string | undefined,
+    clientVersion: string,
     requestType = 'client-connected',
     time = -1,
   ) {
@@ -78,7 +78,7 @@ class DispatcherClient {
     );
   }
 
-  async clientDisconnected(token, clientId) {
+  async clientDisconnected(token: string, clientId: string) {
     const hashedToken = hashToken(token);
     await this.#makeRequest(
       { hashedToken, clientId, requestType: 'client-disconnected' },
@@ -91,7 +91,13 @@ class DispatcherClient {
     );
   }
 
-  async #makeRequest(logContext, url, method, requestBody?, cb?) {
+  async #makeRequest(
+    logContext: Record<string, unknown>,
+    url: string,
+    method: string,
+    requestBody?: unknown,
+    cb?: () => void,
+  ) {
     const requestId = uuid();
     // version *must* be provided
     const urlWithVersion = new URL(url);
@@ -132,12 +138,13 @@ class DispatcherClient {
           'successfully sent request to Dispatcher',
         );
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
       logger.error(
         {
           ...logContext,
           requestId,
-          errorMessage: e.message,
+          errorMessage,
           stackTrace: new Error('stack generator').stack,
           dispatcherUrl: this.#url,
           dispatcherVersion: this.#version,
@@ -151,11 +158,20 @@ class DispatcherClient {
   }
 }
 
-export let clientConnected;
-export let clientPinged;
-export let clientDisconnected;
-export let serverStarting;
-export let serverStopping;
+export let clientConnected: (
+  token: string,
+  clientId: string | undefined,
+  clientVersion: string,
+) => void;
+export let clientPinged: (
+  token: string,
+  clientId: string | undefined,
+  clientVersion: string,
+  time: number,
+) => void;
+export let clientDisconnected: (token: string, clientId: string) => void;
+export let serverStarting: () => void;
+export let serverStopping: (cb: () => void) => void;
 
 const config = getConfig();
 
@@ -167,11 +183,20 @@ if (config.dispatcherUrl) {
     config.dispatcherVersion,
   );
 
-  clientConnected = async function (token, clientId, clientVersion) {
+  clientConnected = async function (
+    token: string,
+    clientId: string | undefined,
+    clientVersion: string,
+  ) {
     return kc.clientConnected(token, clientId, clientVersion);
   };
 
-  clientPinged = async function (token, clientId, clientVersion, time) {
+  clientPinged = async function (
+    token: string,
+    clientId: string | undefined,
+    clientVersion: string,
+    time: number,
+  ) {
     return kc.clientConnected(
       token,
       clientId,
@@ -181,7 +206,7 @@ if (config.dispatcherUrl) {
     );
   };
 
-  clientDisconnected = async function (token, clientId) {
+  clientDisconnected = async function (token: string, clientId: string) {
     return kc.clientDisconnected(token, clientId);
   };
 

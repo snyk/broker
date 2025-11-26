@@ -24,14 +24,14 @@ const SNIPPETS_CODE_SCM_ORIGINS = [
   'BITBUCKET_API',
 ];
 
-function nestedCopy(array) {
-  return JSON.parse(JSON.stringify(array));
+function nestedCopy(obj: Object) {
+  return JSON.parse(JSON.stringify(obj));
 }
 
 function injectRulesAtRuntime(
   filters: FiltersType,
   config: CONFIGURATION,
-  ruleType?,
+  ruleType?: string,
 ) {
   const ACCEPT_IAC = process.env.ACCEPT_IAC || config.ACCEPT_IAC;
   if (
@@ -352,7 +352,7 @@ export default async (
   folderLocation = '',
 ): Promise<FiltersType | Map<string, FiltersType>> => {
   const acceptFilename = config.accept || '';
-  let retrievedFilters;
+  let retrievedFilters: Map<string, string>;
 
   if (!acceptFilename || (acceptFilename && isValidURI(acceptFilename))) {
     let rulesUrisMap;
@@ -373,14 +373,15 @@ export default async (
       if (!retrievedFilters.get(type)) {
         throw new Error(`Missing filter for ${type}.`);
       }
-      filters[type] = yaml.safeLoad(retrievedFilters.get(type));
+      filters[type] = yaml.safeLoad(retrievedFilters.get(type)!);
       filters[type] = injectRulesAtRuntime(filters[type], config, type);
     });
   } else {
     if (!acceptFilename) {
       return filters;
+      // @ts-expect-error - retrievedFilters may be undefined
     } else if (acceptFilename && retrievedFilters) {
-      filters = yaml.safeLoad(retrievedFilters.get('current'));
+      filters = yaml.safeLoad(retrievedFilters.get('current')!);
     } else {
       const acceptLocation = path.resolve(
         folderLocation

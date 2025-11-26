@@ -31,6 +31,7 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
         connectionName: connectionName,
         validated: passing,
         results: data,
+        message: undefined as string | undefined,
       };
       if (!passing) {
         result[
@@ -51,14 +52,30 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
     const { auths, rawCreds } = loadCredentialsFromConfig(clientOpts.config);
 
     // make the internal validation request
-    const validationResults: any = [];
+    const validationResults: {
+      brokerClientValidationUrl: string;
+      brokerClientValidationMethod: string;
+      brokerClientValidationTimeoutMs: number;
+      maskedCredentials?: string | null;
+    }[] = [];
     let errorOccurred = true;
     if (auths.length > 0) {
       for (let i = 0; i < auths.length; i++) {
         logger.info(`Checking if credentials at index ${i} are valid.`);
         const auth = auths[i];
         const rawCred = rawCreds[i];
-        let credsResult;
+        let credsResult: {
+          data: {
+            brokerClientValidationUrl: string;
+            brokerClientValidationMethod: string;
+            brokerClientValidationTimeoutMs: number;
+            ok?: boolean;
+            brokerClientValidationUrlStatusCode?: number;
+            error?: string | Error;
+            maskedCredentials?: string | null;
+          };
+          errorOccurred: boolean;
+        };
         // Bitbucket server always returns a 200 regardless of the validity of the PAT
         // this function is to look inside the response body and determine if the
         // credentials really are valid or not.
@@ -94,7 +111,15 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
       logger.info(
         'No credentials specified - checking if target can be accessed without credentials.',
       );
-      let credsResult;
+      let credsResult: {
+        data: {
+          brokerClientValidationUrl: string;
+          brokerClientValidationMethod: string;
+          brokerClientValidationTimeoutMs: number;
+          maskedCredentials?: string | null;
+        };
+        errorOccurred: boolean;
+      };
       if (clientOpts.config.BITBUCKET_PAT) {
         logger.info(
           'Using Bitbucket PAT credentials check (no explicit auth).',

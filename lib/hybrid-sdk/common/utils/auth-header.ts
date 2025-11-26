@@ -1,18 +1,30 @@
 import { replace } from './replace-vars';
 import { getConfig } from '../config/config';
 // Not standardized Basic auth format, currently using in Azure Repos API
-export const getEncodedTokenBasedBasicAuth = (token, config) => {
+export const getEncodedTokenBasedBasicAuth = (
+  token: string | undefined,
+  config,
+) => {
   return Buffer.from(replace(token, config)).toString('base64');
 };
 
-export const getEncodedBasicAuth = (username, password, config) => {
+export const getEncodedBasicAuth = (
+  username: string | undefined,
+  password: string | undefined,
+  config,
+) => {
   return Buffer.from(
     `${replace(username, config)}:${replace(password, config)}`,
   ).toString('base64');
 };
 
 export default (
-  { scheme, token = '', username = '', password = '' },
+  {
+    scheme,
+    token = '',
+    username = '',
+    password = '',
+  }: { scheme: string; token?: string; username?: string; password?: string },
   connectionConfig?,
 ) => {
   const config = connectionConfig ?? getConfig();

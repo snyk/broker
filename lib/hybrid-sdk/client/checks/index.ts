@@ -31,9 +31,14 @@ export async function executePreflightChecks(
   const preflightChecks: Check[] = [];
   const httpChecks = getHttpChecks(config as Config).filter((c) => c.enabled);
   preflightChecks.push(...httpChecks);
-  const configChecks = getConfigChecks(config as Config).filter(
-    (c) => c.enabled,
-  );
+  const configChecks = getConfigChecks(
+    config as Config & {
+      REMOTE_WORKLOAD_NAME: string;
+      REMOTE_WORKLOAD_MODULE_PATH: string;
+      CLIENT_WORKLOAD_NAME: string;
+      CLIENT_WORKLOAD_MODULE_PATH: string;
+    },
+  ).filter((c) => c.enabled);
   preflightChecks.push(...configChecks);
 
   const preflightCheckResults: CheckResult[] = [];

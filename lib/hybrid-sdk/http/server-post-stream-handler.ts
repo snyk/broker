@@ -25,7 +25,7 @@ export class StreamResponseHandler {
   // response;
   // streamSize = 0;
 
-  static create(streamingID) {
+  static create(streamingID: string) {
     const stream = streamsStore.get(streamingID);
     if (!stream) {
       return null;
@@ -40,7 +40,12 @@ export class StreamResponseHandler {
     );
   }
 
-  constructor(streamingID, streamBuffer, response, brokerAppClientId) {
+  constructor(
+    streamingID: string,
+    streamBuffer: stream.PassThrough,
+    response: Response,
+    brokerAppClientId: string | null,
+  ) {
     this.streamingID = streamingID;
     this.streamResponse = {
       streamBuffer,
@@ -50,13 +55,19 @@ export class StreamResponseHandler {
     };
   }
 
-  writeStatusAndHeaders = (statusAndHeaders) => {
+  writeStatusAndHeaders = (statusAndHeaders: {
+    status: number;
+    headers: unknown;
+  }) => {
     this.streamResponse.response
       .status(statusAndHeaders.status)
       .set(statusAndHeaders.headers);
   };
 
-  writeChunk = (chunk, waitForDrainCb) => {
+  writeChunk = (
+    chunk,
+    waitForDrainCb?: (streamBuffer: stream.PassThrough) => void,
+  ) => {
     this.streamResponse.streamSize += chunk.length;
     if (!this.streamResponse.streamBuffer.write(chunk) && waitForDrainCb) {
       waitForDrainCb(this.streamResponse.streamBuffer);
@@ -72,7 +83,7 @@ export class StreamResponseHandler {
     });
   };
 
-  destroy = (error) => {
+  destroy = (error?: Error) => {
     this.streamResponse.streamBuffer.destroy(error);
     streamsStore.del(this.streamingID);
   };

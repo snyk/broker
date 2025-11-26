@@ -7,8 +7,13 @@ import { observeResponseSize } from './common/utils/metrics';
 
 /**
  * @deprecated Deprecated in favour of {@link StreamResponseHandler} */
-export const legacyStreamResponseHandler = (token) => {
-  return (streamingID, chunk, finished, ioResponse) => {
+export const legacyStreamResponseHandler = (token: string) => {
+  return (
+    streamingID: string,
+    chunk,
+    finished: boolean,
+    ioResponse: { status: number; headers: Record<string, string> },
+  ) => {
     const streamFromId = streamsStore.get(streamingID) as StreamResponse;
 
     if (streamFromId) {

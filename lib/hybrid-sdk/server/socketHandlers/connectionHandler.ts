@@ -8,7 +8,7 @@ import { hashToken, maskToken } from '../../common/utils/token';
 import { ISpark } from 'primus';
 
 export const handleSocketConnection = (socket: ISpark) => {
-  let clientId = null;
+  let clientId: string | null = null;
   let identified = false;
 
   const token = socket.request.uri.pathname
@@ -42,8 +42,8 @@ export const handleSocketConnection = (socket: ISpark) => {
       },
       'Socket termination signal received',
     );
-    handleTerminationSignalOnSocket(token, clientId);
+    handleTerminationSignalOnSocket(token, clientId!);
   });
 
-  socket.on('error', (error) => handleSocketError(error));
+  socket.on('error', (error: unknown) => handleSocketError(error));
 };

@@ -62,7 +62,7 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
   }
 };
 
-export const runStartupPlugins = async (clientOpts, connectionKey) => {
+export const runStartupPlugins = async (clientOpts, connectionKey: string) => {
   const loadedPlugins = clientOpts.config.plugins as Map<
     string,
     BrokerPlugin[]
@@ -98,7 +98,7 @@ export const runStartupPlugins = async (clientOpts, connectionKey) => {
 
 export const runPreRequestPlugins = async (
   clientOpts,
-  connectionIdentifier,
+  connectionIdentifier: string,
   pristinePreRequest: PostFilterPreparedRequest,
   contextId: string | null,
 ) => {

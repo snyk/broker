@@ -1,6 +1,11 @@
 import { log as logger } from './logger';
 
-export const logResponse = (logContext, status, response, config) => {
+export const logResponse = (
+  logContext: Record<string, unknown>,
+  status: number,
+  response: { body: unknown },
+  config: { LOG_ENABLE_BODY?: string },
+) => {
   logContext.responseStatus = status;
   logContext.responseBody =
     config && config.LOG_ENABLE_BODY === 'true' ? response.body : null;
@@ -8,7 +13,10 @@ export const logResponse = (logContext, status, response, config) => {
   logger.info(logContext, 'Sending response back to websocket connection.');
 };
 
-export const logError = (logContext, error) => {
+export const logError = (
+  logContext: Record<string, unknown>,
+  error: unknown,
+) => {
   logger.error(
     {
       ...logContext,

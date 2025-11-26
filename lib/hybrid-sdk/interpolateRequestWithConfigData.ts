@@ -15,9 +15,12 @@ export const getInterpolatedRequest = (
   connectionIdentifier: string | null,
   matchedFilterRule: Rule,
   payload,
-  logContext,
+  logContext: {
+    bodyVarsSubstitution?: string[];
+    headerVarsSubstitution?: string[];
+  },
   contextConfig,
-  requestOrigin?,
+  requestOrigin?: string,
 ) => {
   const config = { ...contextConfig, ...getConfig() };
   const { origin: baseOrigin, auth, connectionType } = matchedFilterRule;

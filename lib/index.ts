@@ -3,14 +3,15 @@ import { log as logger } from './logs/logger';
 import { getConfig, loadBrokerConfig } from './hybrid-sdk/common/config/config';
 import { CONFIGURATION } from './hybrid-sdk/common/types/options';
 
-process.on('uncaughtExceptionMonitor', (error, origin) => {
+process.on('uncaughtExceptionMonitor', (error: unknown, origin: string) => {
   logger.error({ error, origin }, 'found unhandled exception');
 });
 
-process.on('unhandledRejection', (reason: any) => {
+process.on('unhandledRejection', (reason: unknown) => {
+  const reasonStack = reason instanceof Error ? reason.stack : 'Unknown';
   logger.error(
     {
-      reason: reason.stack,
+      reason: reasonStack,
     },
     'caught unhandledRejection',
   );
@@ -37,7 +38,7 @@ export const app = async ({ port = 7341, client = false, config }) => {
     const globalConfig = getConfig();
     const localConfig = Object.assign({}, globalConfig, config) as Record<
       string,
-      any
+      unknown
     > as CONFIGURATION;
     localConfig.brokerType = method;
     if (method == 'client') {
@@ -55,8 +56,10 @@ export const app = async ({ port = 7341, client = false, config }) => {
         port: localConfig.port || port,
       });
     }
-  } catch (error: any) {
-    logger.error({ error }, `${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    logger.error({ error }, `${errorMessage}`);
 
     throw error;
   }

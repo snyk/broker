@@ -31,7 +31,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
   const connection = getSocketConnectionByIdentifier(identifier);
   const currentClient = connection
     ? connection.find(
-        (x) => x.metadata.clientId === brokerClientId && x.role === role,
+        (x) => x.metadata?.clientId === brokerClientId && x.role === role,
       )
     : null;
   logger.debug({ identifier, brokerClientId, role }, 'Validating credentials');
@@ -50,7 +50,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
     // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
     const credsCheckResponse = await validateBrokerClientCredentials(
       credentials,
-      brokerClientId as string,
+      brokerClientId,
       identifier,
       true,
     );

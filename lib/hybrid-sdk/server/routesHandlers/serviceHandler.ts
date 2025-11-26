@@ -6,7 +6,7 @@ export interface preparedRequest {
   url: string;
   headers: Object;
   method: string;
-  body?: any;
+  body?: unknown;
   timeoutMs?: number;
 }
 const minimalServiceEnabledBrokerVersion =

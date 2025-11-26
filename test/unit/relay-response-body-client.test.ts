@@ -95,6 +95,7 @@ describe('body relay', () => {
       brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      apiHostname: 'localhost',
     };
     const options: LoadedClientOpts | LoadedServerOpts = {
       filters: {
@@ -167,6 +168,7 @@ describe('body relay', () => {
       brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      apiHostname: 'localhost',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {
@@ -231,6 +233,7 @@ describe('body relay', () => {
       brokerType: 'client',
       supportedBrokerTypes: [],
       filterRulesPaths: {},
+      apiHostname: 'localhost',
     };
 
     const options: LoadedClientOpts | LoadedServerOpts = {

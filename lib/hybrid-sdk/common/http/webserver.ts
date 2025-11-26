@@ -15,11 +15,19 @@ import { createServer as createHttpsServer } from 'https';
 // with no body have req.body = undefined. This matches the as-yet-unreleased
 // bodyparser 2.x behaviour.
 const EmptyBody = Symbol('Empty Body');
-const markEmptyRequestBody = (req, res, next) => {
+const markEmptyRequestBody = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
   req.body = req.body || EmptyBody;
   next();
 };
-const stripEmptyRequestBody = (req, res, next) => {
+const stripEmptyRequestBody = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
   if (req.body === EmptyBody) {
     delete req.body;
   }
@@ -44,28 +52,35 @@ export const webserver = (config, altPort: number) => {
     }),
   );
   app.use(stripEmptyRequestBody);
-  app.use((err, req, res, next) => {
-    if (err) {
-      const brokerToken = extractBrokerTokenFromUrl(req.url);
-      const maskedToken = maskToken(brokerToken);
-      const hashedToken = hashToken(brokerToken);
-      logger.error(
-        {
-          url: req.url.replaceAll(brokerToken, maskedToken),
-          requestMethod: req.method,
-          requestHeaders: req.headers,
-          requestId: req.headers['snyk-request-id'] || '',
-          maskedToken: maskedToken,
-          hashedToken: hashedToken,
-          error: err,
-        },
-        'Error occurred receiving http request on broker webserver',
-      );
-      next(err);
-    } else {
-      next(err);
-    }
-  });
+  app.use(
+    (
+      err: unknown,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      if (err) {
+        const brokerToken = extractBrokerTokenFromUrl(req.url)!;
+        const maskedToken = maskToken(brokerToken);
+        const hashedToken = hashToken(brokerToken);
+        logger.error(
+          {
+            url: req.url.replaceAll(brokerToken, maskedToken),
+            requestMethod: req.method,
+            requestHeaders: req.headers,
+            requestId: req.headers['snyk-request-id'] || '',
+            maskedToken: maskedToken,
+            hashedToken: hashedToken,
+            error: err,
+          },
+          'Error occurred receiving http request on broker webserver',
+        );
+        next(err);
+      } else {
+        next(err);
+      }
+    },
+  );
 
   if (altPort) {
     port = altPort;

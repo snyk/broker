@@ -2,7 +2,10 @@ import {
   CheckResult,
   HttpCheck,
 } from '../../lib/hybrid-sdk/client/checks/types';
-import { Config } from '../../lib/hybrid-sdk/client/types/config';
+import {
+  Config,
+  ConnectionConfig,
+} from '../../lib/hybrid-sdk/client/types/config';
 import { executeHttpRequest } from '../../lib/hybrid-sdk/client/checks/http/http-executor';
 import {
   getConfig,
@@ -52,10 +55,8 @@ export const aConfig = (fields: Partial<Config>): Config => {
 /**
  * Config with all features disabled.
  */
-export const aUniversalDefaultConfig = async (
-  fields: Partial<Config>,
-): Promise<Config> => {
+export const aUniversalDefaultConfig = async (fields: Partial<Config>) => {
   await loadBrokerConfig();
   const config = { ...getConfig(), ...fields };
-  return config as Config;
+  return config as Config & { connections: Record<string, ConnectionConfig> };
 };

@@ -38,7 +38,7 @@ export const createWebSocketConnectionPairs = async (
   websocketConnections: WebSocketConnection[],
   clientOpts: LoadedClientOpts,
   globalIdentifyingMetadata: IdentifyingMetadata,
-  connectionKey,
+  connectionKey: string,
 ) => {
   const socketIdentifyingMetadata = structuredClone(globalIdentifyingMetadata);
   socketIdentifyingMetadata.friendlyName = connectionKey;
@@ -103,7 +103,10 @@ export const createWebSocket = (
   originalIdentifyingMetadata: IdentifyingMetadata,
   role?: Role,
 ): WebSocketConnection => {
-  const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
+  const identifyingMetadata = Object.assign(
+    {},
+    originalIdentifyingMetadata,
+  ) as IdentifyingMetadata;
   identifyingMetadata.role = role ?? Role.primary;
   const localClientOps = Object.assign({}, clientOpts);
   identifyingMetadata.identifier =

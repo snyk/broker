@@ -23,7 +23,7 @@ export default abstract class BrokerPlugin {
 
   makeRequestToDownstream: (
     req: PostFilterPreparedRequest,
-    retries?: any,
+    retries?: number,
   ) => Promise<HttpResponse>;
   request?: PostFilterPreparedRequest;
 
@@ -40,7 +40,7 @@ export default abstract class BrokerPlugin {
     );
   }
 
-  isDisabled(config): boolean {
+  isDisabled(config: Record<string, unknown>): boolean {
     let isDisabled = false;
     if (config[`DISABLE_${this.pluginCode}_PLUGIN`]) {
       logger.info({ plugin: this.pluginName }, `Plugin disabled.`);
@@ -76,7 +76,7 @@ export default abstract class BrokerPlugin {
   setPluginConfigParamForConnection(
     connectionKey: string,
     paramName: string,
-    value: any,
+    value: PluginConnectionConfig | string,
   ) {
     setPluginConfigParamByConnectionKey(connectionKey, paramName, value);
   }
@@ -85,7 +85,7 @@ export default abstract class BrokerPlugin {
     connectionKey: string,
     contextId: string,
     paramName: string,
-    value: any,
+    value: unknown,
   ) {
     setPluginConfigParamByConnectionKeyAndContextId(
       connectionKey,

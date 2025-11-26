@@ -14,7 +14,7 @@ export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
   statusText?: string;
-  body: any;
+  body: string;
 }
 const MAX_RETRY = getConfig().MAX_RETRY || 3;
 
@@ -30,7 +30,7 @@ if (process.env.NP_PROXY || process.env.no_proxy) {
 
 export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
-  retries = MAX_RETRY,
+  retries: number = MAX_RETRY,
 ): Promise<HttpResponse> => {
   const config = getConfig();
   const localRequest = req;
@@ -49,7 +49,7 @@ export const makeRequestToDownstream = async (
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
     method: localRequest.method,
-    headers: localRequest.headers as any,
+    headers: localRequest.headers,
   };
 
   return new Promise<HttpResponse>((resolve, reject) => {
@@ -62,7 +62,7 @@ export const makeRequestToDownstream = async (
           let data = '';
 
           // A chunk of data has been received.
-          response.on('data', (chunk) => {
+          response.on('data', (chunk: string) => {
             data += chunk;
           });
 
@@ -73,7 +73,7 @@ export const makeRequestToDownstream = async (
               response.statusCode >= 200 &&
               response.statusCode < 300
             ) {
-              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+              const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
               const maskedToken = maskToken(brokerToken);
               logger.trace(
                 {
@@ -83,7 +83,7 @@ export const makeRequestToDownstream = async (
                 `Successful request`,
               );
             } else {
-              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+              const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
               const maskedToken = maskToken(brokerToken);
               logger.debug(
                 {
@@ -121,7 +121,7 @@ export const makeRequestToDownstream = async (
       // An error occurred while fetching.
       request.on('error', (error) => {
         if (retries > 0) {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
           const maskedToken = maskToken(brokerToken);
           logger.warn(
             {
@@ -134,7 +134,7 @@ export const makeRequestToDownstream = async (
             resolve(makeRequestToDownstream(localRequest, retries - 1));
           }, 500); // Wait for 0.5 second before retrying
         } else {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
           const maskedToken = maskToken(brokerToken);
           logger.error(
             {
@@ -160,7 +160,7 @@ export const makeRequestToDownstream = async (
 
 export const makeStreamingRequestToDownstream = (
   req: PostFilterPreparedRequest,
-  retries = MAX_RETRY,
+  retries: number = MAX_RETRY,
 ): Promise<http.IncomingMessage> => {
   const config = getConfig();
   const localRequest = req;
@@ -179,7 +179,7 @@ export const makeStreamingRequestToDownstream = (
   const httpClient = localRequest.url.startsWith('https') ? https : http;
   const options: http.RequestOptions = {
     method: localRequest.method,
-    headers: localRequest.headers as any,
+    headers: localRequest.headers,
   };
 
   return new Promise<http.IncomingMessage>((resolve, reject) => {
@@ -194,7 +194,7 @@ export const makeStreamingRequestToDownstream = (
             response.statusCode >= 200 &&
             response.statusCode < 300
           ) {
-            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+            const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
             const maskedToken = maskToken(brokerToken);
             logger.debug(
               {
@@ -205,7 +205,7 @@ export const makeStreamingRequestToDownstream = (
               `Successful downstream request.`,
             );
           } else {
-            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+            const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
             const maskedToken = maskToken(brokerToken);
             logger.warn(
               {
@@ -242,7 +242,7 @@ export const makeStreamingRequestToDownstream = (
       );
       request.on('error', (error) => {
         if (retries > 0) {
-          const brokerToken = extractBrokerTokenFromUrl(req.url);
+          const brokerToken = extractBrokerTokenFromUrl(req.url)!;
           const maskedToken = maskToken(brokerToken);
           logger.warn(
             {
@@ -257,7 +257,7 @@ export const makeStreamingRequestToDownstream = (
             );
           }, 500); // Wait for 0.5 second before retrying
         } else {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
+          const brokerToken = extractBrokerTokenFromUrl(localRequest.url)!;
           const maskedToken = maskToken(brokerToken);
           logger.error(
             {
@@ -300,7 +300,7 @@ export const makeSingleRawRequestToDownstream = async (
   const timeoutMs = req.timeoutMs ?? 0;
   const options: http.RequestOptions = {
     method: localRequest.method,
-    headers: localRequest.headers as any,
+    headers: localRequest.headers,
     timeout: timeoutMs,
   };
   return new Promise<HttpResponse>((resolve, reject) => {

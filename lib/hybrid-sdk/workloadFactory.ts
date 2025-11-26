@@ -84,14 +84,16 @@ export abstract class Workload<
     return new WorkloadClass(req, res, options);
   }
 
-  static async instantiate(
+  static async instantiate<
+    T extends WorkloadType.localClient | WorkloadType.remoteServer,
+  >(
     name: string,
     path: string,
-    type: WorkloadType.localClient | WorkloadType.remoteServer,
-    params,
-  ): Promise<
-    Workload<WorkloadType.localClient> | Workload<WorkloadType.remoteServer>
-  > {
+    type: T,
+    params: T extends WorkloadType.remoteServer
+      ? RemoteServerWorkloadParams
+      : LocalClientWorkloadParams,
+  ): Promise<Workload<T>> {
     if (!path) {
       throw new Error(
         `Unable to instantiate workload, path is undefined. Please check config.default.json to contain workload directives. Refer to https://github.com/snyk/broker/blob/master/config.default.json.`,
@@ -99,9 +101,17 @@ export abstract class Workload<
     }
     switch (type) {
       case WorkloadType.remoteServer:
-        return await this.instantiateRemoteServerWorkload(name, path, params);
+        return (await this.instantiateRemoteServerWorkload(
+          name,
+          path,
+          params as RemoteServerWorkloadParams,
+        )) as Workload<T>;
       case WorkloadType.localClient:
-        return await this.instantiateLocalClientWorkload(name, path, params);
+        return (await this.instantiateLocalClientWorkload(
+          name,
+          path,
+          params as LocalClientWorkloadParams,
+        )) as Workload<T>;
       default:
         throw new Error(`Error loading workload - unknown type ${type}`);
     }

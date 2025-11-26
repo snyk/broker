@@ -218,7 +218,7 @@ export class Plugin extends BrokerPlugin {
             connectionKey,
             contextId,
             'JWT_TOKEN',
-          ),
+          ) as string,
         ),
       );
       if (
@@ -240,7 +240,7 @@ export class Plugin extends BrokerPlugin {
             connectionKey,
             contextId,
             'ghaAccessToken',
-          ),
+          ) as string,
         ).token,
       );
       if (
@@ -379,7 +379,7 @@ export class Plugin extends BrokerPlugin {
           'JWT_TOKEN',
         )
       ) {
-        let timeoutHandlerId;
+        let timeoutHandlerId: NodeJS.Timeout;
         let timeoutHandler = async () => {};
         timeoutHandler = async () => {
           try {
@@ -599,7 +599,7 @@ export class Plugin extends BrokerPlugin {
             connectionName,
             contextId,
             'JWT_TOKEN',
-          );
+          ) as string | undefined;
           if (!jwt) {
             throw new Error(`Github app plugin error: could not refresh JWT.`);
           }
@@ -660,7 +660,7 @@ export class Plugin extends BrokerPlugin {
           connectionName,
           contextId,
           'ghaAccessToken',
-        );
+        ) as string | undefined;
       if (!ghaAccessTokenInHandler) {
         throw new Error(`Github app plugin error: could not get access token.`);
       }

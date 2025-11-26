@@ -6,7 +6,14 @@ import {
   getWebsocketConnections,
 } from '../connectionsManager/manager';
 
-export const serviceHandler = async (msg, cb) => {
+export const serviceHandler = async (
+  msg: { url: string; headers: { 'snyk-request-id': string } },
+  cb: (params: {
+    status: number;
+    headers: { requestId: string };
+    body: string;
+  }) => void,
+) => {
   const clientOptions = getClientOpts();
   // strip off any query strings
   const command = msg.url.indexOf('?') < 0 ? msg.url : msg.url.split('?')[0];

@@ -10,16 +10,32 @@ import {
   Workload,
   WorkloadType,
 } from '../hybrid-sdk/workloadFactory';
-import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
+import { LOADEDFILTERSET } from '../hybrid-sdk/common/types/filter';
 
 export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClient> {
   req: Request;
   res: Response;
-  options;
-  constructor(req, res, options) {
-    super('broker', WorkloadType['local-client']);
+  options: {
+    config: {
+      brokerType: 'client' | 'server';
+      universalBrokerEnabled: boolean;
+    };
+    loadedFilters?: LOADEDFILTERSET;
+  };
+  constructor(
+    req: Request,
+    res: Response,
+    options: {
+      config: {
+        brokerType: 'client' | 'server';
+        universalBrokerEnabled: boolean;
+      };
+      loadedFilters?: LOADEDFILTERSET;
+    },
+  ) {
+    super('broker', WorkloadType.localClient);
     this.req = req;
     this.res = res;
     this.options = options;
@@ -36,7 +52,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       this.res.locals.websocket,
     );
 
-    const logContext: ExtendedLogContext = {
+    const logContext: Record<string, unknown> = {
       url: this.req.url,
       connectionName: '',
       requestMethod: this.req.method,

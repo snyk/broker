@@ -4,7 +4,7 @@ export const retry = async <T>(
   fn: () => Promise<T> | T,
   { retries, operation } = { retries: 30, operation: '' },
   attempt = 0,
-) => {
+): Promise<T> => {
   try {
     return await fn();
   } catch (error) {

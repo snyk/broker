@@ -1,9 +1,20 @@
 import { getFilterConfig } from '../hybrid-sdk/client/config/filters';
 import { WebSocketConnection } from '../hybrid-sdk/client/types/client';
-import { LOADEDFILTERSET } from '../hybrid-sdk/common/types/filter';
+import { LOADEDFILTERSET, Rule } from '../hybrid-sdk/common/types/filter';
+import { RequestPayload } from '../hybrid-sdk/common/types/http';
 
-export const filterRequest = (payload, options, websocketConnectionHandler) => {
-  let filterResponse;
+export const filterRequest = (
+  payload: RequestPayload,
+  options: {
+    config: {
+      brokerType: 'client' | 'server';
+      universalBrokerEnabled?: boolean;
+    };
+    loadedFilters?: LOADEDFILTERSET;
+  },
+  websocketConnectionHandler?: WebSocketConnection,
+) => {
+  let filterResponse: false | Rule;
   if (
     options.config.brokerType == 'client' &&
     options.config.universalBrokerEnabled
@@ -14,7 +25,7 @@ export const filterRequest = (payload, options, websocketConnectionHandler) => {
     >;
     filterResponse =
       loadedFilters
-        .get(websocketConnectionHandler.supportedIntegrationType)
+        .get(websocketConnectionHandler!.supportedIntegrationType)
         ?.private(payload) || false;
   } else if (options.config.brokerType == 'client') {
     const loadedFilters = getFilterConfig().loadedFilters as LOADEDFILTERSET;
@@ -27,11 +38,17 @@ export const filterRequest = (payload, options, websocketConnectionHandler) => {
 };
 
 export const filterClientRequest = (
-  payload,
-  options,
+  payload: RequestPayload,
+  options: {
+    config: {
+      brokerType: 'client' | 'server';
+      universalBrokerEnabled: boolean;
+    };
+    loadedFilters?: LOADEDFILTERSET;
+  },
   websocketConnectionHandler: WebSocketConnection,
 ) => {
-  let filterResponse;
+  let filterResponse: Rule | false;
   if (
     options.config.brokerType == 'client' &&
     options.config.universalBrokerEnabled
