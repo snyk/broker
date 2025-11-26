@@ -6,6 +6,8 @@ import { logError, logResponse } from '../logs/log';
 import { isJson } from './common/utils/json';
 import { replaceUrlPartialChunk } from './common/utils/replace-vars';
 import { RequestMetadata } from './types';
+import { WebSocketConnection } from './client/types/client';
+import { WebSocketServer } from './server/types/socket';
 
 export interface HybridResponse {
   status: number;
@@ -16,16 +18,16 @@ export interface HybridResponse {
 }
 export class HybridResponseHandler {
   connectionIdentifier;
-  websocketConnectionHandler;
+  websocketConnectionHandler: WebSocketServer | WebSocketConnection;
   logContext;
   config;
   requestMetadata: RequestMetadata;
-  websocketResponseHandler;
+  websocketResponseHandler: (response: HybridResponse) => void;
   responseHandler;
   constructor(
     requestMetadata: RequestMetadata,
-    websocketConnectionHandler,
-    websocketResponseHandler,
+    websocketConnectionHandler: WebSocketServer | WebSocketConnection,
+    websocketResponseHandler: (response: HybridResponse) => void,
     config,
     logContext,
   ) {
@@ -38,9 +40,9 @@ export class HybridResponseHandler {
     // WebsocketResponseHandler provided means WS response expected
     // header x-broker-ws-response:true used on server side
     if (
-      this.websocketConnectionHandler?.capabilities?.includes(
-        'receive-post-streams',
-      ) &&
+      (
+        this.websocketConnectionHandler as { capabilities?: string[] }
+      )?.capabilities?.includes('receive-post-streams') &&
       !this.websocketResponseHandler
     ) {
       // Response Traffic over HTTP Post
@@ -107,9 +109,10 @@ export class HybridResponseHandler {
         this.logContext,
         this.config,
         this.connectionIdentifier,
-        this.websocketConnectionHandler?.serverId ?? '',
+        (this.websocketConnectionHandler as { serverId?: string })?.serverId ??
+          '',
         this.requestMetadata.requestId,
-        this.websocketConnectionHandler.role,
+        (this.websocketConnectionHandler as { role?: string })?.role ?? '',
       );
       if (streamingRequestData) {
         // POST Streaming

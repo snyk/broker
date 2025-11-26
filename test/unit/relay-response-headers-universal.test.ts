@@ -1,10 +1,7 @@
 const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 jest.mock('../../lib/hybrid-sdk/http/request');
-import {
-  Role,
-  WebSocketConnection,
-} from '../../lib/hybrid-sdk/client/types/client';
+import { Role } from '../../lib/hybrid-sdk/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -23,12 +20,13 @@ import {
   LoadedServerOpts,
 } from '../../lib/hybrid-sdk/common/types/options';
 import { AuthObject } from '../../lib/hybrid-sdk/common/types/filter';
+import { Primus } from 'primus';
+import { WebSocketServer } from '../../lib/hybrid-sdk/server/types/socket';
 
-const dummyWebsocketHandler: WebSocketConnection = {
+const dummyWebsocketHandler = {
   destroy: () => {
     return;
   },
-  latency: 0,
   options: {
     ping: 0,
     pong: 0,
@@ -38,19 +36,21 @@ const dummyWebsocketHandler: WebSocketConnection = {
     timeout: 100,
     transport: '',
   },
+  authorize: () => {},
+  plugin: () => ({} as Primus),
   send: () => {},
   serverId: '0',
   socket: {},
   supportedIntegrationType: 'github',
   transport: '',
-  url: '',
-  on: () => {},
+  url: new URL('http://localhost:8000'),
+  on: () => ({} as Primus),
   end: () => {},
   role: Role.primary,
   open: () => {},
-  emit: () => {},
+  emit: () => false,
   readyState: 3,
-};
+} as unknown as WebSocketServer;
 
 const dummyAuthObject: AuthObject = {
   scheme: '',

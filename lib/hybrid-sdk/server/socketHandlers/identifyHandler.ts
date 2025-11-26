@@ -7,6 +7,7 @@ import { getDesensitizedToken } from '../utils/token';
 import { getForwardWebSocketRequestHandler } from './initHandlers';
 import semver from 'semver';
 import { legacyStreamResponseHandler } from '../../LegacyStreamResponseHandler';
+import { ISpark } from 'primus';
 
 let response;
 const minimalSupportedBrokerVersion =
@@ -51,7 +52,11 @@ export const rmClientIdFromTerminationMap = (
 
 // TODO decide if the socket doesn't identify itself within X period,
 // should we toss it away?
-export const handleIdentifyOnSocket = (clientData, socket, token): boolean => {
+export const handleIdentifyOnSocket = (
+  clientData,
+  socket: ISpark,
+  token?: string,
+): boolean => {
   // clientData can be a string token coming from older broker clients,
   // OR an object coming from newer clients in the form of { token, metadata }
   if (typeof clientData === 'object') {
