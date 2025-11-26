@@ -158,10 +158,10 @@ export const createWebSocket = (
       },
     };
   }
-  const websocket: WebSocketConnection = new Socket(
+  const websocket = new Socket(
     localClientOps.config.brokerServerUrlForSocket,
     socketSettings,
-  );
+  ) as unknown as WebSocketConnection;
   websocket.socketVersion = 1;
   websocket.socketType = 'client';
   if (localClientOps.config.universalBrokerEnabled) {

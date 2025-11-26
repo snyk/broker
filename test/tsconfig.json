@@ -1,4 +1,12 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["**/*.ts", "unit/client/scm/github/commit.test.ts", "functional/systemcheck.test.ts", "unit/proxying-decision.test.ts", "functional/dispatcher-server-api.test.ts", "fixtures/plugins/dummy.js"]
+  "include": [
+    "**/*.ts",
+    "../types/**/*.d.ts",
+    "unit/client/scm/github/commit.test.ts",
+    "functional/systemcheck.test.ts",
+    "unit/proxying-decision.test.ts",
+    "functional/dispatcher-server-api.test.ts",
+    "fixtures/plugins/dummy.js"
+  ]
 }

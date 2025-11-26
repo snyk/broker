@@ -2,13 +2,22 @@ import { forwardHttpRequest } from '../../common/connectionToWorkloadInterface/f
 import { forwardWebSocketRequest } from '../../common/connectionToWorkloadInterface/forwardWebsocketRequest';
 import { LoadedServerOpts } from '../../common/types/options';
 import { initIdentifyHandler } from './identifyHandler';
+import { WebSocketServer } from '../types/socket';
+import { RequestPayload } from '../../common/types/http';
+import { HybridResponse } from '../../responseSenders';
+import { Request, Response } from 'express';
 
-let forwardWebSocketResponse;
-let forwardHttpRequestHandler;
+let forwardWebSocketResponse: (
+  connectionIdentifier: any,
+) => (
+  payload: RequestPayload,
+  emit: (response: HybridResponse) => void,
+) => Promise<void>;
+let forwardHttpRequestHandler: (req: Request, res: Response) => Promise<void>;
 
 export const initConnectionHandler = (
   serverOpts: LoadedServerOpts,
-  websocket,
+  websocket: WebSocketServer,
 ) => {
   forwardWebSocketResponse = forwardWebSocketRequest(serverOpts, websocket);
   forwardHttpRequestHandler = forwardHttpRequest(serverOpts);

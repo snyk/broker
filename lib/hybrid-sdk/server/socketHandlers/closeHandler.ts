@@ -4,13 +4,14 @@ import { clientDisconnected } from '../infra/dispatcher';
 import { getSocketConnections } from '../socket';
 import { getDesensitizedToken } from '../utils/token';
 import { rmClientIdFromTerminationMap } from './identifyHandler';
+import { ISpark } from 'primus';
 
 export const handleConnectionCloseOnSocket = (
-  closeReason,
-  socket,
-  token,
-  clientId,
-  identified,
+  closeReason: string,
+  socket: ISpark,
+  token: string | undefined,
+  clientId: string,
+  identified: boolean,
 ) => {
   if (token) {
     const { maskedToken, hashedToken } = getDesensitizedToken(token);

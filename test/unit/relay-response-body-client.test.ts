@@ -4,8 +4,8 @@ process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 jest.mock('../../lib/hybrid-sdk/http/request');
 import { setFilterConfig } from '../../lib/hybrid-sdk/client/config/filters';
 import {
-  Role,
   WebSocketConnection,
+  Role,
 } from '../../lib/hybrid-sdk/client/types/client';
 import { makeRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 
@@ -25,12 +25,12 @@ import {
   LoadedServerOpts,
 } from '../../lib/hybrid-sdk/common/types/options';
 import { AuthObject } from '../../lib/hybrid-sdk/common/types/filter';
+import { Primus } from 'primus';
 
-const dummyWebsocketHandler: WebSocketConnection = {
+const dummyWebsocketHandler = {
   destroy: () => {
     return;
   },
-  latency: 0,
   options: {
     ping: 0,
     pong: 0,
@@ -40,19 +40,22 @@ const dummyWebsocketHandler: WebSocketConnection = {
     timeout: 100,
     transport: '',
   },
+  authorize: () => {},
+  plugin: () => ({} as Primus),
   send: () => {},
   serverId: '0',
   socket: {},
+  socketType: 'client',
   supportedIntegrationType: 'github',
   transport: '',
-  url: '',
-  on: () => {},
+  url: new URL('http://localhost:8000'),
+  on: () => ({} as Primus),
   end: () => {},
   role: Role.primary,
   open: () => {},
-  emit: () => {},
+  emit: () => false,
   readyState: 3,
-};
+} as WebSocketConnection;
 
 const dummyAuthObject: AuthObject = {
   scheme: '',

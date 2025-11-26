@@ -1,7 +1,7 @@
 import Primus from 'primus';
 import Emitter from 'primus-emitter';
 import { LoadedServerOpts } from '../common/types/options';
-import { SocketHandler } from './types/socket';
+import { WebSocketServer, SocketHandler } from './types/socket';
 import { handleIoError } from './socketHandlers/errorHandler';
 import { handleSocketConnection } from './socketHandlers/connectionHandler';
 import { initConnectionHandler } from './socketHandlers/initHandlers';
@@ -47,17 +47,20 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
     compression: Boolean(loadedServerOpts.config.socketUseCompression) || false,
   };
 
-  const websocket = new Primus(server, ioConfig);
+  const websocket = new Primus(server, ioConfig) as WebSocketServer;
   if (loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
     websocket.authorize(async (req, done) => {
       const connectionIdentifier = req.uri.pathname
         .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
         .toLowerCase();
       const maskedToken = maskToken(connectionIdentifier);
-      const authHeader =
-        req.headers['Authorization'] ?? req.headers['authorization'];
-      const brokerClientId = req.headers['x-snyk-broker-client-id'] ?? null;
-      const role = req.headers['x-snyk-broker-client-role'] ?? null;
+      const authHeader = (req.headers['Authorization'] ??
+        req.headers['authorization']) as string | undefined;
+      const brokerClientId =
+        (req.headers['x-snyk-broker-client-id'] as string | undefined) ?? null;
+      const role =
+        (req.headers['x-snyk-broker-client-role'] as string | undefined) ??
+        null;
       if (
         (!authHeader ||
           !authHeader.toLowerCase().startsWith('bearer') ||
@@ -93,8 +96,8 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         );
         // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
         const credsCheckResponse = await validateBrokerClientCredentials(
-          authHeader,
-          brokerClientId,
+          authHeader!,
+          brokerClientId!,
           connectionIdentifier,
         );
         if (!credsCheckResponse) {
@@ -121,9 +124,9 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         const currentClient: ClientSocket = {
           socketType: 'server',
           socketVersion: 1,
-          brokerClientId: brokerClientId,
+          brokerClientId: brokerClientId!,
           brokerAppClientId: brokerAppClientId,
-          role: role ?? Role.primary,
+          role: (role ?? Role.primary) as Role,
           credsValidationTime: nowDate,
         };
         const connections = getSocketConnections();

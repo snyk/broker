@@ -1,4 +1,5 @@
 import { getFilterConfig } from '../hybrid-sdk/client/config/filters';
+import { WebSocketConnection } from '../hybrid-sdk/client/types/client';
 import { LOADEDFILTERSET } from '../hybrid-sdk/common/types/filter';
 
 export const filterRequest = (payload, options, websocketConnectionHandler) => {
@@ -28,7 +29,7 @@ export const filterRequest = (payload, options, websocketConnectionHandler) => {
 export const filterClientRequest = (
   payload,
   options,
-  websocketConnectionHandler,
+  websocketConnectionHandler: WebSocketConnection,
 ) => {
   let filterResponse;
   if (

@@ -2,8 +2,8 @@ const PORT = 8001;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
 
 import {
-  Role,
   WebSocketConnection,
+  Role,
 } from '../../lib/hybrid-sdk/client/types/client';
 import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
 import { loadAllFilters } from '../../lib/hybrid-sdk/common/filter/filtersAsync';
@@ -16,12 +16,12 @@ import {
   LoadedServerOpts,
 } from '../../lib/hybrid-sdk/common/types/options';
 import { setFilterConfig } from '../../lib/hybrid-sdk/client/config/filters';
+import { Primus } from 'primus';
 
-const dummyWebsocketHandler: WebSocketConnection = {
+const dummyWebsocketHandler = {
   destroy: () => {
     return;
   },
-  latency: 0,
   options: {
     ping: 0,
     pong: 0,
@@ -31,19 +31,22 @@ const dummyWebsocketHandler: WebSocketConnection = {
     timeout: 100,
     transport: '',
   },
+  authorize: () => {},
+  plugin: () => ({} as Primus),
   send: () => {},
   serverId: '0',
   socket: {},
+  socketType: 'client',
   transport: '',
-  url: '',
-  on: () => {},
+  url: new URL('http://localhost:8000'),
+  on: () => ({} as Primus),
   end: () => {},
   role: Role.primary,
   open: () => {},
-  emit: () => {},
+  emit: () => false,
   readyState: 3,
   supportedIntegrationType: 'github',
-};
+} as WebSocketConnection;
 
 const dummyLoadedFilters = new Map();
 dummyLoadedFilters['github'] = {

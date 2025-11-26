@@ -5,8 +5,9 @@ import { handleConnectionCloseOnSocket } from './closeHandler';
 import { handleSocketError } from './errorHandler';
 import { handleTerminationSignalOnSocket } from './terminateHandler';
 import { hashToken, maskToken } from '../../common/utils/token';
+import { ISpark } from 'primus';
 
-export const handleSocketConnection = (socket) => {
+export const handleSocketConnection = (socket: ISpark) => {
   let clientId = null;
   let identified = false;
 
@@ -27,7 +28,7 @@ export const handleSocketConnection = (socket) => {
 
   ['close', 'end', 'disconnect'].forEach((e) =>
     socket.on(e, () =>
-      handleConnectionCloseOnSocket(e, socket, token, clientId, identified),
+      handleConnectionCloseOnSocket(e, socket, token, clientId!, identified),
     ),
   );
 

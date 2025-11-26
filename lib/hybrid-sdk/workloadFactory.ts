@@ -1,3 +1,7 @@
+import { WebSocketConnection } from './client/types/client';
+import { HybridResponse } from './responseSenders';
+import { WebSocketServer } from './server/types/socket';
+
 export enum WorkloadType {
   remoteServer = 'remoteServer',
   localClient = 'localClient',
@@ -6,7 +10,7 @@ export enum WorkloadType {
 export interface RemoteServerWorkloadParams {
   connectionIdentifier: string;
   options: any;
-  websocketConnectionHandler: any;
+  websocketConnectionHandler: WebSocketServer | WebSocketConnection;
 }
 
 export interface LocalClientWorkloadParams {
@@ -17,7 +21,7 @@ export interface LocalClientWorkloadParams {
 
 export interface RemoteServerWorkloadRuntimeParams {
   payload: any;
-  websocketHandler: any;
+  websocketHandler: (response: HybridResponse) => void;
 }
 export interface LocalClientWorkloadRuntimeParams {
   makeRequestOverHttp?: boolean;
@@ -36,7 +40,7 @@ interface WorkloadModule {
   default: new (
     connectionIdentifier: string,
     options: any,
-    websocketConnectionHandler: any,
+    websocketConnectionHandler: WebSocketServer | WebSocketConnection,
   ) => Workload<WorkloadType.remoteServer>;
 }
 

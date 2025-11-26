@@ -1,5 +1,6 @@
 import { FiltersType } from '../../common/types/filter';
 import { CheckResult } from '../checks/types';
+import { Primus } from 'primus';
 
 export interface HookResults {
   preflightCheckResults?: CheckResult[];
@@ -49,42 +50,30 @@ export interface ConnectionMetadata {
   serverId?: string;
 }
 
-export interface WebSocketConnection {
-  options: {
-    reconnect: any;
-    ping: number;
-    pong: number;
-    timeout: number;
-    transport: any;
-    queueSize: any;
-    stategy: any;
-  };
-  transport: any;
-  socketVersion?: any;
-  socketType?: string;
-  identifier?: string;
+export interface WebSocketConnection
+  extends Pick<Primus, 'destroy' | 'emit' | 'end' | 'on'> {
+  capabilities?: string[];
   clientConfig?: any;
-  role: Role;
   friendlyName?: string;
-  supportedIntegrationType: string;
+  identifier?: string;
+  role: Role;
   serverId: string;
-  url: any;
-  latency: any;
-  socket: any;
-  destroy: any;
-  send: any;
-  end: any;
-  open: any;
-  emit: any;
-  capabilities?: any;
-  on: (string, any) => any;
-  readyState: any;
-  timeoutHandlerId?: any;
-}
-// export interface WebSocketConnection {
-//   websocket: Connection;
-// }
+  socketType: 'client';
+  socketVersion?: number;
+  supportedIntegrationType: string;
+  timeoutHandlerId?: NodeJS.Timeout;
 
+  // Added by primus, but specific to the client
+  socket: any;
+  readyState: number;
+  transport: {
+    extraHeaders?: Record<string, string>;
+  };
+  url: URL;
+
+  // Added by primus-emitter plugin
+  send: (event: string, ...args: any[]) => void;
+}
 export interface ValidationResult {
   connectionName: string;
   validated: boolean;
