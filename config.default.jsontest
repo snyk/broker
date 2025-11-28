@@ -37,7 +37,7 @@
   "BROKER_CLIENT_CONFIGURATION": {
     "common": {
       "default": {
-        "BROKER_SERVER_URL": "https://broker2.snyk.io",
+        "BROKER_SERVER_URL": "https://broker.snyk.io",
         "BROKER_HEALTHCHECK_PATH": "/healthcheck"
       },
       "required": {}
