@@ -54,7 +54,7 @@ describe('config', () => {
       BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token $GITHUB_TOKEN',
       BROKER_CLIENT_VALIDATION_URL: 'https://$GITHUB_API/user',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
-      BROKER_SERVER_URL: 'https://broker2.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.snyk.io',
       GITHUB: 'github.com',
       GITHUB_API: 'api.github.com',
       GITHUB_GRAPHQL: 'api.github.com',
@@ -96,7 +96,7 @@ describe('config', () => {
       BROKER_CLIENT_VALIDATION_BASIC_AUTH: 'PAT:123',
       BROKER_CLIENT_VALIDATION_URL:
         'https://hostname/org/_apis/git/repositories',
-      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
@@ -132,7 +132,7 @@ describe('config', () => {
     expect(configData).toEqual({
       BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
       BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
-      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
@@ -179,7 +179,7 @@ describe('config', () => {
       BROKER_CLIENT_URL: 'dummy',
       BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
       BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
-      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
@@ -241,7 +241,7 @@ describe('config', () => {
     expect(configData).toEqual({
       BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 123',
       BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
-      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
@@ -291,7 +291,7 @@ describe('config', () => {
     expect(configData).toEqual({
       BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'token 456',
       BROKER_CLIENT_VALIDATION_URL: 'https://api.github.com/user',
-      BROKER_SERVER_URL: 'https://broker2.dev.snyk.io',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
       BROKER_HA_MODE_ENABLED: 'false',
       BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
       BROKER_HEALTHCHECK_PATH: '/healthcheck',
