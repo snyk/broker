@@ -35,6 +35,7 @@ export const openHandler = (
     },
     'Successfully established a websocket connection to the broker server.',
   );
+  io.connectionStartTime = Date.now();
   logger.debug(
     {
       metadata,

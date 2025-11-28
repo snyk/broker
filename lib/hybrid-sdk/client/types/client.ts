@@ -62,6 +62,7 @@ export interface WebSocketConnection
   socketVersion?: number;
   supportedIntegrationType: string;
   timeoutHandlerId?: NodeJS.Timeout;
+  connectionStartTime?: number;
 
   // Added by primus, but specific to the client
   socket: any;
