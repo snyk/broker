@@ -291,7 +291,7 @@ export const createWebSocket = (
   websocket.on('service', serviceHandler);
 
   websocket.on('close', () => {
-    closeHandler(localClientOps, identifyingMetadata);
+    closeHandler(websocket, localClientOps, identifyingMetadata);
   });
 
   return websocket;
