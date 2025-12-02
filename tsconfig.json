@@ -12,7 +12,8 @@
     "noImplicitAny": false,
     "alwaysStrict": false,
     "esModuleInterop": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "moduleResolution": "node"
   },
   "include": ["./lib/**/*", "./cli/**/*", "./types/**/*"]
 }
