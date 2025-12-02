@@ -55,7 +55,7 @@ export const rmClientIdFromTerminationMap = (
 export const handleIdentifyOnSocket = (
   clientData,
   socket: ISpark,
-  token?: string,
+  token: string,
 ): boolean => {
   // clientData can be a string token coming from older broker clients,
   // OR an object coming from newer clients in the form of { token, metadata }
