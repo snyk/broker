@@ -32,7 +32,7 @@ describe('client send termination signal to broker server', () => {
     .spyOn(process, 'exit')
     // Disabling es-lint, complains of unused "code" otherwise
     // eslint-disable-next-line
-    .mockImplementation((code?: string | number | null) => undefined as never);
+    .mockImplementation((code?: number) => undefined as never);
   beforeAll(async () => {
     const PORT = 9999;
     tws = await createTestWebServer();
