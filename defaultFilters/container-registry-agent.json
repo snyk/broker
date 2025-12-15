@@ -72,6 +72,12 @@
         "origin": "${CR_AGENT_URL}"
       },
       {
+        "//": "lists paginated results (supports >1000 images)",
+        "method": "GET",
+        "path": "/list-paginated/*",
+        "origin": "${CR_AGENT_URL}"
+      },
+      {
         "//": "accepts image scan requests (v1)",
         "method": "POST",
         "path": "/discover",
