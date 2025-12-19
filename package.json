@@ -36,7 +36,7 @@
     "test": "test"
   },
   "devDependencies": {
-    "@openpgp/web-stream-tools": "^0.0.13",
+    "@openpgp/web-stream-tools": "0.3.0",
     "@types/body-parser": "~1.19.6",
     "@types/bunyan": "~1.8.8",
     "@types/compression": "~1.7.5",
@@ -99,7 +99,7 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
     "node-cache": "^5.1.0",
-    "openpgp": "^5.11.3",
+    "openpgp": "6.3.0",
     "path-to-regexp": "^1.9.0",
     "primus": "^6.1.0",
     "primus-emitter": "^3.1.1",
