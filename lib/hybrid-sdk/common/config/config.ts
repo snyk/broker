@@ -81,6 +81,7 @@ export const findPluginFolder = async (
 export const loadBrokerConfig = async (localConfigForTest?) => {
   dotenv.config({
     path: path.join(process.cwd(), '.env'),
+    quiet: true,
   });
   try {
     const localConfig = localConfigForTest
