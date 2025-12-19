@@ -373,14 +373,14 @@ export default async (
       if (!retrievedFilters.get(type)) {
         throw new Error(`Missing filter for ${type}.`);
       }
-      filters[type] = yaml.safeLoad(retrievedFilters.get(type));
+      filters[type] = yaml.load(retrievedFilters.get(type));
       filters[type] = injectRulesAtRuntime(filters[type], config, type);
     });
   } else {
     if (!acceptFilename) {
       return filters;
     } else if (acceptFilename && retrievedFilters) {
-      filters = yaml.safeLoad(retrievedFilters.get('current'));
+      filters = yaml.load(retrievedFilters.get('current'));
     } else {
       const acceptLocation = path.resolve(
         folderLocation
@@ -389,7 +389,7 @@ export default async (
         acceptFilename,
       );
 
-      filters = yaml.safeLoad(fs.readFileSync(acceptLocation, 'utf8'));
+      filters = yaml.load(fs.readFileSync(acceptLocation, 'utf8'));
     }
 
     // If user brings an accept json, skip the IAC|CODE rules injection logic
