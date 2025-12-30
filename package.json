@@ -80,7 +80,7 @@
   "dependencies": {
     "axios": "1.13.2",
     "axios-retry": "4.5.0",
-    "body-parser": "^1.20.3",
+    "body-parser": "1.20.4",
     "bunyan": "^1.8.12",
     "camelcase": "^5.3.1",
     "clarify": "^2.0.0",
@@ -105,7 +105,7 @@
     "primus-emitter": "^3.1.1",
     "prom-client": "^11.5.3",
     "proxy-from-env": "^1.1.0",
-    "qs": "^6.13.0",
+    "qs": "6.14.1",
     "semver": "7.7.3",
     "snyk-config": "^4.0.0",
     "then-fs": "^2.0.0",
