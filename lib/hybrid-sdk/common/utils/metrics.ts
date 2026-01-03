@@ -40,6 +40,12 @@ const webSocketRequestsTotal = new Counter({
   labelNames: ['rejectedByFilter', 'flowDirection'],
 });
 
+const socketCloseReasonCount = new Counter({
+  name: 'broker_socket_close_reason_total',
+  help: 'Number of socket close events by reason',
+  labelNames: ['reason'],
+});
+
 function incrementSocketConnectionGauge() {
   socketConnectionGauge.inc(1);
 }
@@ -70,6 +76,10 @@ function incrementWebSocketRequestsTotal(rejectedByFilter, flowDirection) {
   );
 }
 
+function incrementSocketCloseReasonCount(reason) {
+  socketCloseReasonCount.inc({ reason }, 1);
+}
+
 export {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
@@ -77,4 +87,5 @@ export {
   incrementUnableToSizeResponse,
   incrementHttpRequestsTotal,
   incrementWebSocketRequestsTotal,
+  incrementSocketCloseReasonCount,
 };
