@@ -65,7 +65,7 @@ ignore:
   SNYK-RHEL8-BROTLI-14213465:
     - '*':
         reason: No fix for rhel-ubi8 available yet
-        expires: 2026-01-08T12:02:28.307Z
+        expires: 2026-02-08T12:02:28.307Z
         created: 2025-12-09T12:02:28.315Z
   SNYK-RHEL8-GNUPG2-14723700:
     - '*':
