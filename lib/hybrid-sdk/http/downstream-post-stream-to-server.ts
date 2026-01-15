@@ -12,6 +12,7 @@ import http from 'http';
 import { getAuthConfig } from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
+import type { ExtendedLogContext } from '../common/types/log';
 import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
@@ -36,16 +37,23 @@ if (proxyUri) {
 class BrokerServerPostResponseHandler {
   #buffer;
   #brokerTransformer;
-  #logContext;
+  #logContext: ExtendedLogContext;
   #config;
-  #brokerToken;
-  #streamingId;
+  #brokerToken: string;
+  #streamingId?: string;
   #serverId;
   #role;
-  #requestId;
-  #brokerSrvPostRequestHandler;
+  #requestId: string;
+  #brokerSrvPostRequestHandler?: http.ClientRequest;
 
-  constructor(logContext, config, brokerToken, serverId, requestId, role) {
+  constructor(
+    logContext: ExtendedLogContext,
+    config,
+    brokerToken: string,
+    serverId,
+    requestId: string,
+    role,
+  ) {
     this.#logContext = logContext;
     this.#config = config;
     this.#brokerToken = brokerToken;
@@ -113,9 +121,15 @@ class BrokerServerPostResponseHandler {
 
       this.#brokerSrvPostRequestHandler
         .on('error', (e) => {
+          const logContext: ExtendedLogContext = {
+            ...this.#logContext,
+            requestId: this.#requestId,
+            url: brokerServerPostRequestUrl,
+            error: e.message,
+          };
           logger.error(
             {
-              errMsg: e.message,
+              ...logContext,
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
             },
@@ -123,11 +137,17 @@ class BrokerServerPostResponseHandler {
           );
           this.#buffer.end(e.message);
         })
-        .on('response', (r) => {
-          r.on('error', (err) => {
+        .on('response', async (r) => {
+          r.on('error', async (err) => {
+            const logContext: ExtendedLogContext = {
+              ...this.#logContext,
+              requestId: this.#requestId,
+              url: brokerServerPostRequestUrl,
+              error: err.message,
+            };
             logger.error(
               {
-                errMsg: err.message,
+                ...logContext,
                 errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
               },
@@ -135,12 +155,19 @@ class BrokerServerPostResponseHandler {
             );
           });
           if (r.statusCode !== 200) {
+            const body = await readBody(r).catch(() => '');
+            const logContext: ExtendedLogContext = {
+              ...this.#logContext,
+              requestId: this.#requestId,
+              url: brokerServerPostRequestUrl,
+              responseStatus: r.statusCode?.toString(),
+              error: body,
+              responseHeaders: r.headers.toString(),
+            };
             logger.error(
               {
-                statusCode: r.statusCode,
+                ...logContext,
                 statusMessage: r.statusMessage,
-                headers: r.headers,
-                body: r.body?.toString(),
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Received unexpected HTTP response POSTing data to Broker Server',
@@ -241,7 +268,7 @@ class BrokerServerPostResponseHandler {
         status,
         headers: response.headers,
       });
-      this.#initHttpClientRequest();
+      await this.#initHttpClientRequest();
       this.#sendIoData(ioData);
       logger.debug(
         this.#logContext,
@@ -287,14 +314,14 @@ class BrokerServerPostResponseHandler {
           response,
           this.#buffer,
           this.#brokerTransformer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!, // initialized in #initHttpClientRequest above
         );
       } else {
         logger.debug(this.#logContext, 'Pipelining standard');
         await pipeline(
           response,
           this.#buffer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!, // initialized in #initHttpClientRequest above
         );
       }
     } catch (err) {
@@ -313,8 +340,8 @@ class BrokerServerPostResponseHandler {
       { ...this.#logContext, responseData, body },
       'posting internal response back to Broker Server as it is expecting streaming response',
     );
-    this.#initHttpClientRequest();
-    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler);
+    await this.#initHttpClientRequest();
+    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!); // initialized in #initHttpClientRequest above
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();
@@ -323,6 +350,24 @@ class BrokerServerPostResponseHandler {
 
 function isJson(responseHeaders) {
   return responseHeaders['content-type']?.includes('json') || false;
+}
+
+function readBody(response: http.IncomingMessage): Promise<string> {
+  const bodyChunks: Buffer[] = [];
+
+  return new Promise((resolve, reject) => {
+    response.on('data', (chunk) => {
+      bodyChunks.push(chunk);
+    });
+
+    response.on('end', () => {
+      resolve(Buffer.concat(bodyChunks).toString());
+    });
+
+    response.on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 export { BrokerServerPostResponseHandler };
