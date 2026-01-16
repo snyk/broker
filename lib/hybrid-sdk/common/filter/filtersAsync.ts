@@ -5,6 +5,45 @@ import path from 'path';
 import undefsafe from 'undefsafe';
 import tryJSONParse from '../utils/try-json-parse';
 import { log as logger } from '../../../logs/logger';
+
+// Regex cache to prevent dynamic compilation on each request
+const regexCache = new Map<string, RegExp>();
+
+// Object pools for memory management
+const queryObjectPool: Record<string, any>[] = [];
+
+const getQueryObjectFromPool = (): Record<string, any> => {
+  const obj = queryObjectPool.pop();
+  if (obj) {
+    // Clear all properties
+    Object.keys(obj).forEach(key => delete obj[key]);
+    return obj;
+  }
+  return {};
+};
+
+const returnQueryObjectToPool = (obj: Record<string, any>): void => {
+  if (queryObjectPool.length < 50) { // Limit pool size
+    queryObjectPool.push(obj);
+  }
+};
+
+// Get cached regex or compile and cache new one
+const getCachedRegex = (pattern: string): RegExp => {
+  let regex = regexCache.get(pattern);
+  if (!regex) {
+    try {
+      regex = new RegExp(pattern);
+      regexCache.set(pattern, regex);
+    } catch (error) {
+      logger.error({ error, pattern }, 'Failed to compile regex pattern');
+      // Return a regex that never matches for safety
+      regex = /(?!)/;
+      regexCache.set(pattern, regex);
+    }
+  }
+  return regex;
+};
 import { RequestPayload } from '../types/http';
 import {
   LOADEDFILTERSET,
@@ -98,6 +137,12 @@ export const loadFilters: LOADEDFILTER = (
     const bodyRegexFilters = valid
       ? valid.filter((v) => !!v.path && !!v.regex)
       : [];
+
+    // Pre-compile and cache regexes during filter loading
+    const compiledBodyRegexFilters = bodyRegexFilters.map(filter => ({
+      ...filter,
+      compiledRegex: filter.regex ? getCachedRegex(filter.regex) : null
+    }));
     const queryFilters = valid ? valid.filter((v) => !!v.queryParam) : [];
     const headerFilters = valid ? valid.filter((v) => !!v.header) : [];
 
@@ -141,11 +186,21 @@ export const loadFilters: LOADEDFILTER = (
       }
 
       // Discard any fragments before further processing
-      const mainURI = req.url.split('#')[0];
+      const hashIndex = req.url.indexOf('#');
+      const mainURI = hashIndex !== -1 ? req.url.substring(0, hashIndex) : req.url;
 
       // query params might contain additional "?"s, only split on the 1st one
-      const parts = mainURI.split('?');
-      const [url, querystring] = [parts[0], parts.slice(1).join('?')];
+      const questionIndex = mainURI.indexOf('?');
+      let url: string;
+      let querystring: string;
+      
+      if (questionIndex !== -1) {
+        url = mainURI.substring(0, questionIndex);
+        querystring = mainURI.substring(questionIndex + 1);
+      } else {
+        url = mainURI;
+        querystring = '';
+      }
       const res = regexp.exec(url);
       if (!res) {
         // no url match
@@ -170,17 +225,17 @@ export const loadFilters: LOADEDFILTER = (
           });
         }
 
-        if (!isValid && bodyRegexFilters.length) {
+        if (!isValid && compiledBodyRegexFilters.length) {
           parsedBody = parsedBody || tryJSONParse(req.body);
 
-          // validate against the body by regex
-          isValid = bodyRegexFilters.some(({ path: filterPath, regex }) => {
+          // validate against the body by regex using pre-compiled regexes
+          isValid = compiledBodyRegexFilters.some(({ path: filterPath, compiledRegex }) => {
+            if (!compiledRegex) return false;
             try {
-              const re = new RegExp(regex!); //paths without regexes got filtered out earlier, hence the !
-              return re.test(undefsafe(parsedBody, filterPath!));
+              return compiledRegex.test(undefsafe(parsedBody, filterPath!));
             } catch (error) {
               logger.error(
-                { error, path: filterPath, regex },
+                { error, path: filterPath },
                 'failed to test regex rule',
               );
               return false;
@@ -189,23 +244,31 @@ export const loadFilters: LOADEDFILTER = (
         }
 
         // no need to check query filters if the request is already valid
-        if (!isValid && queryFilters.length) {
-          const parsedQuerystring = qs.parse(querystring);
+        if (!isValid && queryFilters.length && querystring) {
+          const parsedQuerystring = getQueryObjectFromPool();
+          
+          try {
+            // Parse querystring into pooled object
+            Object.assign(parsedQuerystring, qs.parse(querystring));
 
-          // validate against the querystring
-          isValid = queryFilters.every(({ queryParam, values }) => {
-            // ! because the value is not undefined, queryFilters length to be non zero and array filtered earlier
-            return values!.some((value) =>
-              // ! because the queryParam is not undefined, queryFilters length to be non zero and array filtered earlier
-              minimatch(
-                (parsedQuerystring[queryParam!] as string) || '',
-                value,
-                {
-                  dot: true,
-                },
-              ),
-            );
-          });
+            // validate against the querystring
+            isValid = queryFilters.every(({ queryParam, values }) => {
+              // ! because the value is not undefined, queryFilters length to be non zero and array filtered earlier
+              return values!.some((value) =>
+                // ! because the queryParam is not undefined, queryFilters length to be non zero and array filtered earlier
+                minimatch(
+                  (parsedQuerystring[queryParam!] as string) || '',
+                  value,
+                  {
+                    dot: true,
+                  },
+                ),
+              );
+            });
+          } finally {
+            // Always return object to pool
+            returnQueryObjectToPool(parsedQuerystring);
+          }
         }
 
         if (!isValid) {
