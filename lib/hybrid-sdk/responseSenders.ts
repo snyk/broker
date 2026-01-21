@@ -8,6 +8,7 @@ import { replaceUrlPartialChunk } from './common/utils/replace-vars';
 import { RequestMetadata } from './types';
 import { WebSocketConnection } from './client/types/client';
 import { WebSocketServer } from './server/types/socket';
+import { ExtendedLogContext } from './common/types/log';
 
 export interface HybridResponse {
   status: number;
@@ -19,7 +20,7 @@ export interface HybridResponse {
 export class HybridResponseHandler {
   connectionIdentifier;
   websocketConnectionHandler: WebSocketServer | WebSocketConnection;
-  logContext;
+  logContext: ExtendedLogContext;
   config;
   requestMetadata: RequestMetadata;
   websocketResponseHandler: (response: HybridResponse) => void;
@@ -29,7 +30,7 @@ export class HybridResponseHandler {
     websocketConnectionHandler: WebSocketServer | WebSocketConnection,
     websocketResponseHandler: (response: HybridResponse) => void,
     config,
-    logContext,
+    logContext: ExtendedLogContext,
   ) {
     this.logContext = logContext;
     this.websocketResponseHandler = websocketResponseHandler;

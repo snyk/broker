@@ -1,4 +1,4 @@
-import { log as logger } from '../../logs/logger';
+import { log as globalLogger } from '../../logs/logger';
 import stream from 'stream';
 import { pipeline } from 'stream/promises';
 
@@ -12,6 +12,7 @@ import http from 'http';
 import { getAuthConfig } from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
+import type { ExtendedLogContext } from '../common/types/log';
 import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
@@ -33,31 +34,72 @@ if (proxyUri) {
     environmentVariableNamespace: '',
   });
 }
+
+interface Logger {
+  debug(message: string): void;
+  debug(
+    context: Partial<ExtendedLogContext> & Record<string, any>,
+    message: string,
+  ): void;
+  error(message: string): void;
+  error(
+    context: Partial<ExtendedLogContext> & Record<string, any>,
+    message: string,
+  ): void;
+  child(context: Partial<ExtendedLogContext> & Record<string, any>): Logger;
+}
+
+/**
+ * Handles sending HTTP responses back to the Broker Server via POST requests.
+ * Supports both streaming and non-streaming response modes.
+ *
+ * Note: The logContext parameter is used both for logging and for setting HTTP request headers
+ * (e.g., actingOrgPublicId -> 'Snyk-acting-org-public-id', productLine -> 'Snyk-product-line').
+ */
 class BrokerServerPostResponseHandler {
-  #buffer;
+  #buffer: stream.PassThrough;
   #brokerTransformer;
-  #logContext;
+  #logContext: ExtendedLogContext;
   #config;
-  #brokerToken;
-  #streamingId;
+  #brokerToken: string;
+  #streamingId?: string;
   #serverId;
   #role;
-  #requestId;
-  #brokerSrvPostRequestHandler;
+  #requestId: string;
+  #brokerSrvPostRequestHandler?: http.ClientRequest;
+  #logger: Logger;
 
-  constructor(logContext, config, brokerToken, serverId, requestId, role) {
+  /**
+   * Creates a new handler for posting responses to the Broker Server.
+   * @param logContext - Logging context with request metadata
+   * @param config - Broker configuration
+   * @param brokerToken - Token identifying the broker connection
+   * @param serverId - Server identifier
+   * @param requestId - Unique request identifier
+   * @param role - Broker role
+   * @param logger - Optional logger instance (defaults to global logger)
+   */
+  constructor(
+    logContext: ExtendedLogContext,
+    config,
+    brokerToken: string,
+    serverId,
+    requestId: string,
+    role,
+    logger: Logger = globalLogger,
+  ) {
+    this.#logger = logger.child({ ...logContext, requestId });
     this.#logContext = logContext;
     this.#config = config;
     this.#brokerToken = brokerToken;
     this.#serverId = serverId;
     this.#role = role;
     this.#requestId = requestId;
-    this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 });
+    this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 }); // 1MB
     this.#buffer.on('error', (e) =>
-      logger.error(
+      this.#logger.error(
         {
-          ...this.#logContext,
-          error: e,
+          errorDetails: e,
           stackTrace: new Error('stacktrace generator').stack,
         },
         'received error sending data to broker server post request buffer',
@@ -79,6 +121,7 @@ class BrokerServerPostResponseHandler {
       );
 
       url = addServerIdAndRoleQS(url, this.#serverId, this.#role);
+      const logger = this.#logger.child({ url: url.toString() });
 
       const brokerServerPostRequestUrl = url.toString();
 
@@ -99,7 +142,7 @@ class BrokerServerPostResponseHandler {
         },
         timeout: this.#config.brokerClientPostTimeout
           ? parseInt(this.#config.brokerClientPostTimeout)
-          : 1200000,
+          : 1200000, // ms -> 20 minutes
       };
       if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
         options.headers['authorization'] =
@@ -115,7 +158,7 @@ class BrokerServerPostResponseHandler {
         .on('error', (e) => {
           logger.error(
             {
-              errMsg: e.message,
+              error: e.message,
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
             },
@@ -123,11 +166,35 @@ class BrokerServerPostResponseHandler {
           );
           this.#buffer.end(e.message);
         })
-        .on('response', (r) => {
-          r.on('error', (err) => {
+        .on('timeout', () => {
+          const timeoutError = new Error(
+            'Upstream request to Broker Server timed out',
+          );
+          // Note: This timeout may fire if upstream or downstream is slow
+          // (whichever timeout is shorter). Check buffer state to help diagnose.
+          logger.error(
+            {
+              error: timeoutError.message,
+              errDetails: timeoutError,
+              timeout: options.timeout,
+              buffer: {
+                readableLength: this.#buffer.readableLength,
+                readableHighWaterMark: this.#buffer.readableHighWaterMark,
+                writableLength: this.#buffer.writableLength,
+                writableHighWaterMark: this.#buffer.writableHighWaterMark,
+              },
+              stackTrace: new Error('stacktrace generator').stack,
+            },
+            'Upstream request to Broker Server timed out',
+          );
+          this.#brokerSrvPostRequestHandler?.destroy();
+          this.#buffer.end(timeoutError.message);
+        })
+        .on('response', async (r) => {
+          r.on('error', async (err) => {
             logger.error(
               {
-                errMsg: err.message,
+                error: err.message,
                 errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
               },
@@ -135,12 +202,13 @@ class BrokerServerPostResponseHandler {
             );
           });
           if (r.statusCode !== 200) {
+            const body = await readBody(r).catch(() => '');
             logger.error(
               {
-                statusCode: r.statusCode,
+                responseStatus: r.statusCode?.toString(),
+                error: body,
+                responseHeaders: JSON.stringify(r.headers),
                 statusMessage: r.statusMessage,
-                headers: r.headers,
-                body: r.body?.toString(),
                 stackTrace: new Error('stacktrace generator').stack,
               },
               'Received unexpected HTTP response POSTing data to Broker Server',
@@ -148,22 +216,25 @@ class BrokerServerPostResponseHandler {
           }
         })
         .on('finish', () => {
-          logger.debug(this.#logContext, 'Finish Post Request Handler Event');
+          logger.debug('Finish Post Request Handler Event');
         })
         .on('close', () => {
-          logger.debug(this.#logContext, 'Close Post Request Handler Event');
+          logger.debug('Close Post Request Handler Event');
         });
 
-      logger.debug(this.#logContext, 'POST Request Client setup');
+      logger.debug('POST Request Client setup');
     } catch (err) {
-      logger.error({ err }, 'Error init Client for POST Broker Server Stream');
+      this.#logger.error(
+        { errorDetails: err },
+        'Error init Client for POST Broker Server Stream',
+      );
     }
   }
 
   #sendIoData(ioData) {
     const ioDataLength = ioData.length;
-    logger.debug(
-      { ...this.#logContext, ioDataLength },
+    this.#logger.debug(
+      { ioDataLength },
       `sending ioData (Status & Headers) to Broker Server`,
     );
     // Would be nice if there were a Unit32Array or a writeUint32 method, but noooooo...
@@ -181,11 +252,10 @@ class BrokerServerPostResponseHandler {
   #handleRequestError() {
     // For reasons unknown, doing foo.on(this.#func)
     // doesn't work - you need return a function from here
-    return (error) => {
-      logger.error(
+    return (error: Error) => {
+      this.#logger.error(
         {
-          ...this.#logContext,
-          error,
+          errorDetails: error,
           stackTrace: new Error('stacktrace generator').stack,
         },
         'received error from downstream request while streaming data to Broker Server',
@@ -207,32 +277,55 @@ class BrokerServerPostResponseHandler {
             },
           }),
         );
-        this.#buffer.write(Buffer.from(body));
-        this.#buffer.end();
       }
     };
   }
 
+  /**
+   * Streams a downstream HTTP response back to the Broker Server.
+   * Sends status/headers first, then streams the response body.
+   * @param response - The incoming HTTP response to forward
+   * @param streamingID - Unique identifier for this streaming request
+   */
   async forwardRequest(response: http.IncomingMessage, streamingID) {
     const config = this.#config;
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;
       response.socket.on('error', (err) => {
-        logger.error(
+        this.#logger.error(
           {
-            msg: err.message,
-            err: err,
+            error: err.message,
+            errDetails: err,
             stackTrace: new Error('stacktrace generator').stack,
           },
           'Socket Response error in Streaming from downstream',
         );
       });
+      response.socket.on('timeout', () => {
+        const timeoutError = new Error('Downstream response socket timed out');
+        // Note: This timeout may fire if downstream or upstream is slow
+        // (whichever timeout is shorter). Check buffer state to help diagnose.
+        this.#logger.error(
+          {
+            error: timeoutError.message,
+            errDetails: timeoutError,
+            buffer: {
+              readableLength: this.#buffer.readableLength,
+              writableLength: this.#buffer.writableLength,
+              readableHighWaterMark: this.#buffer.readableHighWaterMark,
+              writableHighWaterMark: this.#buffer.writableHighWaterMark,
+            },
+            stackTrace: new Error('stacktrace generator').stack,
+          },
+          'Downstream response socket timed out',
+        );
+        response.socket.destroy();
+      });
       const status = response?.statusCode || 500;
-      logger.debug(
+      this.#logger.debug(
         {
-          ...this.#logContext,
-          responseStatus: status,
+          responseStatus: status.toString(),
         },
         'response received, setting up stream to Broker Server',
       );
@@ -241,16 +334,13 @@ class BrokerServerPostResponseHandler {
         status,
         headers: response.headers,
       });
-      this.#initHttpClientRequest();
+      await this.#initHttpClientRequest();
       this.#sendIoData(ioData);
-      logger.debug(
-        this.#logContext,
-        'successfully sent status & headers to Broker Server',
-      );
-      const localLogContext = this.#logContext;
+      this.#logger.debug('successfully sent status & headers to Broker Server');
       // TODO: break into 2 distinct transform, only to add to pipeline if conditions are met
       // Take out of here if possible
-      logger.debug(this.#logContext, 'Setting up transformers');
+      this.#logger.debug('Setting up transformers');
+      const logger = this.#logger;
       this.#brokerTransformer = new stream.Transform({
         transform(chunk, encoding, callback) {
           const httpBody =
@@ -258,7 +348,7 @@ class BrokerServerPostResponseHandler {
               ? { body: chunk.toString() }.body
               : null;
           logger.debug(
-            { ...localLogContext, chunkLength: chunk.length, httpBody },
+            { chunkLength: chunk.length, httpBody },
             'writing data to buffer',
           );
           if (config.RES_BODY_URL_SUB && isResponseJson) {
@@ -279,42 +369,45 @@ class BrokerServerPostResponseHandler {
         (config && config.LOG_ENABLE_BODY === 'true') ||
         (config.RES_BODY_URL_SUB && isResponseJson)
       ) {
-        logger.debug(
-          this.#logContext,
-          'Pipelining with body logging on or Body replace ',
-        );
+        this.#logger.debug('Pipelining with body logging on or Body replace ');
         await pipeline(
           response,
           this.#buffer,
           this.#brokerTransformer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!, // initialized in #initHttpClientRequest above
         );
       } else {
-        logger.debug(this.#logContext, 'Pipelining standard');
+        this.#logger.debug('Pipelining standard');
         await pipeline(
           response,
           this.#buffer,
-          this.#brokerSrvPostRequestHandler,
+          this.#brokerSrvPostRequestHandler!, // initialized in #initHttpClientRequest above
         );
       }
     } catch (err) {
-      logger.error(
-        { err },
+      this.#logger.error(
+        { errorDetails: err },
         'Error in forwarding the request to broker server pipeline',
       );
     }
   }
 
+  /**
+   * Sends a complete response (status, headers, body) back to the Broker Server.
+   * Used for non-streaming, internally generated responses.
+   * @param responseData - Response object containing status, headers, and body
+   * @param streamingID - Unique identifier for this request
+   */
   async sendData(responseData, streamingID) {
     this.#streamingId = streamingID;
     const body = responseData.body;
     delete responseData.body;
-    logger.debug(
-      { ...this.#logContext, responseData, body },
+    this.#logger.debug(
+      { responseData, body },
       'posting internal response back to Broker Server as it is expecting streaming response',
     );
-    this.#initHttpClientRequest();
-    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler);
+    await this.#initHttpClientRequest();
+    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!); // initialized in #initHttpClientRequest above
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();
@@ -323,6 +416,24 @@ class BrokerServerPostResponseHandler {
 
 function isJson(responseHeaders) {
   return responseHeaders['content-type']?.includes('json') || false;
+}
+
+function readBody(response: http.IncomingMessage): Promise<string> {
+  const bodyChunks: Buffer[] = [];
+
+  return new Promise((resolve, reject) => {
+    response.on('data', (chunk) => {
+      bodyChunks.push(chunk);
+    });
+
+    response.on('end', () => {
+      resolve(Buffer.concat(bodyChunks).toString());
+    });
+
+    response.on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 export { BrokerServerPostResponseHandler };
