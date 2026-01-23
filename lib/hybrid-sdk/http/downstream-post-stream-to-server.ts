@@ -121,7 +121,6 @@ class BrokerServerPostResponseHandler {
       );
 
       url = addServerIdAndRoleQS(url, this.#serverId, this.#role);
-      const logger = this.#logger.child({ url: url.toString() });
 
       const brokerServerPostRequestUrl = url.toString();
 
@@ -144,6 +143,12 @@ class BrokerServerPostResponseHandler {
           ? parseInt(this.#config.brokerClientPostTimeout)
           : 1200000, // ms -> 20 minutes
       };
+
+      const logger = this.#logger.child({
+        method: options.method,
+        url: brokerServerPostRequestUrl,
+      });
+
       if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
         options.headers['authorization'] =
           getAuthConfig().accessToken.authHeader;
@@ -312,15 +317,16 @@ class BrokerServerPostResponseHandler {
             errDetails: timeoutError,
             buffer: {
               readableLength: this.#buffer.readableLength,
-              writableLength: this.#buffer.writableLength,
               readableHighWaterMark: this.#buffer.readableHighWaterMark,
+              writableLength: this.#buffer.writableLength,
               writableHighWaterMark: this.#buffer.writableHighWaterMark,
             },
             stackTrace: new Error('stacktrace generator').stack,
           },
           'Downstream response socket timed out',
         );
-        response.socket.destroy();
+        response.socket?.destroy();
+        this.#buffer.end(timeoutError.message);
       });
       const status = response?.statusCode || 500;
       this.#logger.debug(
