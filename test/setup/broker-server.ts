@@ -2,7 +2,8 @@ import { app } from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
 import { DEFAULT_BROKER_SERVER_PORT } from './constants';
-import { setTimeout } from 'timers/promises';
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const LOG = createTestLogger();
 
@@ -157,5 +158,5 @@ export const closeBrokerServer = async (
   brokerServer: BrokerServer,
 ): Promise<void> => {
   await brokerServer.server?.close();
-  await setTimeout(100, 'wait 100ms after closing server');
+  await sleep(100);
 };
