@@ -307,27 +307,6 @@ class BrokerServerPostResponseHandler {
           'Socket Response error in Streaming from downstream',
         );
       });
-      response.socket.on('timeout', () => {
-        const timeoutError = new Error('Downstream response socket timed out');
-        // Note: This timeout may fire if downstream or upstream is slow
-        // (whichever timeout is shorter). Check buffer state to help diagnose.
-        this.#logger.error(
-          {
-            error: timeoutError.message,
-            errDetails: timeoutError,
-            buffer: {
-              readableLength: this.#buffer.readableLength,
-              readableHighWaterMark: this.#buffer.readableHighWaterMark,
-              writableLength: this.#buffer.writableLength,
-              writableHighWaterMark: this.#buffer.writableHighWaterMark,
-            },
-            stackTrace: new Error('stacktrace generator').stack,
-          },
-          'Downstream response socket timed out',
-        );
-        response.socket?.destroy();
-        this.#buffer.end(timeoutError.message);
-      });
       const status = response?.statusCode || 500;
       this.#logger.debug(
         {
