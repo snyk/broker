@@ -1,6 +1,8 @@
 import { log as globalLogger } from '../../logs/logger';
 import stream from 'stream';
-import { pipeline } from 'stream/promises';
+import { promisify } from 'util';
+
+const pipeline = promisify(stream.pipeline);
 
 import version from '../common/utils/version';
 
@@ -308,17 +310,13 @@ class BrokerServerPostResponseHandler {
         );
       });
       response.socket.on('timeout', () => {
-        const timeoutError = new Error('Downstream response socket timed out');
-        // Note: This timeout may fire if downstream or upstream is slow
-        // (whichever timeout is shorter). Check buffer state to help diagnose.
         this.#logger.error(
           {
-            error: timeoutError.message,
-            errDetails: timeoutError,
+            error: 'Downstream response socket timed out',
             buffer: {
               readableLength: this.#buffer.readableLength,
-              readableHighWaterMark: this.#buffer.readableHighWaterMark,
               writableLength: this.#buffer.writableLength,
+              readableHighWaterMark: this.#buffer.readableHighWaterMark,
               writableHighWaterMark: this.#buffer.writableHighWaterMark,
             },
             stackTrace: new Error('stacktrace generator').stack,
@@ -326,7 +324,6 @@ class BrokerServerPostResponseHandler {
           'Downstream response socket timed out',
         );
         response.socket?.destroy();
-        this.#buffer.end(timeoutError.message);
       });
       const status = response?.statusCode || 500;
       this.#logger.debug(
