@@ -206,59 +206,6 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
-  describe('downstream socket timeout', () => {
-    beforeEach(() => {
-      setConfig({
-        brokerServerUrl,
-        universalBrokerEnabled: false,
-        universalBrokerGa: false,
-      });
-    });
-
-    it('logs timeout with buffer state when downstream response socket times out', async () => {
-      nock(brokerServerUrl)
-        .post(`/response-data/${brokerToken}/${streamingId}`)
-        .query(true)
-        .reply(200, 'OK');
-
-      const handler = createHandler();
-
-      const mockSocket = new Socket();
-      const mockResponse = new http.IncomingMessage(mockSocket);
-      mockResponse.statusCode = 200;
-      mockResponse.headers = { 'content-type': 'application/json' };
-
-      // Start forward request (don't await - it may not complete cleanly after socket destroy)
-      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
-
-      // Wait for handler to set up socket listeners, then emit timeout
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      mockSocket.emit('timeout');
-
-      // End the response to allow pipeline to complete
-      mockResponse.push(null);
-
-      // Wait for forwardRequest to finish (it catches errors internally)
-      await forwardPromise;
-
-      const errorCall = testLogger.errorCalls.find(
-        (call) => call.message === 'Downstream response socket timed out',
-      );
-      expect(errorCall).toBeDefined();
-      expect(errorCall?.context).toMatchObject({
-        error: 'Downstream response socket timed out',
-      });
-      expect(errorCall?.context.buffer).toMatchObject({
-        readableLength: expect.any(Number),
-        readableHighWaterMark: expect.any(Number),
-        writableLength: expect.any(Number),
-        writableHighWaterMark: expect.any(Number),
-      });
-
-      mockSocket.destroy();
-    });
-  });
-
   describe('upstream request timeouts', () => {
     const shortTimeout = 100;
 

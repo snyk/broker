@@ -2,66 +2,6 @@
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-RHEL8-GLIBC-6656573:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2024-05-14T11:13:02.169Z
-        created: 2024-05-07T11:13:02.174Z
-  SNYK-RHEL8-GLIBC-6684409:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2024-05-14T11:13:13.154Z
-        created: 2024-05-07T11:13:13.157Z
-  SNYK-RHEL8-KRB5LIBS-9620338:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-05-03T12:01:13.134Z
-        created: 2025-04-03T12:01:13.137Z
-  SNYK-JS-WS-7266574:
-    - '*':
-        reason: Mitigated in code
-        expires: 2025-09-13T12:03:16.272Z
-        created: 2025-02-11T12:03:16.275Z
-  SNYK-JS-CROSSSPAWN-8303230:
-    - '*':
-        reason: No upstream fix available
-        expires: 2024-12-11T13:11:49.669Z
-        created: 2024-11-11T13:11:49.674Z
-  SNYK-RHEL8-PAM-8350338:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2024-12-12T12:19:17.636Z
-        created: 2024-11-12T12:19:17.640Z
-  SNYK-RHEL8-SQLITELIBS-9711861:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-05-24T15:32:17.640Z
-        created: 2025-04-24T15:32:17.640Z
-  SNYK-RHEL8-ZLIB-10174471:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-06-19T23:59:69.000Z
-        created: 2025-05-20T10:20:00.000Z
-  SNYK-RHEL8-GLIBC-10216671:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-06-22T23:59:69.000Z
-        created: 2025-05-23T17:28:00.000Z
-  SNYK-RHEL8-PAM-10374854:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-08-17T19:08:00.000Z
-        created: 2025-07-17T19:08:00.000Z
-  SNYK-RHEL8-SQLITELIBS-10757331:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-08-23T10:00:00.000Z
-        created: 2025-07-23T10:00:00.000Z
-  SNYK-RHEL8-PAM-11794982:
-    - '*':
-        reason: No fix from RHEL available
-        expires: 2025-09-14T19:08:00.000Z
-        created: 2025-08-14T19:08:00.000Z
   SNYK-RHEL8-BROTLI-14213465:
     - '*':
         reason: No fix for rhel-ubi8 available yet
@@ -72,6 +12,16 @@ ignore:
         reason: No fix for rhel-ubi8 available yet
         expires: 2026-01-29T14:28:53.152Z
         created: 2025-12-30T14:28:53.160Z
+  SNYK-RHEL8-GNUPG2-15128939:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        created: 2026-01-28T00:00:00.000Z
+        expires: 2026-04-28T00:00:00.000Z
+  SNYK-RHEL8-GNUPG2-15128992:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        created: 2026-01-28T00:00:00.000Z
+        expires: 2026-04-28T00:00:00.000Z
 patch: {}
 exclude:
   global:
