@@ -162,6 +162,22 @@ describe('filters and interpolates', () => {
       });
     });
 
+    describe('for GHE private filters', () => {
+      const rules = JSON.parse(loadFixture(path.join('accept', 'ghe.json')));
+      const filter = loadFilters(rules.private, 'default', {});
+
+      it('should allow DELETE request to git refs with URL-encoded branch name', () => {
+        const url =
+          '/repos/test-org/test-repo/git/refs/heads%2Fsnyk-fix-936792ffbb98fdfd7bf5784d73d7ed1a';
+
+        const filterResponse = filter({
+          url,
+          method: 'DELETE',
+        });
+        expect(filterResponse).toBeTruthy();
+      });
+    });
+
     describe('for bitbucket server private filters', () => {
       const rules = JSON.parse(loadDefaultFilter('bitbucket-server.json'));
       const filter = loadFilters(rules.private, 'default', {});
