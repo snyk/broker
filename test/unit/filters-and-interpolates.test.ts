@@ -160,6 +160,29 @@ describe('filters and interpolates', () => {
         );
         expect(result.url).toMatch(url);
       });
+
+      it('should allow deleting a branch', () => {
+        const url =
+          '/repos/test-org/test-repo/branches/test-branch';
+
+        const filterResponse = filter({
+          url,
+          method: 'DELETE',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
     });
 
     describe('for GHE private filters', () => {
@@ -1072,6 +1095,29 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+        });
+        expect(filterResponse).not.toEqual(false);
+        const filterResponseAsRule = filterResponse as Rule;
+        const result = getInterpolatedRequest(
+          null,
+          filterResponseAsRule,
+          {
+            url,
+            method: 'GET',
+          },
+          {},
+          {},
+        );
+        expect(result.url).toMatch(url);
+      });
+
+      it('should allow DELETE request to delete a branch', () => {
+        const url =
+          '/projects/123/repository/branches/test-branch';
+
+        const filterResponse = filter({
+          url,
+          method: 'DELETE',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
