@@ -384,6 +384,12 @@
       "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
     },
     {
+      "//": "used to delete a git ref (branch)",
+      "method": "DELETE",
+      "path": "/repos/:user/:repo/git/refs/:ref",
+      "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+    },
+    {
       "//": "used to get status checks on a branch",
       "method": "GET",
       "path": "/repos/:user/:repo/branches/:branch/protection/required_status_checks/contexts",
