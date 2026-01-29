@@ -1577,6 +1577,12 @@
       "origin": "https://${GITLAB}"
     },
     {
+      "//": "used to delete a branch",
+      "method": "POST",
+      "path": "/api/v4/projects/:project/repository/branches/:branch",
+      "origin": "https://${GITLAB}"
+    },
+    {
       "//": "get merge base of two commits for given project.",
       "method": "GET",
       "path": "/api/v4/projects/:project/repository/merge_base",
