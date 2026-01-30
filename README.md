@@ -15,3 +15,4 @@ The Broker client runs within the user's internal network, keeping sensitive dat
 ## Usage
 
 Please refer to our [extensive documentation](https://docs.snyk.io/enterprise-setup/snyk-broker).
+
