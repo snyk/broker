@@ -3,6 +3,7 @@ import { getConfig } from '../../common/config/config';
 import { NextFunction, Request, Response } from 'express';
 import { WebSocketConnection } from '../types/client';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
+import { maskToken } from '../../common/utils/token';
 
 export const websocketConnectionSelectorMiddleware = (
   req: Request,
@@ -74,17 +75,59 @@ export const websocketConnectionSelectorMiddleware = (
       req.path.startsWith('/v1/') ||
       req.path.startsWith('/v2/')
     ) {
-      const craCompatibleAvailableTypes = getCraCompatibleTypes(config);
-      if (craCompatibleAvailableTypes.length > 0) {
-        inboundRequestType = craCompatibleAvailableTypes[0];
-      } else {
-        res
-          .status(505)
-          .send(
-            'Current Broker Client configuration does not support this flow. Missing container registry agent compatible connection.',
-          );
+      // Extract connection identifier from request header (set by workload)
+      const connectionIdentifier = req.headers[
+        'snyk-broker-connection-identifier'
+      ] as string;
+
+      if (!connectionIdentifier) {
+        logger.error(
+          { url: req.path },
+          'Container registry request missing connection identifier header',
+        );
+        res.status(500).send('missing connection identifier');
         return;
       }
+
+      const selectedWebsocketConnection = websocketConnections.find(
+        (conn) => conn.identifier === connectionIdentifier,
+      );
+
+      if (!selectedWebsocketConnection) {
+        logger.error(
+          {
+            connectionIdentifier: maskToken(connectionIdentifier),
+            url: req.path,
+          },
+          'no websocket connection found for container registry request identifier',
+        );
+        res.status(404).send('connection not found for identifier');
+        return;
+      }
+
+      const craCompatibleTypeNames = config.CRA_COMPATIBLE_TYPES as string[];
+      if (
+        !craCompatibleTypeNames.includes(
+          selectedWebsocketConnection.supportedIntegrationType,
+        )
+      ) {
+        logger.error(
+          {
+            connectionIdentifier: maskToken(connectionIdentifier),
+            type: selectedWebsocketConnection.supportedIntegrationType,
+            url: req.path,
+          },
+          'connection found but type is not CRA-compatible',
+        );
+        res
+          .status(505)
+          .send('Connection type not compatible with container registry requests.');
+        return;
+      }
+
+      res.locals.websocket = selectedWebsocketConnection;
+      next();
+      return;
     } else {
       logger.error(
         { url: req.path },

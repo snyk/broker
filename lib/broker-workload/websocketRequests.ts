@@ -57,6 +57,13 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
     const websocketResponseHandler = websocketHandler;
     if (this.options.config.universalBrokerEnabled) {
       payload.connectionIdentifier = this.connectionIdentifier;
+      // note: We duplicate payload.connectionIdentifier in headers because the middleware
+      // (websocketConnectionSelectorMiddleware) runs on express requests (req, res) and
+      // doesn't have access to the payload object. The payload only exists in the
+      // BrokerWorkload context, but the middleware needs the identifier to route CR
+      // requests to the correct websocket connection. headers are the standard
+      // way to pass data from a workload to the Express middleware layer.
+      payload.headers['snyk-broker-connection-identifier'] = this.connectionIdentifier;
     }
     const correlationHeaders = getCorrelationDataFromHeaders(payload.headers);
 
