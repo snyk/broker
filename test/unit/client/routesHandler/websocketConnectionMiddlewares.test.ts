@@ -93,7 +93,40 @@ describe('websocketConnectionSelectorMiddleware', () => {
       expect(next).toHaveBeenCalled();
     });
 
-    it('should return 500 error when identifier header is missing', () => {
+    it('should return 500 error when identifier header is missing and multiple CRA-compatible connections exist', () => {
+      const websocketConnections = [
+        {
+          identifier: 'connection-identifier-1',
+          supportedIntegrationType: 'ecr',
+        },
+        {
+          identifier: 'connection-identifier-2',
+          supportedIntegrationType: 'ecr',
+        },
+      ];
+
+      mockedGetConfig.mockReturnValue({
+        universalBrokerEnabled: true,
+        CRA_COMPATIBLE_TYPES: ['ecr', 'acr', 'gcr'],
+      });
+
+      const req = httpMocks.createRequest({
+        path: '/api/v1/recurring-tests/dependencies',
+        headers: {},
+      });
+      const res = httpMocks.createResponse();
+      res.locals.websocketConnections = websocketConnections;
+
+      websocketConnectionSelectorMiddleware(req, res, next);
+
+      expect(res.statusCode).toBe(500);
+      expect(res._getData()).toContain(
+        'missing connection identifier (multiple CRA-compatible connections)',
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should fallback to single CRA-compatible connection when identifier header is missing', () => {
       const websocketConnections = [
         {
           identifier: 'connection-identifier-1',
@@ -115,9 +148,9 @@ describe('websocketConnectionSelectorMiddleware', () => {
 
       websocketConnectionSelectorMiddleware(req, res, next);
 
-      expect(res.statusCode).toBe(500);
-      expect(res._getData()).toContain('missing connection identifier');
-      expect(next).not.toHaveBeenCalled();
+      expect(res.statusCode).toBe(200);
+      expect(next).toHaveBeenCalled();
+      expect(res.locals.websocket).toEqual(websocketConnections[0]);
     });
 
     it('should return 404 error when connection not found by identifier', () => {
@@ -145,7 +178,7 @@ describe('websocketConnectionSelectorMiddleware', () => {
       websocketConnectionSelectorMiddleware(req, res, next);
 
       expect(res.statusCode).toBe(404);
-      expect(res._getData()).toContain('Connection not found');
+      expect(res._getData()).toContain('connection not found for identifier');
       expect(next).not.toHaveBeenCalled();
     });
 

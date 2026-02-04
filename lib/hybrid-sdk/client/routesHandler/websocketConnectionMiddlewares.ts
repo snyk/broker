@@ -1,7 +1,7 @@
 import { log as logger } from '../../../logs/logger';
 import { getConfig } from '../../common/config/config';
 import { NextFunction, Request, Response } from 'express';
-import { WebSocketConnection } from '../types/client';
+import { WebSocketConnection, Role } from '../types/client';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
 import { maskToken } from '../../common/utils/token';
 
@@ -80,51 +80,103 @@ export const websocketConnectionSelectorMiddleware = (
         'snyk-broker-connection-identifier'
       ] as string;
 
-      if (!connectionIdentifier) {
-        logger.error(
-          { url: req.path },
-          'Container registry request missing connection identifier header',
-        );
-        res.status(500).send('missing connection identifier');
-        return;
-      }
-
-      const selectedWebsocketConnection = websocketConnections.find(
-        (conn) => conn.identifier === connectionIdentifier,
+      const craCompatibleTypeNames = config.CRA_COMPATIBLE_TYPES as string[];
+      const craCompatibleConnections = websocketConnections.filter((conn) =>
+        craCompatibleTypeNames.includes(conn.supportedIntegrationType),
       );
 
-      if (!selectedWebsocketConnection) {
-        logger.error(
-          {
-            connectionIdentifier: maskToken(connectionIdentifier),
-            url: req.path,
-          },
-          'no websocket connection found for container registry request identifier',
-        );
-        res.status(404).send('connection not found for identifier');
-        return;
-      }
+      // Count unique connection identifiers (each connection has primary and secondary roles)
+      const uniqueCraCompatibleIdentifiers = new Set(
+        craCompatibleConnections.map((conn) => conn.identifier),
+      );
 
-      const craCompatibleTypeNames = config.CRA_COMPATIBLE_TYPES as string[];
-      if (
-        !craCompatibleTypeNames.includes(
-          selectedWebsocketConnection.supportedIntegrationType,
-        )
-      ) {
-        logger.error(
-          {
-            connectionIdentifier: maskToken(connectionIdentifier),
-            type: selectedWebsocketConnection.supportedIntegrationType,
-            url: req.path,
-          },
-          'connection found but type is not CRA-compatible',
+      let selectedWebsocketConnection: WebSocketConnection | undefined;
+
+      if (connectionIdentifier) {
+        // Identifier-based routing (for requests from server over websocket)
+        selectedWebsocketConnection = websocketConnections.find(
+          (conn) => conn.identifier === connectionIdentifier,
         );
-        res
-          .status(505)
-          .send(
-            'Connection type not compatible with container registry requests.',
+
+        if (!selectedWebsocketConnection) {
+          logger.error(
+            {
+              connectionIdentifier: maskToken(connectionIdentifier),
+              url: req.path,
+            },
+            'no websocket connection found for container registry request identifier',
           );
-        return;
+          res.status(404).send('connection not found for identifier');
+          return;
+        }
+
+        if (
+          !craCompatibleTypeNames.includes(
+            selectedWebsocketConnection.supportedIntegrationType,
+          )
+        ) {
+          logger.error(
+            {
+              connectionIdentifier: maskToken(connectionIdentifier),
+              type: selectedWebsocketConnection.supportedIntegrationType,
+              url: req.path,
+            },
+            'connection found but type is not CRA-compatible',
+          );
+          res
+            .status(505)
+            .send(
+              'Connection type not compatible with container registry requests.',
+            );
+          return;
+        }
+      } else {
+        // Fallback to type-based routing when header is missing
+        // This supports backward compatibility for requests from behind the client
+        // Only works when there's exactly one unique CRA-compatible connection identifier
+        if (uniqueCraCompatibleIdentifiers.size === 0) {
+          logger.error(
+            { url: req.path },
+            'No CRA-compatible connections available for container registry request',
+          );
+          res.status(404).send('no CRA-compatible connection available');
+          return;
+        }
+
+        if (uniqueCraCompatibleIdentifiers.size === 1) {
+          // Single unique connection identifier: use primary connection (backward compatible behavior)
+          const connectionId = Array.from(uniqueCraCompatibleIdentifiers)[0];
+          selectedWebsocketConnection =
+            craCompatibleConnections.find(
+              (conn) =>
+                conn.identifier === connectionId && conn.role === Role.primary,
+            ) ||
+            craCompatibleConnections.find(
+              (conn) => conn.identifier === connectionId,
+            );
+          logger.debug(
+            {
+              type: selectedWebsocketConnection?.supportedIntegrationType,
+              url: req.path,
+            },
+            '[Container Registry Routing] Using single CRA-compatible connection (no identifier header).',
+          );
+        } else {
+          // Multiple unique connection identifiers but no identifier header: cannot route
+          logger.error(
+            {
+              url: req.path,
+              availableConnections: uniqueCraCompatibleIdentifiers.size,
+            },
+            'Container registry request missing connection identifier header and multiple CRA-compatible connections exist',
+          );
+          res
+            .status(500)
+            .send(
+              'missing connection identifier (multiple CRA-compatible connections)',
+            );
+          return;
+        }
       }
 
       res.locals.websocket = selectedWebsocketConnection;
