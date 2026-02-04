@@ -121,7 +121,9 @@ export const websocketConnectionSelectorMiddleware = (
         );
         res
           .status(505)
-          .send('Connection type not compatible with container registry requests.');
+          .send(
+            'Connection type not compatible with container registry requests.',
+          );
         return;
       }
 

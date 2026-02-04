@@ -248,7 +248,9 @@ describe('websocketConnectionSelectorMiddleware', () => {
         universalBrokerEnabled: false,
       });
 
-      const { isWebsocketConnOpen } = require('../../../../lib/hybrid-sdk/client/utils/socketHelpers');
+      const {
+        isWebsocketConnOpen,
+      } = require('../../../../lib/hybrid-sdk/client/utils/socketHelpers');
       (isWebsocketConnOpen as jest.Mock).mockReturnValue(true);
 
       const req = httpMocks.createRequest({
