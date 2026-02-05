@@ -75,7 +75,6 @@ export const websocketConnectionSelectorMiddleware = (
       req.path.startsWith('/v1/') ||
       req.path.startsWith('/v2/')
     ) {
-      // Extract connection identifier from request header (set by workload)
       const connectionIdentifier = req.headers[
         'snyk-broker-connection-identifier'
       ] as string;
@@ -85,7 +84,8 @@ export const websocketConnectionSelectorMiddleware = (
         craCompatibleTypeNames.includes(conn.supportedIntegrationType),
       );
 
-      // Count unique connection identifiers (each connection has primary and secondary roles)
+      // take into account unique connection identifiers
+      // each connection has primary and secondary roles so we need to count unique identifiers
       const uniqueCraCompatibleIdentifiers = new Set(
         craCompatibleConnections.map((conn) => conn.identifier),
       );
@@ -144,7 +144,7 @@ export const websocketConnectionSelectorMiddleware = (
         }
 
         if (uniqueCraCompatibleIdentifiers.size === 1) {
-          // Single unique connection identifier: use primary connection (backward compatible behavior)
+          // Single unique connection identifier: use primary connection (backwards compatibility)
           const connectionId = Array.from(uniqueCraCompatibleIdentifiers)[0];
           selectedWebsocketConnection =
             craCompatibleConnections.find(
@@ -154,13 +154,6 @@ export const websocketConnectionSelectorMiddleware = (
             craCompatibleConnections.find(
               (conn) => conn.identifier === connectionId,
             );
-          logger.debug(
-            {
-              type: selectedWebsocketConnection?.supportedIntegrationType,
-              url: req.path,
-            },
-            '[Container Registry Routing] Using single CRA-compatible connection (no identifier header).',
-          );
         } else {
           // Multiple unique connection identifiers but no identifier header: cannot route
           logger.error(
