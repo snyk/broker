@@ -27,13 +27,25 @@ import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 import { WebSocketServer } from '../hybrid-sdk/server/types/socket';
 import { WebSocketConnection } from '../hybrid-sdk/client/types/client';
 
+export type BrokerWorkloadOptions = {
+  config: {
+    brokerType: 'client' | 'server';
+    universalBrokerEnabled: boolean;
+  };
+};
+
+/**
+ * Handler for a single request received over the WebSocket connection. Checks the request against
+ * accept rules; if it matches, performs the downstream HTTP request and sends the response back
+ * over the WebSocket; otherwise blocks and responds with an error.
+ */
 export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
-  options;
+  options: BrokerWorkloadOptions;
   connectionIdentifier: string;
   websocketConnectionHandler: WebSocketServer | WebSocketConnection;
   constructor(
     connectionIdentifier: string,
-    options,
+    options: BrokerWorkloadOptions,
     websocketConnectionHandler: WebSocketServer | WebSocketConnection,
   ) {
     super('broker', WorkloadType['remote-server']);
@@ -67,10 +79,14 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
         this.connectionIdentifier;
     }
     const correlationHeaders = getCorrelationDataFromHeaders(payload.headers);
+    const contextId = payload.headers['x-snyk-broker-context-id'] as
+      | string
+      | undefined;
 
     const logContext: ExtendedLogContext = {
       url: payload.url,
       connectionName: this.websocketConnectionHandler.friendlyName ?? '',
+      contextId,
       requestMethod: payload.method,
       requestHeaders: payload.headers,
       streamingID: payload.streamingID,

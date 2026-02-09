@@ -14,6 +14,11 @@ import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 
+/**
+ * Handler for a single incoming HTTP request from a local client (e.g. Snyk CLI) or webhook.
+ * Checks the request against accept rules; if it matches, forwards it (over HTTP or the existing
+ * connection); otherwise responds with 401 blocked.
+ */
 export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClient> {
   req: Request;
   res: Response;
