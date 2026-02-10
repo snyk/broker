@@ -63,7 +63,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
     await expect(
       plugin.startUp(
         'test connection',
-        config.connections['test-connection'],
+        config.connections['test connection'],
         getPluginConfigByConnectionKey(
           'test connection',
         ) as unknown as PluginConnectionConfig,
@@ -190,7 +190,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
       'eyJ0eXBlIjoiZ2l0bGFiLWNyIiwgInVzZXJuYW1lIjoidGVzdC11c2VybmFtZSIsICJwYXNzd29yZCI6InRlc3QtcGFzc3dvcmQiLCAicmVnaXN0cnlCYXNlIjoidW5kZWZpbmVkIn0K',
     );
   });
-  it.skip('Plugins creates credentials for any type of CR with context', async () => {
+  it('Plugins creates credentials for any type of CR with context', async () => {
     const config = {
       connections: {
         'test connection': {

@@ -1,4 +1,3 @@
-import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
 
