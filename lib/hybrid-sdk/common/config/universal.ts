@@ -1,7 +1,7 @@
 import { log as logger } from '../../../logs/logger';
 import { Config, ConnectionConfig } from '../../client/types/config';
 import { expandPlaceholderValuesInFlatList, getConfig } from './config';
-import { getPluginsConfig } from './pluginsConfig';
+import { getPluginsConfig, getPluginsContextConfig } from './pluginsConfig';
 import { determineFilterType } from '../../client/utils/filterSelection';
 
 export const getConfigForType = (type: string) => {
@@ -81,6 +81,12 @@ export const getValidationConfigForType = (type) => {
     validations: config.brokerClientConfiguration[`${type}`].validations,
   };
 };
+
+/**
+ * Returns the effective config for a request: connection config for the given
+ * identifier, optionally scoped to contextId, with integration-type defaults,
+ * context vars, and plugin config merged and placeholders expanded.
+ */
 export const getConfigForIdentifier = (
   identifier: string,
   config,
@@ -141,7 +147,28 @@ export const getConfigForIdentifier = (
       }
     }
   }
+  const pluginContextToInject = {};
+  if (connectionKey && contextId) {
+    const pluginContext = getPluginsContextConfig(connectionKey, contextId);
+    const allowedContextKeys = getAllowedKeysForType(connectionType);
+    for (const key in pluginContext) {
+      if (allowedContextKeys.includes(key)) {
+        pluginContextToInject[key] = pluginContext[key];
+      } else {
+        logger.debug(
+          { key, connectionKey },
+          'Env var in context not allowed for injection in request.',
+        );
+      }
+    }
+  }
 
+  // Merge in precedence order (later overrides earlier):
+  // 1. Type defaults – static defaults for this integration type (e.g. github-server-app) from brokerClientConfiguration.
+  // 2. Connection config – this connection’s config from universal config (identifier, name, connection-level env vars).
+  // 3. Context config – per-context env vars from config.connections[connectionKey].contexts[contextId] (filtered).
+  // 4. Connection-level plugin config – in-memory state plugins wrote for this connection (e.g. tokens).
+  // 5. Context-level plugin config – in-memory state plugins wrote for this connection+context (e.g. JWT per context).
   const configToOverload = {
     ...(connectionType ? getConfigForType(connectionType) : {}),
     ...(connectionKey ? config.connections[connectionKey] : {}),
@@ -149,6 +176,7 @@ export const getConfigForIdentifier = (
     ...(getPluginsConfig() && getPluginsConfig()[connectionKey!]
       ? getPluginsConfig()[connectionKey!]
       : {}),
+    ...pluginContextToInject,
   };
   if (connectionKey && config.connections[connectionKey].contexts) {
     delete configToOverload.contexts;
@@ -161,6 +189,18 @@ export const getConfigForIdentifier = (
   return configOverloaded as Config;
 };
 
+/**
+ * Returns a merged config object for a specific connection, optionally scoped to a context. Starts
+ * from localConfig, overlays connection-specific values (type defaults, connection config, context
+ * overrides, and plugin state), then expands any $PLACEHOLDER references in the result. Used to
+ * produce the effective config for processing a single request.
+ *
+ * @param connectionIdentifier - The broker token identifying the connection.
+ * @param localConfig - The base config to merge connection-specific values into.
+ * @param contextId - Optional context ID to scope the config to a specific
+ *   org/installation within the connection.
+ * @returns The fully merged and placeholder-expanded config object.
+ */
 export const overloadConfigWithConnectionSpecificConfig = (
   connectionIdentifier,
   localConfig,
