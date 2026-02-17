@@ -1,5 +1,4 @@
 import { Plugin } from '../../../../lib/hybrid-sdk/client/brokerClientPlugins/plugins/githubServerAppAuth';
-// import nock from 'nock';
 import { delay } from '../../../helpers/utils';
 import {
   getPluginConfigSubKey,
@@ -64,8 +63,9 @@ describe('Github Server App Plugin', () => {
     const plugin = new Plugin(config);
     setPluginConfigKey('test connection', { ...config });
     // Exist only in the local cfg for testing purpose
-    expect(getPluginConfigSubKey('test connection', 'GHA_ACCESS_TOKEN'))
-      .toBeUndefined;
+    expect(
+      getPluginConfigSubKey('test connection', 'GHA_ACCESS_TOKEN'),
+    ).toBeUndefined();
 
     plugin._setAccessTokenLifecycleHandler('test connection', config);
     jest.advanceTimersByTime(10000);

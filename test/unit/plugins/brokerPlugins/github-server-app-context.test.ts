@@ -260,4 +260,62 @@ describe('Github Server App Plugin - startupContext', () => {
       /Github app plugin Error: could not extract access token/,
     );
   });
+
+  it('should cancel previous context timers when startUpContext is called again', async () => {
+    jest.spyOn(plugin, '_getJWT').mockReturnValue('mockJWT');
+    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+
+    // First startUpContext — schedules JWT and access token timers
+    await plugin.startUpContext(
+      connectionName,
+      contextId,
+      connectionConfig,
+      pluginsConfig,
+    );
+
+    const firstJwtTimerId = getPluginConfigParamByConnectionKeyAndContextId(
+      connectionName,
+      contextId,
+      'jwtTimeoutHandlerId',
+    );
+    const firstAccessTokenTimerId =
+      getPluginConfigParamByConnectionKeyAndContextId(
+        connectionName,
+        contextId,
+        'ghaAccessTokenTimeoutHandlerId',
+      );
+    expect(firstJwtTimerId).toBeDefined();
+    expect(firstAccessTokenTimerId).toBeDefined();
+
+    // Second startUpContext — should cancel old timers before scheduling new ones
+    clearTimeoutSpy.mockClear();
+    await plugin.startUpContext(
+      connectionName,
+      contextId,
+      connectionConfig,
+      pluginsConfig,
+    );
+
+    const secondJwtTimerId = getPluginConfigParamByConnectionKeyAndContextId(
+      connectionName,
+      contextId,
+      'jwtTimeoutHandlerId',
+    );
+    const secondAccessTokenTimerId =
+      getPluginConfigParamByConnectionKeyAndContextId(
+        connectionName,
+        contextId,
+        'ghaAccessTokenTimeoutHandlerId',
+      );
+    expect(secondJwtTimerId).toBeDefined();
+    expect(secondAccessTokenTimerId).toBeDefined();
+    expect(secondJwtTimerId).not.toBe(firstJwtTimerId);
+    expect(secondAccessTokenTimerId).not.toBe(firstAccessTokenTimerId);
+
+    // Old timers should have been cleared
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(firstJwtTimerId);
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(firstAccessTokenTimerId);
+
+    clearTimeoutSpy.mockRestore();
+  });
 });

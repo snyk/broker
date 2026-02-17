@@ -5,6 +5,7 @@ import {
   getPluginsConfig,
   PluginConnectionConfig,
 } from '../../../../lib/hybrid-sdk/common/config/pluginsConfig';
+
 describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Instantiate plugin', () => {
     const config = {};
@@ -35,7 +36,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Plugins fail if missing parameters', async () => {
     const config = {
       connections: {
-        'test connection': { CR_CREDENTIALS: '' },
+        'test-connection': { CR_CREDENTIALS: '' },
       },
     };
     const plugin = new Plugin(config);
@@ -55,7 +56,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
   it('Plugins fail if missing parameters for ECR', async () => {
     const config = {
       connections: {
-        'test connection': { CR_CREDENTIALS: '', type: 'ecr' },
+        'test-connection': { CR_CREDENTIALS: '', type: 'ecr' },
       },
     };
     const plugin = new Plugin(config);
@@ -63,7 +64,7 @@ describe('containerRegistryCredentialsFormatting Plugin', () => {
     await expect(
       plugin.startUp(
         'test connection',
-        config.connections['test connection'],
+        config.connections['test-connection'],
         getPluginConfigByConnectionKey(
           'test connection',
         ) as unknown as PluginConnectionConfig,
