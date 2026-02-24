@@ -1,7 +1,10 @@
-export interface PluginConnectionConfig {
-  contexts?: Record<string, Record<string, string>>;
+import { ConnectionContext } from '../../client/types/client';
 
-  [key: string]: string | Record<string, Record<string, string>> | undefined; // Allows any key with any value type
+export interface PluginConnectionConfig {
+  // map of contextId to paramName to value
+  contexts?: Record<string, ConnectionContext>;
+
+  [key: string]: string | Record<string, ConnectionContext> | undefined; // Allows any key with any value type
 }
 
 export interface PluginsConfig {
@@ -79,7 +82,7 @@ export const setPluginConfigKey = (key: string, value: any): void => {
 export function getPluginConfigSubKey(
   key: string,
   subKey: 'contexts',
-): Record<string, Record<string, string>> | undefined;
+): Record<string, ConnectionContext> | undefined;
 
 export function getPluginConfigSubKey(
   key: string,

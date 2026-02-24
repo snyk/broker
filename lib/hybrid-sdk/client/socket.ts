@@ -34,12 +34,22 @@ const getAuthExpirationTimeout = (config: CONFIGURATION) => {
   );
 };
 
+/**
+ * Creates a pair of WebSocket connections (primary and secondary) for the given connection key.
+ * Each logical connection is represented by two sockets so they can be managed as a pair
+ * (e.g. by shutDownConnectionPair).
+ *
+ * @param clientOpts - Loaded client config and options
+ * @param globalIdentifyingMetadata - Base identifying metadata (friendlyName, identifier, etc. are set per connection)
+ * @param connectionKey - Key into config.connections for this connection
+ * @returns The primary and secondary WebSocket connections as a tuple
+ * @throws If the connection has no identifier
+ */
 export const createWebSocketConnectionPairs = async (
-  websocketConnections: WebSocketConnection[],
   clientOpts: LoadedClientOpts,
   globalIdentifyingMetadata: IdentifyingMetadata,
   connectionKey,
-) => {
+): Promise<[WebSocketConnection, WebSocketConnection]> => {
   const socketIdentifyingMetadata = structuredClone(globalIdentifyingMetadata);
   socketIdentifyingMetadata.friendlyName = connectionKey;
   socketIdentifyingMetadata.id =
@@ -90,12 +100,10 @@ export const createWebSocketConnectionPairs = async (
     clientOpts.config.connections[`${socketIdentifyingMetadata.friendlyName}`]
       .serverId ?? '';
 
-  websocketConnections.push(
+  return [
     createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
-  );
-  websocketConnections.push(
     createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
-  );
+  ];
 };
 
 export const createWebSocket = (
