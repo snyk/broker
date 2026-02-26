@@ -28,6 +28,7 @@ import { loadPlugins } from './brokerClientPlugins/pluginManager';
 import { manageWebsocketConnections } from './connectionsManager/manager';
 import { findPluginFolder } from '../common/config/config';
 import { retrieveAndLoadFilters } from './utils/filterLoading';
+import * as metrics from './metrics';
 
 const ONEDAY = 24 * 3600 * 1000; // 24h in ms
 
@@ -64,6 +65,17 @@ export const main = async (clientOpts: ClientOpts) => {
       { brokerClientId: clientOpts.config.brokerClientId },
       'Generated broker client id.',
     );
+
+    let metricsClient: metrics.Client;
+    try {
+      metricsClient = metrics.createClient(
+        clientOpts.config as metrics.RawConfig,
+      );
+    } catch (err) {
+      logger.fatal({ err }, 'Failed to initialize metrics client.');
+      process.exit(1);
+    }
+    metricsClient.incrementBrokerClientMetric();
 
     clientOpts.config.API_BASE_URL =
       clientOpts.config.API_BASE_URL ??
@@ -208,6 +220,9 @@ export const main = async (clientOpts: ClientOpts) => {
       close: (done) => {
         logger.info('Client websocket is closing.');
         server.close();
+        metricsClient.shutdown().catch((err) => {
+          logger.warn({ err }, 'Error shutting down metrics client.');
+        });
         for (let i = 0; i < websocketConnections.length; i++) {
           websocketConnections[i].destroy(function () {
             logger.info(
