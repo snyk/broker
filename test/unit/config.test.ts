@@ -319,6 +319,48 @@ describe('config', () => {
     delete process.env.CLIENT_SECRET;
   });
 
+  it('getConfigByidentifier with Context that uses alternate filter type', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest12';
+    process.env.BROKER_TOKEN_1 = 'dummyBrokerIdentifier';
+    process.env.BITBUCKET = 'bitbucket.server';
+    process.env.BITBUCKET_PAT = 'bitbucketpat';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    await loadBrokerConfig();
+    const configData = getConfigForIdentifier(
+      'dummyBrokerIdentifier',
+      getConfig(),
+      'test-context',
+    );
+    expect(configData).toEqual({
+      BROKER_CLIENT_VALIDATION_AUTHORIZATION_HEADER: 'Bearer bitbucketpat',
+      BROKER_CLIENT_VALIDATION_URL:
+        'https://bitbucket.server/rest/api/1.0/projects',
+      BROKER_SERVER_URL: 'https://broker.dev.snyk.io',
+      BROKER_HA_MODE_ENABLED: 'false',
+      BROKER_DISPATCHER_BASE_URL: 'https://api.dev.snyk.io',
+      BROKER_HEALTHCHECK_PATH: '/healthcheck',
+      BITBUCKET: 'bitbucket.server',
+      BITBUCKET_GIT: 'bitbucket.server',
+      BITBUCKET_API: 'bitbucket.server/rest/api/1.0',
+      BITBUCKET_PAT: 'bitbucketpat',
+      GIT_PASSWORD: 'bitbucketpat',
+      GIT_URL: 'bitbucket.server',
+      GIT_USERNAME: 'x-access-token',
+      id: '1',
+      identifier: 'dummyBrokerIdentifier',
+      type: 'bitbucket-server-bearer-auth',
+    });
+    delete process.env.UNIVERSAL_BROKER_ENABLED;
+    delete process.env.SERVICE_ENV;
+    delete process.env.BROKER_TOKEN_1;
+    delete process.env.BITBUCKET;
+    delete process.env.BITBUCKET_PAT;
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
+
   it('getConfigByidentifier with non existing Context should throw', async () => {
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest10';

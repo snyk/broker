@@ -97,7 +97,7 @@ export const getConfigForIdentifier = (
     identifier,
   );
   const connectionKey = connection?.key || undefined;
-  const connectionType = connection?.value.type || undefined;
+  let connectionType = connection?.value.type || undefined;
   if (!connectionType) {
     logger.error(
       { integrations: config.integrations },
@@ -135,6 +135,7 @@ export const getConfigForIdentifier = (
   const contextToInject = {};
   if (connectionKey && contextId) {
     const context = config.connections[connectionKey].contexts[contextId];
+    connectionType = determineFilterType(connectionType, context);
     const allowedContextKeys = getAllowedKeysForType(connectionType);
     for (const key in context) {
       if (allowedContextKeys.includes(key)) {
@@ -177,6 +178,7 @@ export const getConfigForIdentifier = (
       ? getPluginsConfig()[connectionKey!]
       : {}),
     ...pluginContextToInject,
+    type: connectionType,
   };
   if (connectionKey && config.connections[connectionKey].contexts) {
     delete configToOverload.contexts;
