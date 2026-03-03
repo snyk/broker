@@ -71,18 +71,14 @@ export const createWebSocketConnectionPairs = async (
       `Cannot create websocket connection ${socketIdentifyingMetadata.friendlyName} without identifier.`,
     );
   }
-  let serverId: string | null = null;
-  if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
-    serverId = await getServerId(
-      clientOpts.config,
-      socketIdentifyingMetadata.identifier,
-      socketIdentifyingMetadata.clientId,
-    );
-  }
+  let serverId: string | null = await getServerId(
+    clientOpts.config,
+    socketIdentifyingMetadata.identifier,
+    socketIdentifyingMetadata.clientId,
+  );
+
   if (serverId === null) {
-    if (clientOpts.config.BROKER_HA_MODE_ENABLED == 'true') {
-      logger.warn({}, 'Could not receive server id from Broker Dispatcher.');
-    }
+    logger.warn({}, 'Could not receive server id from Broker Dispatcher.');
     serverId = '';
   } else {
     logger.info(

@@ -1,6 +1,4 @@
 import { ConfigMetadata } from '../types/client';
-import { Config } from '../types/config';
-import { log as logger } from '../../../logs/logger';
 import { getConfig, loadBrokerConfig } from '../../common/config/config';
 import version from '../../common/utils/version';
 import { CONFIGURATION } from '../../common/types/options';
@@ -29,7 +27,6 @@ export const getClientConfigMetadata = (
   const configMetadata: ConfigMetadata = {
     brokerClientId: clientConfig.brokerClientId,
     version: `${version}`,
-    haMode: highAvailabilityModeEnabled(clientConfig),
     debugMode: clientConfig.logLevel === 'debug' ? true : false,
     bodyLogMode: clientConfig.logEnableBody === 'true' ? true : false,
     credPooling: isCredPoolingUsed(clientConfig),
@@ -55,23 +52,3 @@ const isCredPoolingUsed = (config: Record<string, any>): boolean => {
   }
   return false;
 };
-
-export function highAvailabilityModeEnabled(config: any): boolean {
-  // high availability mode is disabled per default
-  let highAvailabilityModeEnabled = false;
-  const highAvailabilityModeEnabledValue = (config as Config)
-    .BROKER_HA_MODE_ENABLED;
-
-  if (typeof highAvailabilityModeEnabledValue !== 'undefined') {
-    highAvailabilityModeEnabled =
-      highAvailabilityModeEnabledValue.toLowerCase() === 'true' ||
-      highAvailabilityModeEnabledValue.toLowerCase() === 'yes';
-  }
-
-  logger.debug(
-    { enabled: highAvailabilityModeEnabled },
-    'Checking for HA mode.',
-  );
-
-  return highAvailabilityModeEnabled;
-}
