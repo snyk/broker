@@ -1,0 +1,38 @@
+{
+    "BROKER_CLIENT_CONFIGURATION": {
+      "common": {
+        "default": {
+          "BROKER_SERVER_URL": "https://broker.dev.snyk.io",
+          "BROKER_HA_MODE_ENABLED": "false",
+          "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+        },
+        "oauth": {
+          "clientId": "${CLIENT_ID}",
+          "clientSecret": "${CLIENT_SECRET}"
+        }
+      },
+      "bitbucket-server": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      },
+      "bitbucket-server-bearer-auth": {
+        "validations":[{
+          "url": "https://snyk.io/no-such-url-ever"
+        }]
+      }
+    },
+    "CONNECTIONS": {
+      "my bitbucket connection": {
+        "type": "bitbucket-server",
+        "id": "1",
+        "identifier": "${BROKER_TOKEN_1}",
+        "BITBUCKET": "${BITBUCKET}",
+        "contexts": {
+          "test-context": {
+            "BITBUCKET_PAT": "${BITBUCKET_PAT}"
+          }
+        }
+      }
+    }
+}

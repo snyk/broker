@@ -379,6 +379,14 @@ export class Plugin extends BrokerPlugin {
           'JWT_TOKEN',
         )
       ) {
+        const existingJwtTimerId =
+          this.getPluginConfigParamForConnectionContext(
+            connectionName,
+            contextId,
+            'jwtTimeoutHandlerId',
+          );
+        if (existingJwtTimerId) clearTimeout(existingJwtTimerId);
+
         let timeoutHandlerId;
         let timeoutHandler = async () => {};
         timeoutHandler = async () => {
@@ -586,6 +594,14 @@ export class Plugin extends BrokerPlugin {
         'ghaAccessToken',
       )
     ) {
+      const existingAccessTokenTimerId =
+        this.getPluginConfigParamForConnectionContext(
+          connectionName,
+          contextId,
+          'ghaAccessTokenTimeoutHandlerId',
+        );
+      if (existingAccessTokenTimerId) clearTimeout(existingAccessTokenTimerId);
+
       let timeoutHandlerId;
       let timeoutHandler = async () => {};
       timeoutHandler = async () => {

@@ -228,7 +228,7 @@ describe('Plugin Manager', () => {
     ];
   });
 
-  it.skip('should run prerequest plugins with context successfully', async () => {
+  it('should run prerequest plugins with context successfully', async () => {
     const clientOpts = {
       config: {
         universalBrokerEnabled: true,

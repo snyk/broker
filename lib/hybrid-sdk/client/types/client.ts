@@ -21,6 +21,12 @@ export interface ConfigMetadata {
   universalBroker: boolean;
 }
 
+/**
+ * Identity and capability metadata the broker client sends when identifying
+ * itself to the broker server over a WebSocket. Describes who the client is,
+ * what it supports, and which connection it is for (e.g. friendlyName,
+ * identifier). Cloned and augmented per connection when creating socket pairs.
+ */
 export interface IdentifyingMetadata {
   capabilities: string[];
   clientId: string;
@@ -38,6 +44,9 @@ export interface IdentifyingMetadata {
   clientConfig: ConfigMetadata;
   role: Role;
 }
+
+/** Per-context parameter key-value pairs (e.g. env vars for a GitHub App installation). */
+export type ConnectionContext = Record<string, string>;
 
 export enum Role {
   primary = 'primary',

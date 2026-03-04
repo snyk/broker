@@ -192,6 +192,9 @@ function sanitiseObject(obj) {
   return mapValues(obj, (v) => sanitise(v));
 }
 function sanitiseConnection(connection) {
+  if (typeof connection === 'string') {
+    return sanitise(connection);
+  }
   const connectionObj = JSON.parse(JSON.stringify(connection));
   return sanitiseObject(connectionObj);
 }

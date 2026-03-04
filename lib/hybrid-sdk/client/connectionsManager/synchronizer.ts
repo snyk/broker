@@ -3,10 +3,32 @@ import { log as logger } from '../../../logs/logger';
 import { createWebSocketConnectionPairs } from '../socket';
 import { runStartupPlugins } from '../brokerClientPlugins/pluginManager';
 import { shutDownConnectionPair } from './connectionHelpers';
-import { IdentifyingMetadata, WebSocketConnection } from '../types/client';
+import {
+  ConnectionContext,
+  IdentifyingMetadata,
+  WebSocketConnection,
+} from '../types/client';
 import { addTimerToTerminalHandlers } from '../../common/utils/signals';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
 
+/** Internal bookkeeping written by the synchronizer to detect config changes
+ *  between sync cycles. Not part of the websocket protocol or identity. */
+interface SyncState {
+  contexts?: Record<string, ConnectionContext>;
+}
+
+/** Synchronizer bookkeeping — tracks the last-seen config per connection
+ *  so we can detect changes (e.g. context updates) between sync cycles. */
+export const syncStateByConnection = new Map<string, SyncState>();
+
+/**
+ * Keeps WebSocket connections and plugins in sync with configured integrations. For each
+ * connection, detects whether it is new, removed, disabled, or changed (identifier rotation,
+ * context updates) and reacts accordingly: initializing plugins, creating or tearing down
+ * websocket pairs, and re-running plugin startup when contexts change. Optionally loads remote
+ * config once at startup and schedules itself to poll when server notifications are unavailable.
+ * Mutates websocketConnections in place.
+ */
 export const syncClientConfig = async (
   clientOpts,
   websocketConnections: WebSocketConnection[],
@@ -87,16 +109,17 @@ export const syncClientConfig = async (
       continue;
     }
 
+    // If connection doesn't exist, create it
     if (currentWebsocketConnectionIndex < 0) {
       logger.info({ connectionName: key }, 'Creating configured connection.');
       await runStartupPlugins(clientOpts, key);
 
-      await createWebSocketConnectionPairs(
-        websocketConnections,
+      const [primary, secondary] = await createWebSocketConnectionPairs(
         clientOpts,
         globalIdentifyingMetadata,
         key,
       );
+      websocketConnections.push(primary, secondary);
     } else if (
       // Token rotation for the connection at hand
       connectionConfig.identifier !=
@@ -113,19 +136,34 @@ export const syncClientConfig = async (
       );
 
       // setup new tunnels
-
       await runStartupPlugins(clientOpts, key);
 
-      await createWebSocketConnectionPairs(
-        websocketConnections,
+      const [primary, secondary] = await createWebSocketConnectionPairs(
         clientOpts,
         globalIdentifyingMetadata,
         key,
       );
+      websocketConnections.push(primary, secondary);
     } else {
-      logger.debug({ connectionName: key }, 'Connection already configured.');
+      // If contexts have changed, re-run plugins for the connection
+      const contextsChanged =
+        JSON.stringify(connectionConfig.contexts ?? {}) !==
+        JSON.stringify(syncStateByConnection.get(key)?.contexts ?? {});
+      if (contextsChanged) {
+        logger.info(
+          { connectionName: key },
+          'Contexts changed, re-running plugins.',
+        );
+        await runStartupPlugins(clientOpts, key);
+      } else {
+        logger.debug({ connectionName: key }, 'Connection already configured.');
+      }
     }
+
+    syncStateByConnection.set(key, { contexts: connectionConfig.contexts });
   }
+
+  // Shut down connections that are no longer configured
   if (integrationsKeys.length != websocketConnections.length) {
     const alreadyShutDownConnectionNames: string[] = [];
     for (let i = 0; i < websocketConnections.length; i++) {
@@ -138,6 +176,7 @@ export const syncClientConfig = async (
         logger.debug({ friendlyName }, 'Shutting down connection');
         try {
           alreadyShutDownConnectionNames.push(friendlyName);
+          syncStateByConnection.delete(friendlyName);
           shutDownConnectionPair(websocketConnections, i);
         } catch (err) {
           logger.error(
