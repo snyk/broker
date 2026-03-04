@@ -6,6 +6,7 @@ import {
   AggregationTemporality,
   MeterProvider,
   PeriodicExportingMetricReader,
+  AggregationType,
 } from '@opentelemetry/sdk-metrics';
 import { Client } from './client';
 
@@ -23,12 +24,12 @@ export interface OtelClientConfig {
  * {@link Client} implementation backed by OpenTelemetry.
  * Exports metrics to an OTLP/gRPC endpoint using delta temporality.
  *
- * Automatically registers Node.js runtime metrics (event loop lag/utilization,
- * GC duration, heap size, active handles) via {@link RuntimeNodeInstrumentation}.
+ * Automatically registers the Node.js event loop delay p99 metric via
+ * {@link RuntimeNodeInstrumentation}, renamed to 'broker.nodejs.eventloop.delay.p99'
+ * for pipeline compatibility. Other runtime metrics are filtered out.
  *
- * For non-Kubernetes environments, consider adding @opentelemetry/host-metrics
- * to collect system-level metrics (CPU, memory, network I/O). In k8s these are
- * already provided by the infrastructure and are not needed here.
+ * For non-Kubernetes environments, container metrics (CPU, memory, network I/O)
+ * are already provided by the infrastructure via cAdvisor.
  */
 export class OtelClient implements Client {
   private readonly meterProvider: MeterProvider;
@@ -51,6 +52,20 @@ export class OtelClient implements Client {
 
       this.meterProvider = new MeterProvider({
         readers: [reader],
+        views: [
+          // Rename p99 event loop delay metric with broker. prefix
+          {
+            instrumentName: 'nodejs.eventloop.delay.p99',
+            meterName: '@opentelemetry/instrumentation-runtime-node',
+            name: 'broker.nodejs.eventloop.delay.p99',
+          },
+          // Drop all other runtime metrics (views are matched in order, so this comes last)
+          {
+            instrumentName: '*',
+            meterName: '@opentelemetry/instrumentation-runtime-node',
+            aggregation: { type: AggregationType.DROP },
+          },
+        ],
       });
     }
 
