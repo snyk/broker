@@ -1,5 +1,5 @@
 ARG BROKER_VERSION=latest
-ARG NODE_VERSION=20.19.0
+ARG NODE_VERSION=20.20.0
 
 
 FROM registry.access.redhat.com/ubi8/nodejs-20 AS node-base
