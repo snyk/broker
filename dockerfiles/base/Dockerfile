@@ -127,5 +127,11 @@ COPY --from=broker-builder --chown=node:node /home/node/snyk-broker/node_modules
 COPY --chown=node:node config.default.json /home/node/config.default.json
 COPY --chown=node:node defaultFilters /home/node/defaultFilters
 
+# Remove npm from final image - not needed at runtime (broker runs pre-compiled JS)
+# This eliminates container scan findings for npm-bundled vulnerabilities:
+# - tar@7.5.9 (SNYK-JS-TAR-15416075)
+# - minimatch@10.2.2 (SNYK-JS-MINIMATCH-15353387, SNYK-JS-MINIMATCH-15353389)
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 WORKDIR /home/node
 USER node
