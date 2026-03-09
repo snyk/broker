@@ -1607,6 +1607,12 @@
         "origin": "https://${GITLAB}"
     },
     {
+        "//": "update an existing merge request",
+        "method": "PUT",
+        "path": "/api/v4/projects/:project/merge_requests/:pullRef",
+        "origin": "https://${GITLAB}"
+    },
+    {
       "//": "create a new MR summary comment (note)",
       "method": "POST",
       "path": "/api/v4/projects/:project/merge_requests/:pullRef/notes",
