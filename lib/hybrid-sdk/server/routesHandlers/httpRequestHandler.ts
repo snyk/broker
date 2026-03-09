@@ -62,7 +62,11 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
-      logger.warn({ desensitizedToken }, 'No matching connection found.');
+      const requestId = req.headers['snyk-request-id'];
+      logger.warn(
+        { desensitizedToken, requestId },
+        'No matching connection found.',
+      );
       res.setHeader('x-broker-failure', 'no-connection');
       return res.status(404).json({ ok: false });
     }
@@ -71,7 +75,11 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   const connection = connections.get(token)!;
   // Make sure a connection actually exists before proceeding
   if (connection.length === 0) {
-    logger.warn({ desensitizedToken }, 'No matching connection found.');
+    const requestId = req.headers['snyk-request-id'];
+    logger.warn(
+      { desensitizedToken, requestId },
+      'No matching connection found.',
+    );
     res.setHeader('x-broker-failure', 'no-connection');
     return res.status(404).json({ ok: false });
   }
