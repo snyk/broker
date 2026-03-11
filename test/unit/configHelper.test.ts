@@ -17,7 +17,6 @@ describe('config', () => {
     delete process.env.LOG_ENABLE_BODY;
     delete process.env.GITHUB_TOKEN_POOL;
     delete process.env.INSECURE_DOWNSTREAM;
-    delete process.env.BROKER_HA_MODE_ENABLED;
     delete process.env.HTTP_PROXY;
     delete process.env.NODE_EXTRA_CA_CERT;
     delete process.env.ACCEPT;
@@ -30,7 +29,6 @@ describe('config', () => {
     delete process.env.LOG_ENABLE_BODY;
     delete process.env.GITHUB_TOKEN_POOL;
     delete process.env.INSECURE_DOWNSTREAM;
-    delete process.env.BROKER_HA_MODE_ENABLED;
     delete process.env.HTTP_PROXY;
     delete process.env.NODE_EXTRA_CA_CERT;
     delete process.env.ACCEPT;
@@ -47,7 +45,6 @@ describe('config', () => {
       credPooling: false,
       customAccept: false,
       debugMode: false,
-      haMode: false,
       privateCa: false,
       proxy: false,
       tlsReject: false,
@@ -62,7 +59,6 @@ describe('config', () => {
     process.env.LOG_ENABLE_BODY = 'true';
     process.env.GITHUB_TOKEN_POOL = '123,456';
     process.env.INSECURE_DOWNSTREAM = 'true_but_truly_value_does_not_matter';
-    process.env.BROKER_HA_MODE_ENABLED = 'true';
     process.env.HTTP_PROXY = 'http://myproxy';
     process.env.NODE_EXTRA_CA_CERT = 'my/path';
     process.env.ACCEPT = 'my/path';
@@ -77,7 +73,6 @@ describe('config', () => {
       credPooling: true,
       customAccept: true,
       debugMode: true,
-      haMode: true,
       privateCa: true,
       proxy: true,
       tlsReject: true,
@@ -92,7 +87,6 @@ describe('config', () => {
     process.env.LOG_ENABLE_BODY = 'true';
     process.env.GITHUB_TOKEN_POOL = '123,456';
     process.env.INSECURE_DOWNSTREAM = 'true_but_truly_value_does_not_matter';
-    process.env.BROKER_HA_MODE_ENABLED = 'true';
     process.env.HTTP_PROXY = 'http://myproxy';
     process.env.NODE_EXTRA_CA_CERT = 'my/path';
     process.env.ACCEPT = 'accept.json';
@@ -107,7 +101,6 @@ describe('config', () => {
       credPooling: true,
       customAccept: false,
       debugMode: true,
-      haMode: true,
       privateCa: true,
       proxy: true,
       tlsReject: true,
@@ -120,7 +113,6 @@ describe('config', () => {
   it('everything is false for everything disabled in config', async () => {
     process.env.LOG_LEVEL = 'info';
     process.env.GITHUB_TOKEN = '456';
-    process.env.BROKER_HA_MODE_ENABLED = 'false';
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
     await loadBrokerConfig();
     const config = getConfig();
@@ -131,7 +123,6 @@ describe('config', () => {
       credPooling: false,
       customAccept: false,
       debugMode: false,
-      haMode: false,
       privateCa: false,
       proxy: false,
       tlsReject: false,
