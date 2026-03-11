@@ -1,0 +1,30 @@
+{
+    "BROKER_CLIENT_CONFIGURATION": {
+        "common": {
+            "default": {
+                "BROKER_SERVER_URL": "https://broker.dev.snyk.io",
+                "BROKER_HA_MODE_ENABLED": "false",
+                "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+            },
+            "oauth": {
+                "clientId": "${CLIENT_ID}",
+                "clientSecret": "${CLIENT_SECRET}"
+            }
+        }
+    },
+    "CONNECTIONS": {
+        "ecr1": {
+            "type": "ecr",
+            "identifier": "${BROKER_TOKEN_1}",
+            "CR_AGENT_URL": "http://localhost:17500",
+            "BROKER_CLIENT_URL": "http://localhost:7341"
+        },
+        "ecr2": {
+            "type": "ecr",
+            "identifier": "${BROKER_TOKEN_2}",
+            "CR_AGENT_URL": "http://localhost:17500",
+            "BROKER_CLIENT_URL": "http://localhost:7341"
+        }
+    }
+}
+
