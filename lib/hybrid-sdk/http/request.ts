@@ -35,6 +35,7 @@ export const makeRequestToDownstream = async (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
+  const requestId = localRequest.headers['snyk-request-id'] || '';
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -107,7 +108,7 @@ export const makeRequestToDownstream = async (
             const requestDurationMs = performance.now() - startTime;
             if (retries > 0) {
               logger.warn(
-                { msg: localRequest.url, requestDurationMs },
+                { msg: localRequest.url, requestDurationMs, requestId },
                 `Downstream Response failed. Retrying after 500ms...`,
               );
               setTimeout(() => {
@@ -115,7 +116,7 @@ export const makeRequestToDownstream = async (
               }, 500); // Wait for 0.5 second before retrying
             } else {
               logger.error(
-                { error, requestDurationMs },
+                { error, requestDurationMs, requestId },
                 `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
               );
               reject(error);
@@ -134,6 +135,7 @@ export const makeRequestToDownstream = async (
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
               requestDurationMs,
+              requestId,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -148,6 +150,7 @@ export const makeRequestToDownstream = async (
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
               requestDurationMs,
+              requestId,
             },
             `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
@@ -173,6 +176,7 @@ export const makeStreamingRequestToDownstream = (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
+  const requestId = localRequest.headers['snyk-request-id'] || '';
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -224,6 +228,7 @@ export const makeStreamingRequestToDownstream = (
                 url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: response.headers,
                 requestDurationMs,
+                requestId,
               },
               `Non 2xx HTTP Code Received`,
             );
@@ -233,7 +238,7 @@ export const makeStreamingRequestToDownstream = (
             const requestDurationMs = performance.now() - startTime;
             if (retries > 0) {
               logger.warn(
-                { msg: localRequest.url, requestDurationMs },
+                { msg: localRequest.url, requestDurationMs, requestId },
                 `Downstream Response failed. Retrying after 500ms...`,
               );
               setTimeout(() => {
@@ -243,7 +248,7 @@ export const makeStreamingRequestToDownstream = (
               }, 500); // Wait for 0.5 second before retrying
             } else {
               logger.error(
-                { error, requestDurationMs },
+                { error, requestDurationMs, requestId },
                 `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
               );
               reject(error);
@@ -263,6 +268,7 @@ export const makeStreamingRequestToDownstream = (
               url: req.url.replaceAll(brokerToken, maskedToken),
               err: error,
               requestDurationMs,
+              requestId,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -279,6 +285,7 @@ export const makeStreamingRequestToDownstream = (
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
               requestDurationMs,
+              requestId,
             },
             `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
@@ -301,6 +308,7 @@ export const makeSingleRawRequestToDownstream = async (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
+  const requestId = localRequest.headers['snyk-request-id'] || '';
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -356,7 +364,7 @@ export const makeSingleRawRequestToDownstream = async (
           response.on('error', (error) => {
             const requestDurationMs = performance.now() - startTime;
             logger.error(
-              { error, requestDurationMs, url: localRequest.url },
+              { error, requestDurationMs, url: localRequest.url, requestId },
               'Error making raw request to downstream.',
             );
             reject(error);
@@ -366,7 +374,7 @@ export const makeSingleRawRequestToDownstream = async (
       request.on('error', (error) => {
         const requestDurationMs = performance.now() - startTime;
         logger.error(
-          { error, requestDurationMs, url: localRequest.url },
+          { error, requestDurationMs, url: localRequest.url, requestId },
           'Error making raw request to downstream.',
         );
         reject(error);
@@ -375,7 +383,7 @@ export const makeSingleRawRequestToDownstream = async (
         const requestDurationMs = performance.now() - startTime;
         request.destroy(); // Abort the request if it times out
         logger.info(
-          { url: localRequest.url, requestDurationMs },
+          { url: localRequest.url, requestDurationMs, requestId },
           `Raw request to URI timed out.`,
         );
         reject(new Error(`Request to URI ${localRequest.url} timed out.`));
