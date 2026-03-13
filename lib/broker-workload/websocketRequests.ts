@@ -23,15 +23,22 @@ import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
 } from '../hybrid-sdk/common/utils/metrics';
+import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 import { WebSocketServer } from '../hybrid-sdk/server/types/socket';
 import { WebSocketConnection } from '../hybrid-sdk/client/types/client';
+
+// Converts status code to string like 5xx
+function statusClass(statusCode: number | undefined): string {
+  return statusCode != null ? `${String(statusCode)[0]}xx` : 'unknown';
+}
 
 export type BrokerWorkloadOptions = {
   config: {
     brokerType: 'client' | 'server';
     universalBrokerEnabled: boolean;
   };
+  metricsClient?: MetricsClient;
 };
 
 /**
@@ -122,6 +129,8 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }`,
     );
 
+    const metricsClient = this.options.metricsClient;
+
     const matchedFilterRule = filterRequest(
       payload,
       this.options,
@@ -129,6 +138,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
     );
     if (!matchedFilterRule) {
       incrementWebSocketRequestsTotal(true, 'inbound-request');
+      metricsClient?.recordRequest('broker-server', false);
       const reason =
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
       logContext.error = 'Blocked by filter rules';
@@ -153,6 +163,9 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       );
 
       incrementWebSocketRequestsTotal(false, 'inbound-request');
+      metricsClient?.recordRequest('broker-server', true);
+      const streaming = Boolean(payload.streamingID);
+      metricsClient?.recordDownstreamRequest(streaming);
       const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
       // mutates the payload
       const preparedRequest = await prepareRequest(
@@ -179,11 +192,16 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }
       incrementHttpRequestsTotal(false, 'outbound-request');
 
-      if (payload.streamingID) {
+      if (streaming) {
         // indicates server supports streaming
         try {
+          const start = performance.now();
           const downstreamRequestIncomingResponse =
             await makeStreamingRequestToDownstream(preparedRequest.req);
+          metricsClient?.recordDownstreamDuration(
+            true,
+            (performance.now() - start) / 1000, // convert ms to seconds
+          );
           responseHandler.streamDataResponse(downstreamRequestIncomingResponse);
         } catch (e) {
           logger.error(
@@ -198,7 +216,15 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       } else {
         // here if request against server had header x-broker-ws-response:true
         try {
+          const start = performance.now();
           const response = await makeRequestToDownstream(preparedRequest.req);
+          metricsClient?.recordDownstreamDuration(
+            false,
+            (performance.now() - start) / 1000,
+          );
+          metricsClient?.recordDownstreamStatus(
+            statusClass(response?.statusCode),
+          );
           const status = (response && response.statusCode) || 500;
           if (status > 404) {
             logger.warn(

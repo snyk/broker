@@ -2,11 +2,13 @@ import { LoadedClientOpts } from '../../common/types/options';
 import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../../logs/logger';
 import { IdentifyingMetadata } from '../types/client';
+import { Client } from '../metrics/client';
 
 export const openHandler = (
   io,
   clientOps: LoadedClientOpts,
   identifyingMetadata: IdentifyingMetadata,
+  metricsClient: Client,
 ) => {
   const metadata = {
     capabilities: identifyingMetadata.capabilities,
@@ -36,6 +38,7 @@ export const openHandler = (
     'Successfully established a websocket connection to the broker server.',
   );
   io.connectionStartTime = Date.now();
+  metricsClient.setConnectionState('connected', identifyingMetadata.role);
   logger.debug(
     {
       metadata,
