@@ -166,6 +166,7 @@ class BrokerServerPostResponseHandler {
               error: e.message,
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
+              streamingID: this.#streamingId,
             },
             'received error sending data via POST to Broker Server',
           );
@@ -262,6 +263,7 @@ class BrokerServerPostResponseHandler {
         {
           errorDetails: error,
           stackTrace: new Error('stacktrace generator').stack,
+          streamingID: this.#streamingId,
         },
         'received error from downstream request while streaming data to Broker Server',
       );
@@ -303,6 +305,7 @@ class BrokerServerPostResponseHandler {
             error: err.message,
             errDetails: err,
             stackTrace: new Error('stacktrace generator').stack,
+            streamingID: this.#streamingId,
           },
           'Socket Response error in Streaming from downstream',
         );

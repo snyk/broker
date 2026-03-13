@@ -250,6 +250,7 @@ export const log = bunyan.createLogger({
     connection: sanitiseConnection,
     err: serialiseError,
     error: serialiseError,
+    errDetails: serialiseError,
     accessToken: sanitisePlugins,
   },
 });
