@@ -318,6 +318,10 @@ export const createWebSocket = (
 
   websocket.on('service', serviceHandler);
 
+  websocket.on('incoming::pong', (time: number) => {
+    metricsClient.recordPingLatency((Date.now() - time) / 1000);
+  });
+
   websocket.on('close', () => {
     closeHandler(websocket, localClientOps, identifyingMetadata, metricsClient);
   });

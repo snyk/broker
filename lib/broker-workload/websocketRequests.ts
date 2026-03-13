@@ -192,58 +192,72 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }
       incrementHttpRequestsTotal(false, 'outbound-request');
 
-      if (streaming) {
-        // indicates server supports streaming
-        try {
-          const start = performance.now();
-          const downstreamRequestIncomingResponse =
-            await makeStreamingRequestToDownstream(preparedRequest.req);
-          metricsClient?.recordDownstreamDuration(
-            true,
-            (performance.now() - start) / 1000, // convert ms to seconds
-          );
-          responseHandler.streamDataResponse(downstreamRequestIncomingResponse);
-        } catch (e) {
-          logger.error(
-            {
-              ...logContext,
-              error: e,
-              stackTrace: new Error('stacktrace generator').stack,
-            },
-            '[Downstream] Caught error making streaming request to downstream ',
-          );
-        }
-      } else {
-        // here if request against server had header x-broker-ws-response:true
-        try {
-          const start = performance.now();
-          const response = await makeRequestToDownstream(preparedRequest.req);
-          metricsClient?.recordDownstreamDuration(
-            false,
-            (performance.now() - start) / 1000,
-          );
-          metricsClient?.recordDownstreamStatus(
-            statusClass(response?.statusCode),
-          );
-          const status = (response && response.statusCode) || 500;
-          if (status > 404) {
-            logger.warn(
+      metricsClient?.incrementInflight();
+      try {
+        if (streaming) {
+          // indicates server supports streaming
+          try {
+            const start = performance.now();
+            const downstreamRequestIncomingResponse =
+              await makeStreamingRequestToDownstream(preparedRequest.req);
+            metricsClient?.recordDownstreamDuration(
+              true,
+              (performance.now() - start) / 1000, // convert ms to seconds
+            );
+            const contentLength =
+              downstreamRequestIncomingResponse.headers['content-length'];
+            if (contentLength) {
+              const bytes = parseInt(contentLength, 10);
+              if (!isNaN(bytes)) {
+                metricsClient?.recordUpstreamResponseBytes(bytes);
+              }
+            }
+            responseHandler.streamDataResponse(
+              downstreamRequestIncomingResponse,
+            );
+          } catch (e) {
+            logger.error(
               {
-                statusCode: response.statusCode,
-                url: preparedRequest.req.url,
-                requestId: logContext.requestId,
+                ...logContext,
+                error: e,
+                stackTrace: new Error('stacktrace generator').stack,
               },
-              `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
+              '[Downstream] Caught error making streaming request to downstream ',
             );
           }
-          responseHandler.sendDataResponse(response, logContext);
-        } catch (error) {
-          logError(logContext, error);
-          return responseHandler.sendResponse({
-            status: 500,
-            body: error,
-          });
+        } else {
+          // here if request against server had header x-broker-ws-response:true
+          try {
+            const start = performance.now();
+            const response = await makeRequestToDownstream(preparedRequest.req);
+            metricsClient?.recordDownstreamDuration(
+              false,
+              (performance.now() - start) / 1000,
+            );
+            metricsClient?.recordDownstreamStatus(
+              statusClass(response?.statusCode),
+            );
+            const status = (response && response.statusCode) || 500;
+            if (status > 404) {
+              logger.warn(
+                {
+                  statusCode: response.statusCode,
+                  url: preparedRequest.req.url,
+                },
+                `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
+              );
+            }
+            responseHandler.sendDataResponse(response, logContext);
+          } catch (error) {
+            logError(logContext, error);
+            return responseHandler.sendResponse({
+              status: 500,
+              body: error,
+            });
+          }
         }
+      } finally {
+        metricsClient?.decrementInflight();
       }
     }
   }

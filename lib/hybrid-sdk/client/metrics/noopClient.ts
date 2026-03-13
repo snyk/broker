@@ -28,4 +28,8 @@ export class NoopClient implements Client {
   ): void {}
   recordDownstreamStatus(_statusClass: string): void {}
   recordConnectionDuration(_role: string, _durationSeconds: number): void {}
+  recordUpstreamResponseBytes(_bytes: number): void {}
+  incrementInflight(): void {}
+  decrementInflight(): void {}
+  recordPingLatency(_durationSeconds: number): void {}
 }

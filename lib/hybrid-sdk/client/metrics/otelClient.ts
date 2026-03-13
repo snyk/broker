@@ -2,6 +2,7 @@ import {
   Counter,
   Gauge,
   Histogram,
+  UpDownCounter,
   ValueType,
 } from '@opentelemetry/api';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -57,8 +58,9 @@ export class OtelClient implements Client {
   private readonly downstreamDurationHistogram: Histogram;
   private readonly downstreamStatusCounter: Counter;
   private readonly connectionDurationHistogram: Histogram;
-
-
+  private readonly upstreamResponseBytesHistogram: Histogram;
+  private readonly inflightRequestsCounter: UpDownCounter;
+  private readonly pingLatencyHistogram: Histogram;
 
   constructor(config: OtelClientConfig) {
     const reader =
@@ -213,6 +215,43 @@ export class OtelClient implements Client {
       },
     );
 
+    this.upstreamResponseBytesHistogram = meter.createHistogram(
+      'broker.client.upstream.response.bytes',
+      {
+        description:
+          'Byte size of response bodies sent back to the broker server',
+        unit: 'By',
+        advice: {
+          explicitBucketBoundaries: [
+            1024, 10240, 102400, 524288, 1048576, 5242880, 10485760, 20971520,
+          ],
+        },
+      },
+    );
+
+    this.inflightRequestsCounter = meter.createUpDownCounter(
+      'broker.client.inflight.requests',
+      {
+        description:
+          'Number of downstream requests currently in progress',
+        valueType: ValueType.INT,
+      },
+    );
+
+    // TODO: These buckets might not make sense
+    this.pingLatencyHistogram = meter.createHistogram(
+      'broker.client.ws.ping.latency.seconds',
+      {
+        description:
+          'Websocket heartbeat (ping/pong) round-trip latency in seconds',
+        unit: 's',
+        advice: {
+          explicitBucketBoundaries: [
+            0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
+          ],
+        },
+      },
+    );
   }
 
   // --- Existing ---
@@ -292,4 +331,19 @@ export class OtelClient implements Client {
     this.connectionDurationHistogram.record(durationSeconds, { role });
   }
 
+  recordUpstreamResponseBytes(bytes: number): void {
+    this.upstreamResponseBytesHistogram.record(bytes);
+  }
+
+  incrementInflight(): void {
+    this.inflightRequestsCounter.add(1);
+  }
+
+  decrementInflight(): void {
+    this.inflightRequestsCounter.add(-1);
+  }
+
+  recordPingLatency(durationSeconds: number): void {
+    this.pingLatencyHistogram.record(durationSeconds);
+  }
 }
