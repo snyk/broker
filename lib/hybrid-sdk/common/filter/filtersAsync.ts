@@ -235,7 +235,11 @@ export const loadFilters: LOADEDFILTER = (
         }
       }
     } catch (e: unknown) {
-      logger.warn({ error: e }, 'Caught error checking request against rules.');
+      const requestId = payload.headers?.['snyk-request-id'] || '';
+      logger.warn(
+        { error: e, requestId },
+        'Caught error checking request against rules.',
+      );
       res = false;
     }
     return res;

@@ -138,7 +138,10 @@ export class HybridResponseHandler {
         );
       }
     } catch (err) {
-      logger.error({ err }, `Error Posting via Emit callback.`);
+      logger.error(
+        { ...this.logContext, err },
+        `Error Posting via Emit callback.`,
+      );
     }
   };
 

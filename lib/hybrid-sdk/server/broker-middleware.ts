@@ -12,7 +12,8 @@ export const validateBrokerTypeMiddleware = (
     localConfig.brokerServerUniversalConfigEnabled &&
     !req?.headers['x-snyk-broker-type']
   ) {
-    const logContext = { url: req.url, headers: req.headers };
+    const requestId = req.headers['snyk-request-id'];
+    const logContext = { url: req.url, headers: req.headers, requestId };
     logger.warn(
       { logContext },
       'Error: Request does not contain the x-snyk-broker-type header.',

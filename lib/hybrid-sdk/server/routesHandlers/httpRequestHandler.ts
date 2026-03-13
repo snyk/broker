@@ -16,6 +16,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   const connections = getSocketConnections();
   const token = req.params.token;
   const desensitizedToken = getDesensitizedToken(token);
+  const requestId = req.headers['snyk-request-id'];
   req['maskedToken'] = desensitizedToken.maskedToken;
   req['hashedToken'] = desensitizedToken.hashedToken;
   // check if we have this broker in the connections
@@ -57,12 +58,11 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         res.writeHead(httpResponse.statusCode ?? 500, httpResponse.headers);
         return httpResponse.pipe(res);
       } catch (err) {
-        logger.error({ err }, `Error in HTTP middleware: ${err}`);
+        logger.error({ err, requestId }, `Error in HTTP middleware: ${err}`);
         res.setHeader('x-broker-failure', 'error-forwarding-to-primary');
         return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
-      const requestId = req.headers['snyk-request-id'];
       logger.warn(
         { desensitizedToken, requestId },
         'No matching connection found.',
@@ -75,7 +75,6 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   const connection = connections.get(token)!;
   // Make sure a connection actually exists before proceeding
   if (connection.length === 0) {
-    const requestId = req.headers['snyk-request-id'];
     logger.warn(
       { desensitizedToken, requestId },
       'No matching connection found.',
@@ -87,7 +86,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   const client = connection[0];
   if (!client.metadata?.version || !client.metadata?.capabilities) {
     logger.warn(
-      { desensitizedToken },
+      { desensitizedToken, requestId },
       'Connection metadata is missing required properties (version or capabilities).',
     );
     res.setHeader('x-broker-failure', 'bad-request');
@@ -130,6 +129,7 @@ export const extractPossibleContextFromHttpRequestToHeader = async (
   res: Response,
   next: NextFunction,
 ) => {
+  const requestId = req.headers['snyk-request-id'];
   try {
     const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
     const ctxPrefix = '/ctx/';
@@ -141,7 +141,7 @@ export const extractPossibleContextFromHttpRequestToHeader = async (
 
       if (ctxValueEnd === -1) {
         logger.error(
-          { url },
+          { url, requestId },
           'Error processing URL for context extraction. Unexpected pattern.',
         );
         throw new Error(
@@ -156,7 +156,7 @@ export const extractPossibleContextFromHttpRequestToHeader = async (
 
       if (newPathname === '') {
         logger.error(
-          { url },
+          { url, requestId },
           'Error processing URL for context extraction. Unexpected empty pathname.',
         );
         throw new Error(
@@ -169,7 +169,10 @@ export const extractPossibleContextFromHttpRequestToHeader = async (
       req.url = url.pathname + url.search;
     }
   } catch (error) {
-    logger.error({ error }, 'Error processing URL for context extraction.');
+    logger.error(
+      { error, requestId },
+      'Error processing URL for context extraction.',
+    );
   }
 
   next();
