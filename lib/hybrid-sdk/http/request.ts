@@ -1,15 +1,15 @@
-import http from 'http';
-import https from 'https';
+import http from 'node:http';
+import https from 'node:https';
+import { performance } from 'node:perf_hooks';
 import { getProxyForUrl } from 'proxy-from-env';
 import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
-
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
-
 import { getConfig } from '../common/config/config';
 import { extractBrokerTokenFromUrl, maskToken } from '../common/utils/token';
 import { switchToInsecure } from './utils';
 import version from '../common/utils/version';
+
 export interface HttpResponse {
   headers: Object;
   statusCode: number | undefined;
@@ -32,6 +32,7 @@ export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<HttpResponse> => {
+  const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
@@ -68,6 +69,7 @@ export const makeRequestToDownstream = async (
 
           // The whole response has been received.
           response.on('end', () => {
+            const requestDurationMs = performance.now() - startTime;
             if (
               response.statusCode &&
               response.statusCode >= 200 &&
@@ -79,6 +81,7 @@ export const makeRequestToDownstream = async (
                 {
                   statusCode: response.statusCode,
                   url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                  requestDurationMs,
                 },
                 `Successful request`,
               );
@@ -89,6 +92,7 @@ export const makeRequestToDownstream = async (
                 {
                   statusCode: response.statusCode,
                   url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                  requestDurationMs,
                 },
                 `Non 2xx HTTP Code Received`,
               );
@@ -100,9 +104,10 @@ export const makeRequestToDownstream = async (
             });
           });
           response.on('error', (error) => {
+            const requestDurationMs = performance.now() - startTime;
             if (retries > 0) {
               logger.warn(
-                { msg: localRequest.url },
+                { msg: localRequest.url, requestDurationMs },
                 `Downstream Response failed. Retrying after 500ms...`,
               );
               setTimeout(() => {
@@ -110,7 +115,7 @@ export const makeRequestToDownstream = async (
               }, 500); // Wait for 0.5 second before retrying
             } else {
               logger.error(
-                { error },
+                { error, requestDurationMs },
                 `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
               );
               reject(error);
@@ -120,6 +125,7 @@ export const makeRequestToDownstream = async (
       );
       // An error occurred while fetching.
       request.on('error', (error) => {
+        const requestDurationMs = performance.now() - startTime;
         if (retries > 0) {
           const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
           const maskedToken = maskToken(brokerToken);
@@ -127,6 +133,7 @@ export const makeRequestToDownstream = async (
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
+              requestDurationMs,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -140,6 +147,7 @@ export const makeRequestToDownstream = async (
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
+              requestDurationMs,
             },
             `Error making streaming request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
@@ -162,6 +170,7 @@ export const makeStreamingRequestToDownstream = (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
 ): Promise<http.IncomingMessage> => {
+  const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
@@ -189,6 +198,7 @@ export const makeStreamingRequestToDownstream = (
         localRequest.url,
         options,
         (response) => {
+          const requestDurationMs = performance.now() - startTime;
           if (
             response.statusCode &&
             response.statusCode >= 200 &&
@@ -201,6 +211,7 @@ export const makeStreamingRequestToDownstream = (
                 statusCode: response.statusCode,
                 url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
+                requestDurationMs,
               },
               `Successful downstream request.`,
             );
@@ -212,15 +223,17 @@ export const makeStreamingRequestToDownstream = (
                 statusCode: response.statusCode,
                 url: localRequest.url.replaceAll(brokerToken, maskedToken),
                 headers: response.headers,
+                requestDurationMs,
               },
               `Non 2xx HTTP Code Received`,
             );
           }
 
           response.on('error', (error) => {
+            const requestDurationMs = performance.now() - startTime;
             if (retries > 0) {
               logger.warn(
-                { msg: localRequest.url },
+                { msg: localRequest.url, requestDurationMs },
                 `Downstream Response failed. Retrying after 500ms...`,
               );
               setTimeout(() => {
@@ -230,7 +243,7 @@ export const makeStreamingRequestToDownstream = (
               }, 500); // Wait for 0.5 second before retrying
             } else {
               logger.error(
-                { error },
+                { error, requestDurationMs },
                 `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
               );
               reject(error);
@@ -241,6 +254,7 @@ export const makeStreamingRequestToDownstream = (
         },
       );
       request.on('error', (error) => {
+        const requestDurationMs = performance.now() - startTime;
         if (retries > 0) {
           const brokerToken = extractBrokerTokenFromUrl(req.url);
           const maskedToken = maskToken(brokerToken);
@@ -248,6 +262,7 @@ export const makeStreamingRequestToDownstream = (
             {
               url: req.url.replaceAll(brokerToken, maskedToken),
               err: error,
+              requestDurationMs,
             },
             `Request failed. Retrying after 500ms...`,
           );
@@ -263,6 +278,7 @@ export const makeStreamingRequestToDownstream = (
             {
               url: localRequest.url.replaceAll(brokerToken, maskedToken),
               err: error,
+              requestDurationMs,
             },
             `Error making request to downstream. Giving up after ${MAX_RETRY} retries.`,
           );
@@ -282,6 +298,7 @@ export const makeStreamingRequestToDownstream = (
 export const makeSingleRawRequestToDownstream = async (
   req: PostFilterPreparedRequest,
 ): Promise<HttpResponse> => {
+  const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
   if (config.INSECURE_DOWNSTREAM) {
@@ -319,6 +336,15 @@ export const makeSingleRawRequestToDownstream = async (
 
           // The whole response has been received.
           response.on('end', () => {
+            const requestDurationMs = performance.now() - startTime;
+            logger.trace(
+              {
+                statusCode: response.statusCode,
+                url: localRequest.url,
+                requestDurationMs,
+              },
+              'Successful raw request',
+            );
             resolve({
               headers: response.headers,
               statusCode: response.statusCode,
@@ -328,18 +354,30 @@ export const makeSingleRawRequestToDownstream = async (
           });
           // An error occurred while fetching.
           response.on('error', (error) => {
-            logger.error({ error }, 'Error making request to downstream.');
+            const requestDurationMs = performance.now() - startTime;
+            logger.error(
+              { error, requestDurationMs, url: localRequest.url },
+              'Error making raw request to downstream.',
+            );
             reject(error);
           });
         },
       );
       request.on('error', (error) => {
-        logger.error({ error }, 'Error making request to downstream.');
+        const requestDurationMs = performance.now() - startTime;
+        logger.error(
+          { error, requestDurationMs, url: localRequest.url },
+          'Error making raw request to downstream.',
+        );
         reject(error);
       });
       request.on('timeout', () => {
+        const requestDurationMs = performance.now() - startTime;
         request.destroy(); // Abort the request if it times out
-        logger.info(`Request to URI ${localRequest.url} timed out.`);
+        logger.info(
+          { url: localRequest.url, requestDurationMs },
+          `Raw request to URI timed out.`,
+        );
         reject(new Error(`Request to URI ${localRequest.url} timed out.`));
       });
       if (localRequest.body) {
