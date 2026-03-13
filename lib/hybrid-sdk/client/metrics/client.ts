@@ -7,7 +7,7 @@ export interface Client {
   /** Force-flush pending metrics without shutting down. Used before process.exit(). */
   forceFlush(): Promise<void>;
 
-  // ---- Group A: Process Health & Stability ----
+  // ---- Process Health  ----
 
   /**
    * Set the current state of a websocket connection.
@@ -36,7 +36,7 @@ export interface Client {
   /** Increment broker.client.uncaught_exception.total. */
   recordUncaughtException(errorCode: string): void;
 
-  // ---- Group B: Request Flow & Downstream Observability ----
+  // ---- Request Flow ----
 
   /**
    * Increment broker.client.request.total.
@@ -67,4 +67,21 @@ export interface Client {
    */
   recordConnectionDuration(role: string, durationSeconds: number): void;
 
+  /**
+   * Record broker.client.upstream.response.bytes — byte size of response
+   * bodies sent back to the broker server.
+   */
+  recordUpstreamResponseBytes(bytes: number): void;
+
+  /** Increment broker.client.inflight.requests gauge (+1). */
+  incrementInflight(): void;
+
+  /** Decrement broker.client.inflight.requests gauge (-1). */
+  decrementInflight(): void;
+
+  /**
+   * Record broker.client.ws.ping.latency.seconds — websocket heartbeat
+   * round-trip time in seconds.
+   */
+  recordPingLatency(durationSeconds: number): void;
 }

@@ -158,6 +158,10 @@ describe('client/metrics', () => {
       ['recordDownstreamDuration', [false, 1.23]],
       ['recordDownstreamStatus', ['2xx']],
       ['recordConnectionDuration', ['primary', 300]],
+      ['recordUpstreamResponseBytes', [1024]],
+      ['incrementInflight', []],
+      ['decrementInflight', []],
+      ['recordPingLatency', [0.05]],
     ];
 
     it.each(noopMethods)('%s does not throw', (method, args) => {
@@ -399,6 +403,36 @@ describe('client/metrics', () => {
       expect(metric).toBeDefined();
       expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
       expect(metric!.dataPoints[0].attributes['role']).toBe('primary');
+    });
+
+    it('records broker.client.upstream.response.bytes', async () => {
+      client.recordUpstreamResponseBytes(51200);
+      const metric = await findMetric(
+        'broker.client.upstream.response.bytes',
+      );
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints).toHaveLength(1);
+    });
+
+    it('records broker.client.inflight.requests as UpDownCounter', async () => {
+      client.incrementInflight();
+      client.incrementInflight();
+      client.decrementInflight();
+      const metric = await findMetric('broker.client.inflight.requests');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.SUM);
+      expect(metric!.dataPoints[0].value).toBe(1);
+    });
+
+    it('records broker.client.ws.ping.latency.seconds', async () => {
+      client.recordPingLatency(0.042);
+      const metric = await findMetric(
+        'broker.client.ws.ping.latency.seconds',
+      );
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints).toHaveLength(1);
     });
 
     it('collects Node.js runtime metrics', async () => {
