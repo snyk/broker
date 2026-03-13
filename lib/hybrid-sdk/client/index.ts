@@ -77,6 +77,22 @@ export const main = async (clientOpts: ClientOpts) => {
     }
     metricsClient.incrementBrokerClientMetric();
 
+    // Make metricsClient available to createWebSocket (via clientOpts) and workload handlers.
+    (clientOpts as any).metricsClient = metricsClient;
+
+    // Best-effort: record uncaught exceptions after metricsClient is ready.
+    // The top-level handler (registered at module load) still handles logging + exit.
+    process.on('uncaughtException', (error) => {
+      metricsClient.recordUncaughtException(
+        (error as NodeJS.ErrnoException).code ?? error.message ?? 'unknown',
+      );
+      // Only record process_exit when the top-level handler will actually exit.
+      // ECONNRESET is logged but does not trigger process.exit(1).
+      if (error.message !== 'read ECONNRESET') {
+        metricsClient.recordProcessExit('uncaught_exception');
+      }
+    });
+
     clientOpts.config.API_BASE_URL =
       clientOpts.config.API_BASE_URL ??
       clientOpts.config.BROKER_DISPATCHER_BASE_URL ??
@@ -141,6 +157,7 @@ export const main = async (clientOpts: ClientOpts) => {
         clientOpts,
         globalIdentifyingMetadata,
       );
+
     } else {
       websocketConnections.push(
         createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary),

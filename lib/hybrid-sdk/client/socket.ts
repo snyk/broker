@@ -19,6 +19,7 @@ import { initializeSocketHandlers } from './socketHandlers/init';
 import { CONFIGURATION, LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
 import { getAuthConfig } from './auth/oauth';
+import { Client, NoopClient } from './metrics';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
@@ -114,6 +115,8 @@ export const createWebSocket = (
   const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
   identifyingMetadata.role = role ?? Role.primary;
   const localClientOps = Object.assign({}, clientOpts);
+  const metricsClient: Client =
+    (localClientOps as any).metricsClient ?? new NoopClient();
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
   if (!identifyingMetadata.identifier) {
@@ -226,6 +229,11 @@ export const createWebSocket = (
             },
             'Failed to renew connection due to a client error. Exiting...',
           );
+          metricsClient.recordAuthRenewalFailure(
+            renewResponse.statusCode ?? 0,
+          );
+          metricsClient.recordProcessExit('auth_4xx');
+          metricsClient.forceFlush().catch(() => {}); // attempt to flush buffered metrics before exit
           process.exit(1);
           return; // process.exit is overridden during testing, so we return instead
         default: // log and retry
@@ -235,6 +243,9 @@ export const createWebSocket = (
               responseCode: renewResponse.statusCode,
             },
             'Failed to renew connection.',
+          );
+          metricsClient.recordAuthRenewalFailure(
+            renewResponse.statusCode ?? 0,
           );
       }
 
@@ -268,9 +279,18 @@ export const createWebSocket = (
     identifyHandler(serverData, websocket),
   );
 
-  websocket.on('reconnect scheduled', reconnectScheduledHandler);
+  websocket.on('reconnect scheduled', (opts) => {
+    metricsClient.setConnectionState('reconnecting', identifyingMetadata.role);
+    metricsClient.recordReconnect();
+    reconnectScheduledHandler(opts);
+  });
 
-  websocket.on('reconnect failed', () => reconnectFailedHandler(websocket));
+  websocket.on('reconnect failed', () => {
+    metricsClient.setConnectionState('failed', identifyingMetadata.role);
+    metricsClient.recordProcessExit('reconnect_exhaustion');
+    metricsClient.forceFlush().catch(() => {}); // fire-and-forget, same as auth_4xx path
+    reconnectFailedHandler(websocket);
+  });
 
   websocket.on(
     'chunk',
@@ -293,13 +313,13 @@ export const createWebSocket = (
   websocket.on('error', errorHandler);
 
   websocket.on('open', () =>
-    openHandler(websocket, localClientOps, identifyingMetadata),
+    openHandler(websocket, localClientOps, identifyingMetadata, metricsClient),
   );
 
   websocket.on('service', serviceHandler);
 
   websocket.on('close', () => {
-    closeHandler(websocket, localClientOps, identifyingMetadata);
+    closeHandler(websocket, localClientOps, identifyingMetadata, metricsClient);
   });
 
   return websocket;

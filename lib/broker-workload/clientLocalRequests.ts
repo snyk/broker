@@ -12,6 +12,7 @@ import {
 } from '../hybrid-sdk/workloadFactory';
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
+import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 
 /**
@@ -35,6 +36,9 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       this.req,
       this.res,
     );
+    const metricsClient: MetricsClient | undefined = (this.options as any)
+      .metricsClient;
+
     const matchedFilterRule = filterClientRequest(
       this.req,
       this.options,
@@ -63,6 +67,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
 
     if (!matchedFilterRule) {
       incrementHttpRequestsTotal(true, 'inbound-request');
+      metricsClient?.recordRequest('local-client', false);
       const reason =
         'Request does not match any accept rule, blocking HTTP request';
       hybridClientRequestHandler.logContext.error = 'blocked';
@@ -84,6 +89,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
         data.makeRequestOverHttp,
       );
       incrementHttpRequestsTotal(false, 'inbound-request');
+      metricsClient?.recordRequest('local-client', true);
     }
   }
 }
