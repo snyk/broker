@@ -49,6 +49,21 @@ interface Logger {
   child(context: Partial<ExtendedLogContext> & Record<string, any>): Logger;
 }
 
+function extractNetworkErrorDetails(error: unknown): Record<string, unknown> {
+  if (!error || typeof error !== 'object') {
+    return {};
+  }
+  const err = error as Record<string, unknown>;
+  return {
+    errorCode: err.code,
+    errorErrno: err.errno,
+    syscall: err.syscall,
+    timeout: err.timeout,
+    reason: err.reason,
+    info: err.info,
+  };
+}
+
 /**
  * Handles sending HTTP responses back to the Broker Server via POST requests.
  * Supports both streaming and non-streaming response modes.
@@ -167,6 +182,9 @@ class BrokerServerPostResponseHandler {
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
               streamingID: this.#streamingId,
+              requestId: this.#requestId,
+              brokerServerUrl: this.#config.brokerServerUrl,
+              ...extractNetworkErrorDetails(e),
             },
             'received error sending data via POST to Broker Server',
           );
@@ -203,6 +221,7 @@ class BrokerServerPostResponseHandler {
                 error: err.message,
                 errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
+                ...extractNetworkErrorDetails(err),
               },
               'Stream Response error in POST to Broker Server',
             );
