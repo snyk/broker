@@ -229,9 +229,7 @@ export const createWebSocket = (
             },
             'Failed to renew connection due to a client error. Exiting...',
           );
-          metricsClient.recordAuthRenewalFailure(
-            renewResponse.statusCode ?? 0,
-          );
+          metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
           metricsClient.recordProcessExit('auth_4xx');
           metricsClient.forceFlush().catch(() => {}); // attempt to flush buffered metrics before exit
           process.exit(1);
@@ -244,9 +242,7 @@ export const createWebSocket = (
             },
             'Failed to renew connection.',
           );
-          metricsClient.recordAuthRenewalFailure(
-            renewResponse.statusCode ?? 0,
-          );
+          metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
       }
 
       websocket.timeoutHandlerId = setTimeout(

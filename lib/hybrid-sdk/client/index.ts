@@ -157,7 +157,6 @@ export const main = async (clientOpts: ClientOpts) => {
         clientOpts,
         globalIdentifyingMetadata,
       );
-
     } else {
       websocketConnections.push(
         createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary),
