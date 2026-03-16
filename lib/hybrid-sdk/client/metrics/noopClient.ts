@@ -20,7 +20,10 @@ export class NoopClient implements Client {
   recordAuthRenewalFailure(_statusCode: number): void {}
   recordUncaughtException(_errorCode: string): void {}
 
-  recordRequest(_flow: 'broker-server' | 'local-client', _allowed: boolean): void {}
+  recordRequest(
+    _flow: 'broker-server' | 'local-client',
+    _allowed: boolean,
+  ): void {}
   recordDownstreamRequest(_streaming: boolean): void {}
   recordDownstreamDuration(
     _streaming: boolean,

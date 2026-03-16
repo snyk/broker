@@ -302,9 +302,7 @@ describe('client/metrics', () => {
 
     it('records broker.client.uncaught_exception.total with error_code', async () => {
       client.recordUncaughtException('ECONNRESET');
-      const metric = await findMetric(
-        'broker.client.uncaught_exception.total',
-      );
+      const metric = await findMetric('broker.client.uncaught_exception.total');
       expect(metric!.dataPoints[0].value).toBe(1);
       expect(metric!.dataPoints[0].attributes['error_code']).toBe('ECONNRESET');
     });
@@ -351,9 +349,7 @@ describe('client/metrics', () => {
       client.recordDownstreamRequest(true);
       client.recordDownstreamRequest(false);
 
-      const metric = await findMetric(
-        'broker.client.downstream.request.total',
-      );
+      const metric = await findMetric('broker.client.downstream.request.total');
       const dataPoints = metric!.dataPoints;
 
       expect(
@@ -382,12 +378,10 @@ describe('client/metrics', () => {
       const dataPoints = metric!.dataPoints;
 
       expect(
-        dataPoints.find((dp) => dp.attributes['status_class'] === '2xx')
-          ?.value,
+        dataPoints.find((dp) => dp.attributes['status_class'] === '2xx')?.value,
       ).toBe(1);
       expect(
-        dataPoints.find((dp) => dp.attributes['status_class'] === '5xx')
-          ?.value,
+        dataPoints.find((dp) => dp.attributes['status_class'] === '5xx')?.value,
       ).toBe(1);
     });
 
@@ -401,9 +395,7 @@ describe('client/metrics', () => {
 
     it('records broker.client.upstream.response.bytes', async () => {
       client.recordUpstreamResponseBytes(51200);
-      const metric = await findMetric(
-        'broker.client.upstream.response.bytes',
-      );
+      const metric = await findMetric('broker.client.upstream.response.bytes');
       expect(metric).toBeDefined();
       expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
       expect(metric!.dataPoints).toHaveLength(1);
@@ -421,9 +413,7 @@ describe('client/metrics', () => {
 
     it('records broker.client.ws.ping.latency.seconds', async () => {
       client.recordPingLatency(0.042);
-      const metric = await findMetric(
-        'broker.client.ws.ping.latency.seconds',
-      );
+      const metric = await findMetric('broker.client.ws.ping.latency.seconds');
       expect(metric).toBeDefined();
       expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
       expect(metric!.dataPoints).toHaveLength(1);

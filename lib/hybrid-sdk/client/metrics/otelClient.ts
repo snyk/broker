@@ -120,10 +120,13 @@ export class OtelClient implements Client {
       },
     );
 
-    this.reconnectCounter = meter.createCounter('broker.client.reconnect.total', {
-      description: 'Number of websocket reconnect attempts scheduled',
-      valueType: ValueType.INT,
-    });
+    this.reconnectCounter = meter.createCounter(
+      'broker.client.reconnect.total',
+      {
+        description: 'Number of websocket reconnect attempts scheduled',
+        valueType: ValueType.INT,
+      },
+    );
 
     this.processExitCounter = meter.createCounter(
       'broker.client.process_exit.total',
@@ -137,8 +140,7 @@ export class OtelClient implements Client {
     this.authRenewalFailureCounter = meter.createCounter(
       'broker.client.auth_renewal_failure.total',
       {
-        description:
-          'Auth renewal HTTP failures by status code.',
+        description: 'Auth renewal HTTP failures by status code.',
         valueType: ValueType.INT,
       },
     );
@@ -146,7 +148,8 @@ export class OtelClient implements Client {
     this.uncaughtExceptionCounter = meter.createCounter(
       'broker.client.uncaught_exception.total',
       {
-        description: 'Uncaught exceptions by error code (ECONNRESET, ETIMEDOUT, etc.)',
+        description:
+          'Uncaught exceptions by error code (ECONNRESET, ETIMEDOUT, etc.)',
         valueType: ValueType.INT,
       },
     );
@@ -173,7 +176,8 @@ export class OtelClient implements Client {
     this.downstreamRequestCounter = meter.createCounter(
       'broker.client.downstream.request.total',
       {
-        description: 'Requests forwarded to downstream after passing filter rules',
+        description:
+          'Requests forwarded to downstream after passing filter rules',
         valueType: ValueType.INT,
       },
     );
@@ -185,9 +189,7 @@ export class OtelClient implements Client {
           'Duration of downstream HTTP calls in seconds. Non-streaming: full round-trip. Streaming: time to response headers.',
         unit: 's',
         advice: {
-          explicitBucketBoundaries: [
-            0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30,
-          ],
+          explicitBucketBoundaries: [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30],
         },
       },
     );
@@ -232,8 +234,7 @@ export class OtelClient implements Client {
     this.inflightRequestsCounter = meter.createUpDownCounter(
       'broker.client.inflight.requests',
       {
-        description:
-          'Number of downstream requests currently in progress',
+        description: 'Number of downstream requests currently in progress',
         valueType: ValueType.INT,
       },
     );
@@ -309,7 +310,10 @@ export class OtelClient implements Client {
 
   // --- Request Flow ---
 
-  recordRequest(flow: 'broker-server' | 'local-client', allowed: boolean): void {
+  recordRequest(
+    flow: 'broker-server' | 'local-client',
+    allowed: boolean,
+  ): void {
     this.requestCounter.add(1, { flow, allowed: String(allowed) });
   }
 
