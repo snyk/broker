@@ -192,8 +192,8 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }
       incrementHttpRequestsTotal(false, 'outbound-request');
 
-      metricsClient?.incrementInflight();
       try {
+        metricsClient?.incrementInflight();
         if (streaming) {
           // indicates server supports streaming
           try {
