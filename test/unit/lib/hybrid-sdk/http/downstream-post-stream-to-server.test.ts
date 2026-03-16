@@ -162,8 +162,8 @@ describe('BrokerServerPostResponseHandler', () => {
         responseStatus: errorStatus.toString(),
         error: errorBody,
       });
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -205,8 +205,8 @@ describe('BrokerServerPostResponseHandler', () => {
       expect(errorCall).toBeDefined();
       expect(errorCall?.context.error).toContain('ETIMEDOUT');
       expect(errorCall?.context.errDetails.code).toBe('ETIMEDOUT');
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -251,8 +251,8 @@ describe('BrokerServerPostResponseHandler', () => {
         error: 'Upstream request to Broker Server timed out',
         timeout: shortTimeout,
       });
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
       expect(errorCall?.context.buffer).toMatchObject({
         readableLength: expect.any(Number),
         readableHighWaterMark: expect.any(Number),
@@ -292,8 +292,8 @@ describe('BrokerServerPostResponseHandler', () => {
         writableLength: expect.any(Number),
         writableHighWaterMark: expect.any(Number),
       });
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
 
       mockSocket.destroy();
     });
@@ -330,8 +330,8 @@ describe('BrokerServerPostResponseHandler', () => {
         (call) => call.message === 'Finish Post Request Handler Event',
       );
       expect(finishCall).toBeDefined();
-      expect(finishCall?.context.duration).toEqual(expect.any(Number));
-      expect(finishCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(finishCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(finishCall?.context.durationMs).toBeGreaterThanOrEqual(0);
     });
 
     it('logs duration on finish event after forwardRequest completes', async () => {
@@ -357,8 +357,8 @@ describe('BrokerServerPostResponseHandler', () => {
         (call) => call.message === 'Finish Post Request Handler Event',
       );
       expect(finishCall).toBeDefined();
-      expect(finishCall?.context.duration).toEqual(expect.any(Number));
-      expect(finishCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(finishCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(finishCall?.context.durationMs).toBeGreaterThanOrEqual(0);
 
       mockSocket.destroy();
     });
@@ -459,13 +459,13 @@ describe('BrokerServerPostResponseHandler', () => {
       const tcpCall = testLogger.debugCalls.find(
         (call) =>
           call.message ===
-          'upstream TCP connection details for POST to Broker Server',
+          'Established TCP connection details for POST to Broker Server',
       );
       expect(tcpCall).toBeDefined();
       expect(tcpCall?.context.requestId).toBe(requestId);
       expect(tcpCall?.context.streamingId).toBe(streamingId);
-      expect(tcpCall?.context.tcpConnectDuration).toEqual(expect.any(Number));
-      expect(tcpCall?.context.tcpConnectDuration).toBeGreaterThanOrEqual(0);
+      expect(tcpCall?.context.tcpConnectDurationMs).toEqual(expect.any(Number));
+      expect(tcpCall?.context.tcpConnectDurationMs).toBeGreaterThanOrEqual(0);
       expect(tcpCall?.context.upstreamLocalAddress).toBe('127.0.0.1');
       expect(tcpCall?.context.upstreamLocalPort).toEqual(expect.any(Number));
       expect(tcpCall?.context.upstreamRemoteAddress).toBe('127.0.0.1');
@@ -504,8 +504,7 @@ describe('BrokerServerPostResponseHandler', () => {
 
       const dnsCall = testLogger.debugCalls.find(
         (call) =>
-          call.message ===
-          'DNS lookup completed for POST to Broker Server',
+          call.message === 'Completed DNS lookup for POST to Broker Server',
       );
       // DNS lookup may not fire when connecting to an IP address directly,
       // so we only assert structure if the event was emitted
@@ -554,7 +553,7 @@ describe('BrokerServerPostResponseHandler', () => {
       const tcpCall = testLogger.debugCalls.find(
         (call) =>
           call.message ===
-          'upstream TCP connection details for POST to Broker Server',
+          'Established TCP connection details for POST to Broker Server',
       );
       expect(tcpCall).toBeDefined();
       expect(tcpCall?.context.upstreamLocalAddress).toBe('127.0.0.1');
@@ -582,10 +581,10 @@ describe('BrokerServerPostResponseHandler', () => {
         req.on('data', (chunk) => chunks.push(chunk));
         req.on('end', () => {
           res.writeHead(200, {
-            'Via': '1.1 corporate-proxy.example.com',
+            Via: '1.1 corporate-proxy.example.com',
             'X-Forwarded-For': '10.0.0.5, 10.0.1.1',
             'X-Real-Ip': '10.0.0.5',
-            'Server': 'nginx/1.25.0',
+            Server: 'nginx/1.25.0',
           });
           res.end('OK');
         });
@@ -625,12 +624,10 @@ describe('BrokerServerPostResponseHandler', () => {
         const headerCall = testLoggerLocal.debugCalls.find(
           (call) =>
             call.message ===
-            'upstream response diagnostic headers from Broker Server POST',
+            'Received response diagnostic headers from Broker Server POST',
         );
         expect(headerCall).toBeDefined();
-        expect(headerCall?.context.via).toBe(
-          '1.1 corporate-proxy.example.com',
-        );
+        expect(headerCall?.context.via).toBe('1.1 corporate-proxy.example.com');
         expect(headerCall?.context.xForwardedFor).toBe('10.0.0.5, 10.0.1.1');
         expect(headerCall?.context.xRealIp).toBe('10.0.0.5');
         expect(headerCall?.context.server).toBe('nginx/1.25.0');
@@ -684,7 +681,7 @@ describe('BrokerServerPostResponseHandler', () => {
         const headerCall = testLoggerLocal.debugCalls.find(
           (call) =>
             call.message ===
-            'upstream response diagnostic headers from Broker Server POST',
+            'Received response diagnostic headers from Broker Server POST',
         );
         expect(headerCall).toBeUndefined();
         done();
@@ -729,7 +726,8 @@ describe('BrokerServerPostResponseHandler', () => {
 
       const proxyCall = testLogger.debugCalls.find(
         (call) =>
-          call.message === 'proxy configuration for POST to Broker Server',
+          call.message ===
+          'Using proxy configuration for POST to Broker Server',
       );
       expect(proxyCall).toBeDefined();
       expect(proxyCall?.context.httpProxy).toBe(
@@ -767,7 +765,8 @@ describe('BrokerServerPostResponseHandler', () => {
 
       const proxyCall = testLogger.debugCalls.find(
         (call) =>
-          call.message === 'proxy configuration for POST to Broker Server',
+          call.message ===
+          'Using proxy configuration for POST to Broker Server',
       );
       expect(proxyCall).toBeDefined();
       expect(proxyCall?.context.httpsProxy).toBe(
@@ -806,7 +805,8 @@ describe('BrokerServerPostResponseHandler', () => {
 
       const proxyCall = testLogger.debugCalls.find(
         (call) =>
-          call.message === 'proxy configuration for POST to Broker Server',
+          call.message ===
+          'Using proxy configuration for POST to Broker Server',
       );
       expect(proxyCall).toBeUndefined();
     });
@@ -852,8 +852,8 @@ describe('BrokerServerPostResponseHandler', () => {
           'received error sending data via POST to Broker Server',
       );
       expect(errorCall).toBeDefined();
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
       expect(errorCall?.context.errorCode).toBe('ETIMEDOUT');
       expect(errorCall?.context.syscall).toBe('connect');
       expect(errorCall?.context.errorErrno).toBe(-60);
@@ -862,9 +862,7 @@ describe('BrokerServerPostResponseHandler', () => {
     });
 
     it('includes duration and network error details on ECONNREFUSED', async () => {
-      const econnrefusedError = new Error(
-        'connect ECONNREFUSED 127.0.0.1:443',
-      );
+      const econnrefusedError = new Error('connect ECONNREFUSED 127.0.0.1:443');
       Object.assign(econnrefusedError, {
         code: 'ECONNREFUSED',
         errno: -61,
@@ -894,8 +892,8 @@ describe('BrokerServerPostResponseHandler', () => {
           'received error sending data via POST to Broker Server',
       );
       expect(errorCall).toBeDefined();
-      expect(errorCall?.context.duration).toEqual(expect.any(Number));
-      expect(errorCall?.context.duration).toBeGreaterThanOrEqual(0);
+      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
       expect(errorCall?.context.errorCode).toBe('ECONNREFUSED');
       expect(errorCall?.context.syscall).toBe('connect');
     });

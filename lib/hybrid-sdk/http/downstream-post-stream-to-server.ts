@@ -184,7 +184,7 @@ class BrokerServerPostResponseHandler {
       if (proxyConfig.httpProxy || proxyConfig.httpsProxy) {
         logger.debug(
           { ...proxyConfig },
-          'proxy configuration for POST to Broker Server',
+          'Using proxy configuration for POST to Broker Server',
         );
       }
 
@@ -192,18 +192,23 @@ class BrokerServerPostResponseHandler {
         const lookupTime = performance.now();
         socket.on(
           'lookup',
-          (err: Error | null, address: string, family: string | number, host: string) => {
+          (
+            err: Error | null,
+            address: string,
+            family: string | number,
+            host: string,
+          ) => {
             logger.debug(
               {
                 requestId: this.#requestId,
                 streamingId: this.#streamingId,
-                dnsLookupDuration: performance.now() - lookupTime,
+                dnsLookupDurationMs: performance.now() - lookupTime,
                 resolvedAddress: address,
                 addressFamily: family,
                 hostname: host,
                 dnsError: err?.message || null,
               },
-              'DNS lookup completed for POST to Broker Server',
+              'Completed DNS lookup for POST to Broker Server',
             );
           },
         );
@@ -212,14 +217,40 @@ class BrokerServerPostResponseHandler {
             {
               requestId: this.#requestId,
               streamingId: this.#streamingId,
-              tcpConnectDuration: performance.now() - lookupTime,
+              tcpConnectDurationMs: performance.now() - lookupTime,
               upstreamLocalAddress: socket.localAddress,
               upstreamLocalPort: socket.localPort,
               upstreamRemoteAddress: socket.remoteAddress,
               upstreamRemotePort: socket.remotePort,
             },
-            'upstream TCP connection details for POST to Broker Server',
+            'Established TCP connection details for POST to Broker Server',
           );
+        });
+        socket.on('secureConnect', () => {
+          const isTlsReused = (
+            socket as import('tls').TLSSocket
+          ).isSessionReused();
+          if (isTlsReused) {
+            logger.debug(
+              {
+                requestId: this.#requestId,
+                streamingId: this.#streamingId,
+              },
+              'Reusing existing TLS session for POST to Broker Server',
+            );
+          } else {
+            const cert = (socket as import('tls').TLSSocket).getPeerCertificate(
+              false,
+            );
+            logger.debug(
+              {
+                requestId: this.#requestId,
+                streamingId: this.#streamingId,
+                fingerprint: cert.fingerprint,
+              },
+              'Established new TLS session for POST to Broker Server',
+            );
+          }
         });
       });
 
@@ -227,7 +258,7 @@ class BrokerServerPostResponseHandler {
         .on('error', (e) => {
           logger.error(
             {
-              duration: performance.now() - startTime,
+              durationMs: performance.now() - startTime,
               error: e.message,
               errDetails: e,
               stackTrace: new Error('stacktrace generator').stack,
@@ -248,7 +279,7 @@ class BrokerServerPostResponseHandler {
           // (whichever timeout is shorter). Check buffer state to help diagnose.
           logger.error(
             {
-              duration: performance.now() - startTime,
+              durationMs: performance.now() - startTime,
               error: timeoutError.message,
               errDetails: timeoutError,
               timeout: options.timeout,
@@ -283,13 +314,13 @@ class BrokerServerPostResponseHandler {
                 streamingId: this.#streamingId,
                 ...diagnosticHeaders,
               },
-              'upstream response diagnostic headers from Broker Server POST',
+              'Received response diagnostic headers from Broker Server POST',
             );
           }
           r.on('error', async (err) => {
             logger.error(
               {
-                duration: performance.now() - startTime,
+                durationMs: performance.now() - startTime,
                 error: err.message,
                 errDetails: err,
                 stackTrace: new Error('stacktrace generator').stack,
@@ -302,7 +333,7 @@ class BrokerServerPostResponseHandler {
             const body = await readBody(r).catch(() => '');
             logger.error(
               {
-                duration: performance.now() - startTime,
+                durationMs: performance.now() - startTime,
                 responseStatus: r.statusCode?.toString(),
                 error: body,
                 responseHeaders: JSON.stringify(r.headers),
@@ -316,15 +347,18 @@ class BrokerServerPostResponseHandler {
         .on('finish', () => {
           logger.debug(
             {
-              duration: performance.now() - startTime
+              durationMs: performance.now() - startTime,
             },
-            'Finish Post Request Handler Event');
+            'Finish Post Request Handler Event',
+          );
         })
         .on('close', () => {
-          logger.debug({
-            duration: performance.now() - startTime
-          },
-            'Close Post Request Handler Event');
+          logger.debug(
+            {
+              durationMs: performance.now() - startTime,
+            },
+            'Close Post Request Handler Event',
+          );
         });
 
       logger.debug('POST Request Client setup');
