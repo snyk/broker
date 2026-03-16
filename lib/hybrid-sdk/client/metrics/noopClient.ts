@@ -9,30 +9,19 @@ export class NoopClient implements Client {
   async shutdown(): Promise<void> {}
   async forceFlush(): Promise<void> {}
 
-  setConnectionState(
-    _state: 'connected' | 'reconnecting' | 'failed',
-    _role: string,
-  ): void {}
+  setConnectionState(): void {}
   recordReconnect(): void {}
-  recordProcessExit(
-    _reason: 'reconnect_exhaustion' | 'auth_4xx' | 'uncaught_exception',
-  ): void {}
-  recordAuthRenewalFailure(_statusCode: number): void {}
-  recordUncaughtException(_errorCode: string): void {}
+  recordProcessExit(): void {}
+  recordAuthRenewalFailure(): void {}
+  recordUncaughtException(): void {}
 
-  recordRequest(
-    _flow: 'broker-server' | 'local-client',
-    _allowed: boolean,
-  ): void {}
-  recordDownstreamRequest(_streaming: boolean): void {}
-  recordDownstreamDuration(
-    _streaming: boolean,
-    _durationSeconds: number,
-  ): void {}
-  recordDownstreamStatus(_statusClass: string): void {}
-  recordConnectionDuration(_role: string, _durationSeconds: number): void {}
-  recordUpstreamResponseBytes(_bytes: number): void {}
+  recordRequest(): void {}
+  recordDownstreamRequest(): void {}
+  recordDownstreamDuration(): void {}
+  recordDownstreamStatus(): void {}
+  recordConnectionDuration(): void {}
+  recordUpstreamResponseBytes(): void {}
   incrementInflight(): void {}
   decrementInflight(): void {}
-  recordPingLatency(_durationSeconds: number): void {}
+  recordPingLatency(): void {}
 }
