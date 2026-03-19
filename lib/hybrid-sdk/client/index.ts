@@ -159,10 +159,20 @@ export const main = async (clientOpts: ClientOpts) => {
       );
     } else {
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary, metricsClient),
+        createWebSocket(
+          clientOpts,
+          globalIdentifyingMetadata,
+          Role.primary,
+          metricsClient,
+        ),
       );
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.secondary, metricsClient),
+        createWebSocket(
+          clientOpts,
+          globalIdentifyingMetadata,
+          Role.secondary,
+          metricsClient,
+        ),
       );
     }
 
