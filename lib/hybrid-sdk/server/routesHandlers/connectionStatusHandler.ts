@@ -80,7 +80,9 @@ export const connectionsStatusHandler = async (req: Request, res: Response) => {
     connectionSummary.push({
       identifier: maskToken(key),
       hashedIdentifier: hashToken(key),
-      versions: [...new Set(value.map((x) => x.metadata.version))],
+      versions: [
+        ...new Set(value.map((x) => x.metadata?.version).filter(Boolean)),
+      ],
       brokerClientIds: [...new Set(value.map((x) => x.brokerClientId))],
     });
   }
