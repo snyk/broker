@@ -103,8 +103,18 @@ export const createWebSocketConnectionPairs = async (
       .serverId ?? '';
 
   return [
-    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary, metricsClient),
-    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary, metricsClient),
+    createWebSocket(
+      clientOpts,
+      socketIdentifyingMetadata,
+      Role.primary,
+      metricsClient,
+    ),
+    createWebSocket(
+      clientOpts,
+      socketIdentifyingMetadata,
+      Role.secondary,
+      metricsClient,
+    ),
   ];
 };
 
