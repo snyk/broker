@@ -77,7 +77,7 @@ export const main = async (clientOpts: ClientOpts) => {
     }
     metricsClient.incrementBrokerClientMetric();
 
-    // Make metricsClient available to createWebSocket (via clientOpts) and workload handlers.
+    // Make metricsClient available to workload handlers via clientOpts.
     (clientOpts as any).metricsClient = metricsClient;
 
     // Best-effort: record uncaught exceptions after metricsClient is ready.
@@ -159,10 +159,10 @@ export const main = async (clientOpts: ClientOpts) => {
       );
     } else {
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary),
+        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary, metricsClient),
       );
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.secondary),
+        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.secondary, metricsClient),
       );
     }
 
