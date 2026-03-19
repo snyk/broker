@@ -9,7 +9,6 @@ export interface HookResults {
 export interface ConfigMetadata {
   brokerClientId: string;
   version: string;
-  haMode: boolean;
   debugMode: boolean;
   bodyLogMode: boolean;
   credPooling: boolean;

@@ -37,7 +37,6 @@ export const aConfig = (fields: Partial<Config>): Config => {
     API_BASE_URL: 'http://api:8080',
     BROKER_CLIENT_URL: 'http://broker-client:8000',
     BROKER_DISPATCHER_BASE_URL: 'http://dispatcher:8080',
-    BROKER_HA_MODE_ENABLED: 'false',
     BROKER_SERVER_URL: 'http://broker-server:8080',
     PREFLIGHT_CHECKS_ENABLED: 'false',
     GIT_COMMITTER_NAME: '',

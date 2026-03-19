@@ -76,7 +76,6 @@ const IDENTIFYING_METADATA: IdentifyingMetadata = {
   isDisabled: false,
   clientConfig: {
     brokerClientId: '123',
-    haMode: false,
     debugMode: false,
     bodyLogMode: false,
     credPooling: false,

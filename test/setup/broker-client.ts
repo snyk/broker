@@ -64,9 +64,6 @@ export const createBrokerClient = async (
         ? params.brokerSystemcheckPath
         : undefined,
       BROKER_TOKEN: params.brokerToken,
-      BROKER_HA_MODE_ENABLED: params.enableHighAvailabilityMode
-        ? params.enableHighAvailabilityMode
-        : 'false',
       PREFLIGHT_CHECKS_ENABLED: params.enablePreflightChecks
         ? params.enablePreflightChecks
         : 'false',
