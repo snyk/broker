@@ -50,6 +50,7 @@ export const createWebSocketConnectionPairs = async (
   clientOpts: LoadedClientOpts,
   globalIdentifyingMetadata: IdentifyingMetadata,
   connectionKey,
+  metricsClient: Client = new NoopClient(),
 ): Promise<[WebSocketConnection, WebSocketConnection]> => {
   const socketIdentifyingMetadata = structuredClone(globalIdentifyingMetadata);
   socketIdentifyingMetadata.friendlyName = connectionKey;
@@ -102,8 +103,8 @@ export const createWebSocketConnectionPairs = async (
       .serverId ?? '';
 
   return [
-    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary),
-    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary),
+    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.primary, metricsClient),
+    createWebSocket(clientOpts, socketIdentifyingMetadata, Role.secondary, metricsClient),
   ];
 };
 
@@ -111,12 +112,11 @@ export const createWebSocket = (
   clientOpts: LoadedClientOpts,
   originalIdentifyingMetadata: IdentifyingMetadata,
   role?: Role,
+  metricsClient: Client = new NoopClient(),
 ): WebSocketConnection => {
   const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
   identifyingMetadata.role = role ?? Role.primary;
   const localClientOps = Object.assign({}, clientOpts);
-  const metricsClient: Client =
-    (localClientOps as any).metricsClient ?? new NoopClient();
   identifyingMetadata.identifier =
     identifyingMetadata.identifier ?? localClientOps.config.brokerToken;
   if (!identifyingMetadata.identifier) {

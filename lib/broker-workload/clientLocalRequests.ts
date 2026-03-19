@@ -13,6 +13,7 @@ import {
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
 import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
+import { NoopClient } from '../hybrid-sdk/client/metrics/noopClient';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 
 /**
@@ -24,11 +25,13 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
   req: Request;
   res: Response;
   options;
+  private metricsClient: MetricsClient;
   constructor(req, res, options) {
     super('broker', WorkloadType['local-client']);
     this.req = req;
     this.res = res;
     this.options = options;
+    this.metricsClient = options.metricsClient ?? new NoopClient();
   }
 
   async handler(data: LocalClientWorkloadRuntimeParams) {
@@ -36,8 +39,6 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       this.req,
       this.res,
     );
-    const metricsClient: MetricsClient | undefined = (this.options as any)
-      .metricsClient;
 
     const matchedFilterRule = filterClientRequest(
       this.req,
@@ -67,7 +68,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
 
     if (!matchedFilterRule) {
       incrementHttpRequestsTotal(true, 'inbound-request');
-      metricsClient?.recordRequest('local-client', false);
+      this.metricsClient.recordRequest('local-client', false);
       const reason =
         'Request does not match any accept rule, blocking HTTP request';
       hybridClientRequestHandler.logContext.error = 'blocked';
@@ -89,7 +90,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
         data.makeRequestOverHttp,
       );
       incrementHttpRequestsTotal(false, 'inbound-request');
-      metricsClient?.recordRequest('local-client', true);
+      this.metricsClient.recordRequest('local-client', true);
     }
   }
 }
