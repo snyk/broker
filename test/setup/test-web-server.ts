@@ -315,6 +315,15 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  echoRouter.post(
+    '/hidden/broker/:token/connections/:clientId',
+    (_: express.Request, resp: express.Response) => {
+      resp.status(200).json({
+        data: { attributes: { server_id: 'test-server-1' } },
+      });
+    },
+  );
+
   echoRouter.all('*', (_: express.Request, resp: express.Response) => {
     resp.status(400).send(false);
   });
