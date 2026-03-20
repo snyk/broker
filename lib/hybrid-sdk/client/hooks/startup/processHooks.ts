@@ -5,7 +5,6 @@ import { commitSigningEnabled, commitSigningFilterRules } from '../../scm';
 import { HookResults } from '../../types/client';
 import { CheckResult } from '../../checks/types';
 import { ClientOpts } from '../../../common/types/options';
-import { highAvailabilityModeEnabled } from '../../config/configHelpers';
 
 export const validateMinimalConfig = async (
   clientOpts: ClientOpts,
@@ -79,24 +78,19 @@ export const processStartUpHooks = async (
       }
     }
     let serverId;
-    if (highAvailabilityModeEnabled(clientOpts.config)) {
-      if (!clientOpts.config.universalBrokerEnabled) {
-        serverId = await getServerId(
-          clientOpts.config,
-          clientOpts.config.brokerToken,
-          brokerClientId,
-        );
+    if (!clientOpts.config.universalBrokerEnabled) {
+      serverId = await getServerId(
+        clientOpts.config,
+        clientOpts.config.brokerToken,
+        brokerClientId,
+      );
 
-        if (serverId === null) {
-          logger.warn(
-            {},
-            'Could not receive server id from Broker Dispatcher.',
-          );
-          serverId = '';
-        } else {
-          logger.debug({ serverId }, 'Received server id.');
-          clientOpts.config.serverId = serverId;
-        }
+      if (serverId === null) {
+        logger.warn({}, 'Could not receive server id from Broker Dispatcher.');
+        serverId = '';
+      } else {
+        logger.debug({ serverId }, 'Received server id.');
+        clientOpts.config.serverId = serverId;
       }
     }
 

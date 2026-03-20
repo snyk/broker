@@ -1,3 +1,4 @@
+import nock from 'nock';
 import { app } from '../../lib';
 import { createTestLogger } from '../helpers/logger';
 import { choosePort } from './detect-port';
@@ -64,9 +65,6 @@ export const createBrokerClient = async (
         ? params.brokerSystemcheckPath
         : undefined,
       BROKER_TOKEN: params.brokerToken,
-      BROKER_HA_MODE_ENABLED: params.enableHighAvailabilityMode
-        ? params.enableHighAvailabilityMode
-        : 'false',
       PREFLIGHT_CHECKS_ENABLED: params.enablePreflightChecks
         ? params.enablePreflightChecks
         : 'false',
@@ -76,10 +74,23 @@ export const createBrokerClient = async (
       BROKER_TYPE: params.type ? params.type : undefined,
       removeXForwardedHeaders: 'true',
       universalBrokerEnabled: params.universalBrokerEnabled ?? false,
+      API_BASE_URL: process.env.API_BASE_URL ?? params.brokerServerUrl,
     },
   };
 
+  // getServerId is called during startup for non-universal broker clients.
+  // In tests there is no real dispatcher service, so intercept that call.
+  const apiBaseUrl = opts.config.API_BASE_URL as string;
+  nock(new URL(apiBaseUrl).origin)
+    .post(/\/hidden\/broker\/[^/]+\/connections\/[^/]+/)
+    .query(true)
+    .reply(200, { data: { attributes: { server_id: 'test-server-1' } } });
+
   const client = await app({ port: port, client: true, config: opts.config });
+
+  // Remove nock interceptors so they don't interfere with subsequent HTTP connections
+  // (e.g. WebSocket polling requests to the broker server).
+  nock.cleanAll();
 
   LOG.debug({ port }, `Broker Client is listening on port ${port}...`);
 
@@ -92,10 +103,18 @@ export const createBrokerClient = async (
 export const waitForBrokerServerConnection = async (
   brokerClient: BrokerClient,
 ): Promise<unknown> => {
+  const websocket = brokerClient.client.websocketConnections[0];
+
+  // If the server already sent 'identify' (capabilities are set by identifyHandler),
+  // return immediately rather than waiting for an event that has already fired.
+  if (websocket.capabilities) {
+    return { capabilities: websocket.capabilities };
+  }
+
   let serverMetadata: unknown;
 
   await new Promise((resolve) => {
-    brokerClient.client.websocketConnections[0].on('identify', (serverData) => {
+    websocket.on('identify', (serverData) => {
       LOG.debug({ serverData }, 'on identify event for broker client');
 
       serverMetadata = serverData;

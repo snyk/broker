@@ -5,6 +5,10 @@ import {
 } from '../../../lib/hybrid-sdk/client/types/client';
 import { LoadedClientOpts } from '../../../lib/hybrid-sdk/common/types/options';
 
+jest.mock('../../../lib/hybrid-sdk/client/dispatcher', () => ({
+  getServerId: jest.fn().mockResolvedValue('server-1'),
+}));
+
 describe('Connections Manager', () => {
   it('Returns websocket connections empty array by default', async () => {
     process.env.SKIP_REMOTE_CONFIG = 'true';
@@ -15,6 +19,7 @@ describe('Connections Manager', () => {
         supportedBrokerTypes: [],
         filterRulesPaths: {},
         brokerType: 'client',
+        brokerToken: 'test-broker-token',
       },
       filters: new Map<string, any>(),
     };
@@ -28,7 +33,6 @@ describe('Connections Manager', () => {
       isDisabled: false,
       clientConfig: {
         brokerClientId: '123',
-        haMode: false,
         debugMode: false,
         bodyLogMode: false,
         credPooling: false,

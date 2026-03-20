@@ -134,7 +134,6 @@ describe('createWebSocket - renew auth behaviour', () => {
       clientConfig: {
         brokerClientId: 'test-client-id',
         version: '1.0.0',
-        haMode: false,
         debugMode: false,
         bodyLogMode: false,
         credPooling: false,

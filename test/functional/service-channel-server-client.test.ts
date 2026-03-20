@@ -75,7 +75,6 @@ describe('proxy requests originating from behind the broker server', () => {
         credPooling: true, //client sets a PASSWORD_POOL
         customAccept: true,
         debugMode: false,
-        haMode: false,
         insecureDownstream: false,
         privateCa: false,
         proxy: false,
@@ -99,7 +98,6 @@ describe('proxy requests originating from behind the broker server', () => {
         credPooling: true, //client sets a PASSWORD_POOL
         customAccept: true,
         debugMode: false,
-        haMode: false,
         insecureDownstream: false,
         privateCa: false,
         proxy: false,
