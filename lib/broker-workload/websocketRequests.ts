@@ -23,15 +23,22 @@ import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
 } from '../hybrid-sdk/common/utils/metrics';
+import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
 import { maskToken, hashToken } from '../hybrid-sdk/common/utils/token';
 import { WebSocketServer } from '../hybrid-sdk/server/types/socket';
 import { WebSocketConnection } from '../hybrid-sdk/client/types/client';
+
+// Converts status code to string like 5xx
+function statusClass(statusCode: number | undefined): string {
+  return statusCode != null ? `${String(statusCode)[0]}xx` : 'unknown';
+}
 
 export type BrokerWorkloadOptions = {
   config: {
     brokerType: 'client' | 'server';
     universalBrokerEnabled: boolean;
   };
+  metricsClient?: MetricsClient;
 };
 
 /**
@@ -122,6 +129,8 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }`,
     );
 
+    const metricsClient = this.options.metricsClient;
+
     const matchedFilterRule = filterRequest(
       payload,
       this.options,
@@ -129,6 +138,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
     );
     if (!matchedFilterRule) {
       incrementWebSocketRequestsTotal(true, 'inbound-request');
+      metricsClient?.recordRequest('broker-server', false);
       const reason =
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
       logContext.error = 'Blocked by filter rules';
@@ -153,6 +163,9 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       );
 
       incrementWebSocketRequestsTotal(false, 'inbound-request');
+      metricsClient?.recordRequest('broker-server', true);
+      const streaming = Boolean(payload.streamingID);
+      metricsClient?.recordDownstreamRequest(streaming);
       const contextId = payload.headers['x-snyk-broker-context-id'] ?? null;
       // mutates the payload
       const preparedRequest = await prepareRequest(
@@ -179,45 +192,73 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       }
       incrementHttpRequestsTotal(false, 'outbound-request');
 
-      if (payload.streamingID) {
-        // indicates server supports streaming
-        try {
-          const downstreamRequestIncomingResponse =
-            await makeStreamingRequestToDownstream(preparedRequest.req);
-          responseHandler.streamDataResponse(downstreamRequestIncomingResponse);
-        } catch (e) {
-          logger.error(
-            {
-              ...logContext,
-              error: e,
-              stackTrace: new Error('stacktrace generator').stack,
-            },
-            '[Downstream] Caught error making streaming request to downstream ',
-          );
-        }
-      } else {
-        // here if request against server had header x-broker-ws-response:true
-        try {
-          const response = await makeRequestToDownstream(preparedRequest.req);
-          const status = (response && response.statusCode) || 500;
-          if (status > 404) {
-            logger.warn(
+      try {
+        metricsClient?.incrementInflight();
+        if (streaming) {
+          // indicates server supports streaming
+          try {
+            const start = performance.now();
+            const downstreamRequestIncomingResponse =
+              await makeStreamingRequestToDownstream(preparedRequest.req);
+            metricsClient?.recordDownstreamDuration(
+              true,
+              (performance.now() - start) / 1000, // convert ms to seconds
+            );
+            const contentLength =
+              downstreamRequestIncomingResponse.headers['content-length'];
+            if (contentLength) {
+              const bytes = parseInt(contentLength, 10);
+              if (!isNaN(bytes)) {
+                metricsClient?.recordUpstreamResponseBytes(bytes);
+              }
+            }
+            responseHandler.streamDataResponse(
+              downstreamRequestIncomingResponse,
+            );
+          } catch (e) {
+            logger.error(
               {
-                statusCode: response.statusCode,
-                url: preparedRequest.req.url,
-                requestId: logContext.requestId,
+                ...logContext,
+                error: e,
+                stackTrace: new Error('stacktrace generator').stack,
               },
-              `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
+              '[Downstream] Caught error making streaming request to downstream ',
             );
           }
-          responseHandler.sendDataResponse(response, logContext);
-        } catch (error) {
-          logError(logContext, error);
-          return responseHandler.sendResponse({
-            status: 500,
-            body: error,
-          });
+        } else {
+          // here if request against server had header x-broker-ws-response:true
+          try {
+            const start = performance.now();
+            const response = await makeRequestToDownstream(preparedRequest.req);
+            metricsClient?.recordDownstreamDuration(
+              false,
+              (performance.now() - start) / 1000,
+            );
+            metricsClient?.recordDownstreamStatus(
+              statusClass(response?.statusCode),
+            );
+            const status = (response && response.statusCode) || 500;
+            if (status > 404) {
+              logger.warn(
+                {
+                  statusCode: response.statusCode,
+                  url: preparedRequest.req.url,
+                  requestId: logContext.requestId,
+                },
+                `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
+              );
+            }
+            responseHandler.sendDataResponse(response, logContext);
+          } catch (error) {
+            logError(logContext, error);
+            return responseHandler.sendResponse({
+              status: 500,
+              body: error,
+            });
+          }
         }
+      } finally {
+        metricsClient?.decrementInflight();
       }
     }
   }

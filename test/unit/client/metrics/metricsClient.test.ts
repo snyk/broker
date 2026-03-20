@@ -141,65 +141,305 @@ describe('client/metrics', () => {
       const client = new metrics.NoopClient();
       await expect(client.shutdown()).resolves.toBeUndefined();
     });
+
+    it('forceFlush resolves cleanly', async () => {
+      const client = new metrics.NoopClient();
+      await expect(client.forceFlush()).resolves.toBeUndefined();
+    });
+
+    const noopMethods: Array<[string, Parameters<any>]> = [
+      ['setConnectionState', ['connected', 'primary']],
+      ['recordReconnect', []],
+      ['recordProcessExit', ['reconnect_exhaustion']],
+      ['recordAuthRenewalFailure', [503]],
+      ['recordUncaughtException', ['ECONNRESET']],
+      ['recordRequest', ['broker-server', true]],
+      ['recordDownstreamRequest', [false]],
+      ['recordDownstreamDuration', [false, 1.23]],
+      ['recordDownstreamStatus', ['2xx']],
+      ['recordConnectionDuration', ['primary', 300]],
+      ['recordUpstreamResponseBytes', [1024]],
+      ['incrementInflight', []],
+      ['decrementInflight', []],
+      ['recordPingLatency', [0.05]],
+    ];
+
+    it.each(noopMethods)('%s does not throw', (method, args) => {
+      const client = new metrics.NoopClient();
+      expect(() => (client as any)[method](...args)).not.toThrow();
+    });
   });
 
   describe('OtelMetricsClient', () => {
-    it('records a metric when incrementBrokerClientMetric is called', async () => {
-      const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
+    let reader: TestMetricReader;
+    let meterProvider: MeterProvider;
+    let client: metrics.OtelClient;
 
-      const client = new metrics.OtelClient({
+    beforeEach(() => {
+      reader = new TestMetricReader();
+      meterProvider = new MeterProvider({ readers: [reader] });
+      client = new metrics.OtelClient({
         endpoint: new URL('http://localhost:4317'),
         exportIntervalMs: 60_000,
         meterProvider,
       });
+    });
 
-      client.incrementBrokerClientMetric();
-
-      const { resourceMetrics } = await reader.collect();
-      const metric = resourceMetrics.scopeMetrics
-        .flatMap((sm) => sm.metrics)
-        .find((m) => m.descriptor.name === 'broker.client.initialized');
-
-      expect(metric).toBeDefined();
-      expect(metric!.dataPointType).toBe(DataPointType.SUM);
-      expect(metric!.dataPoints).toHaveLength(1);
-      expect(metric!.dataPoints[0].value).toBe(1);
-
+    afterEach(async () => {
       await client.shutdown();
     });
 
+    async function collectMetrics() {
+      const { resourceMetrics } = await reader.collect();
+      return resourceMetrics.scopeMetrics.flatMap((sm) => sm.metrics);
+    }
+
+    async function findMetric(name: string) {
+      const all = await collectMetrics();
+      const metric = all.find((m) => m.descriptor.name === name);
+      if (!metric) return undefined;
+      // Cast dataPoints to any[] so tests can call .find() without union-type issues
+      return {
+        ...metric,
+        dataPoints: metric.dataPoints as any[],
+      };
+    }
+
+    it('records broker.client.initialized', async () => {
+      client.incrementBrokerClientMetric();
+      const metric = await findMetric('broker.client.initialized');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.SUM);
+      expect(metric!.dataPoints[0].value).toBe(1);
+    });
+
+    it('records broker.client.connection.state with correct state/role attributes', async () => {
+      client.setConnectionState('connected', 'primary');
+      const metric = await findMetric('broker.client.connection.state');
+      expect(metric).toBeDefined();
+
+      const dataPoints = metric!.dataPoints;
+      const connectedPoint = dataPoints.find(
+        (dp) =>
+          dp.attributes['state'] === 'connected' &&
+          dp.attributes['role'] === 'primary',
+      );
+      const reconnectingPoint = dataPoints.find(
+        (dp) => dp.attributes['state'] === 'reconnecting',
+      );
+      const failedPoint = dataPoints.find(
+        (dp) => dp.attributes['state'] === 'failed',
+      );
+
+      expect(connectedPoint?.value).toBe(1);
+      expect(reconnectingPoint?.value).toBe(0);
+      expect(failedPoint?.value).toBe(0);
+    });
+
+    it('zeroes previous state when transitioning', async () => {
+      client.setConnectionState('connected', 'primary');
+      client.setConnectionState('reconnecting', 'primary');
+
+      const metric = await findMetric('broker.client.connection.state');
+      const dataPoints = metric!.dataPoints;
+
+      const connectedPoint = dataPoints.find(
+        (dp) =>
+          dp.attributes['state'] === 'connected' &&
+          dp.attributes['role'] === 'primary',
+      );
+      const reconnectingPoint = dataPoints.find(
+        (dp) =>
+          dp.attributes['state'] === 'reconnecting' &&
+          dp.attributes['role'] === 'primary',
+      );
+
+      expect(connectedPoint?.value).toBe(0);
+      expect(reconnectingPoint?.value).toBe(1);
+    });
+
+    it('tracks state per role independently', async () => {
+      client.setConnectionState('connected', 'primary');
+      client.setConnectionState('reconnecting', 'secondary');
+
+      const metric = await findMetric('broker.client.connection.state');
+      const dataPoints = metric!.dataPoints;
+
+      expect(
+        dataPoints.find(
+          (dp) =>
+            dp.attributes['state'] === 'connected' &&
+            dp.attributes['role'] === 'primary',
+        )?.value,
+      ).toBe(1);
+      expect(
+        dataPoints.find(
+          (dp) =>
+            dp.attributes['state'] === 'reconnecting' &&
+            dp.attributes['role'] === 'secondary',
+        )?.value,
+      ).toBe(1);
+    });
+
+    it('records broker.client.reconnect.total', async () => {
+      client.recordReconnect();
+      client.recordReconnect();
+      const metric = await findMetric('broker.client.reconnect.total');
+      expect(metric!.dataPoints[0].value).toBe(2);
+    });
+
+    it('records broker.client.process_exit.total with reason attribute', async () => {
+      client.recordProcessExit('reconnect_exhaustion');
+      const metric = await findMetric('broker.client.process_exit.total');
+      expect(metric!.dataPoints[0].value).toBe(1);
+      expect(metric!.dataPoints[0].attributes['reason']).toBe(
+        'reconnect_exhaustion',
+      );
+    });
+
+    it('records broker.client.auth_renewal_failure.total with status_code', async () => {
+      client.recordAuthRenewalFailure(503);
+      const metric = await findMetric(
+        'broker.client.auth_renewal_failure.total',
+      );
+      expect(metric!.dataPoints[0].value).toBe(1);
+      expect(metric!.dataPoints[0].attributes['status_code']).toBe('503');
+    });
+
+    it('records broker.client.uncaught_exception.total with error_code', async () => {
+      client.recordUncaughtException('ECONNRESET');
+      const metric = await findMetric('broker.client.uncaught_exception.total');
+      expect(metric!.dataPoints[0].value).toBe(1);
+      expect(metric!.dataPoints[0].attributes['error_code']).toBe('ECONNRESET');
+    });
+
+    it('records broker.client.uptime_seconds as a positive value', async () => {
+      const metric = await findMetric('broker.client.uptime_seconds');
+      expect(metric).toBeDefined();
+      const value = metric!.dataPoints[0].value as number;
+      expect(value).toBeGreaterThan(0);
+    });
+
+    it('records broker.client.request.total with flow and allowed attributes', async () => {
+      client.recordRequest('broker-server', true);
+      client.recordRequest('broker-server', false);
+      client.recordRequest('local-client', true);
+
+      const metric = await findMetric('broker.client.request.total');
+      const dataPoints = metric!.dataPoints;
+
+      expect(
+        dataPoints.find(
+          (dp) =>
+            dp.attributes['flow'] === 'broker-server' &&
+            dp.attributes['allowed'] === 'true',
+        )?.value,
+      ).toBe(1);
+      expect(
+        dataPoints.find(
+          (dp) =>
+            dp.attributes['flow'] === 'broker-server' &&
+            dp.attributes['allowed'] === 'false',
+        )?.value,
+      ).toBe(1);
+      expect(
+        dataPoints.find(
+          (dp) =>
+            dp.attributes['flow'] === 'local-client' &&
+            dp.attributes['allowed'] === 'true',
+        )?.value,
+      ).toBe(1);
+    });
+
+    it('records broker.client.downstream.request.total with streaming attribute', async () => {
+      client.recordDownstreamRequest(true);
+      client.recordDownstreamRequest(false);
+
+      const metric = await findMetric('broker.client.downstream.request.total');
+      const dataPoints = metric!.dataPoints;
+
+      expect(
+        dataPoints.find((dp) => dp.attributes['streaming'] === 'true')?.value,
+      ).toBe(1);
+      expect(
+        dataPoints.find((dp) => dp.attributes['streaming'] === 'false')?.value,
+      ).toBe(1);
+    });
+
+    it('records broker.client.downstream.duration.seconds', async () => {
+      client.recordDownstreamDuration(false, 0.42);
+      const metric = await findMetric(
+        'broker.client.downstream.duration.seconds',
+      );
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints[0].attributes['streaming']).toBe('false');
+    });
+
+    it('records broker.client.downstream.status with status_class attribute', async () => {
+      client.recordDownstreamStatus('2xx');
+      client.recordDownstreamStatus('5xx');
+
+      const metric = await findMetric('broker.client.downstream.status');
+      const dataPoints = metric!.dataPoints;
+
+      expect(
+        dataPoints.find((dp) => dp.attributes['status_class'] === '2xx')?.value,
+      ).toBe(1);
+      expect(
+        dataPoints.find((dp) => dp.attributes['status_class'] === '5xx')?.value,
+      ).toBe(1);
+    });
+
+    it('records broker.client.ws.duration.seconds with role attribute', async () => {
+      client.recordConnectionDuration('primary', 3600);
+      const metric = await findMetric('broker.client.ws.duration.seconds');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints[0].attributes['role']).toBe('primary');
+    });
+
+    it('records broker.client.upstream.response.bytes', async () => {
+      client.recordUpstreamResponseBytes(51200);
+      const metric = await findMetric('broker.client.upstream.response.bytes');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints).toHaveLength(1);
+    });
+
+    it('records broker.client.inflight.requests as UpDownCounter', async () => {
+      client.incrementInflight();
+      client.incrementInflight();
+      client.decrementInflight();
+      const metric = await findMetric('broker.client.inflight.requests');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.SUM);
+      expect(metric!.dataPoints[0].value).toBe(1);
+    });
+
+    it('records broker.client.ws.ping.latency.seconds', async () => {
+      client.recordPingLatency(0.042);
+      const metric = await findMetric('broker.client.ws.ping.latency.seconds');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
+      expect(metric!.dataPoints).toHaveLength(1);
+    });
+
     it('collects Node.js runtime metrics', async () => {
-      const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
-
-      const client = new metrics.OtelClient({
-        endpoint: new URL('http://localhost:4317'),
-        exportIntervalMs: 60_000,
-        meterProvider,
-      });
-
       const { resourceMetrics } = await reader.collect();
       const allNames = resourceMetrics.scopeMetrics
         .flatMap((sm) => sm.metrics)
         .map((m) => m.descriptor.name);
 
       expect(allNames.some((name) => name.startsWith('nodejs.'))).toBe(true);
-
-      await client.shutdown();
     });
 
-    it('shutdown resolves cleanly with runtime instrumentation', async () => {
-      const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
-
-      const client = new metrics.OtelClient({
-        endpoint: new URL('http://localhost:4317'),
-        exportIntervalMs: 60_000,
-        meterProvider,
-      });
-
+    it('shutdown resolves cleanly', async () => {
       await expect(client.shutdown()).resolves.toBeUndefined();
+    });
+
+    it('forceFlush resolves cleanly', async () => {
+      await expect(client.forceFlush()).resolves.toBeUndefined();
     });
   });
 });

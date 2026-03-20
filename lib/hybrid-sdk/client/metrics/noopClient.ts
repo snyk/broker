@@ -5,11 +5,23 @@ import { Client } from './client';
  * Used when no metrics endpoint is configured.
  */
 export class NoopClient implements Client {
-  incrementBrokerClientMetric(): void {
-    // no-op
-  }
+  incrementBrokerClientMetric(): void {}
+  async shutdown(): Promise<void> {}
+  async forceFlush(): Promise<void> {}
 
-  async shutdown(): Promise<void> {
-    // no-op
-  }
+  setConnectionState(): void {}
+  recordReconnect(): void {}
+  recordProcessExit(): void {}
+  recordAuthRenewalFailure(): void {}
+  recordUncaughtException(): void {}
+
+  recordRequest(): void {}
+  recordDownstreamRequest(): void {}
+  recordDownstreamDuration(): void {}
+  recordDownstreamStatus(): void {}
+  recordConnectionDuration(): void {}
+  recordUpstreamResponseBytes(): void {}
+  incrementInflight(): void {}
+  decrementInflight(): void {}
+  recordPingLatency(): void {}
 }

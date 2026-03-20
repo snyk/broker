@@ -1,0 +1,96 @@
+# docker compose -f docker-compose.universal.otel.yaml up -d --build
+services:
+  broker-client:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/base/Dockerfile
+      target: broker-builder
+    working_dir: /home/node/snyk-broker
+    command: ["node", "dist/cli/index.js", "client", "--verbose"]
+    environment:
+      UNIVERSAL_BROKER_ENABLED: "true"
+      DEPLOYMENT_ID: "DEPLOYMENT_ID"
+      CLIENT_ID: "CLIENT_ID"
+      CLIENT_SECRET: "CLIENT_SECRET"
+      BROKER_SERVER_URL: "https://broker.snyk.io"
+      BROKER_DISPATCHER_BASE_URL: "https://api.snyk.io"
+      PORT: "8000"
+      METRICS_OTEL_ENDPOINT: "http://otel-collector:4317"
+      MY_GH_TOKEN: "TOKEN"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - otel-collector
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    configs:
+      - source: otel-config
+        target: /etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"
+      - "8889:8889"
+
+  prometheus:
+    image: prom/prometheus:latest
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    configs:
+      - source: prometheus-config
+        target: /etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - otel-collector
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    configs:
+      - source: grafana-datasource
+        target: /etc/grafana/provisioning/datasources/datasource.yaml
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+configs:
+  otel-config:
+    content: |
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+      exporters:
+        debug:
+          verbosity: detailed
+        prometheus:
+          endpoint: 0.0.0.0:8889
+      service:
+        pipelines:
+          metrics:
+            receivers: [otlp]
+            exporters: [debug, prometheus]
+  prometheus-config:
+    content: |
+      global:
+        scrape_interval: 5s
+      scrape_configs:
+        - job_name: otel-collector
+          static_configs:
+            - targets: ["otel-collector:8889"]
+  grafana-datasource:
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://prometheus:9090
+          isDefault: true
+          editable: true
