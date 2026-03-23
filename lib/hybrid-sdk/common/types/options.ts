@@ -1,4 +1,5 @@
 import { FiltersType, LOADEDFILTERSET } from './filter';
+import type { Client as MetricsClient } from '../../client/metrics/client';
 
 export interface CONFIG {
   supportedBrokerTypes: string[];
@@ -23,6 +24,7 @@ export interface ClientOpts {
     expiresIn: number;
   };
   plugins?: Map<string, any>;
+  metricsClient?: MetricsClient;
 }
 
 export interface ServerOpts {

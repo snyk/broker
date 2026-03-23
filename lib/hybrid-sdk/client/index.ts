@@ -78,7 +78,7 @@ export const main = async (clientOpts: ClientOpts) => {
     metricsClient.incrementBrokerClientMetric();
 
     // Make metricsClient available to workload handlers via clientOpts.
-    (clientOpts as any).metricsClient = metricsClient;
+    clientOpts.metricsClient = metricsClient;
 
     // Best-effort: record uncaught exceptions after metricsClient is ready.
     // The top-level handler (registered at module load) still handles logging + exit.
