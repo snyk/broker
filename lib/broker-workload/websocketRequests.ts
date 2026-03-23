@@ -227,8 +227,8 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
           }
         } else {
           // here if request against server had header x-broker-ws-response:true
+          const start = performance.now();
           try {
-            const start = performance.now();
             const response = await makeRequestToDownstream(preparedRequest.req);
             metricsClient?.recordDownstreamDuration(
               false,
@@ -250,6 +250,11 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
             }
             responseHandler.sendDataResponse(response, logContext);
           } catch (error) {
+            metricsClient?.recordDownstreamDuration(
+              false,
+              (performance.now() - start) / 1000,
+            );
+            metricsClient?.recordDownstreamStatus('5xx');
             logError(logContext, error);
             return responseHandler.sendResponse({
               status: 500,
