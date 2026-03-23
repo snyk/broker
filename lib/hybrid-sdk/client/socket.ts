@@ -241,7 +241,9 @@ export const createWebSocket = (
           );
           metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
           metricsClient.recordProcessExit('auth_4xx');
-          metricsClient.forceFlush().catch(() => {}); // attempt to flush buffered metrics before exit
+          await metricsClient.forceFlush().catch((err) => {
+            logger.warn({ ...commonLogFields, err }, 'Failed to flush metrics before exit');
+          });
           process.exit(1);
           return; // process.exit is overridden during testing, so we return instead
         default: // log and retry
@@ -294,7 +296,9 @@ export const createWebSocket = (
   websocket.on('reconnect failed', () => {
     metricsClient.setConnectionState('failed', identifyingMetadata.role);
     metricsClient.recordProcessExit('reconnect_exhaustion');
-    metricsClient.forceFlush().catch(() => {}); // fire-and-forget, same as auth_4xx path
+    metricsClient.forceFlush().catch((err) => {
+      logger.warn({ err }, 'Failed to flush metrics before exit');
+    });
     reconnectFailedHandler(websocket);
   });
 
