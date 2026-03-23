@@ -309,8 +309,8 @@ describe('createWebSocket - renew auth behaviour', () => {
 
         const expectedTimeoutMs = (expiresInSec - 60) * 1000;
 
-        jest.advanceTimersByTime(expectedTimeoutMs);
-        await Promise.resolve();
+        // advanceTimersByTimeAsync advances timers and ensures async calls complete fully.
+        await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
         clearTimeout(ws.timeoutHandlerId);
 
