@@ -242,7 +242,10 @@ export const createWebSocket = (
           metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
           metricsClient.recordProcessExit('auth_4xx');
           await metricsClient.forceFlush().catch((err) => {
-            logger.warn({ ...commonLogFields, err }, 'Failed to flush metrics before exit');
+            logger.warn(
+              { ...commonLogFields, err },
+              'Failed to flush metrics before exit',
+            );
           });
           process.exit(1);
           return; // process.exit is overridden during testing, so we return instead
