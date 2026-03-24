@@ -1,10 +1,6 @@
 import * as metrics from '../../../../lib/hybrid-sdk/client/metrics';
 import { parse } from '../../../../lib/hybrid-sdk/client/metrics/config';
-import {
-  DataPointType,
-  MeterProvider,
-  MetricReader,
-} from '@opentelemetry/sdk-metrics';
+import { DataPointType, MetricReader } from '@opentelemetry/sdk-metrics';
 
 class TestMetricReader extends MetricReader {
   protected async onShutdown(): Promise<void> {}
@@ -146,12 +142,11 @@ describe('client/metrics', () => {
   describe('OtelMetricsClient', () => {
     it('records a metric when incrementBrokerClientMetric is called', async () => {
       const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
 
       const client = new metrics.OtelClient({
         endpoint: new URL('http://localhost:4317'),
         exportIntervalMs: 60_000,
-        meterProvider,
+        reader,
       });
 
       client.incrementBrokerClientMetric();
@@ -169,37 +164,62 @@ describe('client/metrics', () => {
       await client.shutdown();
     });
 
-    it('collects Node.js runtime metrics', async () => {
+    it('shutdown resolves cleanly with runtime instrumentation', async () => {
       const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
 
       const client = new metrics.OtelClient({
         endpoint: new URL('http://localhost:4317'),
         exportIntervalMs: 60_000,
-        meterProvider,
+        reader,
       });
 
+      await expect(client.shutdown()).resolves.toBeUndefined();
+    });
+
+    it('rename view produces broker.nodejs.eventloop.delay.p99', async () => {
+      const reader = new TestMetricReader();
+
+      const client = new metrics.OtelClient({
+        endpoint: new URL('http://localhost:4317'),
+        exportIntervalMs: 60_000,
+        reader,
+      });
+
+      // Wait for the event loop delay histogram to complete at least one sampling interval.
+      // The RuntimeNodeInstrumentation uses perf_hooks.monitorEventLoopDelay (default 10ms
+      // resolution), so we wait longer to ensure the observable callbacks return data.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const { resourceMetrics } = await reader.collect();
-      const allNames = resourceMetrics.scopeMetrics
+      const names = resourceMetrics.scopeMetrics
         .flatMap((sm) => sm.metrics)
         .map((m) => m.descriptor.name);
 
-      expect(allNames.some((name) => name.startsWith('nodejs.'))).toBe(true);
+      expect(names).toContain('broker.nodejs.eventloop.delay.p99');
+      expect(names).not.toContain('nodejs.eventloop.delay.p99');
 
       await client.shutdown();
     });
 
-    it('shutdown resolves cleanly with runtime instrumentation', async () => {
+    it('drop view leaves no nodejs.* metrics in collected output', async () => {
       const reader = new TestMetricReader();
-      const meterProvider = new MeterProvider({ readers: [reader] });
 
       const client = new metrics.OtelClient({
         endpoint: new URL('http://localhost:4317'),
         exportIntervalMs: 60_000,
-        meterProvider,
+        reader,
       });
 
-      await expect(client.shutdown()).resolves.toBeUndefined();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const { resourceMetrics } = await reader.collect();
+      const nodejsMetrics = resourceMetrics.scopeMetrics
+        .flatMap((sm) => sm.metrics)
+        .filter((m) => m.descriptor.name.startsWith('nodejs.'));
+
+      expect(nodejsMetrics).toHaveLength(0);
+
+      await client.shutdown();
     });
   });
 });
