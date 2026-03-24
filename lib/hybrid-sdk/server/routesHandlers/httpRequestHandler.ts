@@ -77,7 +77,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   if (connection.length === 0) {
     logger.warn(
       { desensitizedToken, requestId },
-      'No matching connection found.',
+      'No connection in pool found.',
     );
     res.setHeader('x-broker-failure', 'no-connection');
     return res.status(404).json({ ok: false });
