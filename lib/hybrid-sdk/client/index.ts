@@ -32,22 +32,18 @@ import * as metrics from './metrics';
 
 const ONEDAY = 24 * 3600 * 1000; // 24h in ms
 
+// Minimal early handler — active until main() registers the full metrics-aware
+// handler below. Ensures structured logging for crashes during boot/init.
+// NOTE: If main() is called more than once, additional listeners will accumulate.
 process.on('uncaughtException', (error) => {
-  if (error.message == 'read ECONNRESET') {
-    logger.error(
-      { msg: error.message, stackTrace: error.stack },
-      'ECONNRESETs Catch all:',
-      error.message,
-    );
-  } else {
-    logger.error(
-      { msg: error.message, stackTrace: error.stack },
-      'Uncaught exception:',
-      error.message,
-    );
-    process.exit(1);
-  }
+  logger.error(
+    { msg: error.message, stackTrace: error.stack },
+    'Uncaught exception (pre-init):',
+    error.message,
+  );
+  process.exit(1);
 });
+
 export let websocketConnections: WebSocketConnection[];
 export const getWebsocketConnections = () => {
   return websocketConnections;
@@ -76,6 +72,42 @@ export const main = async (clientOpts: ClientOpts) => {
       process.exit(1);
     }
     metricsClient.incrementBrokerClientMetric();
+
+    // Make metricsClient available to workload handlers via clientOpts.
+    clientOpts.metricsClient = metricsClient;
+
+    // Replace the early module-scope handler with the full metrics-aware handler.
+    // NOTE: If main() is called more than once, additional listeners will
+    // accumulate after this point — each call registers a new handler on top.
+    process.removeAllListeners('uncaughtException');
+    process.on('uncaughtException', (error) => {
+      const isEconnreset = error.message === 'read ECONNRESET';
+      metricsClient.recordUncaughtException(
+        (error as NodeJS.ErrnoException).code ?? error.message ?? 'unknown',
+      );
+      if (isEconnreset) {
+        logger.error(
+          { msg: error.message, stackTrace: error.stack },
+          'ECONNRESETs Catch all:',
+          error.message,
+        );
+      } else {
+        metricsClient.recordProcessExit('uncaught_exception');
+        logger.error(
+          { msg: error.message, stackTrace: error.stack },
+          'Uncaught exception:',
+          error.message,
+        );
+        const flushTimeout = new Promise<void>((resolve) =>
+          setTimeout(resolve, 2000),
+        );
+        Promise.race([metricsClient.forceFlush(), flushTimeout])
+          .catch((err) =>
+            logger.warn({ err }, 'Failed to flush metrics before exit.'),
+          )
+          .finally(() => process.exit(1));
+      }
+    });
 
     clientOpts.config.API_BASE_URL =
       clientOpts.config.API_BASE_URL ??
@@ -143,10 +175,20 @@ export const main = async (clientOpts: ClientOpts) => {
       );
     } else {
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.primary),
+        createWebSocket(
+          clientOpts,
+          globalIdentifyingMetadata,
+          Role.primary,
+          metricsClient,
+        ),
       );
       websocketConnections.push(
-        createWebSocket(clientOpts, globalIdentifyingMetadata, Role.secondary),
+        createWebSocket(
+          clientOpts,
+          globalIdentifyingMetadata,
+          Role.secondary,
+          metricsClient,
+        ),
       );
     }
 

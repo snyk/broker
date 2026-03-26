@@ -106,7 +106,7 @@ describe('client/checks/http/http-executor.ts', () => {
         { url: check.url, method: check.method, timeoutMs: check.timeoutMs },
       );
 
-      expect(spyOnRequestFn.mock.lastCall[1].headers).toMatchObject({
+      expect(spyOnRequestFn.mock.lastCall![1].headers).toMatchObject({
         Accept: expect.any(String),
         'Content-Type': expect.any(String),
       });

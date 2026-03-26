@@ -2,6 +2,7 @@ import { closeHandler } from '../../../../lib/hybrid-sdk/client/socketHandlers/c
 import { log as logger } from '../../../../lib/logs/logger';
 import { WebSocketConnection } from '../../../../lib/hybrid-sdk/client/types/client';
 import { LoadedClientOpts } from '../../../../lib/hybrid-sdk/common/types/options';
+import { NoopClient } from '../../../../lib/hybrid-sdk/client/metrics';
 
 jest.mock('../../../../lib/logs/logger');
 
@@ -31,7 +32,7 @@ describe('closeHandler', () => {
     const now = startTime + 5000;
     jest.spyOn(Date, 'now').mockReturnValue(now);
 
-    closeHandler(mockWebsocket, mockClientOpts, {});
+    closeHandler(mockWebsocket, mockClientOpts, {}, new NoopClient());
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,7 +45,7 @@ describe('closeHandler', () => {
   });
 
   it('should log warning with durationMs -1 when connectionStartTime is undefined', () => {
-    closeHandler(mockWebsocket, mockClientOpts, {});
+    closeHandler(mockWebsocket, mockClientOpts, {}, new NoopClient());
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.objectContaining({

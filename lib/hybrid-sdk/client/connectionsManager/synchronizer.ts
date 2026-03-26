@@ -118,6 +118,7 @@ export const syncClientConfig = async (
         clientOpts,
         globalIdentifyingMetadata,
         key,
+        clientOpts.metricsClient,
       );
       websocketConnections.push(primary, secondary);
     } else if (
@@ -142,6 +143,7 @@ export const syncClientConfig = async (
         clientOpts,
         globalIdentifyingMetadata,
         key,
+        clientOpts.metricsClient,
       );
       websocketConnections.push(primary, secondary);
     } else {

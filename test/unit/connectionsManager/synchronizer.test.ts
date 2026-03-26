@@ -160,6 +160,7 @@ describe('syncClientConfig', () => {
       clientOpts,
       IDENTIFYING_METADATA,
       'my-conn',
+      undefined,
     );
     expect(syncStateByConnection.get('my-conn')?.contexts).toBeUndefined();
   });
@@ -231,6 +232,7 @@ describe('syncClientConfig', () => {
       clientOpts,
       IDENTIFYING_METADATA,
       'my-conn',
+      undefined,
     );
     expect(syncStateByConnection.get('my-conn')?.contexts).toBeUndefined();
   });

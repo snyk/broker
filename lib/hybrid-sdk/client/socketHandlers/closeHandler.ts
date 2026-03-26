@@ -1,11 +1,13 @@
 import { LoadedClientOpts } from '../../common/types/options';
 import { log as logger } from '../../../logs/logger';
 import { WebSocketConnection } from '../types/client';
+import { Client } from '../metrics/client';
 
 export const closeHandler = (
   websocket: WebSocketConnection,
   clientOps: LoadedClientOpts,
   identifyingMetadata,
+  metricsClient: Client,
 ) => {
   // default duration of -1 so that it is obvious if this misbehaves
   let durationMs = -1;
@@ -22,4 +24,11 @@ export const closeHandler = (
     },
     'Websocket connection to the broker server was closed.',
   );
+
+  if (durationMs >= 0) {
+    metricsClient.recordConnectionDuration(
+      identifyingMetadata.role,
+      durationMs / 1000,
+    );
+  }
 };
