@@ -8,6 +8,7 @@ import {
   waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+import { TestApiServer, createTestApiServer } from '../setup/test-api-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -15,14 +16,17 @@ const serverAccept = path.join(fixtures, 'server', 'filters.json');
 
 describe('proxy requests originating from behind the broker client', () => {
   let tws: TestWebServer;
+  let tas: TestApiServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
 
   beforeAll(async () => {
     delete process.env.BROKER_SERVER_URL;
     tws = await createTestWebServer();
+    tas = await createTestApiServer();
     bs = await createBrokerServer({ filters: serverAccept });
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
+    process.env.API_BASE_URL = `http://localhost:${tas.port}`;
     process.env.CLIENT_ID = 'clienid';
     process.env.CLIENT_SECRET = 'clientsecret';
     process.env.SKIP_REMOTE_CONFIG = 'true';
@@ -30,7 +34,9 @@ describe('proxy requests originating from behind the broker client', () => {
 
   afterAll(async () => {
     await tws.server.close();
+    await tas.server.close();
     await closeBrokerServer(bs);
+    delete process.env.API_BASE_URL;
     delete process.env.BROKER_SERVER_URL;
     delete process.env
       .SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL;

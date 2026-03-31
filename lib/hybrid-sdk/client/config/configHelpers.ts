@@ -57,7 +57,13 @@ const isCredPoolingUsed = (config: Record<string, any>): boolean => {
 };
 
 export function highAvailabilityModeEnabled(config: any): boolean {
-  // high availability mode is disabled per default
+  // Universal broker always runs in HA mode
+  if (config.universalBrokerEnabled) {
+    logger.debug({ enabled: true }, 'Checking for HA mode.');
+    return true;
+  }
+
+  // Legacy broker reads from flag, disabled by default
   let highAvailabilityModeEnabled = false;
   const highAvailabilityModeEnabledValue = (config as Config)
     .BROKER_HA_MODE_ENABLED;

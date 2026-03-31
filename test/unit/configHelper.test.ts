@@ -57,6 +57,17 @@ describe('config', () => {
     });
   });
 
+  it('haMode is true for universal broker without BROKER_HA_MODE_ENABLED', async () => {
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    await loadBrokerConfig();
+    const config = getConfig();
+    config.brokerClientId = '123';
+    expect(getClientConfigMetadata(config as LoadedClientOpts)).toMatchObject({
+      haMode: true,
+      universalBroker: true,
+    });
+  });
+
   it('everything is true for everything enabled in config', async () => {
     process.env.LOG_LEVEL = 'debug';
     process.env.LOG_ENABLE_BODY = 'true';

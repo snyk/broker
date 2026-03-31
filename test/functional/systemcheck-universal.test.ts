@@ -8,6 +8,7 @@ import {
   waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+import { TestApiServer, createTestApiServer } from '../setup/test-api-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
 import nock from 'nock';
 
@@ -17,13 +18,16 @@ const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('broker client systemcheck endpoint', () => {
   let tws: TestWebServer;
+  let tas: TestApiServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
 
   beforeAll(async () => {
     tws = await createTestWebServer();
+    tas = await createTestApiServer();
     // bs = await createBrokerServer({ filters: serverAccept });
     process.env.SKIP_REMOTE_CONFIG = 'true';
+    process.env.API_BASE_URL = `http://localhost:${tas.port}`;
     nock(`https://snyk.io`)
       .persist()
       .get('/no-such-url-ever')
@@ -34,7 +38,9 @@ describe('broker client systemcheck endpoint', () => {
 
   afterAll(async () => {
     await tws.server.close();
+    await tas.server.close();
     // await closeBrokerServer(bs);
+    delete process.env.API_BASE_URL;
     delete process.env.BROKER_SERVER_URL;
     delete process.env.SKIP_REMOTE_CONFIG;
   });
