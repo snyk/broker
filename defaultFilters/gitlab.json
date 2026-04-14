@@ -1707,6 +1707,12 @@
         "method": "POST",
         "path": "/api/v4/projects/:project/repository/commits",
         "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "get the diff of two commits",
+        "method": "GET",
+        "path": "/api/v4/projects/:project/repository/compare",
+        "origin": "https://${GITLAB}"
       }
     ]
   }

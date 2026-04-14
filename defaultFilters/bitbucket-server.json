@@ -1277,6 +1277,17 @@
           "username": "${BITBUCKET_USERNAME}",
           "password": "${BITBUCKET_PASSWORD}"
         }
+      },
+      {
+        "//": "get the diff of two commits",
+        "method": "GET",
+        "path": "/rest/api/1.0/projects/:project/repos/:repo/compare/changes",
+        "origin": "https://${BITBUCKET}",
+        "auth": {
+          "scheme": "basic",
+          "username": "${BITBUCKET_USERNAME}",
+          "password": "${BITBUCKET_PASSWORD}"
+        }
       }
     ]
   }
