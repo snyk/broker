@@ -10,7 +10,7 @@ import {
 import { identifyHandler } from './socketHandlers/identifyHandler';
 import { errorHandler } from './socketHandlers/errorHandler';
 import { openHandler } from './socketHandlers/openHandler';
-import { closeHandler } from './socketHandlers/closeHandler';
+import { reportWebSocketClosureEvent } from './socketHandlers/reportWebSocketClosureEvent';
 import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
 import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
@@ -273,6 +273,7 @@ export const createWebSocket = (
   }
 
   websocket.on('incoming::error', (e) => {
+    metricsClient.recordWebsocketLifecycleEvent('connection_error', identifyingMetadata.role);
     websocket.emit('error', { type: e.type, description: e.description });
   });
 
@@ -325,9 +326,9 @@ export const createWebSocket = (
   websocket.on('notification', notificationHandler);
   websocket.on('error', errorHandler);
 
-  websocket.on('open', () =>
-    openHandler(websocket, localClientOps, identifyingMetadata, metricsClient),
-  );
+  websocket.on('open', () => {
+    openHandler(websocket, localClientOps, identifyingMetadata, metricsClient);
+  });
 
   websocket.on('service', serviceHandler);
 
@@ -336,7 +337,23 @@ export const createWebSocket = (
   });
 
   websocket.on('close', () => {
-    closeHandler(websocket, localClientOps, identifyingMetadata, metricsClient);
+    reportWebSocketClosureEvent(websocket, localClientOps, identifyingMetadata, metricsClient, 'connection_lost');
+  });
+
+  websocket.on('end', () => {
+    reportWebSocketClosureEvent(websocket, localClientOps, identifyingMetadata, metricsClient, 'connection_ended');
+  });
+
+  websocket.on('destroy', () => {
+    reportWebSocketClosureEvent(websocket, localClientOps, identifyingMetadata, metricsClient, 'connection_destroyed');
+  });
+
+  websocket.on('timeout', () => {
+    reportWebSocketClosureEvent(websocket, localClientOps, identifyingMetadata, metricsClient, 'connection_timed_out');
+  });
+
+  websocket.on('closing', () => {
+    reportWebSocketClosureEvent(websocket, localClientOps, identifyingMetadata, metricsClient, 'server_requested_close');
   });
 
   return websocket;

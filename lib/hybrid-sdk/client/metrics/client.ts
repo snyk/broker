@@ -84,4 +84,13 @@ export interface Client {
    * round-trip time in seconds.
    */
   recordPingLatency(durationSeconds: number): void;
+
+  /**
+   * Increment broker.client.ws.lifecycle.total for websocket lifecycle events.
+   * event: a human-readable lifecycle label, e.g.:
+   *   'connection_lost', 'connection_ended', 'connection_destroyed',
+   *   'connection_timed_out', 'connection_error', 'server_requested_close'.
+   * role: 'primary' | 'secondary'.
+   */
+  recordWebsocketLifecycleEvent(event: string, role: string): void;
 }
