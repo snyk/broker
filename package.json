@@ -83,7 +83,7 @@
     "@opentelemetry/instrumentation": "0.212.0",
     "@opentelemetry/instrumentation-runtime-node": "0.25.0",
     "@opentelemetry/sdk-metrics": "2.5.1",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "axios-retry": "4.5.0",
     "body-parser": "1.20.4",
     "bunyan": "^1.8.12",
