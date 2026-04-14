@@ -18,6 +18,16 @@ import { performance } from 'node:perf_hooks';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
 
+const RETRYABLE_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'ENOTFOUND',
+  'ESOCKETTIMEOUT',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+]);
+const CONNECTION_MAX_RETRIES = 3;
+const CONNECTION_RETRY_DELAY_MS = 500;
+
 const client = getConfig().brokerServerUrl?.startsWith('https') ? https : http;
 
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
@@ -50,19 +60,46 @@ interface Logger {
   child(context: Partial<ExtendedLogContext> & Record<string, any>): Logger;
 }
 
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'message' in error &&
+    'code' in error
+  );
+}
+
+function toNodeError(error: unknown): NodeJS.ErrnoException {
+  return isNodeError(error) ? error : new Error(String(error));
+}
+
+function waitForConnection(req: http.ClientRequest): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    req.once('socket', (socket) => {
+      if (socket.connecting) {
+        socket.once('connect', () => resolve());
+        socket.once('error', (err) => reject(err));
+      } else {
+        resolve();
+      }
+    });
+    req.once('error', (err) => reject(err));
+  });
+}
+
 function extractNetworkErrorDetails(error: unknown): Record<string, unknown> {
-  if (!error || typeof error !== 'object') {
+  if (!isNodeError(error)) {
     return {};
   }
-  const err = error as Record<string, unknown>;
-  return {
-    errorCode: err.code,
-    errorErrno: err.errno,
-    syscall: err.syscall,
-    timeout: err.timeout,
-    reason: err.reason,
-    info: err.info,
+  const details: Record<string, unknown> = {
+    errorCode: error.code,
+    errorErrno: error.errno,
+    syscall: error.syscall,
   };
+  if ('timeout' in error) details.timeout = error.timeout;
+  if ('reason' in error) details.reason = error.reason;
+  if ('info' in error) details.info = error.info;
+  return details;
 }
 
 /**
@@ -123,53 +160,54 @@ class BrokerServerPostResponseHandler {
     );
   }
 
-  async #initHttpClientRequest() {
-    try {
-      const startTime = performance.now();
-      const backendHostname =
-        this.#config.universalBrokerEnabled && this.#config.universalBrokerGa
-          ? `${this.#config.brokerServerUrl}/hidden/brokers`
-          : `${this.#config.brokerServerUrl}`;
+  async #initHttpClientRequest(): Promise<void> {
+    const backendHostname =
+      this.#config.universalBrokerEnabled && this.#config.universalBrokerGa
+        ? `${this.#config.brokerServerUrl}/hidden/brokers`
+        : `${this.#config.brokerServerUrl}`;
 
-      let url = new URL(
-        `${backendHostname}/response-data/${this.#brokerToken}/${
-          this.#streamingId
+    let url = new URL(
+      `${backendHostname}/response-data/${this.#brokerToken}/${
+        this.#streamingId
+      }`,
+    );
+
+    url = addServerIdAndRoleQS(url, this.#serverId, this.#role);
+
+    const brokerServerPostRequestUrl = url.toString();
+
+    const options = {
+      method: 'post',
+      headers: {
+        'Snyk-Request-Id': `${this.#requestId}`,
+        'Snyk-acting-org-public-id': `${this.#logContext.actingOrgPublicId}`,
+        'Snyk-acting-group-public-id': `${
+          this.#logContext.actingGroupPublicId
         }`,
-      );
+        'Snyk-product-line': `${this.#logContext.productLine}`,
+        'Snyk-flow-name': `${this.#logContext.flow}`,
+        'Content-Type': BROKER_CONTENT_TYPE,
+        Connection: 'close',
+        'user-agent': 'Snyk Broker client ' + version,
+        'x-broker-client-version': version,
+      },
+      timeout: this.#config.brokerClientPostTimeout
+        ? parseInt(this.#config.brokerClientPostTimeout)
+        : 1200000, // ms -> 20 minutes
+    };
 
-      url = addServerIdAndRoleQS(url, this.#serverId, this.#role);
+    const logger = this.#logger.child({
+      method: options.method,
+      url: brokerServerPostRequestUrl,
+    });
 
-      const brokerServerPostRequestUrl = url.toString();
+    if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
+      options.headers['authorization'] = getAuthConfig().accessToken.authHeader;
+    }
 
-      const options = {
-        method: 'post',
-        headers: {
-          'Snyk-Request-Id': `${this.#requestId}`,
-          'Snyk-acting-org-public-id': `${this.#logContext.actingOrgPublicId}`,
-          'Snyk-acting-group-public-id': `${
-            this.#logContext.actingGroupPublicId
-          }`,
-          'Snyk-product-line': `${this.#logContext.productLine}`,
-          'Snyk-flow-name': `${this.#logContext.flow}`,
-          'Content-Type': BROKER_CONTENT_TYPE,
-          Connection: 'close',
-          'user-agent': 'Snyk Broker client ' + version,
-          'x-broker-client-version': version,
-        },
-        timeout: this.#config.brokerClientPostTimeout
-          ? parseInt(this.#config.brokerClientPostTimeout)
-          : 1200000, // ms -> 20 minutes
-      };
-
-      const logger = this.#logger.child({
-        method: options.method,
-        url: brokerServerPostRequestUrl,
-      });
-
-      if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
-        options.headers['authorization'] =
-          getAuthConfig().accessToken.authHeader;
-      }
+    const retryErrors: string[] = [];
+    for (let attempt = 0; attempt <= CONNECTION_MAX_RETRIES; attempt++) {
+      const startTime = performance.now();
 
       this.#brokerSrvPostRequestHandler = client.request(
         brokerServerPostRequestUrl,
@@ -269,7 +307,6 @@ class BrokerServerPostResponseHandler {
             },
             'received error sending data via POST to Broker Server',
           );
-          this.#buffer.end(e.message);
         })
         .on('timeout', () => {
           const timeoutError = new Error(
@@ -294,7 +331,6 @@ class BrokerServerPostResponseHandler {
             'Upstream request to Broker Server timed out',
           );
           this.#brokerSrvPostRequestHandler?.destroy();
-          this.#buffer.end(timeoutError.message);
         })
         .on('response', async (r) => {
           const diagnosticHeaders = {
@@ -362,11 +398,59 @@ class BrokerServerPostResponseHandler {
         });
 
       logger.debug('POST Request Client setup');
-    } catch (err) {
-      this.#logger.error(
-        { errorDetails: err },
-        'Error init Client for POST Broker Server Stream',
-      );
+
+      try {
+        await waitForConnection(this.#brokerSrvPostRequestHandler);
+        this.#brokerSrvPostRequestHandler.setHeader(
+          'snyk-broker-retry-count',
+          `${attempt}`,
+        );
+        if (attempt > 0) {
+          this.#brokerSrvPostRequestHandler.setHeader(
+            'snyk-broker-retry-errors',
+            retryErrors.join(','),
+          );
+        }
+        return;
+      } catch (e) {
+        this.#brokerSrvPostRequestHandler.destroy();
+
+        const connectionError = toNodeError(e);
+        const errorCode = connectionError.code;
+        const isRetryable =
+          errorCode !== undefined && RETRYABLE_ERROR_CODES.has(errorCode);
+
+        if (isRetryable && attempt < CONNECTION_MAX_RETRIES) {
+          retryErrors.push(errorCode);
+          this.#logger.debug(
+            {
+              attempt: attempt + 1,
+              maxRetries: CONNECTION_MAX_RETRIES,
+              errorCode,
+              error: connectionError.message,
+            },
+            'Retrying connection to Broker Server',
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, CONNECTION_RETRY_DELAY_MS),
+          );
+          continue;
+        }
+
+        if (isRetryable) {
+          this.#logger.error(
+            {
+              attempt: attempt + 1,
+              error: connectionError.message,
+              errorCode,
+            },
+            `Failed to establish connection to Broker Server after ${
+              attempt + 1
+            } attempt(s)`,
+          );
+        }
+        throw connectionError;
+      }
     }
   }
 
@@ -466,7 +550,9 @@ class BrokerServerPostResponseHandler {
         status,
         headers: response.headers,
       });
+
       await this.#initHttpClientRequest();
+
       this.#sendIoData(ioData);
       this.#logger.debug('successfully sent status & headers to Broker Server');
       // TODO: break into 2 distinct transform, only to add to pipeline if conditions are met
@@ -521,6 +607,7 @@ class BrokerServerPostResponseHandler {
         { errorDetails: err },
         'Error in forwarding the request to broker server pipeline',
       );
+      this.#buffer.destroy();
     }
   }
 
@@ -538,7 +625,16 @@ class BrokerServerPostResponseHandler {
       { responseData, body },
       'posting internal response back to Broker Server as it is expecting streaming response',
     );
-    await this.#initHttpClientRequest();
+    try {
+      await this.#initHttpClientRequest();
+    } catch (err) {
+      this.#logger.error(
+        { errorDetails: err },
+        'Error establishing connection for POST to Broker Server',
+      );
+      this.#buffer.destroy();
+      return;
+    }
     pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!); // initialized in #initHttpClientRequest above
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));

@@ -167,49 +167,6 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
-  describe('connection errors', () => {
-    beforeEach(() => {
-      setConfig({
-        brokerServerUrl,
-        universalBrokerEnabled: false,
-        universalBrokerGa: false,
-      });
-    });
-
-    it('logs ETIMEDOUT when TCP connection cannot be established', async () => {
-      const etimedoutError = new Error('connect ETIMEDOUT');
-      (etimedoutError as any).code = 'ETIMEDOUT';
-
-      nock(brokerServerUrl)
-        .post(`/response-data/${brokerToken}/${streamingId}`)
-        .query(true)
-        .replyWithError(etimedoutError);
-
-      const handler = createHandler();
-      await handler.sendData(
-        {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-          body: { test: 'data' },
-        },
-        streamingId,
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const errorCall = testLogger.errorCalls.find(
-        (call) =>
-          call.message ===
-          'received error sending data via POST to Broker Server',
-      );
-      expect(errorCall).toBeDefined();
-      expect(errorCall?.context.error).toContain('ETIMEDOUT');
-      expect(errorCall?.context.errDetails.code).toBe('ETIMEDOUT');
-      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
-      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
-    });
-  });
-
   describe('upstream request timeouts', () => {
     const shortTimeout = 100;
 
@@ -276,10 +233,10 @@ describe('BrokerServerPostResponseHandler', () => {
       mockResponse.headers = { 'content-type': 'application/json' };
 
       const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
-      process.nextTick(() => mockResponse.emit('end'));
+      setTimeout(() => mockResponse.emit('end'), 50);
       await forwardPromise;
 
-      await new Promise((resolve) => setTimeout(resolve, shortTimeout + 100));
+      await new Promise((resolve) => setTimeout(resolve, shortTimeout + 200));
 
       const errorCall = testLogger.errorCalls.find(
         (call) =>
@@ -812,7 +769,7 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
-  describe('ETIMEDOUT diagnostics for proxy/firewall scenarios', () => {
+  describe('connection error diagnostics', () => {
     beforeEach(() => {
       setConfig({
         brokerServerUrl,
@@ -821,58 +778,202 @@ describe('BrokerServerPostResponseHandler', () => {
       });
     });
 
-    it('includes duration and network error details on ETIMEDOUT to help diagnose TCP-level failures', async () => {
-      const etimedoutError = new Error('connect ETIMEDOUT 10.0.0.1:443');
-      Object.assign(etimedoutError, {
-        code: 'ETIMEDOUT',
+    it.each([
+      {
+        errorCode: 'ETIMEDOUT',
         errno: -60,
         syscall: 'connect',
+        errorMessage: 'connect ETIMEDOUT 10.0.0.1:443',
+      },
+      {
+        errorCode: 'ECONNREFUSED',
+        errno: -61,
+        syscall: 'connect',
+        errorMessage: 'connect ECONNREFUSED 127.0.0.1:443',
+      },
+      {
+        errorCode: 'ECONNRESET',
+        errno: -54,
+        syscall: 'read',
+        errorMessage: 'read ECONNRESET',
+      },
+      {
+        errorCode: 'ENOTFOUND',
+        errno: -3008,
+        syscall: 'getaddrinfo',
+        errorMessage: 'getaddrinfo ENOTFOUND test-broker-server',
+      },
+      {
+        errorCode: 'ESOCKETTIMEOUT',
+        errno: -110,
+        syscall: 'connect',
+        errorMessage: 'socket timeout',
+      },
+    ])(
+      'logs duration and network error details on $errorCode',
+      async ({ errorCode, errno, syscall, errorMessage }) => {
+        const error = new Error(errorMessage);
+        Object.assign(error, {
+          code: errorCode,
+          errno,
+          syscall,
+        });
+
+        nock(brokerServerUrl)
+          .post(`/response-data/${brokerToken}/${streamingId}`)
+          .query(true)
+          .replyWithError(error);
+
+        const handler = createHandler();
+        await handler.sendData(
+          {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+            body: { test: 'data' },
+          },
+          streamingId,
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        const errorCall = testLogger.errorCalls.find(
+          (call) =>
+            call.message ===
+            'received error sending data via POST to Broker Server',
+        );
+        expect(errorCall).toBeDefined();
+        expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
+        expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
+        expect(errorCall?.context.errorCode).toBe(errorCode);
+        expect(errorCall?.context.syscall).toBe(syscall);
+        expect(errorCall?.context.errorErrno).toBe(errno);
+        expect(errorCall?.context.streamingID).toBe(streamingId);
+        expect(errorCall?.context.requestId).toBe(requestId);
+      },
+    );
+  });
+
+  describe('TCP connection retry', () => {
+    it('sendData retries on ECONNREFUSED and succeeds', async () => {
+      const detectPort = require('detect-port');
+      const closedPort = await detectPort(0);
+      const closedUrl = `http://127.0.0.1:${closedPort}`;
+
+      setConfig({
+        brokerServerUrl: closedUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
       });
 
-      nock(brokerServerUrl)
-        .post(`/response-data/${brokerToken}/${streamingId}`)
-        .query(true)
-        .replyWithError(etimedoutError);
+      const testLoggerLocal = new TestLogger();
+      const handler = new BrokerServerPostResponseHandler(
+        createLogContext(),
+        getConfig(),
+        brokerToken,
+        serverId,
+        requestId,
+        role,
+        testLoggerLocal,
+      );
 
-      const handler = createHandler();
+      // Start a server after a delay so the first attempt gets ECONNREFUSED
+      // but the retry succeeds
+      let retryServer: http.Server;
+      setTimeout(() => {
+        retryServer = http.createServer((req, res) => {
+          const chunks: Buffer[] = [];
+          req.on('data', (chunk) => chunks.push(chunk));
+          req.on('end', () => {
+            res.writeHead(200);
+            res.end('OK');
+          });
+        });
+        retryServer.listen(closedPort, '127.0.0.1');
+      }, 300);
+
       await handler.sendData(
         {
           status: 200,
           headers: { 'content-type': 'application/json' },
-          body: { large: 'x'.repeat(10000) },
+          body: { test: 'data' },
         },
         streamingId,
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const errorCall = testLogger.errorCalls.find(
+      const retryCall = testLoggerLocal.debugCalls.find(
+        (call) => call.message === 'Retrying connection to Broker Server',
+      );
+      expect(retryCall).toBeDefined();
+      expect(retryCall?.context.errorCode).toBe('ECONNREFUSED');
+
+      const finishCall = testLoggerLocal.debugCalls.find(
+        (call) => call.message === 'Finish Post Request Handler Event',
+      );
+      expect(finishCall).toBeDefined();
+
+      if (retryServer!) {
+        await new Promise<void>((resolve) =>
+          retryServer.close(() => resolve()),
+        );
+      }
+    }, 30000);
+
+    it('sendData gives up after max retries on ECONNREFUSED', async () => {
+      const detectPort = require('detect-port');
+      const closedPort = await detectPort(0);
+      const closedUrl = `http://127.0.0.1:${closedPort}`;
+
+      setConfig({
+        brokerServerUrl: closedUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+
+      const testLoggerLocal = new TestLogger();
+      const handler = new BrokerServerPostResponseHandler(
+        createLogContext(),
+        getConfig(),
+        brokerToken,
+        serverId,
+        requestId,
+        role,
+        testLoggerLocal,
+      );
+
+      await handler.sendData(
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: { test: 'data' },
+        },
+        streamingId,
+      );
+
+      const giveUpCall = testLoggerLocal.errorCalls.find(
         (call) =>
           call.message ===
-          'received error sending data via POST to Broker Server',
+          'Failed to establish connection to Broker Server after 4 attempt(s)',
       );
-      expect(errorCall).toBeDefined();
-      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
-      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
-      expect(errorCall?.context.errorCode).toBe('ETIMEDOUT');
-      expect(errorCall?.context.syscall).toBe('connect');
-      expect(errorCall?.context.errorErrno).toBe(-60);
-      expect(errorCall?.context.streamingID).toBe(streamingId);
-      expect(errorCall?.context.requestId).toBe(requestId);
-    });
+      expect(giveUpCall).toBeDefined();
+      expect(giveUpCall?.context.errorCode).toBe('ECONNREFUSED');
+    }, 30000);
 
-    it('includes duration and network error details on ECONNREFUSED', async () => {
-      const econnrefusedError = new Error('connect ECONNREFUSED 127.0.0.1:443');
-      Object.assign(econnrefusedError, {
-        code: 'ECONNREFUSED',
-        errno: -61,
-        syscall: 'connect',
+    it('sendData does not retry on non-retryable errors', async () => {
+      const error = new Error('connect EHOSTDOWN');
+      Object.assign(error, { code: 'EHOSTDOWN' });
+
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
       });
 
       nock(brokerServerUrl)
         .post(`/response-data/${brokerToken}/${streamingId}`)
         .query(true)
-        .replyWithError(econnrefusedError);
+        .replyWithError(error);
 
       const handler = createHandler();
       await handler.sendData(
@@ -884,18 +985,116 @@ describe('BrokerServerPostResponseHandler', () => {
         streamingId,
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const errorCall = testLogger.errorCalls.find(
+      const retryCall = testLogger.debugCalls.find(
+        (call) => call.message === 'Retrying connection to Broker Server',
+      );
+      expect(retryCall).toBeUndefined();
+    });
+
+    it('forwardRequest retries connection on ECONNREFUSED and succeeds', async () => {
+      const detectPort = require('detect-port');
+      const closedPort = await detectPort(0);
+      const closedUrl = `http://127.0.0.1:${closedPort}`;
+
+      setConfig({
+        brokerServerUrl: closedUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+
+      const testLoggerLocal = new TestLogger();
+      const handler = new BrokerServerPostResponseHandler(
+        createLogContext(),
+        getConfig(),
+        brokerToken,
+        serverId,
+        requestId,
+        role,
+        testLoggerLocal,
+      );
+
+      const mockSocket = new Socket();
+      const mockResponse = new http.IncomingMessage(mockSocket);
+      mockResponse.statusCode = 200;
+      mockResponse.headers = { 'content-type': 'text/plain' };
+
+      // Start a server after a delay so the first attempt gets ECONNREFUSED
+      // but the retry succeeds
+      let retryServer: http.Server;
+      setTimeout(() => {
+        retryServer = http.createServer((req, res) => {
+          const chunks: Buffer[] = [];
+          req.on('data', (chunk) => chunks.push(chunk));
+          req.on('end', () => {
+            res.writeHead(200);
+            res.end('OK');
+          });
+        });
+        retryServer.listen(closedPort, '127.0.0.1', () => {
+          setTimeout(() => mockResponse.push(null), 100);
+        });
+      }, 300);
+
+      await handler.forwardRequest(mockResponse, streamingId);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const retryCall = testLoggerLocal.debugCalls.find(
+        (call) => call.message === 'Retrying connection to Broker Server',
+      );
+      expect(retryCall).toBeDefined();
+      expect(retryCall?.context.errorCode).toBe('ECONNREFUSED');
+
+      mockSocket.destroy();
+      if (retryServer!) {
+        await new Promise<void>((resolve) =>
+          retryServer.close(() => resolve()),
+        );
+      }
+    }, 30000);
+
+    it('forwardRequest gives up after max retries on ECONNREFUSED', async () => {
+      const detectPort = require('detect-port');
+      const closedPort = await detectPort(0);
+      const closedUrl = `http://127.0.0.1:${closedPort}`;
+
+      setConfig({
+        brokerServerUrl: closedUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+
+      const testLoggerLocal = new TestLogger();
+      const handler = new BrokerServerPostResponseHandler(
+        createLogContext(),
+        getConfig(),
+        brokerToken,
+        serverId,
+        requestId,
+        role,
+        testLoggerLocal,
+      );
+
+      const mockSocket = new Socket();
+      const mockResponse = new http.IncomingMessage(mockSocket);
+      mockResponse.statusCode = 200;
+      mockResponse.headers = { 'content-type': 'application/json' };
+
+      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
+      setTimeout(() => mockResponse.push(null), 100);
+      await forwardPromise;
+
+      const giveUpCall = testLoggerLocal.errorCalls.find(
         (call) =>
           call.message ===
-          'received error sending data via POST to Broker Server',
+          'Failed to establish connection to Broker Server after 4 attempt(s)',
       );
-      expect(errorCall).toBeDefined();
-      expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
-      expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
-      expect(errorCall?.context.errorCode).toBe('ECONNREFUSED');
-      expect(errorCall?.context.syscall).toBe('connect');
-    });
+      expect(giveUpCall).toBeDefined();
+      expect(giveUpCall?.context.errorCode).toBe('ECONNREFUSED');
+
+      mockSocket.destroy();
+    }, 30000);
   });
 });
