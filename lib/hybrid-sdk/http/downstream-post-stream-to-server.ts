@@ -69,6 +69,24 @@ function isNodeError(error: unknown): error is NodeJS.ErrnoException {
   );
 }
 
+function toNodeError(error: unknown): NodeJS.ErrnoException {
+  return isNodeError(error) ? error : new Error(String(error));
+}
+
+function waitForConnection(req: http.ClientRequest): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    req.once('socket', (socket) => {
+      if (socket.connecting) {
+        socket.once('connect', () => resolve());
+        socket.once('error', (err) => reject(err));
+      } else {
+        resolve();
+      }
+    });
+    req.once('error', (err) => reject(err));
+  });
+}
+
 function extractNetworkErrorDetails(error: unknown): Record<string, unknown> {
   if (!isNodeError(error)) {
     return {};
@@ -187,6 +205,7 @@ class BrokerServerPostResponseHandler {
       options.headers['authorization'] = getAuthConfig().accessToken.authHeader;
     }
 
+    const retryErrors: string[] = [];
     for (let attempt = 0; attempt <= CONNECTION_MAX_RETRIES; attempt++) {
       const startTime = performance.now();
 
@@ -381,30 +400,28 @@ class BrokerServerPostResponseHandler {
       logger.debug('POST Request Client setup');
 
       try {
-        await new Promise<void>((resolve, reject) => {
-          const req = this.#brokerSrvPostRequestHandler!;
-          req.once('socket', (socket) => {
-            if (socket.connecting) {
-              socket.once('connect', () => resolve());
-              socket.once('error', (err) => reject(err));
-            } else {
-              resolve();
-            }
-          });
-          req.once('error', (err) => reject(err));
-        });
+        await waitForConnection(this.#brokerSrvPostRequestHandler!);
+        this.#brokerSrvPostRequestHandler!.setHeader(
+          'snyk-broker-retry-count',
+          `${attempt}`,
+        );
+        if (attempt > 0) {
+          this.#brokerSrvPostRequestHandler!.setHeader(
+            'x-broker-retry-errors',
+            retryErrors.join(','),
+          );
+        }
         return;
       } catch (e) {
         this.#brokerSrvPostRequestHandler.destroy();
 
-        const connectionError = isNodeError(e) ? e : new Error(String(e));
-        const errorCode = isNodeError(e) ? e.code : undefined;
+        const connectionError = toNodeError(e);
+        const errorCode = connectionError.code;
+        const isRetryable =
+          errorCode !== undefined && RETRYABLE_ERROR_CODES.has(errorCode);
 
-        if (
-          errorCode &&
-          RETRYABLE_ERROR_CODES.has(errorCode) &&
-          attempt < CONNECTION_MAX_RETRIES
-        ) {
+        if (isRetryable && attempt < CONNECTION_MAX_RETRIES) {
+          retryErrors.push(errorCode);
           this.#logger.debug(
             {
               attempt: attempt + 1,
@@ -420,7 +437,7 @@ class BrokerServerPostResponseHandler {
           continue;
         }
 
-        if (errorCode && RETRYABLE_ERROR_CODES.has(errorCode)) {
+        if (isRetryable) {
           this.#logger.error(
             {
               attempt: attempt + 1,
