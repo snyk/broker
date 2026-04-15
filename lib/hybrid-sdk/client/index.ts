@@ -129,10 +129,17 @@ export const main = async (clientOpts: ClientOpts) => {
     }
     await validateMinimalConfig(clientOpts);
 
-    const brokerServerHost = new URL(
-      clientOpts.config.brokerServerUrl ?? 'https://broker.snyk.io',
-    ).hostname;
-    await probeIpv6WithIpv4Fallback(brokerServerHost);
+    if (clientOpts.config.IPV6_CONNECTIVITY_CHECK_ENABLED !== 'false') {
+      const brokerServerHost = new URL(
+        clientOpts.config.brokerServerUrl ?? 'https://broker.snyk.io',
+      ).hostname;
+      await probeIpv6WithIpv4Fallback(brokerServerHost);
+    } else {
+      logger.info(
+        {},
+        'IPv6 connectivity check disabled via IPV6_CONNECTIVITY_CHECK_ENABLED=false.',
+      );
+    }
 
     if (clientOpts.config.universalBrokerEnabled) {
       const pluginsFolderPath = await findPluginFolder(
