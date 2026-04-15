@@ -22,11 +22,13 @@ export class HybridClientRequestHandler {
   req: Request;
   res: Response;
   responseWantedOverWs: boolean;
+  streamingID: string;
 
   constructor(req: Request, res: Response) {
     this.req = req;
     this.res = res;
     this.options = getConfig();
+    this.streamingID = uuid();
 
     this.req.headers['snyk-request-id'] ||= uuid();
     this.responseWantedOverWs = req.headers['x-broker-ws-response']
@@ -36,6 +38,7 @@ export class HybridClientRequestHandler {
       url: this.req.url,
       requestMethod: this.req.method,
       requestHeaders: this.req.headers,
+      streamingID: this.streamingID,
       requestId:
         this.req.headers['snyk-request-id'] &&
         Array.isArray(this.req.headers['snyk-request-id'])
@@ -59,7 +62,6 @@ export class HybridClientRequestHandler {
   }
 
   private makeWebsocketRequestWithStreamingResponse() {
-    const streamingID = uuid();
     const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
     streamBuffer.on('error', (error) => {
       // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
@@ -73,23 +75,20 @@ export class HybridClientRequestHandler {
       );
       this.res.destroy(error);
     });
-    this.logContext.streamingID = streamingID;
     logger.debug(
       this.logContext,
       '[HTTP Flow][Relay] Sending request over websocket connection expecting POST stream response',
     );
 
-    streamsStore.set(streamingID, {
+    streamsStore.set(this.streamingID, {
       response: this.res,
       streamBuffer,
       streamSize: 0,
       brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
     });
     streamBuffer.pipe(this.res);
-    const simplifiedContextWithStreamingID = this.simplifiedContext;
-    simplifiedContextWithStreamingID['streamingID'] = streamingID;
     logger.debug(
-      simplifiedContextWithStreamingID,
+      this.simplifiedContext,
       '[HTTP Flow] Brokering request through Websocket.',
     );
     this.res.locals.websocket.send('request', {
@@ -97,7 +96,7 @@ export class HybridClientRequestHandler {
       method: this.req.method,
       body: this.req.body,
       headers: this.req.headers,
-      streamingID,
+      streamingID: this.streamingID,
     });
     incrementWebSocketRequestsTotal(false, 'outbound-request');
     return;
