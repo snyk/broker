@@ -7,6 +7,7 @@ interface BrokerClient {
   HTTPS_CERT: string;
   HTTPS_KEY: string;
   INSECURE_DOWNSTREAM: string;
+  IPV6_CONNECTIVITY_CHECK_ENABLED: string;
   PREFLIGHT_CHECKS_ENABLED: string;
 }
 

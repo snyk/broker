@@ -28,6 +28,7 @@ import { loadPlugins } from './brokerClientPlugins/pluginManager';
 import { manageWebsocketConnections } from './connectionsManager/manager';
 import { findPluginFolder } from '../common/config/config';
 import { retrieveAndLoadFilters } from './utils/filterLoading';
+import { probeIpv6WithIpv4Fallback } from './utils/probeIpv6WithIpv4Fallback';
 import * as metrics from './metrics';
 
 const ONEDAY = 24 * 3600 * 1000; // 24h in ms
@@ -127,6 +128,18 @@ export const main = async (clientOpts: ClientOpts) => {
       process.env.SNYK_DISPATCHER_URL_PREFIX = '/hidden/brokers';
     }
     await validateMinimalConfig(clientOpts);
+
+    if (clientOpts.config.IPV6_CONNECTIVITY_CHECK_ENABLED !== 'false') {
+      const brokerServerHost = new URL(
+        clientOpts.config.brokerServerUrl ?? 'https://broker.snyk.io',
+      ).hostname;
+      await probeIpv6WithIpv4Fallback(brokerServerHost);
+    } else {
+      logger.info(
+        {},
+        'IPv6 connectivity check disabled via IPV6_CONNECTIVITY_CHECK_ENABLED=false.',
+      );
+    }
 
     if (clientOpts.config.universalBrokerEnabled) {
       const pluginsFolderPath = await findPluginFolder(
