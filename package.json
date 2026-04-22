@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
-    "@opentelemetry/exporter-metrics-otlp-grpc": "0.212.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "0.215.0",
     "@opentelemetry/instrumentation": "0.212.0",
     "@opentelemetry/instrumentation-runtime-node": "0.25.0",
     "@opentelemetry/sdk-metrics": "2.5.1",
@@ -146,6 +146,9 @@
     "node": "20.11.0"
   },
   "overrides": {
+    "express": {
+      "path-to-regexp": "^0.1.13"
+    },
     "form-data": "4.0.4",
     "ws": "7.5.10"
   }
