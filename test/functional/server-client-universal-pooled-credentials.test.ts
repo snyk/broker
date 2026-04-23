@@ -9,6 +9,7 @@ import {
   waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+import { TestApiServer, createTestApiServer } from '../setup/test-api-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -17,6 +18,7 @@ const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('proxy requests originating from behind the broker server with pooled credentials', () => {
   let tws: TestWebServer;
+  let tas: TestApiServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
   let brokerTokens: string[];
@@ -33,9 +35,10 @@ describe('proxy requests originating from behind the broker server with pooled c
 
     const PORT = 9999;
     tws = await createTestWebServer();
+    tas = await createTestApiServer();
     process.env.RESPONSE_DATA_HIDDEN_ENABLED = 'true';
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
-    process.env.API_BASE_URL = `http://localhost:${bs.port}`;
+    process.env.API_BASE_URL = `http://localhost:${tas.port}`;
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltestpool';
@@ -55,15 +58,17 @@ describe('proxy requests originating from behind the broker server with pooled c
     process.env.SNYK_FILTER_RULES_PATHS__gitlab = clientAccept;
     process.env['SNYK_FILTER_RULES_PATHS__azure-repos'] = clientAccept;
     process.env['SNYK_FILTER_RULES_PATHS__jira-bearer-auth'] = clientAccept;
+    const connectionPromise = waitForUniversalBrokerClientsConnection(bs, 4);
     bc = await createUniversalBrokerClient();
-    ({ brokerTokens, metadataArray } =
-      await waitForUniversalBrokerClientsConnection(bs, 2));
+    ({ brokerTokens, metadataArray } = await connectionPromise);
   });
 
   afterAll(async () => {
     await tws.server.close();
+    await tas.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.API_BASE_URL;
     delete process.env.BROKER_SERVER_URL;
     delete process.env.GITHUB_TOKEN;
     delete process.env.GITHUB_TOKEN_POOL;
@@ -88,7 +93,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   });
 
   it('successfully broker on endpoint that forwards requests with basic auth, using first credential', async () => {
-    const url = `http://localhost:${bs.port}/broker/${brokerTokens[0]}/basic-auth`;
+    const url = `http://localhost:${bs.port}/broker/brokertoken1/basic-auth`;
 
     const response = await axiosClient.get(url, { timeout: 5000 });
     const status = response.status;
@@ -101,7 +106,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   });
 
   it('successfully broker on endpoint that forwards requests with token auth in origin, using first credential', async () => {
-    const url = `http://localhost:${bs.port}/broker/${brokerTokens[0]}/echo-headers/github-token-in-origin`;
+    const url = `http://localhost:${bs.port}/broker/brokertoken1/echo-headers/github-token-in-origin`;
 
     const response = await axiosClient.post(url, {});
     expect(response.status).toEqual(200);
@@ -109,7 +114,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   });
 
   it('successfully broker on endpoint that forwards requests with token auth in origin, using first credential again', async () => {
-    const url = `http://localhost:${bs.port}/broker/${brokerTokens[0]}/echo-headers/github`;
+    const url = `http://localhost:${bs.port}/broker/brokertoken1/echo-headers/github`;
 
     const response = await axiosClient.post(url, {});
     expect(response.status).toEqual(200);
@@ -117,7 +122,7 @@ describe('proxy requests originating from behind the broker server with pooled c
   });
 
   it('successfully broker on endpoint that forwards requests with token auth in origin, using token pool', async () => {
-    const url = `http://localhost:${bs.port}/broker/${brokerTokens[0]}/echo-headers/github-pool`;
+    const url = `http://localhost:${bs.port}/broker/brokertoken1/echo-headers/github-pool`;
 
     const response = await axiosClient.post(url, {});
     expect(response.status).toEqual(200);
