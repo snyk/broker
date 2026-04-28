@@ -78,6 +78,12 @@
       "origin": "${CR_AGENT_URL}"
     },
     {
+      "//": "lists tags with metadata (digests, lastPushed) in a repository",
+      "method": "GET",
+      "path": "/list-with-metadata/*",
+      "origin": "${CR_AGENT_URL}"
+    },
+    {
       "//": "accepts image scan requests (v1)",
       "method": "POST",
       "path": "/discover",
