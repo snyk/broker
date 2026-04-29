@@ -149,6 +149,7 @@
     "express": {
       "path-to-regexp": "^0.1.13"
     },
+    "brace-expansion": "1.1.14",
     "form-data": "4.0.4",
     "ws": "7.5.10"
   }
