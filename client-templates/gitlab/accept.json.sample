@@ -1578,7 +1578,7 @@
     },
     {
       "//": "used to delete a branch",
-      "method": "POST",
+      "method": "DELETE",
       "path": "/api/v4/projects/:project/repository/branches/:branch",
       "origin": "https://${GITLAB}"
     },
