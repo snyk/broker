@@ -24,4 +24,5 @@ export class NoopClient implements Client {
   incrementInflight(): void {}
   decrementInflight(): void {}
   recordPingLatency(): void {}
+  recordWebsocketLifecycleEvent(): void {}
 }
