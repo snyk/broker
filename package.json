@@ -116,7 +116,7 @@
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
     "undefsafe": "^2.0.2",
-    "uuid": "8.3.2"
+    "uuid": "14.0.0"
   },
   "repository": {
     "type": "git",
