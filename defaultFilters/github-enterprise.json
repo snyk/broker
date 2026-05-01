@@ -800,18 +800,6 @@
       {
         "//": "used to determine the full dependency tree",
         "method": "GET",
-        "path": "/:name/:repo/:path*/go.mod",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to determine the full dependency tree",
-        "method": "GET",
-        "path": "/:name/:repo/:path*%2Fgo.mod",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to determine the full dependency tree",
-        "method": "GET",
         "path": "/repos/:name/:repo/contents/:path*/go.sum",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       },
@@ -820,18 +808,6 @@
         "method": "GET",
         "path": "/repos/:name/:repo/contents/:path*%2Fgo.sum",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-      },
-      {
-        "//": "used to determine the full dependency tree",
-        "method": "GET",
-        "path": "/:name/:repo/:path*/go.sum",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to determine the full dependency tree",
-        "method": "GET",
-        "path": "/:name/:repo/:path*%2Fgo.sum",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
       },
       {
         "//": "used to scan Dockerfile",
@@ -844,18 +820,6 @@
         "method": "GET",
         "path": "/repos/:name/:repo/contents/:path*%2F*Dockerfile*",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-      },
-      {
-        "//": "used to scan Dockerfile",
-        "method": "GET",
-        "path": "/:name/:repo/:path*/*Dockerfile*",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to scan Dockerfile",
-        "method": "GET",
-        "path": "/:name/:repo/:path*%2F*Dockerfile*",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
       },
       {
         "//": "used to update manifest or lock",
@@ -1232,18 +1196,6 @@
       {
         "//": "used to update manifest or lock",
         "method": "PUT",
-        "path": "/:name/:repo/:path*/go.mod",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to update manifest or lock",
-        "method": "PUT",
-        "path": "/:name/:repo/:path*%2Fgo.mod",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to update manifest or lock",
-        "method": "PUT",
         "path": "/repos/:name/:repo/contents/:path*/go.sum",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
       },
@@ -1252,18 +1204,6 @@
         "method": "PUT",
         "path": "/repos/:name/:repo/contents/:path*%2Fgo.sum",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-      },
-      {
-        "//": "used to update manifest or lock",
-        "method": "PUT",
-        "path": "/:name/:repo/:path*/go.sum",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to update manifest or lock",
-        "method": "PUT",
-        "path": "/:name/:repo/:path*%2Fgo.sum",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
       },
       {
         "//": "used to write or update ignore rules or existing patches",
@@ -1288,18 +1228,6 @@
         "method": "PUT",
         "path": "/repos/:name/:repo/contents/:path*%2F*Dockerfile*",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
-      },
-      {
-        "//": "used to update Dockerfile",
-        "method": "PUT",
-        "path": "/:name/:repo/:path*/*Dockerfile*",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
-      },
-      {
-        "//": "used to update Dockerfile",
-        "method": "PUT",
-        "path": "/:name/:repo/:path*%2F*Dockerfile*",
-        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
       },
       {
         "//": "used to check if there's any ignore rules or existing patches",
@@ -1482,6 +1410,78 @@
         "method": "PATCH",
         "path": "/repos/:name/:repo/hooks/:id",
         "origin": "https://${GITHUB_TOKEN}@${GITHUB_API}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/:name/:repo/:path*/go.mod",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/:name/:repo/:path*%2Fgo.mod",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/:name/:repo/:path*/go.sum",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to determine the full dependency tree",
+        "method": "GET",
+        "path": "/:name/:repo/:path*%2Fgo.sum",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/:name/:repo/:path*/*Dockerfile*",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to scan Dockerfile",
+        "method": "GET",
+        "path": "/:name/:repo/:path*%2F*Dockerfile*",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*/go.mod",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*%2Fgo.mod",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*/go.sum",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update manifest or lock",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*%2Fgo.sum",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*/*Dockerfile*",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
+      },
+      {
+        "//": "used to update Dockerfile",
+        "method": "PUT",
+        "path": "/:name/:repo/:path*%2F*Dockerfile*",
+        "origin": "https://${GITHUB_TOKEN}@${GITHUB_RAW}"
       }
     ]
   }
