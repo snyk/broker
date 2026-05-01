@@ -327,6 +327,7 @@ export const makeSingleRawRequestToDownstream = async (
     method: localRequest.method,
     headers: localRequest.headers as any,
     timeout: timeoutMs,
+    ...localRequest.tlsOptions,
   };
   return new Promise<HttpResponse>((resolve, reject) => {
     try {

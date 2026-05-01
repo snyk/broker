@@ -7,7 +7,10 @@ import { handleSocketConnection } from './socketHandlers/connectionHandler';
 import { initConnectionHandler } from './socketHandlers/initHandlers';
 import { log as logger } from '../../logs/logger';
 import { maskToken } from '../common/utils/token';
-import { validateBrokerClientCredentials } from './auth/authHelpers';
+import {
+  BrokerAuthError,
+  validateBrokerClientCredentials,
+} from './auth/authHelpers';
 
 import { decode } from 'jsonwebtoken';
 import { Role } from '../client/types/client';
@@ -53,79 +56,21 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
       const connectionIdentifier = req.uri.pathname
         .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
         .toLowerCase();
-      const maskedToken = maskToken(connectionIdentifier);
-      const authHeader = (req.headers['Authorization'] ??
-        req.headers['authorization']) as string | undefined;
-      const brokerClientId =
-        (req.headers['x-snyk-broker-client-id'] as string | undefined) ?? null;
-      const role =
-        (req.headers['x-snyk-broker-client-role'] as string | undefined) ??
-        null;
-      if (
-        (!authHeader ||
-          !authHeader.toLowerCase().startsWith('bearer') ||
-          !brokerClientId) &&
-        loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
-      ) {
-        logger.debug({ maskedToken }, 'Request missing Authorization header.');
-        done({
-          statusCode: 401,
-          authenticate: 'Bearer',
-          message: 'Missing required authorization header.',
-        });
-        return;
-      }
-
-      const jwt = authHeader
-        ? authHeader.substring(authHeader.indexOf(' ') + 1)
-        : '';
-      if (
-        !jwt &&
-        loadedServerOpts.config.BROKER_SERVER_MANDATORY_AUTH_ENABLED
-      ) {
-        done({
-          statusCode: 401,
-          authenticate: 'Bearer',
-          message: 'Invalid JWT.',
-        });
-        return;
-      } else {
-        logger.debug(
-          { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-          `Validating auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
-        );
+      try {
         // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
-        const credsCheckResponse = await validateBrokerClientCredentials(
-          authHeader!,
-          brokerClientId!,
-          connectionIdentifier,
-        );
-        if (!credsCheckResponse) {
-          logger.debug(
-            { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-            `Denied auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
+        const { brokerClientId, credentials, role } =
+          await validateBrokerClientCredentials(
+            req.headers,
+            connectionIdentifier,
           );
-          done({
-            statusCode: 401,
-            authenticate: 'Bearer',
-            message: 'Invalid credentials.',
-          });
-          return;
-        }
-
-        logger.debug(
-          { maskedToken: maskToken(connectionIdentifier), brokerClientId },
-          `Successful auth for connection ${connectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
-        );
-
-        const decodedJwt = decode(jwt, { complete: true });
+        const decodedJwt = decode(credentials, { complete: true });
         const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
         const nowDate = new Date().toISOString();
         const currentClient: ClientSocket = {
           socketType: 'server',
           socketVersion: 1,
-          brokerClientId: brokerClientId!,
-          brokerAppClientId: brokerAppClientId,
+          brokerClientId,
+          brokerAppClientId,
           role: (role ?? Role.primary) as Role,
           credsValidationTime: nowDate,
         };
@@ -146,8 +91,23 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           };
         }
         connections.set(connectionIdentifier, clientPool);
+      } catch (err) {
+        if (err instanceof BrokerAuthError) {
+          done({
+            statusCode: 401,
+            authenticate: 'Bearer',
+            message: err.message,
+          });
+          return;
+        }
+        logger.error(
+          { maskedToken: maskToken(connectionIdentifier) },
+          `Unexpected error occurred while validating broker client credentials: ${err}.`,
+        );
+        done(err);
+        return;
       }
-      done();
+      done(null);
     });
   }
   websocket.socketType = 'server';
