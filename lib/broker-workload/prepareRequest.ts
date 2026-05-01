@@ -28,6 +28,7 @@ export interface PostFilterPreparedRequest {
   method: string;
   body?: any;
   timeoutMs?: number;
+  tlsOptions?: Record<string, boolean | string>;
 }
 
 export const prepareRequest = async (
