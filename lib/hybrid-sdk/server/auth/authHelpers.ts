@@ -37,11 +37,25 @@ function getTlsOptions(
   return {};
 }
 
+function getHeaderOptions(authHeader: string) {
+  const requestHeaders: Record<string, string> = {
+    authorization: authHeader,
+    'Content-type': 'application/vnd.api+json',
+  };
+
+  const gatewayHeaderName = process.env.GATEWAY_HEADER_NAME;
+  const gatewayHeaderValue = process.env.GATEWAY_HEADER_VALUE;
+  if (gatewayHeaderName) {
+    requestHeaders[gatewayHeaderName] = gatewayHeaderValue ?? '';
+  }
+
+  return requestHeaders;
+}
+
 export interface ValidatedBrokerCredentials {
   brokerClientId: string;
   credentials: string;
   role: string;
-  requestId: string;
 }
 
 export const validateBrokerClientCredentials = async (
@@ -92,11 +106,8 @@ export const validateBrokerClientCredentials = async (
     ? getConfig().authorizationService
     : process.env.GATEWAY_HOSTNAME;
   const tlsOptions = getTlsOptions(isInternalJWT);
+  const requestHeaders = getHeaderOptions(authHeader);
 
-  const requestHeaders: Record<string, string> = {
-    authorization: authHeader,
-    'Content-type': 'application/vnd.api+json',
-  };
   const xForwardedFor = getHeader(headers, FORWARDED_FOR_HEADER);
   if (xForwardedFor !== undefined) {
     requestHeaders[FORWARDED_FOR_HEADER] = xForwardedFor;
@@ -131,11 +142,11 @@ export const validateBrokerClientCredentials = async (
   }
 
   logger.debug(
-    { maskedToken, brokerClientId, requestId },
+    { maskedToken, brokerClientId },
     `Successful auth for connection ${brokerConnectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
   );
 
-  return { brokerClientId, credentials, role, requestId };
+  return { brokerClientId, credentials, role };
 };
 
 export class BrokerAuthError extends Error {}

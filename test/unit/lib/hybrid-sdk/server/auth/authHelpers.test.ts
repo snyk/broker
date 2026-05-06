@@ -132,19 +132,7 @@ describe('validateBrokerClientCredentials', () => {
         brokerClientId: 'client-1',
         credentials: 'eyJhbGciOiJIUzI1NiJ9.abc',
         role: '',
-        requestId: '',
       });
-    });
-
-    it('propagates snyk-request-id from headers into the result', async () => {
-      mockedRequest.mockResolvedValue(ok201);
-
-      const result = await validateBrokerClientCredentials(
-        { ...goodHeaders, 'snyk-request-id': 'req-abc-123' },
-        identifier,
-      );
-
-      expect(result.requestId).toBe('req-abc-123');
     });
 
     it('returns role from x-snyk-broker-client-role header', async () => {
@@ -230,6 +218,74 @@ describe('validateBrokerClientCredentials', () => {
       expect(
         Object.prototype.hasOwnProperty.call(passedHeaders, 'x-forwarded-for'),
       ).toBe(false);
+    });
+  });
+
+  describe('GATEWAY_HEADER_NAME / GATEWAY_HEADER_VALUE', () => {
+    let savedGatewayHeaderName: string | undefined;
+    let savedGatewayHeaderValue: string | undefined;
+
+    beforeEach(() => {
+      savedGatewayHeaderName = process.env.GATEWAY_HEADER_NAME;
+      savedGatewayHeaderValue = process.env.GATEWAY_HEADER_VALUE;
+    });
+
+    afterEach(() => {
+      if (savedGatewayHeaderName === undefined) {
+        delete process.env.GATEWAY_HEADER_NAME;
+      } else {
+        process.env.GATEWAY_HEADER_NAME = savedGatewayHeaderName;
+      }
+      if (savedGatewayHeaderValue === undefined) {
+        delete process.env.GATEWAY_HEADER_VALUE;
+      } else {
+        process.env.GATEWAY_HEADER_VALUE = savedGatewayHeaderValue;
+      }
+    });
+
+    it('sends gateway headers on validate request when env vars are set', async () => {
+      process.env.GATEWAY_HEADER_NAME = 'x-gateway-secret';
+      process.env.GATEWAY_HEADER_VALUE = 'gateway-auth-token';
+      mockedRequest.mockResolvedValue(ok201);
+
+      await validateBrokerClientCredentials(goodHeaders, identifier);
+
+      expect(mockedRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'x-gateway-secret': 'gateway-auth-token',
+          }),
+        }),
+      );
+      const passedHeaders = mockedRequest.mock.calls[0][0].headers as Record<
+        string,
+        unknown
+      >;
+      expect(passedHeaders.authorization).toBe(goodHeaders.authorization);
+      expect(passedHeaders['Content-type']).toBe('application/vnd.api+json');
+    });
+
+    it('still forwards x-forwarded-for when gateway headers are configured', async () => {
+      process.env.GATEWAY_HEADER_NAME = 'x-gateway-secret';
+      process.env.GATEWAY_HEADER_VALUE = 'gateway-auth-token';
+      mockedRequest.mockResolvedValue(ok201);
+
+      await validateBrokerClientCredentials(
+        {
+          ...goodHeaders,
+          'x-forwarded-for': '198.51.100.2',
+        },
+        identifier,
+      );
+
+      expect(mockedRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'x-gateway-secret': 'gateway-auth-token',
+            'x-forwarded-for': '198.51.100.2',
+          }),
+        }),
+      );
     });
   });
 });
