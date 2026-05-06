@@ -56,6 +56,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
       const connectionIdentifier = req.uri.pathname
         .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
         .toLowerCase();
+      const requestId = req.headers['snyk-request-id'];
       try {
         const { brokerClientId, credentials, role } =
           // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
@@ -93,6 +94,14 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         connections.set(connectionIdentifier, clientPool);
       } catch (err) {
         if (err instanceof BrokerAuthError) {
+          logger.warn(
+            {
+              maskedToken: maskToken(connectionIdentifier),
+              requestId,
+              reason: err.message,
+            },
+            'Rejected broker client websocket connection.',
+          );
           done({
             statusCode: 401,
             authenticate: 'Bearer',
@@ -101,7 +110,10 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           return;
         }
         logger.error(
-          { maskedToken: maskToken(connectionIdentifier) },
+          {
+            maskedToken: maskToken(connectionIdentifier),
+            requestId,
+          },
           `Unexpected error occurred while validating broker client credentials: ${err}.`,
         );
         done(err);

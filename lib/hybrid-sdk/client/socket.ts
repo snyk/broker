@@ -1,6 +1,7 @@
 // import '../common/http/patch-https-request-for-proxying';
 
 import Primus from 'primus';
+import { v4 as uuid } from 'uuid';
 import { log as logger } from '../../logs/logger';
 import primusEmitter from 'primus-emitter';
 import {
@@ -169,16 +170,23 @@ export const createWebSocket = (
     pong: parseInt(localClientOps.config.socketPongTimeout) || 10000,
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
-  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
-    socketSettings['transport'] = {
-      extraHeaders: {
-        Authorization: getAuthConfig().accessToken.authHeader,
-        'x-snyk-broker-client-id': identifyingMetadata.clientId,
-        'x-snyk-broker-client-role': identifyingMetadata.role,
-        'x-broker-client-version': version,
-      },
+
+  let currentRequestId = uuid();
+  const buildExtraHeaders = (requestId: string): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'x-snyk-broker-client-id': identifyingMetadata.clientId,
+      'x-snyk-broker-client-role': identifyingMetadata.role,
+      'x-broker-client-version': version,
+      'snyk-request-id': requestId,
     };
-  }
+    if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
+      headers.Authorization = getAuthConfig().accessToken.authHeader;
+    }
+    return headers;
+  };
+  socketSettings['transport'] = {
+    extraHeaders: buildExtraHeaders(currentRequestId),
+  };
   const websocket = new Socket(
     localClientOps.config.brokerServerUrlForSocket,
     socketSettings,
@@ -207,12 +215,7 @@ export const createWebSocket = (
         role: identifyingMetadata.role,
       };
 
-      websocket.transport.extraHeaders = {
-        Authorization: getAuthConfig().accessToken.authHeader,
-        'x-snyk-broker-client-id': identifyingMetadata.clientId,
-        'x-snyk-broker-client-role': identifyingMetadata.role,
-        'x-broker-client-version': version,
-      };
+      websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
 
       logger.debug(commonLogFields, 'Renewing auth.');
       const renewResponse = await renewBrokerServerConnection(
@@ -280,6 +283,7 @@ export const createWebSocket = (
     {
       url: localClientOps.config.brokerServerUrlForSocket,
       serverId: serverId,
+      requestId: currentRequestId,
     },
     `Broker client is connecting to broker server ${role}.`,
   );
@@ -293,7 +297,10 @@ export const createWebSocket = (
   websocket.on('reconnect scheduled', (opts) => {
     metricsClient.setConnectionState('reconnecting', identifyingMetadata.role);
     metricsClient.recordReconnect();
-    reconnectScheduledHandler(opts);
+
+    currentRequestId = uuid();
+    websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
+    reconnectScheduledHandler(opts, currentRequestId);
   });
 
   websocket.on('reconnect failed', () => {
