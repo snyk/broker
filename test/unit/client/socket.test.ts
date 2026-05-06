@@ -275,6 +275,7 @@ describe('createWebSocket - renew auth behaviour', () => {
         'x-snyk-broker-client-id': 'test-client-id',
         'x-snyk-broker-client-role': Role.primary,
         'x-broker-client-version': expect.any(String),
+        'snyk-request-id': expect.any(String),
       });
     });
   });

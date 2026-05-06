@@ -9,6 +9,7 @@ const AUTHORIZATION_HEADER = 'authorization';
 const FORWARDED_FOR_HEADER = 'x-forwarded-for';
 const BROKER_CLIENT_ID_HEADER = 'x-snyk-broker-client-id';
 const BROKER_CLIENT_ROLE_HEADER = 'x-snyk-broker-client-role';
+const SNYK_REQUEST_ID_HEADER = 'snyk-request-id';
 
 function getHeader(
   headers: IncomingHttpHeaders,
@@ -40,6 +41,7 @@ export interface ValidatedBrokerCredentials {
   brokerClientId: string;
   credentials: string;
   role: string;
+  requestId: string;
 }
 
 export const validateBrokerClientCredentials = async (
@@ -52,10 +54,11 @@ export const validateBrokerClientCredentials = async (
   brokerClientId =
     brokerClientId ?? getHeader(headers, BROKER_CLIENT_ID_HEADER);
   const role = getHeader(headers, BROKER_CLIENT_ROLE_HEADER) ?? '';
+  const requestId = getHeader(headers, SNYK_REQUEST_ID_HEADER) ?? '';
   const maskedToken = maskToken(brokerConnectionIdentifier);
 
   logger.debug(
-    { maskedToken, brokerClientId },
+    { maskedToken, brokerClientId, requestId },
     `Validating auth for connection ${brokerConnectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
   );
 
@@ -70,7 +73,7 @@ export const validateBrokerClientCredentials = async (
   const credentials = authHeader.substring(authHeader.indexOf(' ') + 1);
   if (!credentials) {
     logger.debug(
-      { maskedToken, brokerClientId },
+      { maskedToken, brokerClientId, requestId },
       `Denied auth for connection ${brokerConnectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
     );
     throw new BrokerAuthError('Invalid JWT.');
@@ -111,23 +114,28 @@ export const validateBrokerClientCredentials = async (
     {
       maskedToken,
       validationResponseCode: response.statusCode,
+      requestId,
     },
     'Validate Broker Client Credentials response',
   );
   if (response.statusCode !== 201) {
     logger.debug(
-      { statusCode: response.statusCode, message: response.statusText },
+      {
+        statusCode: response.statusCode,
+        message: response.statusText,
+        requestId,
+      },
       `Broker ${brokerConnectionIdentifier} client ID ${brokerClientId} failed validation.`,
     );
     throw new BrokerAuthError('Invalid credentials.');
   }
 
   logger.debug(
-    { maskedToken, brokerClientId },
+    { maskedToken, brokerClientId, requestId },
     `Successful auth for connection ${brokerConnectionIdentifier} client Id ${brokerClientId}, role ${role}.`,
   );
 
-  return { brokerClientId, credentials, role };
+  return { brokerClientId, credentials, role, requestId };
 };
 
 export class BrokerAuthError extends Error {}

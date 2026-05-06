@@ -132,7 +132,19 @@ describe('validateBrokerClientCredentials', () => {
         brokerClientId: 'client-1',
         credentials: 'eyJhbGciOiJIUzI1NiJ9.abc',
         role: '',
+        requestId: '',
       });
+    });
+
+    it('propagates snyk-request-id from headers into the result', async () => {
+      mockedRequest.mockResolvedValue(ok201);
+
+      const result = await validateBrokerClientCredentials(
+        { ...goodHeaders, 'snyk-request-id': 'req-abc-123' },
+        identifier,
+      );
+
+      expect(result.requestId).toBe('req-abc-123');
     });
 
     it('returns role from x-snyk-broker-client-role header', async () => {
