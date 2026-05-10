@@ -158,6 +158,7 @@ describe('client/metrics', () => {
       ['incrementInflight', []],
       ['decrementInflight', []],
       ['recordPingLatency', [0.05]],
+      ['recordWebsocketLifecycleEvent', ['connection_lost', 'primary']],
     ];
 
     it.each(noopMethods)('%s does not throw', (method, args) => {
@@ -197,6 +198,26 @@ describe('client/metrics', () => {
         ...metric,
         dataPoints: metric.dataPoints as any[],
       };
+    }
+
+    async function findLifecycleDataPoints() {
+      const metric = await findMetric('broker.client.ws.lifecycle.total');
+      expect(metric).toBeDefined();
+      return metric!.dataPoints;
+    }
+
+    function expectDataPoint(
+      dataPoints: any[],
+      attrs: Record<string, string>,
+      expectedValue: number,
+    ) {
+      const match = dataPoints.find((dp) =>
+        Object.entries(attrs).every(
+          ([key, val]) => dp.attributes[key] === val,
+        ),
+      );
+      expect(match).toBeDefined();
+      expect(match?.value).toBe(expectedValue);
     }
 
     it('records broker.client.initialized', async () => {
@@ -417,6 +438,47 @@ describe('client/metrics', () => {
       expect(metric).toBeDefined();
       expect(metric!.dataPointType).toBe(DataPointType.HISTOGRAM);
       expect(metric!.dataPoints).toHaveLength(1);
+    });
+
+    it('records broker.client.ws.lifecycle.total with event and role attributes', async () => {
+      client.recordWebsocketLifecycleEvent('connection_lost', 'primary');
+      const metric = await findMetric('broker.client.ws.lifecycle.total');
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.SUM);
+      expect(metric!.dataPoints[0].value).toBe(1);
+      expect(metric!.dataPoints[0].attributes['event']).toBe(
+        'connection_lost',
+      );
+      expect(metric!.dataPoints[0].attributes['role']).toBe('primary');
+    });
+
+    it('tracks lifecycle events per event type independently', async () => {
+      client.recordWebsocketLifecycleEvent('connection_lost', 'primary');
+      client.recordWebsocketLifecycleEvent('connection_timed_out', 'primary');
+      client.recordWebsocketLifecycleEvent('connection_error', 'primary');
+
+      const dataPoints = await findLifecycleDataPoints();
+      expectDataPoint(dataPoints, { event: 'connection_lost' }, 1);
+      expectDataPoint(dataPoints, { event: 'connection_timed_out' }, 1);
+      expectDataPoint(dataPoints, { event: 'connection_error' }, 1);
+    });
+
+    it('tracks lifecycle events per role independently', async () => {
+      client.recordWebsocketLifecycleEvent('connection_lost', 'primary');
+      client.recordWebsocketLifecycleEvent('connection_lost', 'secondary');
+
+      const dataPoints = await findLifecycleDataPoints();
+      expectDataPoint(dataPoints, { event: 'connection_lost', role: 'primary' }, 1);
+      expectDataPoint(dataPoints, { event: 'connection_lost', role: 'secondary' }, 1);
+    });
+
+    it('accumulates repeated lifecycle events', async () => {
+      client.recordWebsocketLifecycleEvent('connection_destroyed', 'primary');
+      client.recordWebsocketLifecycleEvent('connection_destroyed', 'primary');
+      client.recordWebsocketLifecycleEvent('connection_destroyed', 'primary');
+
+      const dataPoints = await findLifecycleDataPoints();
+      expectDataPoint(dataPoints, { event: 'connection_destroyed' }, 3);
     });
 
     it('rename view produces broker.nodejs.eventloop.delay.p99', async () => {
