@@ -1,9 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { setRequestIdHeader } from '../../../../../../lib/hybrid-sdk/common/http/middleware/requestId';
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { isUUID } from '../../../../../../lib/hybrid-sdk/common/utils/uuid';
 
 const setupApp = (opts?: Parameters<typeof setRequestIdHeader>[0]) => {
   const app = express();
@@ -72,7 +70,7 @@ describe('setRequestIdHeader middleware', () => {
       .set('snyk-request-id', 'not-a-uuid');
 
     expect(res.text).not.toEqual('not-a-uuid');
-    expect(res.text).toMatch(UUID_REGEX);
+    expect(isUUID(res.text)).toBe(true);
   });
 
   it('rejects the nil UUID and falls back to a fresh UUID', async () => {
@@ -82,20 +80,20 @@ describe('setRequestIdHeader middleware', () => {
       .set('snyk-request-id', nil);
 
     expect(res.text).not.toEqual(nil);
-    expect(res.text).toMatch(UUID_REGEX);
+    expect(isUUID(res.text)).toBe(true);
   });
 
   it('generates a UUID when no candidate headers are present', async () => {
     const res = await request(setupApp()).get('/');
 
-    expect(res.text).toMatch(UUID_REGEX);
+    expect(isUUID(res.text)).toBe(true);
     expect(res.headers['snyk-request-id']).toEqual(res.text);
   });
 
   it('always sets snyk-request-id response header to a valid UUID', async () => {
     const res = await request(setupApp()).get('/');
 
-    expect(res.headers['snyk-request-id']).toMatch(UUID_REGEX);
+    expect(isUUID(res.headers['snyk-request-id'])).toBe(true);
   });
 
   it('uses a custom responseHeader when configured', async () => {
@@ -103,7 +101,7 @@ describe('setRequestIdHeader middleware', () => {
       setupApp({ responseHeader: 'x-custom' }),
     ).get('/');
 
-    expect(res.headers['x-custom']).toMatch(UUID_REGEX);
+    expect(isUUID(res.headers['x-custom'])).toBe(true);
     expect(res.headers['snyk-request-id']).toBeUndefined();
   });
 

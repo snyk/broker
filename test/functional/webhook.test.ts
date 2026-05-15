@@ -17,6 +17,7 @@ import {
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from '../setup/constants';
 import { maskToken } from '../../lib/hybrid-sdk/common/utils/token';
+import { isUUID } from '../../lib/hybrid-sdk/common/utils/uuid';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters-webhook.json');
@@ -77,9 +78,7 @@ describe('proxy requests originating from behind the broker client', () => {
     );
 
     expect(response.status).toEqual(200);
-    expect(response.headers['snyk-request-id']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-    );
+    expect(isUUID(response.headers['snyk-request-id'])).toBe(true);
   });
 
   it('preserves a caller-supplied snyk-request-id', async () => {
