@@ -4,7 +4,6 @@ import { HybridClientRequestHandler } from '../hybrid-sdk/clientRequestHelpers';
 import { filterClientRequest } from './requestFiltering';
 import { log as logger } from '../logs/logger';
 import { getInterpolatedRequest } from '../hybrid-sdk/interpolateRequestWithConfigData';
-import { randomUUID } from 'node:crypto';
 import {
   LocalClientWorkloadRuntimeParams,
   Workload,
@@ -63,7 +62,7 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       responseMedium: this.req.headers['x-broker-ws-response']
         ? 'websocket'
         : 'http',
-      requestId: `${this.req.headers['snyk-request-id'] ?? randomUUID()}`,
+      requestId: this.req.requestId,
     };
 
     if (!matchedFilterRule) {

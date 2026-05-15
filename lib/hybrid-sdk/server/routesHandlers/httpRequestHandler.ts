@@ -16,7 +16,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   const connections = getSocketConnections();
   const token = req.params.token;
   const desensitizedToken = getDesensitizedToken(token);
-  const requestId = req.headers['snyk-request-id'];
+  const requestId = req.requestId;
   req['maskedToken'] = desensitizedToken.maskedToken;
   req['hashedToken'] = desensitizedToken.hashedToken;
   // check if we have this broker in the connections
@@ -129,7 +129,7 @@ export const extractPossibleContextFromHttpRequestToHeader = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const requestId = req.headers['snyk-request-id'];
+  const requestId = req.requestId;
   try {
     const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
     const ctxPrefix = '/ctx/';
