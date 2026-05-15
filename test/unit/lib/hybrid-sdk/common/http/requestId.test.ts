@@ -75,9 +75,7 @@ describe('setRequestIdHeader middleware', () => {
 
   it('rejects the nil UUID and falls back to a fresh UUID', async () => {
     const nil = '00000000-0000-0000-0000-000000000000';
-    const res = await request(setupApp())
-      .get('/')
-      .set('snyk-request-id', nil);
+    const res = await request(setupApp()).get('/').set('snyk-request-id', nil);
 
     expect(res.text).not.toEqual(nil);
     expect(isUUID(res.text)).toBe(true);
@@ -97,9 +95,9 @@ describe('setRequestIdHeader middleware', () => {
   });
 
   it('uses a custom responseHeader when configured', async () => {
-    const res = await request(
-      setupApp({ responseHeader: 'x-custom' }),
-    ).get('/');
+    const res = await request(setupApp({ responseHeader: 'x-custom' })).get(
+      '/',
+    );
 
     expect(isUUID(res.headers['x-custom'])).toBe(true);
     expect(res.headers['snyk-request-id']).toBeUndefined();
@@ -133,14 +131,14 @@ describe('setRequestIdHeader middleware', () => {
         },
       }));
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { log: isolatedLogger } = require(
-        '../../../../../../lib/logs/logger',
-      );
+      const {
+        log: isolatedLogger,
+      } = require('../../../../../../lib/logs/logger');
       warnSpy = jest.spyOn(isolatedLogger, 'warn');
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { setRequestIdHeader: isolated } = require(
-        '../../../../../../lib/hybrid-sdk/common/http/middleware/requestId',
-      );
+      const {
+        setRequestIdHeader: isolated,
+      } = require('../../../../../../lib/hybrid-sdk/common/http/middleware/requestId');
       appUnderTest = express();
       appUnderTest.use(isolated());
       appUnderTest.get('/', (req, res) => res.send(req.requestId));
