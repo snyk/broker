@@ -17,6 +17,7 @@ import {
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { DEFAULT_TEST_WEB_SERVER_PORT } from '../setup/constants';
 import { maskToken } from '../../lib/hybrid-sdk/common/utils/token';
+import { isUUID } from '../../lib/hybrid-sdk/common/utils/uuid';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters-webhook.json');
@@ -68,6 +69,28 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual('Received webhook via websocket');
+  });
+
+  it('echoes snyk-request-id on responses even when the caller omits it', async () => {
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-123456789abc`,
+      { some: { example: 'json' } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(isUUID(response.headers['snyk-request-id'])).toBe(true);
+  });
+
+  it('preserves a caller-supplied snyk-request-id', async () => {
+    const supplied = '22222222-2222-4222-8222-222222222222';
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-123456789abc`,
+      { some: { example: 'json' } },
+      { headers: { 'snyk-request-id': supplied } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.headers['snyk-request-id']).toEqual(supplied);
   });
 
   it('successfully broker Webhook call via API', async () => {

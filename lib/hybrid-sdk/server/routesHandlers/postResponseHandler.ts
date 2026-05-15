@@ -16,7 +16,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
     hashedToken: desensitizedToken.hashedToken,
     maskedToken: desensitizedToken.maskedToken,
     streamingID,
-    requestId: req.headers['snyk-request-id'],
+    requestId: req.requestId,
     actingOrgPublicId: req.headers['snyk-acting-org-public-id'],
     actingGroupPublicId: req.headers['snyk-acting-group-public-id'],
     productLine: req.headers['snyk-product-line'],
