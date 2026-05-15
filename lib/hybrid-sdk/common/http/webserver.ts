@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import { log as logger } from '../../../logs/logger';
+import { setRequestIdHeader } from './middleware/requestId';
 import {
   maskToken,
   hashToken,
@@ -34,6 +35,7 @@ export const webserver = (config, altPort: number) => {
 
   app.disable('x-powered-by');
 
+  app.use(setRequestIdHeader());
   app.use(markEmptyRequestBody);
   app.use(
     bodyParser.raw({

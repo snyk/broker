@@ -70,6 +70,30 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.data).toStrictEqual('Received webhook via websocket');
   });
 
+  it('echoes snyk-request-id on responses even when the caller omits it', async () => {
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-123456789abc`,
+      { some: { example: 'json' } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.headers['snyk-request-id']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+  });
+
+  it('preserves a caller-supplied snyk-request-id', async () => {
+    const supplied = '22222222-2222-4222-8222-222222222222';
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-123456789abc`,
+      { some: { example: 'json' } },
+      { headers: { 'snyk-request-id': supplied } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.headers['snyk-request-id']).toEqual(supplied);
+  });
+
   it('successfully broker Webhook call via API', async () => {
     await closeBrokerServer(bs);
 
