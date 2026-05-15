@@ -1,5 +1,5 @@
 // Module augmentation for express.Request. Adds the requestId property that
-// the setRequestIdHeader middleware (lib/hybrid-sdk/common/http/requestId.ts)
+// the setRequestIdHeader middleware (lib/hybrid-sdk/common/http/middleware/requestId.ts)
 // guarantees is set on every request handled by the local webserver.
 //
 // We declare it as a non-optional string because the middleware is mounted

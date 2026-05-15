@@ -64,6 +64,16 @@ describe('setRequestIdHeader middleware', () => {
     );
   });
 
+  it('skips an invalid UUID in a higher-priority header and uses the next valid one', async () => {
+    const valid = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const res = await request(setupApp())
+      .get('/')
+      .set('x-akamai-request-id', 'not-a-uuid')
+      .set('x-request-id', valid);
+
+    expect(res.text).toEqual(valid);
+  });
+
   it('rejects a non-UUID value and falls back to a fresh UUID', async () => {
     const res = await request(setupApp())
       .get('/')
@@ -115,7 +125,7 @@ describe('setRequestIdHeader middleware', () => {
     expect(res.text).toEqual(customUuid);
   });
 
-  it('fails open with a warning and continues the request when randomUUID throws', async () => {
+  it('forwards the error to Express and logs at error level when randomUUID throws', async () => {
     // jest.spyOn cannot intercept named imports after module load, so we
     // reload the middleware inside an isolated module scope where crypto is
     // mocked before the import resolves. The logger spy must also come from
@@ -134,7 +144,7 @@ describe('setRequestIdHeader middleware', () => {
       const {
         log: isolatedLogger,
       } = require('../../../../../../lib/logs/logger');
-      warnSpy = jest.spyOn(isolatedLogger, 'warn');
+      warnSpy = jest.spyOn(isolatedLogger, 'error');
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const {
         setRequestIdHeader: isolated,
@@ -146,7 +156,7 @@ describe('setRequestIdHeader middleware', () => {
 
     const res = await request(appUnderTest).get('/');
 
-    expect(res.status).toEqual(200);
+    expect(res.status).toEqual(500);
     expect(warnSpy).toHaveBeenCalledWith(
       { error: expect.any(Error) },
       'Failed to set request ID.',

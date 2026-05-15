@@ -28,9 +28,8 @@ export class HybridClientRequestHandler {
     this.res = res;
     this.options = getConfig();
 
-    // Backfill the raw header so downstream code that reads
-    // req.headers['snyk-request-id'] directly sees the resolved value.
-    // Remove once all direct header reads are replaced with req.requestId.
+    // Propagate the resolved request ID into req.headers so it is included in
+    // the WS payload sent to the broker server (headers: this.req.headers).
     this.req.headers['snyk-request-id'] ||= this.req.requestId;
     this.responseWantedOverWs = req.headers['x-broker-ws-response']
       ? true

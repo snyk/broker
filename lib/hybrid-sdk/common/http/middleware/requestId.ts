@@ -23,8 +23,8 @@ export interface RequestIdHeaderOptions {
 }
 
 /**
- * Express middleware that guarantees `req.requestId` is populated for every
- * request handled by this server.
+ * Express middleware that guarantees `req.requestId` is set to a valid UUID
+ * string for every request handled by this server.
  *
  * Resolution order:
  * 1. The first header in `incomingHeaders` whose value is a valid, non-nil UUID
@@ -34,6 +34,8 @@ export interface RequestIdHeaderOptions {
  *
  * The resolved value is written to `req.requestId` and echoed back to the
  * caller in the `responseHeader` response header (default: `snyk-request-id`).
+ * If synthesis fails (e.g. the crypto subsystem is unavailable), the error is
+ * forwarded to Express's error handler and the request is not processed further.
  */
 export const setRequestIdHeader = (
   options?: RequestIdHeaderOptions,
@@ -47,7 +49,12 @@ export const setRequestIdHeader = (
         incomingHeaders.map((h) => req.header(h)).find(isUUID) ?? randomUUID();
       res.setHeader(responseHeader, req.requestId);
     } catch (error) {
-      logger.warn({ error }, 'Failed to set request ID.');
+      // Should never throw on Node 20+ — a failure here indicates a broken
+      // crypto subsystem, so we treat it as fatal and forward to Express's
+      // error handler rather than continuing with req.requestId unset.
+      logger.error({ error }, 'Failed to set request ID.');
+      next(error as Error);
+      return;
     }
     next();
   };
