@@ -28,7 +28,10 @@ export class HybridClientRequestHandler {
     this.res = res;
     this.options = getConfig();
 
-    this.req.headers['snyk-request-id'] ||= uuid();
+    // Backfill the raw header so downstream code that reads
+    // req.headers['snyk-request-id'] directly sees the resolved value.
+    // Remove once all direct header reads are replaced with req.requestId.
+    this.req.headers['snyk-request-id'] ||= this.req.requestId;
     this.responseWantedOverWs = req.headers['x-broker-ws-response']
       ? true
       : false;
@@ -36,11 +39,7 @@ export class HybridClientRequestHandler {
       url: this.req.url,
       requestMethod: this.req.method,
       requestHeaders: this.req.headers,
-      requestId:
-        this.req.headers['snyk-request-id'] &&
-        Array.isArray(this.req.headers['snyk-request-id'])
-          ? this.req.headers['snyk-request-id'].join(',')
-          : this.req.headers['snyk-request-id'] || '',
+      requestId: this.req.requestId,
       maskedToken: this.req['maskedToken'],
       hashedToken: this.req['hashedToken'],
       actingOrgPublicId: this.req.headers[

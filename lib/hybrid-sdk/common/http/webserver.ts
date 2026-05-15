@@ -56,7 +56,7 @@ export const webserver = (config, altPort: number) => {
           url: req.url.replaceAll(brokerToken, maskedToken),
           requestMethod: req.method,
           requestHeaders: req.headers,
-          requestId: req.headers['snyk-request-id'] || '',
+          requestId: req.requestId ?? '',
           maskedToken: maskedToken,
           hashedToken: hashedToken,
           error: err,
