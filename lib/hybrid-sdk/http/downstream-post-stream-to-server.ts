@@ -52,6 +52,11 @@ interface Logger {
     context: Partial<ExtendedLogContext> & Record<string, any>,
     message: string,
   ): void;
+  warn(message: string): void;
+  warn(
+    context: Partial<ExtendedLogContext> & Record<string, any>,
+    message: string,
+  ): void;
   error(message: string): void;
   error(
     context: Partial<ExtendedLogContext> & Record<string, any>,
@@ -539,12 +544,29 @@ class BrokerServerPostResponseHandler {
         'downstream TCP connection details',
       );
       const status = response?.statusCode || 500;
-      this.#logger.debug(
-        {
-          responseStatus: status.toString(),
-        },
-        'response received, setting up stream to Broker Server',
-      );
+      // Promote non-2xx responses from the downstream SCM to WARN so they
+      // are visible at default log level. Without this, operators (and
+      // customers) had to enable LOG_LEVEL=debug to diagnose 401/403/5xx
+      // from their SCM — and then drown in TLS/TCP/chunk chatter.
+      // 404 is excluded because some SCM integrations rely on 404-as-probe
+      // (e.g. "does this repo exist?") on the happy path; emitting WARN for
+      // them would itself become noise.
+      if (status >= 400 && status !== 404) {
+        this.#logger.warn(
+          {
+            responseStatus: status.toString(),
+            streamingID,
+          },
+          'Non-2xx response from downstream SCM',
+        );
+      } else {
+        this.#logger.debug(
+          {
+            responseStatus: status.toString(),
+          },
+          'response received, setting up stream to Broker Server',
+        );
+      }
       const isResponseJson = isJson(response.headers);
       const ioData = JSON.stringify({
         status,

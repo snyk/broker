@@ -71,13 +71,17 @@ export const makeLegacyRequest = async (
       const replaced = replaceUrlPartialChunk(response.body, null, options);
       response.body = replaced.newChunk;
     }
-    if (status > 404) {
+    // Threshold matches downstream-post-stream-to-server.ts: surface 401/403
+    // and all 5xx (customer-actionable auth/scope/upstream issues) but skip
+    // 404, which is often a probe on the happy path. Prior `status > 404`
+    // accidentally also silenced 401/402/403, hiding customer-ticket cases.
+    if (status >= 400 && status !== 404) {
       logger.warn(
         {
           statusCode: response.statusCode,
           url: req.url,
         },
-        `[Websocket Flow][Inbound] Unexpected status code for relayed request.`,
+        `[Websocket Flow][Inbound] Non-2xx response from downstream SCM.`,
       );
     }
     logResponse(logContext, status, response, options);
