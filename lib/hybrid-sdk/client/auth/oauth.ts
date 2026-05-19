@@ -1,6 +1,7 @@
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
+import type { Client as MetricsClient } from '../metrics/client';
 
 interface tokenExchangeResponse {
   access_token: string;
@@ -62,7 +63,12 @@ export async function fetchAndUpdateJwt(
   }
 }
 
-const refreshJwt = async (clientConfig, clientId, clientSecret) => {
+const refreshJwt = async (
+  clientConfig,
+  clientId,
+  clientSecret,
+  metricsClient?: MetricsClient,
+) => {
   logger.debug({}, 'Refreshing oauth access token');
   try {
     const newJwt = await fetchAndUpdateJwt(
@@ -78,10 +84,11 @@ const refreshJwt = async (clientConfig, clientId, clientSecret) => {
       authHeader: newJwt.authHeader,
     });
     setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret);
+      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
     }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
   } catch (err) {
-    logger.error(`Error retrieving new JWT ${err}`);
+    metricsClient?.recordJwtRefreshFailure();
+    logger.error({ err }, 'Error retrieving new JWT');
   }
 };
 
@@ -89,6 +96,7 @@ export const setfetchAndUpdateJwt = async (
   clientConfig,
   clientId,
   clientSecret,
+  metricsClient?: MetricsClient,
 ) => {
   const newJwt = await fetchAndUpdateJwt(
     clientConfig.apiHostname,
@@ -98,7 +106,7 @@ export const setfetchAndUpdateJwt = async (
   logger.debug({}, 'Setting auth updater.');
   if (newJwt) {
     setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret);
+      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
     }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
   }
 };

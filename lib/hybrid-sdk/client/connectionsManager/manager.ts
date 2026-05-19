@@ -53,6 +53,7 @@ export const manageWebsocketConnections = async (
         clientOpts.config,
         clientOpts.config.brokerClientConfiguration.common.oauth.clientId,
         clientOpts.config.brokerClientConfiguration.common.oauth.clientSecret,
+        clientOpts.metricsClient,
       );
 
       await retrieveConnectionsForDeployment(

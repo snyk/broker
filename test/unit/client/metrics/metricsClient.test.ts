@@ -148,6 +148,7 @@ describe('client/metrics', () => {
       ['recordReconnect', []],
       ['recordProcessExit', ['reconnect_exhaustion']],
       ['recordAuthRenewalFailure', [503]],
+      ['recordJwtRefreshFailure', []],
       ['recordUncaughtException', ['ECONNRESET']],
       ['recordRequest', ['broker-server', true]],
       ['recordDownstreamRequest', [false]],
@@ -298,6 +299,17 @@ describe('client/metrics', () => {
       );
       expect(metric!.dataPoints[0].value).toBe(1);
       expect(metric!.dataPoints[0].attributes['status_code']).toBe('503');
+    });
+
+    it('records broker.client.jwt_refresh_failure.total', async () => {
+      client.recordJwtRefreshFailure();
+      client.recordJwtRefreshFailure();
+      const metric = await findMetric(
+        'broker.client.jwt_refresh_failure.total',
+      );
+      expect(metric).toBeDefined();
+      expect(metric!.dataPointType).toBe(DataPointType.SUM);
+      expect(metric!.dataPoints[0].value).toBe(2);
     });
 
     it('records broker.client.uncaught_exception.total with error_code', async () => {

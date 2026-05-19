@@ -33,6 +33,14 @@ export interface Client {
   /** Increment broker.client.auth_renewal_failure.total for non-2xx auth renewal responses. */
   recordAuthRenewalFailure(statusCode: number): void;
 
+  /**
+   * Increment broker.client.jwt_refresh_failure.total when the OAuth JWT exchange
+   * against the Snyk API fails. Distinct from recordAuthRenewalFailure (which is for
+   * broker-server credentials renewal): this counter tracks the OAuth bearer-token
+   * lifecycle. Sustained failures break Universal Broker silently.
+   */
+  recordJwtRefreshFailure(): void;
+
   /** Increment broker.client.uncaught_exception.total. */
   recordUncaughtException(errorCode: string): void;
 

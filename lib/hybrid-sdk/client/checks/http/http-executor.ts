@@ -51,9 +51,10 @@ export async function executeHttpRequest(
     );
     return Promise.resolve(checkResult);
   } catch (error) {
-    const errorMessage = `Error executing check with checkId ${checkOptions.id}`;
-    logger.debug({ error }, errorMessage);
-    throw new Error(errorMessage);
+    if (error instanceof Error) {
+      error.message = `Error executing check with checkId ${checkOptions.id}: ${error.message}`;
+    }
+    throw error;
   }
 }
 
