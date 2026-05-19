@@ -5,7 +5,7 @@ export const logResponse = (logContext, status, response, config) => {
   logContext.responseBody =
     config && config.LOG_ENABLE_BODY === 'true' ? response.body : null;
 
-  logger.info(logContext, 'Sending response back to websocket connection.');
+  logger.debug(logContext, 'Sending response back to websocket connection.');
 };
 
 export const logError = (logContext, error) => {

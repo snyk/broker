@@ -55,7 +55,7 @@ export class HybridClientRequestHandler {
 
     this.simplifiedContext = this.logContext;
     delete this.simplifiedContext.requestHeaders;
-    logger.info(this.simplifiedContext, '[HTTP Flow] Received request.');
+    logger.debug(this.simplifiedContext, '[HTTP Flow] Received request.');
   }
 
   private makeWebsocketRequestWithStreamingResponse() {
