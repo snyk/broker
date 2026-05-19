@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
@@ -24,6 +25,7 @@ export async function fetchAndUpdateJwt(
   apiHostname: string,
   clientId: string,
   clientSecret: string,
+  requestId: string = uuid(),
 ) {
   try {
     const data = {
@@ -35,7 +37,10 @@ export async function fetchAndUpdateJwt(
 
     const request: PostFilterPreparedRequest = {
       url: `${apiHostname}/oauth2/token`,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Snyk-Request-Id': requestId,
+      },
       method: 'POST',
       body: formData.toString(),
     };
@@ -59,9 +64,20 @@ export async function fetchAndUpdateJwt(
     });
     return { expiresIn: expiresIn, authHeader: `${type} ${jwt}` };
   } catch (err) {
-    logger.error({ err }, 'Unable to retrieve JWT');
+    logger.error({ err, requestId }, 'Unable to retrieve JWT');
   }
 }
+
+const JWT_REFRESH_RETRY_ON_FAILURE_MS = 30_000;
+
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+export const stopJwtRefresh = () => {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+};
 
 const refreshJwt = async (
   clientConfig,
@@ -69,12 +85,15 @@ const refreshJwt = async (
   clientSecret,
   metricsClient?: MetricsClient,
 ) => {
-  logger.debug({}, 'Refreshing oauth access token');
+  const requestId = uuid();
+  logger.debug({ requestId }, 'Refreshing oauth access token');
+  let nextDelayMs: number;
   try {
     const newJwt = await fetchAndUpdateJwt(
       clientConfig.apiHostname,
       clientId,
       clientSecret,
+      requestId,
     );
     if (!newJwt) {
       throw new Error('Error retrieving new JWT:undefined.');
@@ -83,13 +102,17 @@ const refreshJwt = async (
       expiresIn: newJwt.expiresIn,
       authHeader: newJwt.authHeader,
     });
-    setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
-    }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
+    nextDelayMs =
+      clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000;
   } catch (err) {
     metricsClient?.recordJwtRefreshFailure();
-    logger.error({ err }, 'Error retrieving new JWT');
+    logger.error({ err, requestId }, 'Error retrieving new JWT');
+    nextDelayMs =
+      clientConfig.AUTH_EXPIRATION_OVERRIDE ?? JWT_REFRESH_RETRY_ON_FAILURE_MS;
   }
+  refreshTimer = setTimeout(() => {
+    refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
+  }, nextDelayMs);
 };
 
 export const setfetchAndUpdateJwt = async (
@@ -98,14 +121,17 @@ export const setfetchAndUpdateJwt = async (
   clientSecret,
   metricsClient?: MetricsClient,
 ) => {
+  stopJwtRefresh();
+  const requestId = uuid();
   const newJwt = await fetchAndUpdateJwt(
     clientConfig.apiHostname,
     clientId,
     clientSecret,
+    requestId,
   );
-  logger.debug({}, 'Setting auth updater.');
+  logger.debug({ requestId }, 'Setting auth updater.');
   if (newJwt) {
-    setTimeout(async () => {
+    refreshTimer = setTimeout(async () => {
       refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
     }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
   }
