@@ -17,6 +17,7 @@ interface CapturedLogCall {
 
 class TestLogger {
   errorCalls: CapturedLogCall[] = [];
+  warnCalls: CapturedLogCall[] = [];
   debugCalls: CapturedLogCall[] = [];
   context: Record<string, any> = {};
 
@@ -38,6 +39,30 @@ class TestLogger {
       });
     } else {
       this.errorCalls.push({
+        context: { ...this.context, ...contextOrMessage },
+        message: message || '',
+      });
+    }
+  }
+
+  warn(message: string): void;
+  warn(
+    context: Partial<ExtendedLogContext> & Record<string, any>,
+    message: string,
+  ): void;
+  warn(
+    contextOrMessage:
+      | string
+      | (Partial<ExtendedLogContext> & Record<string, any>),
+    message?: string,
+  ): void {
+    if (typeof contextOrMessage === 'string') {
+      this.warnCalls.push({
+        context: { ...this.context },
+        message: contextOrMessage,
+      });
+    } else {
+      this.warnCalls.push({
         context: { ...this.context, ...contextOrMessage },
         message: message || '',
       });
@@ -74,6 +99,7 @@ class TestLogger {
     const childLogger = new TestLogger();
     childLogger.context = { ...this.context, ...additionalContext };
     childLogger.errorCalls = this.errorCalls; // Share error calls array
+    childLogger.warnCalls = this.warnCalls; // Share warn calls array
     childLogger.debugCalls = this.debugCalls; // Share debug calls array
     return childLogger;
   }
@@ -1096,5 +1122,99 @@ describe('BrokerServerPostResponseHandler', () => {
 
       mockSocket.destroy();
     }, 30000);
+  });
+
+  /**
+   * Regression: the SCM-response status was previously logged only at DEBUG
+   * (`response received, setting up stream to Broker Server`), so customers
+   * hitting 401 / 403 / 5xx from their SCM had no visible signal at default
+   * log level. The fix splits the log by status — DEBUG for success and 404
+   * (commonly a probe pattern), WARN for any other non-2xx so it surfaces.
+   *
+   * These tests pin the routing so the silent-non-2xx regression cannot
+   * recur. They drive `forwardRequest` end-to-end with nock absorbing the
+   * downstream POST, then inspect the captured log calls.
+   */
+  describe('SCM response status logging', () => {
+    beforeEach(() => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+    });
+
+    async function drive(scmStatus: number) {
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(200, 'OK');
+
+      const handler = createHandler();
+      const mockSocket = new Socket();
+      const mockResponse = new http.IncomingMessage(mockSocket);
+      mockResponse.statusCode = scmStatus;
+      mockResponse.headers = { 'content-type': 'application/json' };
+
+      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
+      // push(null) signals end-of-stream so the readable side of the
+      // pipeline drains and forwardRequest resolves. Matches the working
+      // pattern used by the duration-tracking tests above.
+      process.nextTick(() => mockResponse.push(null));
+      await forwardPromise;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      mockSocket.destroy();
+    }
+
+    it.each([401, 403, 500, 502, 503])(
+      'logs WARN when SCM returns %d',
+      async (scmStatus) => {
+        await drive(scmStatus);
+
+        const warnCall = testLogger.warnCalls.find(
+          (c) => c.message === 'Non-2xx response from downstream SCM',
+        );
+        expect(warnCall).toBeDefined();
+        expect(warnCall?.context).toMatchObject({
+          responseStatus: String(scmStatus),
+          streamingID: streamingId,
+        });
+
+        // Regression guard: the success-path DEBUG must NOT also fire for
+        // a non-2xx status, otherwise the operator gets two log lines for
+        // one event.
+        const debugCall = testLogger.debugCalls.find(
+          (c) =>
+            c.message ===
+            'response received, setting up stream to Broker Server',
+        );
+        expect(debugCall).toBeUndefined();
+      },
+    );
+
+    it.each([200, 201, 204, 301, 302, 404])(
+      'logs DEBUG (not WARN) when SCM returns %d',
+      async (scmStatus) => {
+        await drive(scmStatus);
+
+        const debugCall = testLogger.debugCalls.find(
+          (c) =>
+            c.message ===
+            'response received, setting up stream to Broker Server',
+        );
+        expect(debugCall).toBeDefined();
+        expect(debugCall?.context).toMatchObject({
+          responseStatus: String(scmStatus),
+        });
+
+        // Regression guard: 404 is intentionally not WARN — common
+        // probe-pattern on the happy path. Same applies to 2xx/3xx.
+        const warnCall = testLogger.warnCalls.find(
+          (c) => c.message === 'Non-2xx response from downstream SCM',
+        );
+        expect(warnCall).toBeUndefined();
+      },
+    );
   });
 });
