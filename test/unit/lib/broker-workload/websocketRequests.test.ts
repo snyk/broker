@@ -49,7 +49,7 @@ describe('BrokerWorkload', () => {
 
     await workload.handler({ payload, websocketHandler });
 
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       expect.objectContaining({
         contextId: 'some-uuid',
       }),
@@ -73,7 +73,7 @@ describe('BrokerWorkload', () => {
 
     await workload.handler({ payload, websocketHandler });
 
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       expect.objectContaining({
         contextId: undefined,
       }),
