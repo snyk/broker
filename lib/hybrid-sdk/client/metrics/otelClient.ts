@@ -50,6 +50,7 @@ export class OtelClient implements Client {
   private readonly reconnectCounter: Counter;
   private readonly processExitCounter: Counter;
   private readonly authRenewalFailureCounter: Counter;
+  private readonly jwtRefreshFailureCounter: Counter;
   private readonly uncaughtExceptionCounter: Counter;
 
   // Request Flow
@@ -141,6 +142,15 @@ export class OtelClient implements Client {
       'broker.client.auth_renewal_failure.total',
       {
         description: 'Auth renewal HTTP failures by status code.',
+        valueType: ValueType.INT,
+      },
+    );
+
+    this.jwtRefreshFailureCounter = meter.createCounter(
+      'broker.client.jwt_refresh_failure.total',
+      {
+        description:
+          'OAuth JWT refresh failures. Sustained non-zero values mean Universal Broker is losing or has lost its bearer token and will stop processing traffic.',
         valueType: ValueType.INT,
       },
     );
@@ -302,6 +312,10 @@ export class OtelClient implements Client {
     this.authRenewalFailureCounter.add(1, {
       status_code: String(statusCode),
     });
+  }
+
+  recordJwtRefreshFailure(): void {
+    this.jwtRefreshFailureCounter.add(1);
   }
 
   recordUncaughtException(errorCode: string): void {

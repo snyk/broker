@@ -13,6 +13,7 @@ export class NoopClient implements Client {
   recordReconnect(): void {}
   recordProcessExit(): void {}
   recordAuthRenewalFailure(): void {}
+  recordJwtRefreshFailure(): void {}
   recordUncaughtException(): void {}
 
   recordRequest(): void {}

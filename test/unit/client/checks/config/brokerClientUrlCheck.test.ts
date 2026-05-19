@@ -1,5 +1,6 @@
 import { aConfig } from '../../../../helpers/test-factories';
 import { validateBrokerClientUrl } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerClientUrlCheck';
+import { log as logger } from '../../../../../lib/logs/logger';
 const nock = require('nock');
 
 describe('client/checks/config', () => {
@@ -38,7 +39,7 @@ describe('client/checks/config', () => {
       );
     });
 
-    it('should return error check result for https protocol without certificate and key', async () => {
+    it('should return error check result mentioning both remediation paths when probe fails', async () => {
       const id = `check_${Date.now()}`;
       const config = aConfig({
         BROKER_CLIENT_URL: 'https://broker-client:8000',
@@ -50,8 +51,10 @@ describe('client/checks/config', () => {
       );
 
       expect(checkResult.status).toEqual('error');
-      expect(checkResult.output).toContain(
-        'HTTPS_CERT and HTTPS_KEY environment variables are missing',
+      expect(checkResult.output).toContain('HTTPS_CERT and HTTPS_KEY');
+      expect(checkResult.output).toContain('BROKER_CLIENT_URL_TLS_TERMINATED');
+      expect(checkResult.output).toMatch(
+        /Probe to https:\/\/broker-client:8000\/healthcheck failed/,
       );
     });
 
@@ -139,6 +142,81 @@ describe('client/checks/config', () => {
 
       expect(checkResult.status).toEqual('passing');
       expect(checkResult.output).toContain('config check: ok');
+    });
+  });
+
+  /**
+   * Regression: the `isBrokerClientUrlTLSTerminated` catch at
+   * brokerClientUrlCheck.ts:112 used to log at DEBUG, hiding the underlying
+   * network failure at default log level. The customer-visible check output
+   * ("HTTPS_CERT and HTTPS_KEY environment variables are missing") is
+   * potentially misleading when the real cause is DNS / connection refused /
+   * TLS handshake / timeout — so the log must be visible by default (WARN).
+   *
+   * The test below drives the catch by failing the /healthcheck probe and
+   * asserts:
+   *  - logger.warn fires (NOT logger.debug)
+   *  - the log carries the original err for the operator to triage
+   *  - the log carries the probe url so the operator knows what failed
+   */
+  describe('BROKER_CLIENT_URL probe failure logging', () => {
+    let warnSpy: jest.SpyInstance;
+    let debugSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      nock.cleanAll();
+      warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => logger);
+      debugSpy = jest.spyOn(logger, 'debug').mockImplementation(() => logger);
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+      debugSpy.mockRestore();
+      nock.cleanAll();
+    });
+
+    it('logs at WARN with {err, url} when the BROKER_CLIENT_URL probe fails', async () => {
+      nock('https://broker-client:8000')
+        .persist()
+        .get('/healthcheck')
+        .replyWithError(
+          Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:443'), {
+            code: 'ECONNREFUSED',
+          }),
+        );
+
+      const config = aConfig({
+        BROKER_CLIENT_URL: 'https://broker-client:8000',
+      });
+
+      const checkResult = await validateBrokerClientUrl(
+        { id: 'broker-client-url-validation', name: 'check' },
+        config,
+      );
+
+      expect(checkResult.status).toEqual('error');
+      expect(checkResult.output).toContain('ECONNREFUSED');
+      expect(checkResult.output).toContain('HTTPS_CERT and HTTPS_KEY');
+      expect(checkResult.output).toContain('BROKER_CLIENT_URL_TLS_TERMINATED');
+      const probeWarn = warnSpy.mock.calls.find(
+        ([, msg]) =>
+          typeof msg === 'string' &&
+          msg.startsWith('Failed to reach the BROKER_CLIENT_URL'),
+      );
+
+      expect(probeWarn).toBeDefined();
+      const [fields, message] = probeWarn!;
+      expect(typeof fields).toBe('object');
+      expect(fields).toHaveProperty('err');
+      expect(fields).toHaveProperty('url');
+      expect(fields.url).toBe('https://broker-client:8000/healthcheck');
+      expect(message).toContain('ECONNREFUSED'); // from the nock-mocked err
+      const probeDebug = debugSpy.mock.calls.find(
+        ([, msg]) =>
+          typeof msg === 'string' &&
+          msg.startsWith('Failed to reach the BROKER_CLIENT_URL'),
+      );
+      expect(probeDebug).toBeUndefined();
     });
   });
 });
