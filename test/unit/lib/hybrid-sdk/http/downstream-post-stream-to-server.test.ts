@@ -9,6 +9,11 @@ import {
   getConfig,
 } from '../../../../../lib/hybrid-sdk/common/config/config';
 import { ExtendedLogContext } from '../../../../../lib/hybrid-sdk/common/types/log';
+import {
+  OAUTH_TOKEN_REJECTED_EVENT,
+  oauthEvents,
+  setAuthConfigKey,
+} from '../../../../../lib/hybrid-sdk/client/auth/oauth';
 
 interface CapturedLogCall {
   context: Record<string, any>;
@@ -145,6 +150,139 @@ describe('BrokerServerPostResponseHandler', () => {
 
   afterEach(() => {
     nock.cleanAll();
+  });
+
+  describe('401 OAuth token refresh trigger', () => {
+    let emitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Authorization header is only attached when an accessToken exists.
+      setAuthConfigKey('accessToken', {
+        expiresIn: 3600,
+        authHeader: 'Bearer test-token',
+      });
+      // Suppress real listeners — we only care that the event was emitted.
+      oauthEvents.removeAllListeners(OAUTH_TOKEN_REJECTED_EVENT);
+      emitSpy = jest.spyOn(oauthEvents, 'emit');
+    });
+
+    afterEach(() => {
+      emitSpy.mockRestore();
+      setAuthConfigKey('accessToken', undefined);
+    });
+
+    const tokenRejectedEmits = () =>
+      emitSpy.mock.calls.filter(
+        ([eventName]) => eventName === OAUTH_TOKEN_REJECTED_EVENT,
+      ).length;
+
+    it('emits token-rejected exactly once on 401 when universalBrokerGa is enabled', async () => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: true,
+        universalBrokerGa: true,
+      });
+
+      nock(brokerServerUrl)
+        .post(`/hidden/brokers/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(401, 'Unauthorized', { 'content-type': 'text/plain' });
+
+      const handler = createHandler();
+      await handler.sendData(
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: { test: 'data' },
+        },
+        streamingId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(tokenRejectedEmits()).toBe(1);
+    });
+
+    it('does NOT emit token-rejected on 200', async () => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: true,
+        universalBrokerGa: true,
+      });
+
+      nock(brokerServerUrl)
+        .post(`/hidden/brokers/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(200, 'OK');
+
+      const handler = createHandler();
+      await handler.sendData(
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: { test: 'data' },
+        },
+        streamingId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(tokenRejectedEmits()).toBe(0);
+    });
+
+    it('does NOT emit token-rejected on 403 (only 401 triggers refresh)', async () => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: true,
+        universalBrokerGa: true,
+      });
+
+      nock(brokerServerUrl)
+        .post(`/hidden/brokers/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(403, 'Forbidden', { 'content-type': 'text/plain' });
+
+      const handler = createHandler();
+      await handler.sendData(
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: { test: 'data' },
+        },
+        streamingId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(tokenRejectedEmits()).toBe(0);
+    });
+
+    it('does NOT emit token-rejected on 401 when universalBrokerGa is disabled', async () => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(401, 'Unauthorized', { 'content-type': 'text/plain' });
+
+      const handler = createHandler();
+      await handler.sendData(
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: { test: 'data' },
+        },
+        streamingId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(tokenRejectedEmits()).toBe(0);
+    });
   });
 
   describe('response errors', () => {

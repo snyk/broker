@@ -1,5 +1,7 @@
 import {
+  OAUTH_TOKEN_REJECTED_EVENT,
   fetchAndUpdateJwt,
+  oauthEvents,
   setfetchAndUpdateJwt,
   getAuthConfig,
   stopJwtRefresh,
@@ -44,6 +46,7 @@ describe('client/auth/oauth — JWT refresh observability', () => {
 
   afterEach(async () => {
     stopJwtRefresh();
+    oauthEvents.removeAllListeners(OAUTH_TOKEN_REJECTED_EVENT);
     nock.cleanAll();
     await new Promise((r) => setTimeout(r, 50));
     errorSpy.mockRestore();
@@ -95,7 +98,10 @@ describe('client/auth/oauth — JWT refresh observability', () => {
           capturedReqId = this.req.headers['snyk-request-id'];
           return [
             500,
-            JSON.stringify({ error: 'server_error', error_description: 'boom' }),
+            JSON.stringify({
+              error: 'server_error',
+              error_description: 'boom',
+            }),
           ];
         });
 
@@ -274,7 +280,9 @@ describe('client/auth/oauth — JWT refresh observability', () => {
         metricsClient,
       );
 
-      await waitFor(() => getAuthConfig().accessToken?.authHeader === 'Bearer first');
+      await waitFor(
+        () => getAuthConfig().accessToken?.authHeader === 'Bearer first',
+      );
 
       // Second chain: a fresh token. If the first chain's timer wasn't cancelled,
       // it would race here and also call /oauth2/token without a matching interceptor,
@@ -300,6 +308,211 @@ describe('client/auth/oauth — JWT refresh observability', () => {
       // The only failure metric we'd see is from a leaked first-chain timer hitting
       // an unmatched nock — so assert it stayed silent.
       expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+    });
+
+    describe('OAUTH_TOKEN_REJECTED_EVENT', () => {
+      it('triggers a fresh /oauth2/token request and updates the stored token', async () => {
+        const metricsClient = makeMockMetricsClient();
+
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'initial',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+        // Event-triggered refresh response (timer is huge so the scheduled chain won't fire).
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'forced',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+
+        await setfetchAndUpdateJwt(
+          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 60_000 },
+          'cid',
+          'csecret',
+          metricsClient,
+        );
+
+        expect(getAuthConfig().accessToken?.authHeader).toBe('Bearer initial');
+
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+
+        await waitFor(
+          () => getAuthConfig().accessToken?.authHeader === 'Bearer forced',
+        );
+
+        expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+      });
+
+      it('coalesces token-rejected with an in-flight timer-scheduled refresh', async () => {
+        const metricsClient = makeMockMetricsClient();
+
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'initial',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+
+        let releaseTimerRefresh!: () => void;
+        const timerRefreshGate = new Promise<void>((resolve) => {
+          releaseTimerRefresh = resolve;
+        });
+        let scheduledRefreshHits = 0;
+
+        // Single interceptor for the timer-driven refresh. If the event
+        // starts a parallel refresh, a second request would be unmatched.
+        nock(API_HOST)
+          .post('/oauth2/token')
+          .reply(async () => {
+            scheduledRefreshHits++;
+            await timerRefreshGate;
+            return [
+              200,
+              {
+                access_token: 'scheduled',
+                token_type: 'Bearer',
+                expires_in: 3600,
+                scope: 'broker',
+              },
+            ];
+          });
+
+        await setfetchAndUpdateJwt(
+          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 10 },
+          'cid',
+          'csecret',
+          metricsClient,
+        );
+
+        await waitFor(() => scheduledRefreshHits > 0);
+
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+        releaseTimerRefresh();
+
+        await waitFor(
+          () => getAuthConfig().accessToken?.authHeader === 'Bearer scheduled',
+        );
+
+        expect(scheduledRefreshHits).toBe(1);
+        expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+      });
+
+      it('coalesces a burst of emits into a single /oauth2/token request', async () => {
+        const metricsClient = makeMockMetricsClient();
+
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'initial',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+
+        // Only ONE event-triggered interceptor — if coalescing fails, additional
+        // emits would hit an unmatched nock and the failure metric would fire.
+        let forcedHits = 0;
+        nock(API_HOST)
+          .post('/oauth2/token')
+          .reply(() => {
+            forcedHits++;
+            return [
+              200,
+              {
+                access_token: 'forced-shared',
+                token_type: 'Bearer',
+                expires_in: 3600,
+                scope: 'broker',
+              },
+            ];
+          });
+
+        await setfetchAndUpdateJwt(
+          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 60_000 },
+          'cid',
+          'csecret',
+          metricsClient,
+        );
+
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+
+        await waitFor(
+          () =>
+            getAuthConfig().accessToken?.authHeader === 'Bearer forced-shared',
+        );
+
+        expect(forcedHits).toBe(1);
+        expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+      });
+
+      it('replaces the listener so a second setfetchAndUpdateJwt does not double-fire', async () => {
+        const metricsClient = makeMockMetricsClient();
+
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'first-init',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+        nock(API_HOST).post('/oauth2/token').reply(200, {
+          access_token: 'second-init',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          scope: 'broker',
+        });
+        // Only ONE event-triggered interceptor. If both old and new listeners
+        // fire, the second listener would hit an unmatched nock.
+        let forcedHits = 0;
+        nock(API_HOST)
+          .post('/oauth2/token')
+          .reply(() => {
+            forcedHits++;
+            return [
+              200,
+              {
+                access_token: 'after-event',
+                token_type: 'Bearer',
+                expires_in: 3600,
+                scope: 'broker',
+              },
+            ];
+          });
+
+        await setfetchAndUpdateJwt(
+          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 60_000 },
+          'cid',
+          'csecret',
+          metricsClient,
+        );
+        await waitFor(
+          () => getAuthConfig().accessToken?.authHeader === 'Bearer first-init',
+        );
+
+        await setfetchAndUpdateJwt(
+          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 60_000 },
+          'cid',
+          'csecret',
+          metricsClient,
+        );
+        await waitFor(
+          () =>
+            getAuthConfig().accessToken?.authHeader === 'Bearer second-init',
+        );
+
+        expect(oauthEvents.listenerCount(OAUTH_TOKEN_REJECTED_EVENT)).toBe(1);
+
+        oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+        await waitFor(
+          () =>
+            getAuthConfig().accessToken?.authHeader === 'Bearer after-event',
+        );
+
+        expect(forcedHits).toBe(1);
+        expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+      });
     });
 
     it('does not crash when metricsClient is omitted (backwards compatibility)', async () => {

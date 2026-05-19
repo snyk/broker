@@ -1,8 +1,12 @@
+import { EventEmitter } from 'events';
 import { v4 as uuid } from 'uuid';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
 import type { Client as MetricsClient } from '../metrics/client';
+
+export const OAUTH_TOKEN_REJECTED_EVENT = 'token-rejected';
+export const oauthEvents = new EventEmitter();
 
 interface tokenExchangeResponse {
   access_token: string;
@@ -71,12 +75,31 @@ export async function fetchAndUpdateJwt(
 const JWT_REFRESH_RETRY_ON_FAILURE_MS = 30_000;
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+let inflightRefresh: Promise<void> | null = null;
 
 export const stopJwtRefresh = () => {
   if (refreshTimer) {
     clearTimeout(refreshTimer);
     refreshTimer = null;
   }
+};
+
+const startRefreshJwt = (
+  clientConfig,
+  clientId,
+  clientSecret,
+  metricsClient?: MetricsClient,
+) => {
+  if (inflightRefresh) return;
+  stopJwtRefresh();
+  inflightRefresh = refreshJwt(
+    clientConfig,
+    clientId,
+    clientSecret,
+    metricsClient,
+  ).finally(() => {
+    inflightRefresh = null;
+  });
 };
 
 const refreshJwt = async (
@@ -111,7 +134,7 @@ const refreshJwt = async (
       clientConfig.AUTH_EXPIRATION_OVERRIDE ?? JWT_REFRESH_RETRY_ON_FAILURE_MS;
   }
   refreshTimer = setTimeout(() => {
-    refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
+    startRefreshJwt(clientConfig, clientId, clientSecret, metricsClient);
   }, nextDelayMs);
 };
 
@@ -122,6 +145,10 @@ export const setfetchAndUpdateJwt = async (
   metricsClient?: MetricsClient,
 ) => {
   stopJwtRefresh();
+  oauthEvents.removeAllListeners(OAUTH_TOKEN_REJECTED_EVENT);
+  oauthEvents.on(OAUTH_TOKEN_REJECTED_EVENT, () => {
+    startRefreshJwt(clientConfig, clientId, clientSecret, metricsClient);
+  });
   const requestId = uuid();
   const newJwt = await fetchAndUpdateJwt(
     clientConfig.apiHostname,
@@ -131,8 +158,8 @@ export const setfetchAndUpdateJwt = async (
   );
   logger.debug({ requestId }, 'Setting auth updater.');
   if (newJwt) {
-    refreshTimer = setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
+    refreshTimer = setTimeout(() => {
+      startRefreshJwt(clientConfig, clientId, clientSecret, metricsClient);
     }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
   }
 };

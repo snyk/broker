@@ -9,7 +9,11 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 
-import { getAuthConfig } from '../client/auth/oauth';
+import {
+  OAUTH_TOKEN_REJECTED_EVENT,
+  getAuthConfig,
+  oauthEvents,
+} from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import type { ExtendedLogContext } from '../common/types/log';
@@ -370,6 +374,16 @@ class BrokerServerPostResponseHandler {
               'Stream Response error in POST to Broker Server',
             );
           });
+          if (r.statusCode === 401 && this.#config.universalBrokerGa) {
+            logger.warn(
+              {
+                requestId: this.#requestId,
+                streamingId: this.#streamingId,
+              },
+              'Broker server rejected POST with 401; triggering OAuth token refresh',
+            );
+            oauthEvents.emit(OAUTH_TOKEN_REJECTED_EVENT);
+          }
           if (r.statusCode !== 200) {
             const body = await readBody(r).catch(() => '');
             logger.error(
