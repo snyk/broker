@@ -53,3 +53,28 @@ describe('serviceHandler — log levels (PR 2 contract)', () => {
     );
   });
 });
+
+describe('serviceHandler — log levels (PR 8 contract)', () => {
+  let warnSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('logs "Unknown service message received." at WARN, not ERROR, on an unknown command', async () => {
+    await serviceHandler({ url: '/unknown/command', headers: {} }, jest.fn());
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ command: '/unknown/command' }),
+      'Unknown service message received.',
+    );
+    expect(errorSpy).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'Unknown service message received.',
+    );
+  });
+});

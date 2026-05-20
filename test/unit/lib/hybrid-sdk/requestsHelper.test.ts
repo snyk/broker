@@ -13,7 +13,10 @@
 
 import { log as logger } from '../../../../lib/logs/logger';
 import { makeRequestToDownstream } from '../../../../lib/hybrid-sdk/http/request';
-import { makeLegacyRequest } from '../../../../lib/hybrid-sdk/requestsHelper';
+import {
+  legacyStreaming,
+  makeLegacyRequest,
+} from '../../../../lib/hybrid-sdk/requestsHelper';
 
 jest.mock('../../../../lib/logs/logger');
 jest.mock('../../../../lib/hybrid-sdk/http/request', () => ({
@@ -87,4 +90,29 @@ describe('makeLegacyRequest — SCM response status logging', () => {
       );
     },
   );
+});
+
+describe('legacyStreaming — log levels (PR 8 contract)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('logs the capability-fallback line at INFO, not WARN — it is a negotiation outcome, not a degraded state', () => {
+    // Chainable stub: every `.on(event, cb)` returns `rqst` so the stream
+    // wiring after the log call doesn't blow up.
+    const rqst: any = {};
+    rqst.on = jest.fn(() => rqst);
+    const io: any = { send: jest.fn() };
+
+    legacyStreaming(logContext, rqst, {}, io, 'stream-1');
+
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.anything(),
+      'Server did not advertise received-post-streams capability - falling back to legacy streaming.',
+    );
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'Server did not advertise received-post-streams capability - falling back to legacy streaming.',
+    );
+  });
 });

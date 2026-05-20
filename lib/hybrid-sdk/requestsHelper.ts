@@ -97,7 +97,7 @@ export const makeLegacyRequest = async (
 export const legacyStreaming = (logContext, rqst, config, io, streamingID) => {
   let prevPartialChunk;
   let isResponseJson;
-  logger.warn(
+  logger.info(
     logContext,
     'Server did not advertise received-post-streams capability - falling back to legacy streaming.',
   );
