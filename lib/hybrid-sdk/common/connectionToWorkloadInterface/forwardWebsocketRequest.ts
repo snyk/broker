@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+import { isUUID } from '../utils/uuid';
 import { RequestPayload } from '../types/http';
 import { LoadedClientOpts, LoadedServerOpts } from '../types/options';
 import { BrokerWorkload } from '../../../broker-workload/websocketRequests';
@@ -20,11 +22,17 @@ export const forwardWebSocketRequest = (
   // 4. Get response over HTTP conn (logged)
   // 5. Send response over websocket conn
 
-  return (connectionIdentifier) =>
+  return (connectionIdentifier: string) =>
     async (
       payload: RequestPayload,
       emit: (response: HybridResponse) => void,
     ) => {
+      // Old broker-clients on the inbound path may not set snyk-request-id.
+      payload.headers = payload.headers ?? {};
+      if (!isUUID(payload.headers['snyk-request-id'])) {
+        payload.headers['snyk-request-id'] = randomUUID();
+      }
+
       const workloadName = options.config.remoteWorkloadName;
       const workloadModulePath = options.config.remoteWorkloadModulePath;
       const workload = (await Workload.instantiate(

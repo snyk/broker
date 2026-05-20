@@ -99,15 +99,6 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
       ...correlationHeaders,
     };
 
-    if (!correlationHeaders.requestId) {
-      // This should be a warning but older clients won't send one
-      // TODO make this a warning when significant majority of clients are on latest version
-      logger.debug(
-        logContext,
-        'Header Snyk-Request-Id not included in headers passed through',
-      );
-    }
-
     const responseHandler = new HybridResponseHandler(
       {
         connectionIdentifier: this.connectionIdentifier,

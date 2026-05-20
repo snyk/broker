@@ -14,6 +14,9 @@ const mockFilterRequest = filterRequest as jest.MockedFunction<
   typeof filterRequest
 >;
 
+// snyk-request-id is pre-populated in fixtures to reflect production reality:
+// forwardWebSocketRequest guarantees the header is a valid UUID before
+// BrokerWorkload.handler is ever called.
 describe('BrokerWorkload', () => {
   const connectionIdentifier = 'test-connection-id';
   const options: BrokerWorkloadOptions = {
@@ -42,7 +45,10 @@ describe('BrokerWorkload', () => {
     const payload = {
       url: '/',
       method: 'GET',
-      headers: { 'x-snyk-broker-context-id': 'some-uuid' },
+      headers: {
+        'x-snyk-broker-context-id': 'some-uuid',
+        'snyk-request-id': '11111111-1111-4111-8111-111111111111',
+      },
       streamingID: 'stream-1',
     };
     const websocketHandler = jest.fn();
@@ -66,7 +72,7 @@ describe('BrokerWorkload', () => {
     const payload = {
       url: '/',
       method: 'GET',
-      headers: {},
+      headers: { 'snyk-request-id': '22222222-2222-4222-8222-222222222222' },
       streamingID: 'stream-1',
     };
     const websocketHandler = jest.fn();

@@ -28,9 +28,9 @@ export class HybridClientRequestHandler {
     this.res = res;
     this.options = getConfig();
 
-    // Propagate the resolved request ID into req.headers so it is included in
-    // the WS payload sent to the broker server (headers: this.req.headers).
-    this.req.headers['snyk-request-id'] ||= this.req.requestId;
+    // Surface the middleware-validated request ID in the WS payload.
+    // req.headers may still hold the unvalidated inbound value.
+    this.req.headers['snyk-request-id'] = this.req.requestId;
     this.responseWantedOverWs = req.headers['x-broker-ws-response']
       ? true
       : false;

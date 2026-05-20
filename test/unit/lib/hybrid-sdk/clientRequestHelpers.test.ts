@@ -40,3 +40,43 @@ describe('HybridClientRequestHandler — [HTTP Flow] Received request log level'
     );
   });
 });
+
+describe('HybridClientRequestHandler — req.requestId propagation into req.headers', () => {
+  const RESOLVED_UUID = '11111111-1111-4111-8111-111111111111';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('overwrites snyk-request-id header with req.requestId even when the inbound header was already populated with junk', () => {
+    // This pins the contract: the middleware-resolved req.requestId is
+    // authoritative. The inbound header may have carried junk that the
+    // middleware chose not to use (because it failed isUUID); we must not
+    // forward that junk into the WS payload.
+    const req: any = {
+      url: '/some/path',
+      method: 'GET',
+      headers: { 'snyk-request-id': 'not-a-uuid' },
+      requestId: RESOLVED_UUID,
+    };
+    const res: any = {};
+
+    new HybridClientRequestHandler(req, res);
+
+    expect(req.headers['snyk-request-id']).toBe(RESOLVED_UUID);
+  });
+
+  it('writes req.requestId into snyk-request-id header when no inbound header was present', () => {
+    const req: any = {
+      url: '/some/path',
+      method: 'GET',
+      headers: {},
+      requestId: RESOLVED_UUID,
+    };
+    const res: any = {};
+
+    new HybridClientRequestHandler(req, res);
+
+    expect(req.headers['snyk-request-id']).toBe(RESOLVED_UUID);
+  });
+});

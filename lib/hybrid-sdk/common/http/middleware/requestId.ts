@@ -45,8 +45,16 @@ export const setRequestIdHeader = (
 
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.requestId =
-        incomingHeaders.map((h) => req.header(h)).find(isUUID) ?? randomUUID();
+      const inherited = incomingHeaders.map((h) => req.header(h)).find(isUUID);
+      if (inherited) {
+        req.requestId = inherited;
+      } else {
+        req.requestId = randomUUID();
+        logger.debug(
+          { method: req.method, url: req.url },
+          'No valid request ID in inbound headers — new request ID generated',
+        );
+      }
       res.setHeader(responseHeader, req.requestId);
     } catch (error) {
       // Should never throw on Node 20+ — a failure here indicates a broken

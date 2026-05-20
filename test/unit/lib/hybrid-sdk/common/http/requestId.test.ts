@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { setRequestIdHeader } from '../../../../../../lib/hybrid-sdk/common/http/middleware/requestId';
 import { isUUID } from '../../../../../../lib/hybrid-sdk/common/utils/uuid';
+import { log as logger } from '../../../../../../lib/logs/logger';
 
 const setupApp = (opts?: Parameters<typeof setRequestIdHeader>[0]) => {
   const app = express();
@@ -123,6 +124,39 @@ describe('setRequestIdHeader middleware', () => {
       .set('x-only-this', customUuid);
 
     expect(res.text).toEqual(customUuid);
+  });
+
+  describe('synthesis logging', () => {
+    it('logs at debug level when no candidate headers are present', async () => {
+      const debugSpy = jest.spyOn(logger, 'debug');
+
+      await request(setupApp()).get('/test-path');
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'GET', url: '/test-path' }),
+        'No valid request ID in inbound headers — new request ID generated',
+      );
+    });
+
+    it('logs at debug level when all candidate headers contain invalid UUIDs', async () => {
+      const debugSpy = jest.spyOn(logger, 'debug');
+
+      await request(setupApp()).get('/').set('snyk-request-id', 'not-a-uuid');
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'GET', url: '/' }),
+        'No valid request ID in inbound headers — new request ID generated',
+      );
+    });
+
+    it('does not log when a valid UUID is resolved from an inbound header', async () => {
+      const debugSpy = jest.spyOn(logger, 'debug');
+      const validUuid = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+      await request(setupApp()).get('/').set('snyk-request-id', validUuid);
+
+      expect(debugSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('forwards the error to Express and logs at error level when randomUUID throws', async () => {
