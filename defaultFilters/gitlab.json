@@ -1713,6 +1713,12 @@
         "method": "GET",
         "path": "/api/v4/projects/:project/repository/compare",
         "origin": "https://${GITLAB}"
+      },
+      {
+        "//": "used to proxy GraphQL requests to GitLab",
+        "method": "POST",
+        "path": "/api/graphql",
+        "origin": "https://${GITLAB}"
       }
     ]
   }
