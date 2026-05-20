@@ -551,7 +551,7 @@ describe('Plugin Manager', () => {
   });
 });
 
-describe('Plugin Manager — log levels (PR 2 contract)', () => {
+describe('Plugin Manager — log levels', () => {
   const pluginsFolderPath = `${findProjectRoot(
     __dirname,
   )}/test/fixtures/plugins`;
@@ -604,5 +604,96 @@ describe('Plugin Manager', () => {
     } catch (err) {
       expect(err).not.toBeNull();
     }
+  });
+});
+
+describe('loadPlugins — rethrow preservation', () => {
+  const pluginsFolderPath = `${findProjectRoot(
+    __dirname,
+  )}/test/fixtures/plugins`;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const fsPromises = require('fs/promises');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('preserves the original Error instance, message, and code on rethrow', async () => {
+    const original = new Error('EACCES /plugins') as Error & {
+      code?: string;
+    };
+    original.code = 'EACCES';
+    jest.spyOn(fsPromises, 'readdir').mockRejectedValue(original);
+
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy'],
+        connections: { 'my connection': { type: 'dummy' } },
+      },
+    };
+
+    let caught: unknown;
+    try {
+      await loadPlugins(pluginsFolderPath, clientOpts);
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBe(original);
+    expect((caught as Error).message).toContain('Error loading plugins from');
+    expect((caught as Error).message).toContain('EACCES /plugins');
+    expect((caught as any).code).toBe('EACCES');
+  });
+
+  it('wraps a non-Error throwable in an Error, preserving the original via cause', async () => {
+    const original = 'not an Error instance';
+    jest.spyOn(fsPromises, 'readdir').mockRejectedValue(original);
+
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy'],
+        connections: { 'my connection': { type: 'dummy' } },
+      },
+    };
+
+    let caught: unknown;
+    try {
+      await loadPlugins(pluginsFolderPath, clientOpts);
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toContain('Error loading plugins from');
+    expect((caught as Error).message).toContain('not an Error instance');
+    expect((caught as Error).cause).toBe(original);
+  });
+
+  it('does not log at the local catch site (upstream catch logs structurally)', async () => {
+    const original = new Error('EACCES');
+    jest.spyOn(fsPromises, 'readdir').mockRejectedValue(original);
+    const errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy'],
+        connections: { 'my connection': { type: 'dummy' } },
+      },
+    };
+
+    try {
+      await loadPlugins(pluginsFolderPath, clientOpts);
+    } catch {
+      // expected
+    }
+
+    expect(errorSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.anything() }),
+      expect.stringContaining('Error loading plugins from'),
+    );
   });
 });

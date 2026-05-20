@@ -25,8 +25,13 @@ export async function validateBrokerServerUrl(
       output: 'config check: ok',
     } satisfies CheckResult;
   } catch (error) {
-    const errorMessage = `Error executing check with checkId ${checkOptions.id}`;
-    logger.debug({ error }, errorMessage);
-    throw new Error(errorMessage);
+    if (error instanceof Error) {
+      error.message = `Error executing check with checkId ${checkOptions.id}: ${error.message}`;
+      throw error;
+    }
+    throw new Error(
+      `Error executing check with checkId ${checkOptions.id}: ${String(error)}`,
+      { cause: error },
+    );
   }
 }

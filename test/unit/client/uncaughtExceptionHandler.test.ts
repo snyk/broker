@@ -1,7 +1,7 @@
 import { log as logger } from '../../../lib/logs/logger';
 import { handleUncaughtException } from '../../../lib/hybrid-sdk/client/index';
 
-describe('handleUncaughtException — log levels (PR 8 contract)', () => {
+describe('handleUncaughtException — log levels', () => {
   let warnSpy: jest.SpyInstance;
   let errorSpy: jest.SpyInstance;
 

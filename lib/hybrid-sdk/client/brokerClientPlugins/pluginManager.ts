@@ -9,6 +9,18 @@ import {
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { getConfigForIdentifier } from '../../common/config/universal';
 
+/**
+ * Loads broker plugins from the given folder into clientOpts.config.plugins.
+ *
+ * On failure, throws — either the original Error (with its message prefixed
+ * by "Error loading plugins from {path}: ") or, if the underlying throwable
+ * was not an Error, a fresh Error with the original preserved via
+ * `Error.cause`. The local catch deliberately does NOT log — callers must
+ * structurally log the thrown err so its stack, code, and cause survive
+ * (e.g. `logger.warn({ err }, '...')`, not `logger.warn('...: ' + err)`).
+ * The only caller today (lib/hybrid-sdk/client/index.ts main()) does this
+ * correctly; any new caller must follow the same shape.
+ */
 export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
   clientOpts.config['plugins'] = new Map<string, unknown>();
   clientOpts.config.supportedBrokerTypes.forEach((type) => {
@@ -56,9 +68,14 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
     }
     return clientOpts.config['plugins'];
   } catch (err) {
-    const errMsg = `Error loading plugins from ${pluginsFolderPath}`;
-    logger.error({ err }, `Error loading plugins from ${pluginsFolderPath}`);
-    throw new Error(errMsg);
+    if (err instanceof Error) {
+      err.message = `Error loading plugins from ${pluginsFolderPath}: ${err.message}`;
+      throw err;
+    }
+    throw new Error(
+      `Error loading plugins from ${pluginsFolderPath}: ${String(err)}`,
+      { cause: err },
+    );
   }
 };
 

@@ -40,7 +40,7 @@ function makeConfig(overrides: Record<string, any> = {}) {
   } as any;
 }
 
-describe('injectRulesAtRuntime — log levels (PR 2 contract)', () => {
+describe('injectRulesAtRuntime — log levels', () => {
   let infoSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
   let warnSpy: jest.SpyInstance;

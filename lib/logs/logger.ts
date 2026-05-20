@@ -202,20 +202,38 @@ function sanitiseHeaders(headers) {
   return sanitiseObject(hdrs);
 }
 
-function serialiseError(error) {
+// Exported for unit testing. The bunyan serializers below pass this by
+// reference, so changing the export shape is observable in log output.
+//
+// Circular references in `cause` or any custom property copied below are
+// safe at the log-emission boundary: bunyan stringifies records via
+// `safe-json-stringify` (with a `safeCycles` fallback), which converts
+// any cycle to a "[Circular]" marker rather than throwing. So we copy
+// values by reference here without defensive cloning.
+export function serialiseError(
+  error: unknown,
+): Record<string, unknown> | undefined {
   if (!(error instanceof Error)) {
     return;
   }
 
   // part of Error.prototype
-  const result = {
+  const result: Record<string, unknown> = {
     name: error.name,
     message: error.message,
     stack: error.stack,
   };
 
   // collect any other fields that may have been added to the error
-  Object.keys(error).forEach((key) => (result[key] = error[key]));
+  Object.keys(error).forEach((key) => (result[key] = (error as any)[key]));
+
+  // Node sets the ES2022 `cause` property as non-enumerable, so the
+  // Object.keys() pass above doesn't catch it. Copy it explicitly so
+  // catches that wrap a non-Error throwable via `new Error(msg, { cause })`
+  // still surface the original value in the log record.
+  if ('cause' in error) {
+    result.cause = (error as { cause?: unknown }).cause;
+  }
 
   return result;
 }

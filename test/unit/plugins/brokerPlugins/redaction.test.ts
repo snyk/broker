@@ -102,7 +102,7 @@ describe('plugin call-site redaction', () => {
 
   it('abstractBrokerPlugin.preRequest does not leak credentials at trace level', async () => {
     // Container-registry plugin does not override preRequest, so it inherits
-    // the abstract default — the call site PR 4 patched.
+    // the abstract default — that's the call site this test exercises.
     const plugin = new ContainerRegistryPlugin({});
     await plugin.preRequest(
       crConnectionConfig,

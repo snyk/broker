@@ -1,6 +1,7 @@
 import { aConfig } from '../../../../helpers/test-factories';
 import { validateBrokerClientUrl } from '../../../../../lib/hybrid-sdk/client/checks/config/brokerClientUrlCheck';
 import { log as logger } from '../../../../../lib/logs/logger';
+import * as urlValidator from '../../../../../lib/hybrid-sdk/common/utils/urlValidator';
 const nock = require('nock');
 
 describe('client/checks/config', () => {
@@ -217,6 +218,33 @@ describe('client/checks/config', () => {
           msg.startsWith('Failed to reach the BROKER_CLIENT_URL'),
       );
       expect(probeDebug).toBeUndefined();
+    });
+  });
+
+  describe('validateBrokerClientUrl() — rethrow preservation', () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it('wraps a non-Error throwable in an Error, preserving the original via cause', async () => {
+      const original = 'not an Error instance';
+      jest.spyOn(urlValidator, 'isHttpUrl').mockImplementation(() => {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw original;
+      });
+      const config = aConfig({
+        BROKER_CLIENT_URL: 'https://broker-client:8000',
+      });
+
+      let caught: unknown;
+      try {
+        await validateBrokerClientUrl({ id: 'check-cli', name: 'X' }, config);
+      } catch (e) {
+        caught = e;
+      }
+
+      expect(caught).toBeInstanceOf(Error);
+      expect((caught as Error).message).toContain('check-cli');
+      expect((caught as Error).message).toContain('not an Error instance');
+      expect((caught as Error).cause).toBe(original);
     });
   });
 });
