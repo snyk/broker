@@ -8,6 +8,7 @@ import {
   findProjectRoot,
   setConfig,
 } from '../../../lib/hybrid-sdk/common/config/config';
+import { log as logger } from '../../../lib/logs/logger';
 import {
   getPluginConfigParamByConnectionKey,
   getPluginConfigParamByConnectionKeyAndContextId,
@@ -547,6 +548,40 @@ describe('Plugin Manager', () => {
       // we should not error
       expect(err).toBeNull();
     }
+  });
+});
+
+describe('Plugin Manager — log levels (PR 2 contract)', () => {
+  const pluginsFolderPath = `${findProjectRoot(
+    __dirname,
+  )}/test/fixtures/plugins`;
+  let infoSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
+    debugSpy = jest.spyOn(logger, 'debug').mockImplementation(() => {});
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('logs "Loading plugin X" at INFO, not DEBUG', async () => {
+    const clientOpts = {
+      config: {
+        universalBrokerEnabled: true,
+        supportedBrokerTypes: ['dummy'],
+        connections: { 'my connection': { type: 'dummy' } },
+      },
+    };
+    await loadPlugins(pluginsFolderPath, clientOpts);
+
+    expect(infoSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringMatching(/^Loading plugin /),
+    );
+    expect(debugSpy).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringMatching(/^Loading plugin /),
+    );
   });
 });
 

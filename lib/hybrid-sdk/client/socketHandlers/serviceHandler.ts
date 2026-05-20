@@ -23,7 +23,7 @@ export const serviceHandler = async (msg, cb) => {
   } else {
     switch (command) {
       case '/filters/reload':
-        logger.debug({}, 'Reloading filters.');
+        logger.info({}, 'Reloading filters.');
         cb({
           status: 200,
           headers: { requestId },
@@ -31,7 +31,7 @@ export const serviceHandler = async (msg, cb) => {
         });
         break;
       case '/config/reload':
-        logger.debug({}, 'Reloading config.');
+        logger.info({}, 'Reloading config.');
         if (clientOptions.config?.universalBrokerEnabled) {
           cb({
             status: 200,

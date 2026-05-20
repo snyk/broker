@@ -28,7 +28,7 @@ function nestedCopy(array) {
   return JSON.parse(JSON.stringify(array));
 }
 
-function injectRulesAtRuntime(
+export function injectRulesAtRuntime(
   filters: FiltersType,
   config: CONFIGURATION,
   ruleType?,
@@ -259,7 +259,7 @@ function injectRulesAtRuntime(
     process.env.ACCEPT_ESSENTIALS ||
     config.ACCEPT_ESSENTIALS;
   if (ACCEPT_APPRISK && ACCEPT_APPRISK != 'false') {
-    logger.debug(
+    logger.info(
       { accept: ACCEPT_APPRISK },
       `Injecting Accept rules for AppRisk`,
     );
@@ -289,7 +289,7 @@ function injectRulesAtRuntime(
         return !appRiskRulesMethodPattern.includes(`${x.method}|${x.path}`);
       });
       if (possibleOverlappingRules.length > 0) {
-        logger.debug(
+        logger.warn(
           { possibleOverlappingRules },
           `Caution, possible overlapping rules with apprisk rules extension.`,
         );
@@ -301,7 +301,7 @@ function injectRulesAtRuntime(
   const ACCEPT_CUSTOM_PR_TEMPLATES =
     process.env.ACCEPT_CUSTOM_PR_TEMPLATES || config.ACCEPT_CUSTOM_PR_TEMPLATES;
   if (ACCEPT_CUSTOM_PR_TEMPLATES && ACCEPT_CUSTOM_PR_TEMPLATES != 'false') {
-    logger.debug(
+    logger.info(
       { accept: ACCEPT_CUSTOM_PR_TEMPLATES },
       `Injecting accept rules for custom PR templates.`,
     );
@@ -335,7 +335,7 @@ function injectRulesAtRuntime(
         );
       });
       if (possibleOverlappingRules.length > 0) {
-        logger.debug(
+        logger.warn(
           { possibleOverlappingRules },
           `Caution, possible overlapping rules with custom PR templates.`,
         );
