@@ -5,7 +5,8 @@ import { isJson } from '../../common/utils/json';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
-import { getAccessToken } from '../auth/oauth';
+import { getAccessToken, invalidateToken } from '../auth/oauth';
+import { log as logger } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 
 export const retrieveConnectionsForDeployment = async (
@@ -24,7 +25,16 @@ export const retrieveConnectionsForDeployment = async (
     },
     method: 'GET',
   };
-  const connectionsResponse = await makeRequestToDownstream(request);
+  let connectionsResponse = await makeRequestToDownstream(request);
+  if (connectionsResponse.statusCode === 401) {
+    logger.warn(
+      {},
+      'Remote config retrieval returned 401; invalidating cached token and retrying once.',
+    );
+    invalidateToken();
+    request.headers['Authorization'] = await getAccessToken();
+    connectionsResponse = await makeRequestToDownstream(request);
+  }
   if (connectionsResponse.statusCode != 200) {
     if (connectionsResponse.statusCode == 404) {
       throw new Error(

@@ -8,6 +8,7 @@ import {
 } from '../dispatcher-service';
 import {
   getAccessToken,
+  invalidateToken,
   isOAuthClientInitialized,
 } from '../../auth/oauth';
 import { PostFilterPreparedRequest } from '../../../../broker-workload/prepareRequest';
@@ -48,7 +49,16 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
           },
         }),
       };
-      const response = await makeRequestToDownstream(req);
+      let response = await makeRequestToDownstream(req);
+      if (response.statusCode === 401 && isOAuthClientInitialized()) {
+        logger.debug(
+          {},
+          'Dispatcher createConnection returned 401; invalidating cached token and retrying once.',
+        );
+        invalidateToken();
+        req.headers['Authorization'] = await getAccessToken();
+        response = await makeRequestToDownstream(req);
+      }
       const apiResponse = JSON.parse(response.body).data;
       if (!apiResponse?.attributes) {
         logger.trace(

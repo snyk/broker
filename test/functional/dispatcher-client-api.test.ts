@@ -1,10 +1,12 @@
 import { MockServer } from 'jest-mock-server';
 jest.mock('../../lib/hybrid-sdk/client/auth/oauth', () => ({
   getAccessToken: jest.fn().mockResolvedValue('Bearer dummy'),
+  invalidateToken: jest.fn(),
   initOAuthClient: jest.fn(),
   isOAuthClientInitialized: jest.fn().mockReturnValue(true),
 }));
 import { HttpDispatcherServiceClient } from '../../lib/hybrid-sdk/client/dispatcher/client/api';
+import { invalidateToken } from '../../lib/hybrid-sdk/client/auth/oauth';
 
 describe('Broker Dispatcher API client', () => {
   const server = new MockServer();
@@ -73,5 +75,53 @@ describe('Broker Dispatcher API client', () => {
     );
 
     expect(serverId).toEqual('server-id-from-dispatcher');
+  });
+
+  it('retries once on 401, invalidates token, and succeeds on retry', async () => {
+    (invalidateToken as jest.Mock).mockClear();
+
+    server
+      .post(`/hidden/broker/${hashedToken}/connections/1`)
+      .mockImplementationOnce((ctx) => {
+        ctx.status = 401;
+      })
+      .mockImplementationOnce((ctx) => {
+        ctx.status = 201;
+        ctx.body = {
+          data: { attributes: { server_id: 'server-id-after-retry' } },
+        };
+      });
+
+    const client = new HttpDispatcherServiceClient(dispatcherServerBaseUrl);
+
+    const serverId = await client.createConnection(
+      { hashedBrokerToken: hashedToken, brokerClientId: '1' },
+      { deployment_location: 'test', broker_token_first_char: 'a' },
+      config,
+    );
+
+    expect(serverId).toEqual('server-id-after-retry');
+    expect(invalidateToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws when 401 retry also returns 401', async () => {
+    (invalidateToken as jest.Mock).mockClear();
+
+    server
+      .post(`/hidden/broker/${hashedToken}/connections/1`)
+      .mockImplementation((ctx) => {
+        ctx.status = 401;
+      });
+
+    const client = new HttpDispatcherServiceClient(dispatcherServerBaseUrl);
+
+    await expect(
+      client.createConnection(
+        { hashedBrokerToken: hashedToken, brokerClientId: '1' },
+        { deployment_location: 'test', broker_token_first_char: 'a' },
+        config,
+      ),
+    ).rejects.toThrow('Error getting connection allocation.');
+    expect(invalidateToken).toHaveBeenCalledTimes(1);
   });
 });

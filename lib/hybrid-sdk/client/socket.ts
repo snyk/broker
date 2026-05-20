@@ -22,6 +22,7 @@ import { maskToken } from '../common/utils/token';
 import {
   getAccessToken,
   getCachedAccessToken,
+  invalidateToken,
   isOAuthClientInitialized,
 } from './auth/oauth';
 import { Client, NoopClient } from './metrics';
@@ -218,24 +219,39 @@ export const createWebSocket = (
         role: identifyingMetadata.role,
       };
 
-      websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
+      const renewOnce = async () =>
+        renewBrokerServerConnection(
+          {
+            connectionIdentifier: identifyingMetadata.identifier!,
+            brokerClientId: identifyingMetadata.clientId,
+            authorization: await getAccessToken(),
+            role: identifyingMetadata.role,
+            serverId: serverId,
+          },
+          clientOpts.config,
+        );
 
       logger.debug(commonLogFields, 'Renewing auth.');
-      const renewResponse = await renewBrokerServerConnection(
-        {
-          connectionIdentifier: identifyingMetadata.identifier!,
-          brokerClientId: identifyingMetadata.clientId,
-          authorization: await getAccessToken(),
-          role: identifyingMetadata.role,
-          serverId: serverId,
-        },
-        clientOpts.config,
-      );
+      let renewResponse = await renewOnce();
+
+      if (renewResponse.statusCode === 401) {
+        logger.debug(
+          commonLogFields,
+          'Auth renewal returned 401; invalidating cached token and retrying once.',
+        );
+        invalidateToken();
+        renewResponse = await renewOnce();
+      }
 
       const statusClass = Math.floor((renewResponse.statusCode ?? 0) / 100);
       switch (statusClass) {
         case 2: // 2XX - success
           logger.debug(commonLogFields, 'Auth renewed.');
+          // Re-read extraHeaders after renewal: the 401-retry path may have
+          // invalidated and refreshed the cached token, and the next reconnect
+          // needs to pick that up via the synchronous cache read.
+          websocket.transport.extraHeaders =
+            buildExtraHeaders(currentRequestId);
           break;
         case 4: // 4XX - client error - unrecoverable
           logger.fatal(

@@ -12,8 +12,11 @@ import nock from 'nock';
 
 jest.mock('../../lib/hybrid-sdk/client/auth/oauth', () => ({
   getAccessToken: jest.fn().mockResolvedValue('Bearer dummy'),
+  invalidateToken: jest.fn(),
   initOAuthClient: jest.fn(),
 }));
+
+import { invalidateToken } from '../../lib/hybrid-sdk/client/auth/oauth';
 
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 
@@ -206,6 +209,71 @@ describe('Remote config helpers', () => {
     ).rejects.toThrow(
       '500-InternalServerError:An internal server error occurred',
     );
+  });
+
+  it('retries once on 401, invalidates token, and succeeds on retry', async () => {
+    (invalidateToken as jest.Mock).mockClear();
+
+    nock('http://restapihostname')
+      .get(
+        `/hidden/brokers/deployments/67894/connections?version=2024-04-02~experimental`,
+      )
+      .reply(401, { error: 'unauthorized', error_description: 'stale' })
+      .get(
+        `/hidden/brokers/deployments/67894/connections?version=2024-04-02~experimental`,
+      )
+      .reply(200, { data: [] });
+
+    await loadBrokerConfig();
+    const config = getConfig() as CONFIGURATION;
+    config.deploymentId = '67894';
+    config.apiVersion = '2024-04-02~experimental';
+    config.API_BASE_URL = 'http://restapihostname';
+
+    const clientOps: ClientOpts = {
+      port: 0,
+      config,
+      filters: { public: [], private: [] },
+    };
+
+    await expect(
+      retrieveConnectionsForDeployment(
+        clientOps,
+        universalFilePathLocationForTests,
+      ),
+    ).resolves.toBeUndefined();
+    expect(invalidateToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws when 401 retry also returns 401', async () => {
+    (invalidateToken as jest.Mock).mockClear();
+
+    nock('http://restapihostname')
+      .get(
+        `/hidden/brokers/deployments/67895/connections?version=2024-04-02~experimental`,
+      )
+      .twice()
+      .reply(401, { error: 'unauthorized', error_description: 'still stale' });
+
+    await loadBrokerConfig();
+    const config = getConfig() as CONFIGURATION;
+    config.deploymentId = '67895';
+    config.apiVersion = '2024-04-02~experimental';
+    config.API_BASE_URL = 'http://restapihostname';
+
+    const clientOps: ClientOpts = {
+      port: 0,
+      config,
+      filters: { public: [], private: [] },
+    };
+
+    await expect(
+      retrieveConnectionsForDeployment(
+        clientOps,
+        universalFilePathLocationForTests,
+      ),
+    ).rejects.toThrow('401-unauthorized:still stale');
+    expect(invalidateToken).toHaveBeenCalledTimes(1);
   });
 
   it('Should throw error with status code only when non-404 error occurs with invalid JSON body', async () => {

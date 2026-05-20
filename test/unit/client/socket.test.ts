@@ -1,6 +1,7 @@
 jest.mock('../../../lib/hybrid-sdk/client/auth/oauth', () => ({
   getAccessToken: jest.fn().mockResolvedValue('Bearer test-token'),
   getCachedAccessToken: jest.fn().mockReturnValue('Bearer test-token'),
+  invalidateToken: jest.fn(),
   initOAuthClient: jest.fn(),
   isOAuthClientInitialized: jest.fn().mockReturnValue(true),
 }));
@@ -102,6 +103,7 @@ jest.useFakeTimers();
 
 describe('createWebSocket - renew auth behaviour', () => {
   let mockRenewBrokerServerConnection: jest.SpyInstance;
+  let mockInvalidateToken: jest.SpyInstance;
   let mockProcessExit: jest.SpyInstance;
   let mockLoggerFatal: jest.SpyInstance;
 
@@ -166,6 +168,9 @@ describe('createWebSocket - renew auth behaviour', () => {
       headers: {},
       body: '{}',
     });
+
+    mockInvalidateToken =
+      require('../../../lib/hybrid-sdk/client/auth/oauth').invalidateToken;
 
     mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       return undefined as never;
@@ -270,45 +275,89 @@ describe('createWebSocket - renew auth behaviour', () => {
   });
 
   describe('Client error case (4XX status)', () => {
-    it.each([
-      { statusCode: 401, description: '401 Unauthorized' },
-      { statusCode: 403, description: '403 Forbidden' },
-    ])(
-      'should log fatal and exit process on $description',
-      async ({ statusCode }) => {
-        const clientOpts = createMockClientOpts();
-        const identifyingMetadata = createMockIdentifyingMetadata();
+    it('should log fatal and exit process on 403 Forbidden (no retry)', async () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
 
-        const ws = createWebSocket(
-          clientOpts,
-          identifyingMetadata,
-          Role.primary,
-        );
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
 
-        mockRenewBrokerServerConnection.mockResolvedValue({
-          statusCode,
-          headers: {},
-          body: '{}',
-        });
+      mockRenewBrokerServerConnection.mockResolvedValue({
+        statusCode: 403,
+        headers: {},
+        body: '{}',
+      });
 
-        const expectedTimeoutMs = 10 * 60 * 1000;
+      const expectedTimeoutMs = 10 * 60 * 1000;
 
-        await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
-        clearTimeout(ws.timeoutHandlerId);
+      clearTimeout(ws.timeoutHandlerId);
 
-        expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
-        expect(mockLoggerFatal).toHaveBeenCalledWith(
-          expect.objectContaining({
-            connection: expect.any(String),
-            role: Role.primary,
-            responseCode: statusCode,
-          }),
-          'Failed to renew connection due to a client error. Exiting...',
-        );
-        expect(mockProcessExit).toHaveBeenCalledWith(1);
-      },
-    );
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateToken).not.toHaveBeenCalled();
+      expect(mockLoggerFatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connection: expect.any(String),
+          role: Role.primary,
+          responseCode: 403,
+        }),
+        'Failed to renew connection due to a client error. Exiting...',
+      );
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
+
+    it('should retry once on 401 and succeed without exiting', async () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      mockRenewBrokerServerConnection
+        .mockResolvedValueOnce({ statusCode: 401, headers: {}, body: '{}' })
+        .mockResolvedValueOnce({ statusCode: 200, headers: {}, body: '{}' });
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      clearTimeout(ws.timeoutHandlerId);
+
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateToken).toHaveBeenCalledTimes(1);
+      expect(mockLoggerFatal).not.toHaveBeenCalled();
+      expect(mockProcessExit).not.toHaveBeenCalled();
+    });
+
+    it('should log fatal and exit when 401 retry also returns 401', async () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      mockRenewBrokerServerConnection.mockResolvedValue({
+        statusCode: 401,
+        headers: {},
+        body: '{}',
+      });
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      clearTimeout(ws.timeoutHandlerId);
+
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateToken).toHaveBeenCalledTimes(1);
+      expect(mockLoggerFatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connection: expect.any(String),
+          role: Role.primary,
+          responseCode: 401,
+        }),
+        'Failed to renew connection due to a client error. Exiting...',
+      );
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
   });
 
   describe('reconnect scheduled', () => {
