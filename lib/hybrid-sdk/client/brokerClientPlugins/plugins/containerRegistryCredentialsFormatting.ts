@@ -1,5 +1,6 @@
 import BrokerPlugin from '../abstractBrokerPlugin';
 import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
+import { redactConfig } from '../../../../logs/redact';
 
 export class Plugin extends BrokerPlugin {
   pluginCode = 'CONTAINER_REGISTRY_CREDENTIALS_FORMAT_PLUGIN';
@@ -44,14 +45,16 @@ export class Plugin extends BrokerPlugin {
       );
     }
 
-    this.logger.trace(
-      {
-        plugin: this.pluginCode,
-        config: connectionConfig,
-        pluginConfig: pluginConfig,
-      },
-      'Connection Config passed to the plugin',
-    );
+    if (this.logger.trace()) {
+      this.logger.trace(
+        {
+          plugin: this.pluginCode,
+          config: redactConfig(connectionConfig),
+          pluginConfig: redactConfig(pluginConfig),
+        },
+        'Connection Config passed to the plugin',
+      );
+    }
 
     const credentials = Buffer.from(
       this._getCredentials(connectionConfig),
@@ -77,7 +80,13 @@ export class Plugin extends BrokerPlugin {
     connectionConfiguration: Record<string, any>,
     pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
-    this.logger.debug({ contextId, connectionConfiguration, pluginConfig });
+    if (this.logger.debug()) {
+      this.logger.debug({
+        contextId,
+        connectionConfiguration: redactConfig(connectionConfiguration),
+        pluginConfig: redactConfig(pluginConfig),
+      });
+    }
     if (
       !connectionConfiguration.type ||
       !this.applicableBrokerTypes.includes(connectionConfiguration.type)
