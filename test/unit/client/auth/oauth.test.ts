@@ -1,7 +1,9 @@
 import {
-  fetchAndUpdateJwt,
-  setfetchAndUpdateJwt,
-  getAuthConfig,
+  getAccessToken,
+  getCachedAccessToken,
+  initOAuthClient,
+  invalidateToken,
+  isOAuthClientInitialized,
 } from '../../../../lib/hybrid-sdk/client/auth/oauth';
 import { log as logger } from '../../../../lib/logs/logger';
 import type { Client as MetricsClient } from '../../../../lib/hybrid-sdk/client/metrics/client';
@@ -9,6 +11,7 @@ import type { Client as MetricsClient } from '../../../../lib/hybrid-sdk/client/
 const nock = require('nock');
 
 const API_HOST = 'https://api.example.test';
+const TOKEN_PATH = '/oauth2/token';
 
 function makeMockMetricsClient(): jest.Mocked<MetricsClient> {
   return {
@@ -33,7 +36,23 @@ function makeMockMetricsClient(): jest.Mocked<MetricsClient> {
   } as unknown as jest.Mocked<MetricsClient>;
 }
 
-describe('client/auth/oauth — JWT refresh observability', () => {
+function tokenResponse(
+  overrides: Partial<{
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+  }> = {},
+) {
+  return {
+    access_token: 'tok-default',
+    token_type: 'Bearer',
+    expires_in: 3600,
+    scope: 'broker',
+    ...overrides,
+  };
+}
+
+describe('client/auth/oauth (simple-oauth2)', () => {
   let errorSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -41,172 +60,189 @@ describe('client/auth/oauth — JWT refresh observability', () => {
     errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => logger);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     nock.cleanAll();
-    await new Promise((r) => setTimeout(r, 50));
     errorSpy.mockRestore();
   });
 
-  async function waitFor(
-    predicate: () => boolean,
-    timeoutMs = 2000,
-    intervalMs = 10,
-  ): Promise<void> {
-    const start = Date.now();
-    while (!predicate()) {
-      if (Date.now() - start > timeoutMs) {
-        throw new Error(`waitFor: timed out after ${timeoutMs}ms`);
-      }
-      await new Promise((r) => setTimeout(r, intervalMs));
-    }
-  }
+  it('fetches a token on first call and returns "<type> <token>"', async () => {
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+    });
+    expect(isOAuthClientInitialized()).toBe(true);
 
-  describe('fetchAndUpdateJwt', () => {
-    it('logs failures with a structured {err} field (not a template string)', async () => {
-      nock(API_HOST)
-        .post('/oauth2/token')
-        .reply(
-          500,
-          JSON.stringify({
-            error: 'server_error',
-            error_description: 'kaboom',
-          }),
-        );
+    const scope = nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'first' }));
 
-      const result = await fetchAndUpdateJwt(API_HOST, 'cid', 'csecret');
+    const header = await getAccessToken();
 
-      expect(result).toBeUndefined();
-      expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(header).toBe('Bearer first');
+    expect(scope.isDone()).toBe(true);
+  });
 
-      const [fields, message] = errorSpy.mock.calls[0];
-      expect(typeof fields).toBe('object');
-      expect(fields).toHaveProperty('err');
-      expect(fields.err).toBeInstanceOf(Error);
-      expect(message).toBe('Unable to retrieve JWT');
+  it('returns the cached token synchronously via getCachedAccessToken', async () => {
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
     });
 
-    it('returns the parsed token on success', async () => {
-      nock(API_HOST).post('/oauth2/token').reply(200, {
-        access_token: 'tok-123',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        scope: 'broker',
-      });
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'sync-cached' }));
 
-      const result = await fetchAndUpdateJwt(API_HOST, 'cid', 'csecret');
+    await getAccessToken();
 
-      expect(result).toEqual({
-        expiresIn: 3600,
-        authHeader: 'Bearer tok-123',
-      });
-      expect(getAuthConfig().accessToken).toEqual(result);
-      expect(errorSpy).not.toHaveBeenCalled();
+    expect(getCachedAccessToken()).toBe('Bearer sync-cached');
+    expect(nock.pendingMocks()).toHaveLength(0);
+  });
+
+  it('returns undefined from getCachedAccessToken when no token is cached', async () => {
+    await jest.isolateModulesAsync(async () => {
+      const mod = await import('../../../../lib/hybrid-sdk/client/auth/oauth');
+      expect(mod.getCachedAccessToken()).toBeUndefined();
     });
   });
 
-  describe('refreshJwt failure path (via setfetchAndUpdateJwt + timers)', () => {
-    it('fires recordJwtRefreshFailure and logs structured {err} when refresh fails', async () => {
-      const metricsClient = makeMockMetricsClient();
-
-      nock(API_HOST).post('/oauth2/token').reply(200, {
-        access_token: 'first',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        scope: 'broker',
-      });
-      nock(API_HOST)
-        .post('/oauth2/token')
-        .reply(
-          500,
-          JSON.stringify({
-            error: 'server_error',
-            error_description: 'still down',
-          }),
-        );
-
-      await setfetchAndUpdateJwt(
-        { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 10 },
-        'cid',
-        'csecret',
-        metricsClient,
-      );
-
-      expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
-      await waitFor(
-        () =>
-          (metricsClient.recordJwtRefreshFailure as jest.Mock).mock.calls
-            .length > 0,
-      );
-
-      expect(metricsClient.recordJwtRefreshFailure).toHaveBeenCalledTimes(1);
-      const refreshErrorCall = errorSpy.mock.calls.find(
-        ([, msg]) => msg === 'Error retrieving new JWT',
-      );
-      expect(refreshErrorCall).toBeDefined();
-      const [fields] = refreshErrorCall!;
-      expect(typeof fields).toBe('object');
-      expect(fields).toHaveProperty('err');
-      expect(fields.err).toBeInstanceOf(Error);
-      expect(refreshErrorCall![1]).toBe('Error retrieving new JWT');
+  it('returns the cached token on subsequent calls without re-fetching', async () => {
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
     });
 
-    it('does NOT fire recordJwtRefreshFailure when refresh succeeds', async () => {
-      const metricsClient = makeMockMetricsClient();
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'cached' }));
 
-      // Both calls succeed.
-      nock(API_HOST).post('/oauth2/token').reply(200, {
-        access_token: 'first',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        scope: 'broker',
-      });
-      nock(API_HOST).post('/oauth2/token').reply(200, {
-        access_token: 'second',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        scope: 'broker',
-      });
+    expect(await getAccessToken()).toBe('Bearer cached');
+    expect(nock.isDone()).toBe(true);
 
-      await setfetchAndUpdateJwt(
-        { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 10 },
-        'cid',
-        'csecret',
-        metricsClient,
-      );
+    expect(await getAccessToken()).toBe('Bearer cached');
+    expect(nock.pendingMocks()).toHaveLength(0);
+  });
 
-      // Wait for the refresh setTimeout to fire and the second token to land.
-      await waitFor(
-        () => getAuthConfig().accessToken?.authHeader === 'Bearer second',
-      );
-
-      expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
-      expect(errorSpy).not.toHaveBeenCalled();
+  it('re-fetches when the cached token is treated as expired', async () => {
+    // A massive threshold makes any freshly-fetched token "expired" immediately.
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+      expiryThresholdSeconds: 99_999,
     });
 
-    it('does not crash when metricsClient is omitted (backwards compatibility)', async () => {
-      nock(API_HOST).post('/oauth2/token').reply(200, {
-        access_token: 'first',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        scope: 'broker',
-      });
-      nock(API_HOST).post('/oauth2/token').reply(500, '{}');
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'one' }));
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'two' }));
 
-      // No fourth argument — exercises the optional-chaining call site.
-      await expect(
-        setfetchAndUpdateJwt(
-          { apiHostname: API_HOST, AUTH_EXPIRATION_OVERRIDE: 10 },
-          'cid',
-          'csecret',
-        ),
-      ).resolves.toBeUndefined();
+    expect(await getAccessToken()).toBe('Bearer one');
+    expect(await getAccessToken()).toBe('Bearer two');
+    expect(nock.pendingMocks()).toHaveLength(0);
+  });
 
-      // Wait long enough for the scheduled refresh to fire and fail.
-      // The assertion is structural: the catch block ran without throwing.
-      await waitFor(() =>
-        errorSpy.mock.calls.some(
-          ([, msg]) => msg === 'Error retrieving new JWT',
-        ),
+  it('records the metric and rethrows on fetch failure', async () => {
+    const metricsClient = makeMockMetricsClient();
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+      metricsClient,
+    });
+
+    nock(API_HOST).post(TOKEN_PATH).reply(500, {
+      error: 'server_error',
+      error_description: 'kaboom',
+    });
+
+    await expect(getAccessToken()).rejects.toThrow();
+
+    expect(metricsClient.recordJwtRefreshFailure).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.anything() }),
+      'Unable to retrieve JWT',
+    );
+  });
+
+  it('does NOT fire recordJwtRefreshFailure when fetch succeeds', async () => {
+    const metricsClient = makeMockMetricsClient();
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+      metricsClient,
+    });
+
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'ok' }));
+
+    await expect(getAccessToken()).resolves.toBe('Bearer ok');
+
+    expect(metricsClient.recordJwtRefreshFailure).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not crash when metricsClient is omitted on a failed fetch', async () => {
+    // No metricsClient — exercises the optional-chaining `metrics?.recordJwtRefreshFailure()`.
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+    });
+
+    nock(API_HOST).post(TOKEN_PATH).reply(500, {
+      error: 'server_error',
+      error_description: 'kaboom',
+    });
+
+    await expect(getAccessToken()).rejects.toThrow();
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      'Unable to retrieve JWT',
+    );
+  });
+
+  it('reports uninitialized before initOAuthClient', async () => {
+    await jest.isolateModulesAsync(async () => {
+      const mod = await import('../../../../lib/hybrid-sdk/client/auth/oauth');
+      expect(mod.isOAuthClientInitialized()).toBe(false);
+    });
+  });
+
+  it('invalidateToken forces the next call to re-fetch', async () => {
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+    });
+
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'one' }));
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'two' }));
+
+    expect(await getAccessToken()).toBe('Bearer one');
+    expect(await getAccessToken()).toBe('Bearer one'); // cached
+
+    invalidateToken();
+
+    expect(await getAccessToken()).toBe('Bearer two');
+    expect(nock.pendingMocks()).toHaveLength(0);
+  });
+
+  it('throws when called before initOAuthClient', async () => {
+    await jest.isolateModulesAsync(async () => {
+      const mod = await import('../../../../lib/hybrid-sdk/client/auth/oauth');
+      await expect(mod.getAccessToken()).rejects.toThrow(
+        /OAuth client not initialized/,
       );
     });
   });

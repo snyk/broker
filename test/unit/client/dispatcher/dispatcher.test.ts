@@ -1,12 +1,17 @@
 const nock = require('nock');
-import { setAuthConfigKey } from '../../../../lib/hybrid-sdk/client/auth/oauth';
 import { getServerId } from '../../../../lib/hybrid-sdk/client/dispatcher';
 
 const serverUrl = 'http://broker-server-dispatcher';
 
+jest.mock('../../../../lib/hybrid-sdk/client/auth/oauth', () => ({
+  getAccessToken: jest.fn().mockResolvedValue('Bearer dummy'),
+  invalidateToken: jest.fn(),
+  initOAuthClient: jest.fn(),
+  isOAuthClientInitialized: jest.fn().mockReturnValue(true),
+}));
+
 describe('Dispatcher', () => {
   beforeAll(async () => {
-    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
     nock(`${serverUrl}`)
       .persist()
       .post(

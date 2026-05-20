@@ -5,7 +5,7 @@ import { isJson } from '../../common/utils/json';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
-import { getAuthConfig } from '../auth/oauth';
+import { getAccessToken } from '../auth/oauth';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 
 export const retrieveConnectionsForDeployment = async (
@@ -18,7 +18,7 @@ export const retrieveConnectionsForDeployment = async (
     url: `${clientOpts.config.API_BASE_URL}/hidden/brokers/deployments/${deploymentId}/connections?version=${apiVersion}`,
     headers: {
       'Content-Type': 'application/vnd.api+json',
-      Authorization: `${getAuthConfig().accessToken?.authHeader}`,
+      Authorization: await getAccessToken(),
       'x-broker-client-id': `${clientOpts.config.brokerClientId}`,
       'x-broker-client-version': `${version}`,
     },

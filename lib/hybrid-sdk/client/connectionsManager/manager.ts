@@ -7,7 +7,7 @@ import { handleTerminationSignal } from '../../common/utils/signals';
 import { cleanUpUniversalFile } from '../utils/cleanup';
 import { validateUniversalConnectionsRemoteConfig } from './validator';
 import { existsSync, writeFileSync } from 'fs';
-import { setfetchAndUpdateJwt } from '../auth/oauth';
+import { getAccessToken, initOAuthClient } from '../auth/oauth';
 import { reloadConfig } from '../config/configHelpers';
 import { processStartUpHooks } from '../hooks/startup/processHooks';
 import { setBackupWatcher, syncClientConfig } from './synchronizer';
@@ -49,12 +49,15 @@ export const manageWebsocketConnections = async (
         await reloadConfig(clientOpts);
       }
 
-      await setfetchAndUpdateJwt(
-        clientOpts.config,
-        clientOpts.config.brokerClientConfiguration.common.oauth.clientId,
-        clientOpts.config.brokerClientConfiguration.common.oauth.clientSecret,
-        clientOpts.metricsClient,
-      );
+      initOAuthClient({
+        apiHostname: clientOpts.config.apiHostname,
+        clientId:
+          clientOpts.config.brokerClientConfiguration.common.oauth.clientId,
+        clientSecret:
+          clientOpts.config.brokerClientConfiguration.common.oauth.clientSecret,
+        metricsClient: clientOpts.metricsClient,
+      });
+      await getAccessToken();
 
       await retrieveConnectionsForDeployment(
         clientOpts,

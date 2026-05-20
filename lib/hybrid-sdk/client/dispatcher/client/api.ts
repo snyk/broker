@@ -6,7 +6,10 @@ import {
   DispatcherServiceClient,
   ServerId,
 } from '../dispatcher-service';
-import { getAuthConfig } from '../../auth/oauth';
+import {
+  getAccessToken,
+  isOAuthClientInitialized,
+} from '../../auth/oauth';
 import { PostFilterPreparedRequest } from '../../../../broker-workload/prepareRequest';
 
 export class HttpDispatcherServiceClient implements DispatcherServiceClient {
@@ -26,10 +29,11 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
       const path = `${config.DISPATCHER_URL_PREFIX}/${params.hashedBrokerToken}/connections/${params.brokerClientId}`;
       const url = new URL(path, this.baseUrl);
       url.searchParams.append('version', this.version);
-      const headers = { 'Content-type': 'application/vnd.api+json' };
-      const authConfig = getAuthConfig();
-      if (authConfig.accessToken && getAuthConfig().accessToken.authHeader) {
-        headers['Authorization'] = getAuthConfig().accessToken.authHeader;
+      const headers: Record<string, string> = {
+        'Content-type': 'application/vnd.api+json',
+      };
+      if (isOAuthClientInitialized()) {
+        headers['Authorization'] = await getAccessToken();
       }
       const req: PostFilterPreparedRequest = {
         url: url.toString(),

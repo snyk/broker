@@ -17,9 +17,13 @@ import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
-import { CONFIGURATION, LoadedClientOpts } from '../common/types/options';
+import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
-import { getAuthConfig } from './auth/oauth';
+import {
+  getAccessToken,
+  getCachedAccessToken,
+  isOAuthClientInitialized,
+} from './auth/oauth';
 import { Client, NoopClient } from './metrics';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
@@ -28,13 +32,6 @@ import { renewBrokerServerConnection } from './auth/brokerServerConnection';
 import version from '../common/utils/version';
 import { addServerIdAndRoleQS } from '../http/utils';
 import { serviceHandler } from './socketHandlers/serviceHandler';
-
-const getAuthExpirationTimeout = (config: CONFIGURATION) => {
-  return (
-    config.AUTH_EXPIRATION_OVERRIDE ??
-    (getAuthConfig().accessToken?.expiresIn - 60) * 1000
-  );
-};
 
 /**
  * Creates a pair of WebSocket connections (primary and secondary) for the given connection key.
@@ -179,8 +176,11 @@ export const createWebSocket = (
       'x-broker-client-version': version,
       'snyk-request-id': requestId,
     };
-    if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
-      headers.Authorization = getAuthConfig().accessToken.authHeader;
+    if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
+      const authorization = getCachedAccessToken();
+      if (authorization) {
+        headers.Authorization = authorization;
+      }
     }
     return headers;
   };
@@ -205,10 +205,13 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
+  if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
     // The access token is not sent when making requests over the websocket, so we must re-validate
     // the token periodically to keep the connection alive. Connections that do not re-validate the
     // access token will be marked as stale and closed by the server.
+    const renewalIntervalMs =
+      clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? 10 * 60 * 1000;
+
     const timeoutHandler = async () => {
       const commonLogFields = {
         connection: maskToken(identifyingMetadata.identifier),
@@ -222,7 +225,7 @@ export const createWebSocket = (
         {
           connectionIdentifier: identifyingMetadata.identifier!,
           brokerClientId: identifyingMetadata.clientId,
-          authorization: getAuthConfig().accessToken.authHeader,
+          authorization: await getAccessToken(),
           role: identifyingMetadata.role,
           serverId: serverId,
         },
@@ -265,14 +268,11 @@ export const createWebSocket = (
 
       websocket.timeoutHandlerId = setTimeout(
         timeoutHandler,
-        getAuthExpirationTimeout(clientOpts.config),
+        renewalIntervalMs,
       );
     };
 
-    websocket.timeoutHandlerId = setTimeout(
-      timeoutHandler,
-      getAuthExpirationTimeout(clientOpts.config),
-    );
+    websocket.timeoutHandlerId = setTimeout(timeoutHandler, renewalIntervalMs);
   }
 
   websocket.on('incoming::error', (e) => {

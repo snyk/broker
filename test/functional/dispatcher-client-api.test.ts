@@ -1,6 +1,10 @@
 import { MockServer } from 'jest-mock-server';
+jest.mock('../../lib/hybrid-sdk/client/auth/oauth', () => ({
+  getAccessToken: jest.fn().mockResolvedValue('Bearer dummy'),
+  initOAuthClient: jest.fn(),
+  isOAuthClientInitialized: jest.fn().mockReturnValue(true),
+}));
 import { HttpDispatcherServiceClient } from '../../lib/hybrid-sdk/client/dispatcher/client/api';
-import { setAuthConfigKey } from '../../lib/hybrid-sdk/client/auth/oauth';
 
 describe('Broker Dispatcher API client', () => {
   const server = new MockServer();
@@ -20,7 +24,6 @@ describe('Broker Dispatcher API client', () => {
   beforeEach(() => {
     server.reset();
     dispatcherServerBaseUrl = server.getURL().toString();
-    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
   });
 
   it('should return undefined when no allocation found', async () => {

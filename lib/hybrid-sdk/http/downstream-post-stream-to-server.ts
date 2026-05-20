@@ -9,7 +9,7 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 
-import { getAuthConfig } from '../client/auth/oauth';
+import { getAccessToken, isOAuthClientInitialized } from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import type { ExtendedLogContext } from '../common/types/log';
@@ -206,8 +206,8 @@ class BrokerServerPostResponseHandler {
       url: brokerServerPostRequestUrl,
     });
 
-    if (getAuthConfig().accessToken && this.#config.universalBrokerGa) {
-      options.headers['authorization'] = getAuthConfig().accessToken.authHeader;
+    if (this.#config.universalBrokerGa && isOAuthClientInitialized()) {
+      options.headers['authorization'] = await getAccessToken();
     }
 
     const retryErrors: string[] = [];

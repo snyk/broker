@@ -8,14 +8,17 @@ import {
   ClientOpts,
   CONFIGURATION,
 } from '../../lib/hybrid-sdk/common/types/options';
-import { setAuthConfigKey } from '../../lib/hybrid-sdk/client/auth/oauth';
 import nock from 'nock';
+
+jest.mock('../../lib/hybrid-sdk/client/auth/oauth', () => ({
+  getAccessToken: jest.fn().mockResolvedValue('Bearer dummy'),
+  initOAuthClient: jest.fn(),
+}));
 
 const universalFilePathLocationForTests = `${__dirname}/../../config.universal.json`;
 
 describe('Remote config helpers', () => {
   beforeAll(() => {
-    setAuthConfigKey('accessToken', { expireIn: 123, authHeader: 'dummy' });
     writeFileSync(universalFilePathLocationForTests, `{}`);
     nock('http://restapihostname')
       .persist()

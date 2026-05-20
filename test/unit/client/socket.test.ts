@@ -1,5 +1,11 @@
+jest.mock('../../../lib/hybrid-sdk/client/auth/oauth', () => ({
+  getAccessToken: jest.fn().mockResolvedValue('Bearer test-token'),
+  getCachedAccessToken: jest.fn().mockReturnValue('Bearer test-token'),
+  initOAuthClient: jest.fn(),
+  isOAuthClientInitialized: jest.fn().mockReturnValue(true),
+}));
+
 import { createWebSocket } from '../../../lib/hybrid-sdk/client/socket';
-import { setAuthConfigKey } from '../../../lib/hybrid-sdk/client/auth/oauth';
 import {
   LoadedClientOpts,
   CONFIGURATION,
@@ -166,8 +172,6 @@ describe('createWebSocket - renew auth behaviour', () => {
     }) as jest.SpyInstance;
 
     mockLoggerFatal = jest.spyOn(logger, 'fatal').mockImplementation();
-
-    setAuthConfigKey('accessToken', undefined);
   });
 
   afterEach(() => {
@@ -194,12 +198,6 @@ describe('createWebSocket - renew auth behaviour', () => {
         statusCode: 301,
       },
     ])('should retry on $description', async ({ statusCode }) => {
-      const expiresInSec = 3600;
-      setAuthConfigKey('accessToken', {
-        expiresIn: expiresInSec,
-        authHeader: 'Bearer test-token',
-      });
-
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
 
@@ -211,18 +209,16 @@ describe('createWebSocket - renew auth behaviour', () => {
         body: '{}',
       });
 
-      const expectedTimeoutMs = (expiresInSec - 60) * 1000;
+      const expectedTimeoutMs = 10 * 60 * 1000;
 
       // First timeout
-      jest.advanceTimersByTime(expectedTimeoutMs);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
       expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
       expect(mockProcessExit).not.toHaveBeenCalled();
 
       // Second timeout - should retry
-      jest.advanceTimersByTime(expectedTimeoutMs);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
       expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
 
@@ -230,12 +226,6 @@ describe('createWebSocket - renew auth behaviour', () => {
     });
 
     it('should call renewBrokerServerConnection with correct parameters on 2XX', async () => {
-      const expiresInSec = 3600; // 1 hour
-      setAuthConfigKey('accessToken', {
-        expiresIn: expiresInSec,
-        authHeader: 'Bearer test-token',
-      });
-
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
 
@@ -245,7 +235,7 @@ describe('createWebSocket - renew auth behaviour', () => {
         Role.primary,
       );
 
-      const expectedTimeoutMs = (expiresInSec - 60) * 1000;
+      const expectedTimeoutMs = 10 * 60 * 1000;
 
       mockRenewBrokerServerConnection.mockResolvedValue({
         statusCode: 200,
@@ -253,8 +243,7 @@ describe('createWebSocket - renew auth behaviour', () => {
         body: '{}',
       });
 
-      jest.advanceTimersByTime(expectedTimeoutMs);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
       clearTimeout(websocket.timeoutHandlerId);
 
@@ -287,12 +276,6 @@ describe('createWebSocket - renew auth behaviour', () => {
     ])(
       'should log fatal and exit process on $description',
       async ({ statusCode }) => {
-        const expiresInSec = 3600;
-        setAuthConfigKey('accessToken', {
-          expiresIn: expiresInSec,
-          authHeader: 'Bearer test-token',
-        });
-
         const clientOpts = createMockClientOpts();
         const identifyingMetadata = createMockIdentifyingMetadata();
 
@@ -308,9 +291,8 @@ describe('createWebSocket - renew auth behaviour', () => {
           body: '{}',
         });
 
-        const expectedTimeoutMs = (expiresInSec - 60) * 1000;
+        const expectedTimeoutMs = 10 * 60 * 1000;
 
-        // advanceTimersByTimeAsync advances timers and ensures async calls complete fully.
         await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
         clearTimeout(ws.timeoutHandlerId);
@@ -329,49 +311,57 @@ describe('createWebSocket - renew auth behaviour', () => {
     );
   });
 
+  describe('reconnect scheduled', () => {
+    it('updates extraHeaders synchronously without awaiting getAccessToken', async () => {
+      const {
+        getAccessToken,
+        getCachedAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (getCachedAccessToken as jest.Mock).mockReturnValue('Bearer cached');
+
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const reconnectHandler = (ws.on as jest.Mock).mock.calls.find(
+        ([event]) => event === 'reconnect scheduled',
+      )?.[1];
+      expect(reconnectHandler).toBeDefined();
+      expect(reconnectHandler.constructor.name).toBe('Function');
+      expect(reconnectHandler.constructor.name).not.toBe('AsyncFunction');
+
+      const opts = { attempt: 1, retries: 3, scheduled: 5000 };
+      (getAccessToken as jest.Mock).mockClear();
+      reconnectHandler(opts);
+
+      expect(getAccessToken).not.toHaveBeenCalled();
+      expect(ws.transport.extraHeaders).toMatchObject({
+        Authorization: 'Bearer cached',
+        'snyk-request-id': expect.any(String),
+      });
+    });
+  });
+
   describe('Conditional execution', () => {
     it.each([
       {
-        name: 'accessToken is missing',
-        setupAuth: () => setAuthConfigKey('accessToken', undefined),
-        universalBrokerGA: undefined,
-        shouldRenew: false,
-      },
-      {
         name: 'UNIVERSAL_BROKER_GA is false',
-        setupAuth: () =>
-          setAuthConfigKey('accessToken', {
-            expiresIn: 3600,
-            authHeader: 'Bearer test-token',
-          }),
         universalBrokerGA: false,
         shouldRenew: false,
       },
       {
         name: 'UNIVERSAL_BROKER_GA is undefined',
-        setupAuth: () =>
-          setAuthConfigKey('accessToken', {
-            expiresIn: 3600,
-            authHeader: 'Bearer test-token',
-          }),
         universalBrokerGA: undefined,
         shouldRenew: false,
       },
       {
-        name: 'both accessToken and UNIVERSAL_BROKER_GA are present',
-        setupAuth: () =>
-          setAuthConfigKey('accessToken', {
-            expiresIn: 3600,
-            authHeader: 'Bearer test-token',
-          }),
+        name: 'UNIVERSAL_BROKER_GA is "true"',
         universalBrokerGA: 'true',
         shouldRenew: true,
       },
     ])(
       'should handle renew auth when $name',
-      async ({ setupAuth, universalBrokerGA, shouldRenew }) => {
-        setupAuth();
-
+      async ({ universalBrokerGA, shouldRenew }) => {
         const baseOpts = createMockClientOpts();
         const clientOpts = createMockClientOpts({
           config: {
@@ -395,10 +385,9 @@ describe('createWebSocket - renew auth behaviour', () => {
           Role.primary,
         );
 
-        const expectedTimeoutMs = (3600 - 60) * 1000;
+        const expectedTimeoutMs = 10 * 60 * 1000;
 
-        jest.advanceTimersByTime(expectedTimeoutMs);
-        await Promise.resolve();
+        await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
         clearTimeout(ws.timeoutHandlerId);
 
