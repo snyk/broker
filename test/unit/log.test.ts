@@ -23,6 +23,11 @@ const crBase = (process.env.CR_BASE = 'CONTAINER_BASE');
 const gitUsername = (process.env.GIT_USERNAME = 'G_USER');
 const gitPassword = (process.env.GIT_PASSWORD = 'G_PASS');
 const gitClientUrl = (process.env.GIT_CLIENT_URL = 'http://git-client-url.com');
+const githubAppPemPath = (process.env.GITHUB_APP_PRIVATE_PEM_PATH =
+  '/etc/ssh/very-secret.pem');
+const gpgPrivateKey = (process.env.GPG_PRIVATE_KEY =
+  '-----BEGIN PRIVATE KEY-----GPG_SECRET');
+const gpgPassphrase = (process.env.GPG_PASSPHRASE = 'GPG_PASS_DO_NOT_LEAK');
 
 import { Writable } from 'stream';
 import { log } from '../../lib/logs/logger';
@@ -58,6 +63,9 @@ describe('log', () => {
       gitUsername,
       gitPassword,
       gitClientUrl,
+      githubAppPemPath,
+      gpgPrivateKey,
+      gpgPassphrase,
     ].join();
     const sanitizedTokens =
       '${BROKER_TOKEN},${GITHUB_TOKEN},${GITHUB_TOKEN_POOL},${GITLAB_TOKEN},${AZURE_REPOS_TOKEN}';
@@ -118,6 +126,9 @@ describe('log', () => {
     expect(logged).not.toMatch(gitUsername);
     expect(logged).not.toMatch(gitPassword);
     expect(logged).not.toMatch(gitClientUrl);
+    expect(logged).not.toMatch(githubAppPemPath);
+    expect(logged).not.toMatch(gpgPrivateKey);
+    expect(logged).not.toMatch(gpgPassphrase);
 
     // assert sensitive data is masked
     expect(logged).toMatch(sanitizedBitBucket);

@@ -10,6 +10,7 @@ import {
 } from '../../common/config/pluginsConfig';
 import { HttpResponse, makeRequestToDownstream } from '../../http/request';
 import { log as logger } from '../../../logs/logger';
+import { redactConfig } from '../../../logs/redact';
 
 export default abstract class BrokerPlugin {
   abstract pluginCode: string;
@@ -127,13 +128,17 @@ export default abstract class BrokerPlugin {
     postFilterPreparedRequest: PostFilterPreparedRequest,
     pluginConfig?: PluginConnectionConfig,
   ): Promise<PostFilterPreparedRequest> {
-    logger.trace(
-      {
-        connectionConfig: connectionConfiguration,
-        pluginsConfig: pluginConfig,
-      },
-      'Abstract preRequest Plugin',
-    );
+    // Guard the redactConfig calls — preRequest is per-request hot path, and
+    // arguments evaluate before the trace call short-circuits internally.
+    if (logger.trace()) {
+      logger.trace(
+        {
+          connectionConfig: redactConfig(connectionConfiguration),
+          pluginsConfig: redactConfig(pluginConfig),
+        },
+        'Abstract preRequest Plugin',
+      );
+    }
     return postFilterPreparedRequest;
   }
 }

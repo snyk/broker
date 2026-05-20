@@ -6,6 +6,19 @@ import {
   getPluginsConfig,
   getPluginConfigByConnectionKey,
 } from '../hybrid-sdk/common/config/pluginsConfig';
+import {
+  COMMON_CREDENTIAL_ENV_VARS,
+  PER_CONNECTION_CREDENTIAL_ENV_VARS,
+  PER_PLUGIN_CREDENTIAL_ENV_VARS,
+} from './redact';
+
+// Pre-compute the per-connection list once at module load, not per sanitise()
+// call. Universal-broker connections inherit the top-level credential names
+// plus a few connection-only ones.
+const universalBrokerConnectionsVariables: readonly string[] = [
+  ...COMMON_CREDENTIAL_ENV_VARS,
+  ...PER_CONNECTION_CREDENTIAL_ENV_VARS,
+];
 
 const sanitiseConfigVariable = (raw: string, variable: string) =>
   raw.replace(
@@ -107,42 +120,14 @@ export const sanitise = (raw) => {
     }
   }
 
-  const variables = [
-    'BROKER_TOKEN',
-    'GITHUB_TOKEN',
-    'GITHUB_TOKEN_POOL',
-    'BITBUCKET_USERNAME',
-    'BITBUCKET_PASSWORD',
-    'BITBUCKET_PAT',
-    'GITLAB_TOKEN',
-    'JIRA_USERNAME',
-    'JIRA_PASSWORD',
-    'JIRA_PAT',
-    'AZURE_REPOS_TOKEN',
-    'ARTIFACTORY_URL',
-    'CR_CREDENTIALS',
-    'CR_AGENT_URL',
-    'CR_BASE',
-    'CR_USERNAME',
-    'CR_PASSWORD',
-    'CR_TOKEN',
-    'CR_ROLE_ARN',
-    'CR_EXTERNAL_ID',
-    'CR_REGION',
-    'GIT_USERNAME',
-    'GIT_PASSWORD',
-    'GIT_CLIENT_URL',
-    'NEXUS_URL',
-    'BASE_NEXUS_URL',
-    'BASE_NEXUS2_URL',
-    'CHECKMARX_PASSWORD',
-    'SONARQUBE_API_TOKEN',
-  ];
-  const universalBrokerConnectionsVariables = [
-    ...variables,
-    'GITHUB_APP_CLIENT_ID',
-  ];
-  const universalBrokerPluginsVariables = ['GHA_ACCESS_TOKEN', 'JWT_TOKEN'];
+  // String-based allowlist: when `config[var]` is set, this sanitiser replaces
+  // every occurrence of its *value* in the serialised log string with
+  // `${VAR_NAME}`. It does NOT walk arbitrary nested objects — call sites
+  // that log credential-bearing objects must wrap them with `redactConfig`
+  // from ./redact.ts first. Names live in ./redact.ts so both layers share
+  // one source of truth; the groupings keep per-record work bounded.
+  const variables = COMMON_CREDENTIAL_ENV_VARS;
+  const universalBrokerPluginsVariables = PER_PLUGIN_CREDENTIAL_ENV_VARS;
 
   for (const variable of variables) {
     // Copies original `raw`, doesn't mutate it.

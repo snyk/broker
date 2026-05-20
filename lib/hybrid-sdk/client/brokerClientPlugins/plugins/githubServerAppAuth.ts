@@ -7,6 +7,7 @@ import { maskSCMToken } from '../../../common/utils/token';
 import { replace } from '../../../common/utils/replace-vars';
 import { PostFilterPreparedRequest } from '../../../../broker-workload/prepareRequest';
 import { PluginConnectionConfig } from '../../../common/config/pluginsConfig';
+import { redactConfig } from '../../../../logs/redact';
 
 export class Plugin extends BrokerPlugin {
   // Plugin Code and Name must be unique across all plugins.
@@ -38,14 +39,16 @@ export class Plugin extends BrokerPlugin {
         'Running Startup.',
       );
 
-      this.logger.trace(
-        {
-          plugin: this.pluginCode,
-          config: connectionConfig,
-          pluginConfig: pluginConfig,
-        },
-        'Connection Config passed to the plugin',
-      );
+      if (this.logger.trace()) {
+        this.logger.trace(
+          {
+            plugin: this.pluginCode,
+            config: redactConfig(connectionConfig),
+            pluginConfig: redactConfig(pluginConfig),
+          },
+          'Connection Config passed to the plugin',
+        );
+      }
       if (
         connectionConfig &&
         (!connectionConfig.GITHUB_APP_CLIENT_ID ||
@@ -143,21 +146,29 @@ export class Plugin extends BrokerPlugin {
     connectionConfiguration: Record<string, any>,
     pluginConfig: PluginConnectionConfig,
   ): Promise<void> {
-    this.logger.debug({ contextId, connectionConfiguration, pluginConfig });
+    if (this.logger.debug()) {
+      this.logger.debug({
+        contextId,
+        connectionConfiguration: redactConfig(connectionConfiguration),
+        pluginConfig: redactConfig(pluginConfig),
+      });
+    }
     try {
       this.logger.info(
         { plugin: this.pluginName, connectionKey },
         'Running Startup.',
       );
 
-      this.logger.trace(
-        {
-          plugin: this.pluginCode,
-          config: connectionConfiguration,
-          pluginConfig: pluginConfig,
-        },
-        'Connection Config passed to the plugin',
-      );
+      if (this.logger.trace()) {
+        this.logger.trace(
+          {
+            plugin: this.pluginCode,
+            config: redactConfig(connectionConfiguration),
+            pluginConfig: redactConfig(pluginConfig),
+          },
+          'Connection Config passed to the plugin',
+        );
+      }
       if (
         connectionConfiguration &&
         (!connectionConfiguration.GITHUB_APP_CLIENT_ID ||
