@@ -397,6 +397,7 @@ jobs:
           name: Release to GitHub
           no_output_timeout: 20m
           command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
             npm install --save-exact --save-dev semantic-release@22.0.12 @semantic-release/exec@6.0.3 pkg@5.8.1
             npx semantic-release
 
@@ -480,7 +481,7 @@ workflows:
       - release:
           name: Release to GitHub and NPM
           context:
-            - nodejs-lib-release
+            - github-release
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
