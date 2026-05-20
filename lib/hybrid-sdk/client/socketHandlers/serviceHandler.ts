@@ -56,7 +56,7 @@ export const serviceHandler = async (msg, cb) => {
         }
         break;
       default:
-        logger.error(
+        logger.warn(
           { command, requestId },
           'Unknown service message received.',
         );

@@ -81,34 +81,9 @@ export const main = async (clientOpts: ClientOpts) => {
     // NOTE: If main() is called more than once, additional listeners will
     // accumulate after this point — each call registers a new handler on top.
     process.removeAllListeners('uncaughtException');
-    process.on('uncaughtException', (error) => {
-      const isEconnreset = error.message === 'read ECONNRESET';
-      metricsClient.recordUncaughtException(
-        (error as NodeJS.ErrnoException).code ?? error.message ?? 'unknown',
-      );
-      if (isEconnreset) {
-        logger.error(
-          { msg: error.message, stackTrace: error.stack },
-          'ECONNRESETs Catch all:',
-          error.message,
-        );
-      } else {
-        metricsClient.recordProcessExit('uncaught_exception');
-        logger.error(
-          { msg: error.message, stackTrace: error.stack },
-          'Uncaught exception:',
-          error.message,
-        );
-        const flushTimeout = new Promise<void>((resolve) =>
-          setTimeout(resolve, 2000),
-        );
-        Promise.race([metricsClient.forceFlush(), flushTimeout])
-          .catch((err) =>
-            logger.warn({ err }, 'Failed to flush metrics before exit.'),
-          )
-          .finally(() => process.exit(1));
-      }
-    });
+    process.on('uncaughtException', (error) =>
+      handleUncaughtException(error, metricsClient),
+    );
 
     clientOpts.config.API_BASE_URL =
       clientOpts.config.API_BASE_URL ??
@@ -295,5 +270,40 @@ export const main = async (clientOpts: ClientOpts) => {
   } catch (err) {
     logger.warn({ err }, `Shutting down client.`);
     throw err;
+  }
+};
+
+// Exported for unit testing — behaviour-identical to the inline body that
+// previously lived in the `process.on('uncaughtException', ...)` callback
+// registered inside main().
+export const handleUncaughtException = (
+  error: Error,
+  metricsClient: metrics.Client,
+) => {
+  const isEconnreset = error.message === 'read ECONNRESET';
+  metricsClient.recordUncaughtException(
+    (error as NodeJS.ErrnoException).code ?? error.message ?? 'unknown',
+  );
+  if (isEconnreset) {
+    logger.warn(
+      { msg: error.message, stackTrace: error.stack },
+      'ECONNRESETs Catch all:',
+      error.message,
+    );
+  } else {
+    metricsClient.recordProcessExit('uncaught_exception');
+    logger.error(
+      { msg: error.message, stackTrace: error.stack },
+      'Uncaught exception:',
+      error.message,
+    );
+    const flushTimeout = new Promise<void>((resolve) =>
+      setTimeout(resolve, 2000),
+    );
+    Promise.race([metricsClient.forceFlush(), flushTimeout])
+      .catch((err) =>
+        logger.warn({ err }, 'Failed to flush metrics before exit.'),
+      )
+      .finally(() => process.exit(1));
   }
 };
