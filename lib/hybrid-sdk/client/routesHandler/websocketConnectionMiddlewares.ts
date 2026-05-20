@@ -60,9 +60,8 @@ export const websocketConnectionSelectorMiddleware = (
       ) {
         inboundRequestType = 'bitbucket-server-bearer-auth';
       } else {
-        const requestId = req.headers['snyk-request-id'];
         logger.warn(
-          { url: req.path, requestId },
+          { url: req.path, requestId: req.requestId },
           'Unexpected type in webhook request.',
         );
         res
@@ -90,9 +89,8 @@ export const websocketConnectionSelectorMiddleware = (
         return;
       }
     } else {
-      const requestId = req.headers['snyk-request-id'];
       logger.error(
-        { url: req.path, requestId },
+        { url: req.path, requestId: req.requestId },
         'Unknown type in client->server request.',
       );
       if (config.serviceEnv == 'universaltest') {
