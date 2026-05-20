@@ -11,6 +11,7 @@ import {
 import * as pluginManager from '../../../lib/hybrid-sdk/client/brokerClientPlugins/pluginManager';
 import * as socket from '../../../lib/hybrid-sdk/client/socket';
 import * as connectionHelpers from '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers';
+import { log as logger } from '../../../lib/logs/logger';
 
 jest.mock(
   '../../../lib/hybrid-sdk/client/connectionsManager/remoteConnectionSync',
@@ -329,6 +330,70 @@ describe('syncClientConfig', () => {
     expect(
       mockedConnectionHelpers.shutDownConnectionPair,
     ).not.toHaveBeenCalled();
+  });
+
+  describe('log levels (PR 2 contract)', () => {
+    let infoSpy: jest.SpyInstance;
+    let debugSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
+      debugSpy = jest.spyOn(logger, 'debug').mockImplementation(() => {});
+    });
+    afterEach(() => jest.restoreAllMocks());
+
+    it('logs "Waiting for connections (polling)." at DEBUG, not INFO', async () => {
+      const clientOpts = makeClientOpts(undefined);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        'Waiting for connections (polling).',
+      );
+      expect(infoSpy).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Waiting for connections (polling).',
+      );
+    });
+
+    it('logs the "not in use by any orgs" message at DEBUG, not INFO', async () => {
+      const clientOpts = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: null,
+          friendlyName: 'my-conn',
+          id: 'conn-id',
+        },
+      });
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('not in use by any orgs'),
+      );
+      expect(infoSpy).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('not in use by any orgs'),
+      );
+    });
+
+    it('logs "Shutting down connection" at INFO, not DEBUG', async () => {
+      const clientOpts = makeClientOpts({});
+      const wsConns: WebSocketConnection[] = [
+        makeWsConn('removed-conn', 'token-1'),
+        makeWsConn('removed-conn', 'token-1'),
+      ];
+      await syncClientConfig(clientOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ friendlyName: 'removed-conn' }),
+        'Shutting down connection',
+      );
+      expect(debugSpy).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Shutting down connection',
+      );
+    });
   });
 
   it('should re-run plugins when contexts change on an existing connection', async () => {

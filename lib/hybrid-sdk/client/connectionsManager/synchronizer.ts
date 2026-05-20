@@ -52,7 +52,7 @@ export const syncClientConfig = async (
     websocketConnections.length === 0;
 
   if (isPollingRequired) {
-    logger.info({}, `Waiting for connections (polling).`);
+    logger.debug({}, `Waiting for connections (polling).`);
     if (process.env.NODE_ENV != 'test') {
       setTimeout(
         () =>
@@ -98,7 +98,7 @@ export const syncClientConfig = async (
           integrationsKeys.indexOf(key),
         );
       } else {
-        logger.info(
+        logger.debug(
           {
             id: connectionConfig.id,
             name: connectionConfig.friendlyName,
@@ -175,7 +175,7 @@ export const syncClientConfig = async (
         !integrationsKeys.includes(friendlyName) &&
         !alreadyShutDownConnectionNames.includes(friendlyName)
       ) {
-        logger.debug({ friendlyName }, 'Shutting down connection');
+        logger.info({ friendlyName }, 'Shutting down connection');
         try {
           alreadyShutDownConnectionNames.push(friendlyName);
           syncStateByConnection.delete(friendlyName);

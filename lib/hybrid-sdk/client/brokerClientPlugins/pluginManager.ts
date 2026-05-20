@@ -30,7 +30,7 @@ export const loadPlugins = async (pluginsFolderPath: string, clientOpts) => {
             !pluginInstance.isDisabled(clientOpts.config) &&
             pluginInstance.isPluginActive()
           ) {
-            logger.debug({}, `Loading plugin ${pluginInstance.pluginName}`);
+            logger.info({}, `Loading plugin ${pluginInstance.pluginName}`);
             const configPluginForCurrentType =
               clientOpts.config.plugins.get(applicableBrokerType);
             if (

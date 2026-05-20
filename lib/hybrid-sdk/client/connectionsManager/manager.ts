@@ -68,7 +68,7 @@ export const manageWebsocketConnections = async (
       handleTerminationSignal(cleanUpUniversalFile);
     } else {
       handleTerminationSignal(() => {
-        logger.debug({}, 'Received process termination signal.');
+        logger.info({}, 'Received process termination signal.');
       });
     }
 
