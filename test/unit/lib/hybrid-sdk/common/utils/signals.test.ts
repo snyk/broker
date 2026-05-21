@@ -82,13 +82,13 @@ describe('signals', () => {
     });
   });
 
-  describe('addTimerToTerminalHandlers', () => {
-    it('clears a registered setInterval on SIGTERM', () => {
+  describe('terminal handler registries', () => {
+    it('clearAllTimers clears a registered setInterval on SIGTERM', () => {
       const signals = loadSignals();
       signals.handleTerminationSignal(() => {});
       const fn = jest.fn();
       const interval = setInterval(fn, 10);
-      signals.addTimerToTerminalHandlers(interval);
+      signals.addIntervalToTerminalHandlers(interval);
 
       process.emit('SIGTERM' as any);
 
@@ -96,12 +96,12 @@ describe('signals', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('clears a registered setTimeout on SIGTERM', () => {
+    it('clearAllTimers clears a registered setTimeout on SIGTERM', () => {
       const signals = loadSignals();
       signals.handleTerminationSignal(() => {});
       const fn = jest.fn();
       const timeout = setTimeout(fn, 50);
-      signals.addTimerToTerminalHandlers(timeout);
+      signals.addTimeoutToTerminalHandlers(timeout);
 
       process.emit('SIGTERM' as any);
 
@@ -109,19 +109,51 @@ describe('signals', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('clears both setTimeout and setInterval on SIGINT', () => {
+    it('clearAllTimers clears both kinds together on SIGINT', () => {
       const signals = loadSignals();
       signals.handleTerminationSignal(() => {});
       const intervalFn = jest.fn();
       const timeoutFn = jest.fn();
-      signals.addTimerToTerminalHandlers(setInterval(intervalFn, 10));
-      signals.addTimerToTerminalHandlers(setTimeout(timeoutFn, 50));
+      signals.addIntervalToTerminalHandlers(setInterval(intervalFn, 10));
+      signals.addTimeoutToTerminalHandlers(setTimeout(timeoutFn, 50));
 
       process.emit('SIGINT' as any);
 
       jest.advanceTimersByTime(100);
       expect(intervalFn).not.toHaveBeenCalled();
       expect(timeoutFn).not.toHaveBeenCalled();
+    });
+
+    it('dispatches clearInterval (not clearTimeout) for registered intervals', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const interval = setInterval(() => {}, 10);
+      signals.addIntervalToTerminalHandlers(interval);
+
+      process.emit('SIGTERM' as any);
+
+      expect(clearIntervalSpy).toHaveBeenCalledWith(interval);
+      expect(clearTimeoutSpy).not.toHaveBeenCalledWith(interval);
+      clearIntervalSpy.mockRestore();
+      clearTimeoutSpy.mockRestore();
+    });
+
+    it('dispatches clearTimeout (not clearInterval) for registered timeouts', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const timeout = setTimeout(() => {}, 50);
+      signals.addTimeoutToTerminalHandlers(timeout);
+
+      process.emit('SIGTERM' as any);
+
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(timeout);
+      expect(clearIntervalSpy).not.toHaveBeenCalledWith(timeout);
+      clearIntervalSpy.mockRestore();
+      clearTimeoutSpy.mockRestore();
     });
   });
 });

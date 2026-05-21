@@ -1,14 +1,16 @@
 import { getWebsocketConnections } from '../../client';
 import { log as logger } from '../../../logs/logger';
 
-const timers: NodeJS.Timeout[] = [];
+const intervals: NodeJS.Timeout[] = [];
+const timeouts: NodeJS.Timeout[] = [];
 const GRACE_PERIOD_MS = 12000;
 
 let shuttingDown = false;
 export const isShuttingDown = (): boolean => shuttingDown;
 
 const clearAllTimers = () => {
-  timers.forEach((timer) => clearTimeout(timer));
+  intervals.forEach((id) => clearInterval(id));
+  timeouts.forEach((id) => clearTimeout(id));
 };
 
 export const handleTerminationSignal = (callback: () => void) => {
@@ -33,8 +35,12 @@ export const handleTerminationSignal = (callback: () => void) => {
   });
 };
 
-export const addTimerToTerminalHandlers = (timerId: NodeJS.Timeout) => {
-  timers.push(timerId);
+export const addIntervalToTerminalHandlers = (intervalId: NodeJS.Timeout) => {
+  intervals.push(intervalId);
+};
+
+export const addTimeoutToTerminalHandlers = (timeoutId: NodeJS.Timeout) => {
+  timeouts.push(timeoutId);
 };
 
 const signalTerminationToServer = (signal) => {

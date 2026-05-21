@@ -1,4 +1,5 @@
 import {
+  __resetSynchronizerStateForTests,
   syncClientConfig,
   syncStateByConnection,
 } from '../../../lib/hybrid-sdk/client/connectionsManager/synchronizer';
@@ -25,7 +26,8 @@ jest.mock(
 );
 jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
   isShuttingDown: jest.fn(() => false),
-  addTimerToTerminalHandlers: jest.fn(),
+  addIntervalToTerminalHandlers: jest.fn(),
+  addTimeoutToTerminalHandlers: jest.fn(),
 }));
 
 const mockedPluginManager = jest.mocked(pluginManager);
@@ -106,6 +108,7 @@ describe('syncClientConfig', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     syncStateByConnection.clear();
+    __resetSynchronizerStateForTests();
     process.env.SKIP_REMOTE_CONFIG = 'true';
     process.env.NODE_ENV = 'test';
 
@@ -433,20 +436,79 @@ describe('syncClientConfig', () => {
     });
   });
 
-  describe('recursive setTimeout registration', () => {
-    it('registers the recursive setTimeout via addTimerToTerminalHandlers when polling', async () => {
-      // Need NODE_ENV != 'test' for the setTimeout branch to fire.
+  describe('polling interval registration', () => {
+    it('registers a single setInterval via addIntervalToTerminalHandlers across multiple polling cycles', async () => {
+      // Need NODE_ENV != 'test' for the setInterval branch to fire.
+      process.env.NODE_ENV = 'production';
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        1,
+      );
+      const registeredTimer =
+        mockedSignals.addIntervalToTerminalHandlers.mock.calls[0][0];
+      expect(registeredTimer).toBeDefined();
+      // Mock doesn't clear; do it manually so the interval doesn't fire post-test.
+      clearInterval(registeredTimer as NodeJS.Timeout);
+    });
+
+    it('does not register via addTimeoutToTerminalHandlers (intervals only)', async () => {
       process.env.NODE_ENV = 'production';
       const clientOpts = makeClientOpts(undefined);
 
       await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
 
-      expect(mockedSignals.addTimerToTerminalHandlers).toHaveBeenCalledTimes(1);
+      expect(mockedSignals.addTimeoutToTerminalHandlers).not.toHaveBeenCalled();
       const registeredTimer =
-        mockedSignals.addTimerToTerminalHandlers.mock.calls[0][0];
-      expect(registeredTimer).toBeDefined();
-      // Mock doesn't clear; do it manually to prevent the recursive callback firing post-test.
-      clearTimeout(registeredTimer as NodeJS.Timeout);
+        mockedSignals.addIntervalToTerminalHandlers.mock.calls[0]?.[0];
+      if (registeredTimer) clearInterval(registeredTimer as NodeJS.Timeout);
+    });
+  });
+
+  describe('re-entrancy guard', () => {
+    it('skips a second concurrent call while the first is in progress', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      const secondCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      await secondCall;
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(1);
+
+      resolveFirst!();
+      await firstCall;
+    });
+
+    it('allows a subsequent call after the first completes', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
     });
   });
 
