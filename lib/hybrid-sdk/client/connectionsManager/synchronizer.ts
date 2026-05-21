@@ -8,7 +8,10 @@ import {
   IdentifyingMetadata,
   WebSocketConnection,
 } from '../types/client';
-import { addTimerToTerminalHandlers } from '../../common/utils/signals';
+import {
+  addTimerToTerminalHandlers,
+  isShuttingDown,
+} from '../../common/utils/signals';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
 
 /** Internal bookkeeping written by the synchronizer to detect config changes
@@ -34,6 +37,9 @@ export const syncClientConfig = async (
   websocketConnections: WebSocketConnection[],
   globalIdentifyingMetadata: IdentifyingMetadata,
 ): Promise<void> => {
+  if (isShuttingDown()) {
+    return;
+  }
   if (
     !process.env.SKIP_REMOTE_CONFIG &&
     !process.env.REMOTE_CONFIG_POLLING_MODE
@@ -54,14 +60,16 @@ export const syncClientConfig = async (
   if (isPollingRequired) {
     logger.debug({}, `Waiting for connections (polling).`);
     if (process.env.NODE_ENV != 'test') {
-      setTimeout(
-        () =>
-          syncClientConfig(
-            clientOpts,
-            websocketConnections,
-            globalIdentifyingMetadata,
-          ),
-        clientOpts.config.connectionsManager.watcher.interval,
+      addTimerToTerminalHandlers(
+        setTimeout(
+          () =>
+            syncClientConfig(
+              clientOpts,
+              websocketConnections,
+              globalIdentifyingMetadata,
+            ),
+          clientOpts.config.connectionsManager.watcher.interval,
+        ),
       );
     }
   } else {

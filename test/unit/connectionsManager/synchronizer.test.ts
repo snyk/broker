@@ -11,6 +11,8 @@ import {
 import * as pluginManager from '../../../lib/hybrid-sdk/client/brokerClientPlugins/pluginManager';
 import * as socket from '../../../lib/hybrid-sdk/client/socket';
 import * as connectionHelpers from '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers';
+import * as signals from '../../../lib/hybrid-sdk/common/utils/signals';
+import * as remoteConnectionSync from '../../../lib/hybrid-sdk/client/connectionsManager/remoteConnectionSync';
 import { log as logger } from '../../../lib/logs/logger';
 
 jest.mock(
@@ -21,10 +23,16 @@ jest.mock('../../../lib/hybrid-sdk/client/socket');
 jest.mock(
   '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers',
 );
+jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
+  isShuttingDown: jest.fn(() => false),
+  addTimerToTerminalHandlers: jest.fn(),
+}));
 
 const mockedPluginManager = jest.mocked(pluginManager);
 const mockedSocket = jest.mocked(socket);
 const mockedConnectionHelpers = jest.mocked(connectionHelpers);
+const mockedSignals = jest.mocked(signals);
+const mockedRemoteConnectionSync = jest.mocked(remoteConnectionSync);
 
 /** Create a minimal mock WebSocketConnection */
 function makeWsConn(
@@ -393,6 +401,52 @@ describe('syncClientConfig', () => {
         expect.anything(),
         'Shutting down connection',
       );
+    });
+  });
+
+  describe('shutdown gate', () => {
+    afterEach(() => {
+      mockedSignals.isShuttingDown.mockReturnValue(false);
+    });
+
+    it('returns immediately when isShuttingDown() is true, without calling retrieveAndLoadRemoteConfigSync', async () => {
+      mockedSignals.isShuttingDown.mockReturnValue(true);
+      delete process.env.SKIP_REMOTE_CONFIG;
+      const clientOpts = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: 'token-1',
+          friendlyName: 'my-conn',
+        },
+      });
+      const wsConns: WebSocketConnection[] = [];
+
+      await syncClientConfig(clientOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).not.toHaveBeenCalled();
+      expect(mockedPluginManager.runStartupPlugins).not.toHaveBeenCalled();
+      expect(
+        mockedSocket.createWebSocketConnectionPairs,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('recursive setTimeout registration', () => {
+    it('registers the recursive setTimeout via addTimerToTerminalHandlers when polling', async () => {
+      // Need NODE_ENV != 'test' for the setTimeout branch to fire.
+      process.env.NODE_ENV = 'production';
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addTimerToTerminalHandlers).toHaveBeenCalledTimes(1);
+      const registeredTimer =
+        mockedSignals.addTimerToTerminalHandlers.mock.calls[0][0];
+      expect(registeredTimer).toBeDefined();
+      // Mock doesn't clear; do it manually to prevent the recursive callback firing post-test.
+      clearTimeout(registeredTimer as NodeJS.Timeout);
     });
   });
 

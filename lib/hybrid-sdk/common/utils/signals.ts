@@ -3,9 +3,18 @@ import { log as logger } from '../../../logs/logger';
 
 const timers: NodeJS.Timeout[] = [];
 const GRACE_PERIOD_MS = 12000;
+
+let shuttingDown = false;
+export const isShuttingDown = (): boolean => shuttingDown;
+
+const clearAllTimers = () => {
+  timers.forEach((timer) => clearTimeout(timer));
+};
+
 export const handleTerminationSignal = (callback: () => void) => {
   process.on('SIGINT', () => {
-    timers.forEach((timer) => clearInterval(timer));
+    shuttingDown = true;
+    clearAllTimers();
     callback();
     signalTerminationToServer('SIGINT');
     setTimeout(() => {
@@ -14,7 +23,8 @@ export const handleTerminationSignal = (callback: () => void) => {
   });
 
   process.on('SIGTERM', async () => {
-    timers.forEach((timer) => clearInterval(timer));
+    shuttingDown = true;
+    clearAllTimers();
     callback();
     signalTerminationToServer('SIGTERM');
     setTimeout(() => {

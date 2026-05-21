@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { makeRequestToDownstream } from '../../http/request';
 import { ClientOpts } from '../../common/types/options';
 import { isJson } from '../../common/utils/json';
@@ -7,11 +7,19 @@ import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
 import { getAuthConfig } from '../auth/oauth';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
+import { log as logger } from '../../../logs/logger';
 
 export const retrieveConnectionsForDeployment = async (
   clientOpts: ClientOpts,
   universalFilePath: string,
 ) => {
+  if (!existsSync(universalFilePath)) {
+    logger.warn(
+      { universalFilePath },
+      'config.universal.json missing during sync; skipping',
+    );
+    return;
+  }
   const deploymentId = clientOpts.config.deploymentId;
   const apiVersion = clientOpts.config.apiVersion;
   const request: PostFilterPreparedRequest = {
