@@ -6,7 +6,7 @@ orbs:
 
 defaults: &defaults
   docker:
-    - image: cimg/node:20.14
+    - image: cimg/node:24.15
   working_directory: ~/broker
 filter-tags-only: &filter-tags-only
   filters:
@@ -261,7 +261,7 @@ jobs:
         type: string
       nodejs_cycle:
         type: string
-        default: ""
+        default: "24"
       project_name:
         type: string
         default: "broker"
@@ -444,7 +444,7 @@ workflows:
           requires:
             - Install NPM packages
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "20"
+          nodejs_cycle: "24"
           project_name: broker
 
       - scan-docker-image:
@@ -1016,7 +1016,7 @@ workflows:
             - Scan repository for secrets
             - Release all docker images
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "20"
+          nodejs_cycle: "24"
           project_name: broker
           post-steps:
             - notify-slack-on-failure
@@ -1061,7 +1061,7 @@ workflows:
             - Scan repository for secrets
           additional_arguments: "--build-arg BASE_IMAGE=ubuntu:24.04"
           dockerfile: dockerfiles/base/Dockerfile
-          nodejs_cycle: "24"
+          nodejs_cycle: "26"
           project_name: broker-edge
           post-steps:
             - notify-slack-on-failure
