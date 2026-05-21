@@ -53,8 +53,12 @@ export async function executeHttpRequest(
   } catch (error) {
     if (error instanceof Error) {
       error.message = `Error executing check with checkId ${checkOptions.id}: ${error.message}`;
+      throw error;
     }
-    throw error;
+    throw new Error(
+      `Error executing check with checkId ${checkOptions.id}: ${String(error)}`,
+      { cause: error },
+    );
   }
 }
 

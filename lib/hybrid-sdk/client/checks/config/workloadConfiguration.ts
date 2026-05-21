@@ -68,7 +68,13 @@ function verifyClassAndHandler(className, filePath) {
 
     return handlerRegex.test(fileContent);
   } catch (error) {
-    const errorMessage = `Error validating Workload configuration. ${error}`;
-    throw new Error(errorMessage);
+    if (error instanceof Error) {
+      error.message = `Error validating Workload configuration. ${error.message}`;
+      throw error;
+    }
+    throw new Error(
+      `Error validating Workload configuration. ${String(error)}`,
+      { cause: error },
+    );
   }
 }

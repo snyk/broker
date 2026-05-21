@@ -16,7 +16,7 @@ jest.mock(
   }),
 );
 
-describe('serviceHandler — log levels (PR 2 contract)', () => {
+describe('serviceHandler — config / filter reload log levels', () => {
   let infoSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
 
@@ -54,7 +54,7 @@ describe('serviceHandler — log levels (PR 2 contract)', () => {
   });
 });
 
-describe('serviceHandler — log levels (PR 8 contract)', () => {
+describe('serviceHandler — unknown-command log level', () => {
   let warnSpy: jest.SpyInstance;
   let errorSpy: jest.SpyInstance;
 

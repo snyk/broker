@@ -332,7 +332,7 @@ describe('syncClientConfig', () => {
     ).not.toHaveBeenCalled();
   });
 
-  describe('log levels (PR 2 contract)', () => {
+  describe('log levels', () => {
     let infoSpy: jest.SpyInstance;
     let debugSpy: jest.SpyInstance;
 

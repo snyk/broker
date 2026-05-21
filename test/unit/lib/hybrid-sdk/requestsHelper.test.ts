@@ -92,7 +92,7 @@ describe('makeLegacyRequest — SCM response status logging', () => {
   );
 });
 
-describe('legacyStreaming — log levels (PR 8 contract)', () => {
+describe('legacyStreaming — capability-fallback log level', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

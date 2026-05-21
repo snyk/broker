@@ -1,7 +1,7 @@
 import { log as logger } from '../../../../lib/logs/logger';
 import { errorHandler } from '../../../../lib/hybrid-sdk/client/socketHandlers/errorHandler';
 
-describe('errorHandler — log levels (PR 8 contract)', () => {
+describe('errorHandler — log levels', () => {
   let warnSpy: jest.SpyInstance;
   let errorSpy: jest.SpyInstance;
 

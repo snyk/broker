@@ -61,7 +61,7 @@ describe('executeHttpRequest — error-handling regression', () => {
     expect((caught as any).code).toBe('ECONNREFUSED');
   });
 
-  it('lets non-Error throwables pass through unchanged', async () => {
+  it('wraps a non-Error string throwable in an Error, preserving the original via cause', async () => {
     mockedRequest.mockRejectedValueOnce('not an Error instance');
 
     let caught: unknown;
@@ -74,7 +74,47 @@ describe('executeHttpRequest — error-handling regression', () => {
       caught = e;
     }
 
-    expect(caught).toBe('not an Error instance');
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toContain('broker-server-status');
+    expect((caught as Error).message).toContain('not an Error instance');
+    expect((caught as Error).cause).toBe('not an Error instance');
+  });
+
+  it('wraps a non-Error object throwable, preserving it via cause', async () => {
+    const original = { code: 'X', detail: { reason: 'bad' } };
+    mockedRequest.mockRejectedValueOnce(original);
+
+    let caught: unknown;
+    try {
+      await executeHttpRequest(
+        { id: 'broker-server-status', name: 'Broker Server Healthcheck' },
+        httpOptions,
+      );
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toContain('broker-server-status');
+    expect((caught as Error).cause).toBe(original);
+  });
+
+  it('wraps null / undefined throwables without crashing', async () => {
+    mockedRequest.mockRejectedValueOnce(null);
+
+    let caught: unknown;
+    try {
+      await executeHttpRequest(
+        { id: 'broker-server-status', name: 'Broker Server Healthcheck' },
+        httpOptions,
+      );
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toContain('broker-server-status');
+    expect((caught as Error).cause).toBeNull();
   });
 
   it('does not double-prefix when called twice with different check ids', async () => {
