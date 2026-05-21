@@ -16,6 +16,7 @@ let client: ClientCredentials | null = null;
 let token: AccessToken | null = null;
 let metrics: MetricsClient | undefined;
 let thresholdSeconds = DEFAULT_EXPIRY_THRESHOLD_SECONDS;
+let inFlightRefresh: Promise<AccessToken> | null = null;
 
 export function isOAuthClientInitialized(): boolean {
   return client !== null;
@@ -37,6 +38,33 @@ export function initOAuthClient(opts: InitOAuthClientOptions): void {
   thresholdSeconds =
     opts.expiryThresholdSeconds ?? DEFAULT_EXPIRY_THRESHOLD_SECONDS;
   token = null;
+  inFlightRefresh = null;
+}
+
+function refreshToken(): Promise<AccessToken> {
+  if (!client) {
+    return Promise.reject(
+      new Error('OAuth client not initialized. Call initOAuthClient() first.'),
+    );
+  }
+  if (inFlightRefresh) {
+    return inFlightRefresh;
+  }
+  const activeClient = client;
+  inFlightRefresh = (async () => {
+    try {
+      token = await activeClient.getToken({});
+      logger.debug({}, 'Refreshed oauth access token');
+      return token;
+    } catch (err) {
+      metrics?.recordJwtRefreshFailure();
+      logger.error({ err }, 'Unable to retrieve JWT');
+      throw err;
+    } finally {
+      inFlightRefresh = null;
+    }
+  })();
+  return inFlightRefresh;
 }
 
 async function ensureToken(): Promise<AccessToken> {
@@ -48,15 +76,7 @@ async function ensureToken(): Promise<AccessToken> {
   if (token && !token.expired(thresholdSeconds)) {
     return token;
   }
-  try {
-    token = await client.getToken({});
-    logger.debug({}, 'Refreshed oauth access token');
-    return token;
-  } catch (err) {
-    metrics?.recordJwtRefreshFailure();
-    logger.error({ err }, 'Unable to retrieve JWT');
-    throw err;
-  }
+  return refreshToken();
 }
 
 function formatAccessToken(accessToken: AccessToken): string {
@@ -64,10 +84,28 @@ function formatAccessToken(accessToken: AccessToken): string {
   return `${raw.token_type} ${raw.access_token}`;
 }
 
-/** Returns a cached token synchronously when still valid; undefined if a fetch is required. */
+/**
+ * Returns a cached token synchronously. Triggers a background refresh when the
+ * cached token is within the expiry threshold (or absent/expired) so that
+ * subsequent sync reads see a fresh token. When the token is within the
+ * threshold but not yet expired, the still-valid token is returned for the
+ * current caller — better than returning undefined and forcing an unauth'd
+ * request.
+ */
 export function getCachedAccessToken(): string | undefined {
-  if (!token || token.expired(thresholdSeconds)) {
+  if (!client) {
     return undefined;
+  }
+  if (!token || token.expired(0)) {
+    void refreshToken().catch(() => {
+      /* failure already logged and recorded in refreshToken */
+    });
+    return undefined;
+  }
+  if (token.expired(thresholdSeconds)) {
+    void refreshToken().catch(() => {
+      /* failure already logged and recorded in refreshToken */
+    });
   }
   return formatAccessToken(token);
 }

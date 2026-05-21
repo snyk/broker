@@ -360,6 +360,93 @@ describe('createWebSocket - renew auth behaviour', () => {
     });
   });
 
+  describe('Thrown error during renewal', () => {
+    it('should reschedule and not crash when getAccessToken rejects', async () => {
+      const {
+        getAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      const mockLoggerWarn = jest.spyOn(logger, 'warn').mockImplementation();
+      const recordAuthRenewalFailureSpy = jest.spyOn(
+        require('../../../lib/hybrid-sdk/client/metrics/noopClient').NoopClient
+          .prototype,
+        'recordAuthRenewalFailure',
+      );
+
+      (getAccessToken as jest.Mock)
+        .mockRejectedValueOnce(new Error('oauth unreachable'))
+        .mockResolvedValue('Bearer test-token');
+
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+
+      // First tick: getAccessToken throws → handler should swallow and reschedule.
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      expect(mockRenewBrokerServerConnection).not.toHaveBeenCalled();
+      expect(recordAuthRenewalFailureSpy).toHaveBeenCalledWith(0);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connection: expect.any(String),
+          role: Role.primary,
+          err: expect.any(Error),
+        }),
+        'Failed to renew connection.',
+      );
+      expect(mockProcessExit).not.toHaveBeenCalled();
+      expect(ws.timeoutHandlerId).toBeDefined();
+
+      // Second tick: loop survived and proceeds normally.
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('should reschedule and not crash when renewBrokerServerConnection rejects', async () => {
+      const mockLoggerWarn = jest.spyOn(logger, 'warn').mockImplementation();
+      const recordAuthRenewalFailureSpy = jest.spyOn(
+        require('../../../lib/hybrid-sdk/client/metrics/noopClient').NoopClient
+          .prototype,
+        'recordAuthRenewalFailure',
+      );
+
+      mockRenewBrokerServerConnection
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce({ statusCode: 200, headers: {}, body: '{}' });
+
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+
+      // First tick: renewal throws → handler should swallow and reschedule.
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
+      expect(recordAuthRenewalFailureSpy).toHaveBeenCalledWith(0);
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connection: expect.any(String),
+          role: Role.primary,
+          err: expect.any(Error),
+        }),
+        'Failed to renew connection.',
+      );
+      expect(mockProcessExit).not.toHaveBeenCalled();
+      expect(ws.timeoutHandlerId).toBeDefined();
+
+      // Second tick: loop survived and the 200 response is honored.
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+  });
+
   describe('reconnect scheduled', () => {
     it('updates extraHeaders synchronously without awaiting getAccessToken', async () => {
       const {
