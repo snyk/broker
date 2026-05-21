@@ -30,15 +30,18 @@ export const syncStateByConnection = new Map<string, SyncState>();
 let pollingIntervalRegistered = false;
 
 /** Re-entrancy guard. Polling, backup-watcher, and RPC-triggered calls can
- *  race; we drop overlapping calls because the in-flight sync already covers
- *  the latest state. */
+ *  race. We coalesce instead of drop: at most one extra cycle is queued, so
+ *  an RPC reload arriving mid-sync still triggers a follow-up pass to pick
+ *  up the latest state. */
 let isSyncing = false;
+let resyncPending = false;
 
 /** Test-only reset. The registration flag is module-level state; tests that
  *  trigger the polling branch need to clear it between cases. */
 export const __resetSynchronizerStateForTests = () => {
   pollingIntervalRegistered = false;
   isSyncing = false;
+  resyncPending = false;
 };
 
 /**
@@ -58,174 +61,192 @@ export const syncClientConfig = async (
     return;
   }
   if (isSyncing) {
-    logger.debug({}, 'syncClientConfig already in progress, skipping tick.');
+    // Coalesce: queue exactly one follow-up cycle so the latest state is
+    // observed without stacking concurrent syncs.
+    resyncPending = true;
+    logger.debug(
+      {},
+      'syncClientConfig already in progress, queuing follow-up cycle.',
+    );
     return;
   }
   isSyncing = true;
   try {
-    if (
-      !process.env.SKIP_REMOTE_CONFIG &&
-      !process.env.REMOTE_CONFIG_POLLING_MODE
-    ) {
-      // Done at startup only. RPC calls trigger this instead of polling
-      await retrieveAndLoadRemoteConfigSync(clientOpts);
-    }
-
-    const integrationsKeys = clientOpts.config.connections
-      ? Object.keys(clientOpts.config.connections)
-      : [];
-
-    const isPollingRequired =
-      clientOpts.config.UNIVERSAL_BROKER_GA !== 'true' ||
-      integrationsKeys.length < 1 ||
-      websocketConnections.length === 0;
-
-    if (isPollingRequired) {
-      logger.debug({}, `Waiting for connections (polling).`);
-      if (process.env.NODE_ENV != 'test' && !pollingIntervalRegistered) {
-        pollingIntervalRegistered = true;
-        addIntervalToTerminalHandlers(
-          setInterval(
-            () =>
-              syncClientConfig(
-                clientOpts,
-                websocketConnections,
-                globalIdentifyingMetadata,
-              ),
-            clientOpts.config.connectionsManager.watcher.interval,
-          ),
-        );
-      }
-    } else {
-      logger.debug({}, 'Disabling polling in favor of server notification.');
-    }
-
-    for (const key of integrationsKeys) {
-      const connectionConfig = clientOpts.config.connections[key];
-
-      const currentWebsocketConnectionIndex = websocketConnections.findIndex(
-        (conn) => conn.friendlyName === key,
+    do {
+      resyncPending = false;
+      await runSyncCycle(
+        clientOpts,
+        websocketConnections,
+        globalIdentifyingMetadata,
       );
-      if (connectionConfig.isDisabled) {
-        logger.error(
+    } while (resyncPending && !isShuttingDown());
+  } finally {
+    isSyncing = false;
+  }
+};
+
+const runSyncCycle = async (
+  clientOpts,
+  websocketConnections: WebSocketConnection[],
+  globalIdentifyingMetadata: IdentifyingMetadata,
+): Promise<void> => {
+  if (
+    !process.env.SKIP_REMOTE_CONFIG &&
+    !process.env.REMOTE_CONFIG_POLLING_MODE
+  ) {
+    // Done at startup only. RPC calls trigger this instead of polling
+    await retrieveAndLoadRemoteConfigSync(clientOpts);
+  }
+
+  const integrationsKeys = clientOpts.config.connections
+    ? Object.keys(clientOpts.config.connections)
+    : [];
+
+  const isPollingRequired =
+    clientOpts.config.UNIVERSAL_BROKER_GA !== 'true' ||
+    integrationsKeys.length < 1 ||
+    websocketConnections.length === 0;
+
+  if (isPollingRequired) {
+    logger.debug({}, `Waiting for connections (polling).`);
+    if (process.env.NODE_ENV != 'test' && !pollingIntervalRegistered) {
+      pollingIntervalRegistered = true;
+      addIntervalToTerminalHandlers(
+        setInterval(
+          () =>
+            syncClientConfig(
+              clientOpts,
+              websocketConnections,
+              globalIdentifyingMetadata,
+            ),
+          clientOpts.config.connectionsManager.watcher.interval,
+        ),
+      );
+    }
+  } else {
+    logger.debug({}, 'Disabling polling in favor of server notification.');
+  }
+
+  for (const key of integrationsKeys) {
+    const connectionConfig = clientOpts.config.connections[key];
+
+    const currentWebsocketConnectionIndex = websocketConnections.findIndex(
+      (conn) => conn.friendlyName === key,
+    );
+    if (connectionConfig.isDisabled) {
+      logger.error(
+        {
+          id: connectionConfig.id,
+          name: connectionConfig.friendlyName,
+        },
+        `Connection is disabled due to (a) missing environment variable(s). Please provide the value and restart the broker client.`,
+      );
+      continue;
+    }
+    if (!connectionConfig.identifier) {
+      if (currentWebsocketConnectionIndex > -1) {
+        logger.info(
           {
             id: connectionConfig.id,
             name: connectionConfig.friendlyName,
           },
-          `Connection is disabled due to (a) missing environment variable(s). Please provide the value and restart the broker client.`,
+          `Shutting down unused connection.`,
         );
-        continue;
-      }
-      if (!connectionConfig.identifier) {
-        if (currentWebsocketConnectionIndex > -1) {
-          logger.info(
-            {
-              id: connectionConfig.id,
-              name: connectionConfig.friendlyName,
-            },
-            `Shutting down unused connection.`,
-          );
-          shutDownConnectionPair(
-            websocketConnections,
-            integrationsKeys.indexOf(key),
-          );
-        } else {
-          logger.debug(
-            {
-              id: connectionConfig.id,
-              name: connectionConfig.friendlyName,
-            },
-            `Connection (${connectionConfig.friendlyName}) not in use by any orgs. Will check periodically and create connection when in use.`,
-          );
-        }
-        continue;
-      }
-
-      // If connection doesn't exist, create it
-      if (currentWebsocketConnectionIndex < 0) {
-        logger.info({ connectionName: key }, 'Creating configured connection.');
-        await runStartupPlugins(clientOpts, key);
-
-        const [primary, secondary] = await createWebSocketConnectionPairs(
-          clientOpts,
-          globalIdentifyingMetadata,
-          key,
-          clientOpts.metricsClient,
-        );
-        websocketConnections.push(primary, secondary);
-      } else if (
-        // Token rotation for the connection at hand
-        connectionConfig.identifier !=
-        websocketConnections[currentWebsocketConnectionIndex].identifier
-      ) {
-        logger.info(
-          { connectionName: key },
-          'Updating configured connection for new identifier.',
-        );
-        // shut down previous tunnels
         shutDownConnectionPair(
           websocketConnections,
           integrationsKeys.indexOf(key),
         );
-
-        // setup new tunnels
-        await runStartupPlugins(clientOpts, key);
-
-        const [primary, secondary] = await createWebSocketConnectionPairs(
-          clientOpts,
-          globalIdentifyingMetadata,
-          key,
-          clientOpts.metricsClient,
-        );
-        websocketConnections.push(primary, secondary);
       } else {
-        // If contexts have changed, re-run plugins for the connection
-        const contextsChanged =
-          JSON.stringify(connectionConfig.contexts ?? {}) !==
-          JSON.stringify(syncStateByConnection.get(key)?.contexts ?? {});
-        if (contextsChanged) {
-          logger.info(
-            { connectionName: key },
-            'Contexts changed, re-running plugins.',
-          );
-          await runStartupPlugins(clientOpts, key);
-        } else {
-          logger.debug(
-            { connectionName: key },
-            'Connection already configured.',
+        logger.debug(
+          {
+            id: connectionConfig.id,
+            name: connectionConfig.friendlyName,
+          },
+          `Connection (${connectionConfig.friendlyName}) not in use by any orgs. Will check periodically and create connection when in use.`,
+        );
+      }
+      continue;
+    }
+
+    // If connection doesn't exist, create it
+    if (currentWebsocketConnectionIndex < 0) {
+      logger.info({ connectionName: key }, 'Creating configured connection.');
+      await runStartupPlugins(clientOpts, key);
+
+      const [primary, secondary] = await createWebSocketConnectionPairs(
+        clientOpts,
+        globalIdentifyingMetadata,
+        key,
+        clientOpts.metricsClient,
+      );
+      websocketConnections.push(primary, secondary);
+    } else if (
+      // Token rotation for the connection at hand
+      connectionConfig.identifier !=
+      websocketConnections[currentWebsocketConnectionIndex].identifier
+    ) {
+      logger.info(
+        { connectionName: key },
+        'Updating configured connection for new identifier.',
+      );
+      // shut down previous tunnels
+      shutDownConnectionPair(
+        websocketConnections,
+        integrationsKeys.indexOf(key),
+      );
+
+      // setup new tunnels
+      await runStartupPlugins(clientOpts, key);
+
+      const [primary, secondary] = await createWebSocketConnectionPairs(
+        clientOpts,
+        globalIdentifyingMetadata,
+        key,
+        clientOpts.metricsClient,
+      );
+      websocketConnections.push(primary, secondary);
+    } else {
+      // If contexts have changed, re-run plugins for the connection
+      const contextsChanged =
+        JSON.stringify(connectionConfig.contexts ?? {}) !==
+        JSON.stringify(syncStateByConnection.get(key)?.contexts ?? {});
+      if (contextsChanged) {
+        logger.info(
+          { connectionName: key },
+          'Contexts changed, re-running plugins.',
+        );
+        await runStartupPlugins(clientOpts, key);
+      } else {
+        logger.debug({ connectionName: key }, 'Connection already configured.');
+      }
+    }
+
+    syncStateByConnection.set(key, { contexts: connectionConfig.contexts });
+  }
+
+  // Shut down connections that are no longer configured
+  if (integrationsKeys.length != websocketConnections.length) {
+    const alreadyShutDownConnectionNames: string[] = [];
+    for (let i = 0; i < websocketConnections.length; i++) {
+      const friendlyName = websocketConnections[i].friendlyName;
+      if (
+        friendlyName &&
+        !integrationsKeys.includes(friendlyName) &&
+        !alreadyShutDownConnectionNames.includes(friendlyName)
+      ) {
+        logger.info({ friendlyName }, 'Shutting down connection');
+        try {
+          alreadyShutDownConnectionNames.push(friendlyName);
+          syncStateByConnection.delete(friendlyName);
+          shutDownConnectionPair(websocketConnections, i);
+        } catch (err) {
+          logger.error(
+            { err },
+            `Error shutting down connection ${friendlyName}`,
           );
         }
       }
-
-      syncStateByConnection.set(key, { contexts: connectionConfig.contexts });
     }
-
-    // Shut down connections that are no longer configured
-    if (integrationsKeys.length != websocketConnections.length) {
-      const alreadyShutDownConnectionNames: string[] = [];
-      for (let i = 0; i < websocketConnections.length; i++) {
-        const friendlyName = websocketConnections[i].friendlyName;
-        if (
-          friendlyName &&
-          !integrationsKeys.includes(friendlyName) &&
-          !alreadyShutDownConnectionNames.includes(friendlyName)
-        ) {
-          logger.info({ friendlyName }, 'Shutting down connection');
-          try {
-            alreadyShutDownConnectionNames.push(friendlyName);
-            syncStateByConnection.delete(friendlyName);
-            shutDownConnectionPair(websocketConnections, i);
-          } catch (err) {
-            logger.error(
-              { err },
-              `Error shutting down connection ${friendlyName}`,
-            );
-          }
-        }
-      }
-    }
-  } finally {
-    isSyncing = false;
   }
 };
 

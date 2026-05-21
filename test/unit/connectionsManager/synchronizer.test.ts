@@ -107,6 +107,8 @@ describe('syncClientConfig', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks resets call history but not mockReturnValue overrides.
+    mockedSignals.isShuttingDown.mockReturnValue(false);
     syncStateByConnection.clear();
     __resetSynchronizerStateForTests();
     process.env.SKIP_REMOTE_CONFIG = 'true';
@@ -469,8 +471,8 @@ describe('syncClientConfig', () => {
     });
   });
 
-  describe('re-entrancy guard', () => {
-    it('skips a second concurrent call while the first is in progress', async () => {
+  describe('re-entrancy coalescing', () => {
+    it('coalesces a concurrent call into exactly one follow-up cycle', async () => {
       delete process.env.SKIP_REMOTE_CONFIG;
       let resolveFirst: (() => void) | undefined;
       mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
@@ -488,12 +490,77 @@ describe('syncClientConfig', () => {
       const secondCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
 
       await secondCall;
+      // Second call returned immediately (coalesced) — only the first cycle has started.
       expect(
         mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
       ).toHaveBeenCalledTimes(1);
 
       resolveFirst!();
       await firstCall;
+
+      // Follow-up cycle ran exactly once after the first completed.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('collapses multiple concurrent calls to a single follow-up cycle', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      // Three concurrent calls during the first in-flight sync.
+      await Promise.all([
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+      ]);
+
+      resolveFirst!();
+      await firstCall;
+
+      // First cycle + exactly one coalesced follow-up = 2 total, not 4.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips the queued follow-up cycle if shutdown begins mid-sync', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA); // queues follow-up
+
+      // Shutdown begins before the first cycle finishes.
+      mockedSignals.isShuttingDown.mockReturnValue(true);
+      resolveFirst!();
+      await firstCall;
+
+      // Only the first cycle ran; the queued follow-up was skipped.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('allows a subsequent call after the first completes', async () => {
