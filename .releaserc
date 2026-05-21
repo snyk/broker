@@ -1,6 +1,9 @@
 {
   "prepare": [
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      { "npmPublish": false }
+    ],
     {
       "//": "build the linux, macos, and windows binaries",
       "path": "@semantic-release/exec",
@@ -23,7 +26,10 @@
     }
   ],
   "publish": [
-    "@semantic-release/npm",
+    {
+      "path": "@semantic-release/exec",
+      "cmd": "npm publish"
+    },
     {
       "path": "@semantic-release/github",
       "assets": [
