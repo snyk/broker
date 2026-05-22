@@ -156,4 +156,88 @@ describe('signals', () => {
       clearTimeoutSpy.mockRestore();
     });
   });
+
+  describe('clearAndRemoveInterval / clearAndRemoveTimeout', () => {
+    it('clearAndRemoveInterval clears the timer and removes it from the registry so shutdown does not re-clear it', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const fn = jest.fn();
+      const interval = setInterval(fn, 10);
+      signals.addIntervalToTerminalHandlers(interval);
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      signals.clearAndRemoveInterval(interval);
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(clearIntervalSpy).toHaveBeenCalledWith(interval);
+
+      // Shutdown should not redundantly call clearInterval on the removed handle.
+      process.emit('SIGTERM' as any);
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(100);
+      expect(fn).not.toHaveBeenCalled();
+      clearIntervalSpy.mockRestore();
+    });
+
+    it('clearAndRemoveTimeout clears the timer and removes it from the registry so shutdown does not re-clear it', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const fn = jest.fn();
+      const timeout = setTimeout(fn, 50);
+      signals.addTimeoutToTerminalHandlers(timeout);
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+
+      signals.clearAndRemoveTimeout(timeout);
+      expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(timeout);
+
+      process.emit('SIGTERM' as any);
+      expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(100);
+      expect(fn).not.toHaveBeenCalled();
+      clearTimeoutSpy.mockRestore();
+    });
+
+    it('repeated toggle does not grow the registry: shutdown clears only the currently-registered handle', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      // Simulate three add/clear cycles followed by a final live registration.
+      for (let i = 0; i < 3; i++) {
+        const id = setInterval(() => {}, 10);
+        signals.addIntervalToTerminalHandlers(id);
+        signals.clearAndRemoveInterval(id);
+      }
+      const liveId = setInterval(() => {}, 10);
+      signals.addIntervalToTerminalHandlers(liveId);
+
+      clearIntervalSpy.mockClear();
+      process.emit('SIGTERM' as any);
+
+      // Only the live handle is in the registry; the three cleared ones are gone.
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(clearIntervalSpy).toHaveBeenCalledWith(liveId);
+      clearIntervalSpy.mockRestore();
+    });
+
+    it('clearAndRemoveInterval is a no-op (no throw) on an unregistered handle', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      const stray = setInterval(() => {}, 10);
+      const registered = setInterval(() => {}, 10);
+      signals.addIntervalToTerminalHandlers(registered);
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      expect(() => signals.clearAndRemoveInterval(stray)).not.toThrow();
+      // Stray handle gets cleared (defensive), but the registered one survives.
+      expect(clearIntervalSpy).toHaveBeenCalledWith(stray);
+
+      clearIntervalSpy.mockClear();
+      process.emit('SIGTERM' as any);
+      expect(clearIntervalSpy).toHaveBeenCalledWith(registered);
+      clearIntervalSpy.mockRestore();
+    });
+  });
 });

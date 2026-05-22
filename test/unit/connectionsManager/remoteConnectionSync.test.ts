@@ -14,6 +14,8 @@ jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
   isShuttingDown: jest.fn(() => false),
   addIntervalToTerminalHandlers: jest.fn(),
   addTimeoutToTerminalHandlers: jest.fn(),
+  clearAndRemoveInterval: jest.fn(),
+  clearAndRemoveTimeout: jest.fn(),
 }));
 jest.mock('node:fs', () => ({
   ...jest.requireActual('node:fs'),

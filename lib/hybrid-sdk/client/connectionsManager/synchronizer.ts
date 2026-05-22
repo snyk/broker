@@ -10,6 +10,7 @@ import {
 } from '../types/client';
 import {
   addIntervalToTerminalHandlers,
+  clearAndRemoveInterval,
   isShuttingDown,
 } from '../../common/utils/signals';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
@@ -41,7 +42,7 @@ let resyncPending = false;
  *  trigger the polling branch need to clear it between cases. */
 export const __resetSynchronizerStateForTests = () => {
   if (pollingIntervalId) {
-    clearInterval(pollingIntervalId);
+    clearAndRemoveInterval(pollingIntervalId);
   }
   pollingIntervalId = null;
   isSyncing = false;
@@ -128,7 +129,7 @@ const runSyncCycle = async (
   } else {
     logger.debug({}, 'Disabling polling in favor of server notification.');
     if (pollingIntervalId) {
-      clearInterval(pollingIntervalId);
+      clearAndRemoveInterval(pollingIntervalId);
       pollingIntervalId = null;
     }
   }

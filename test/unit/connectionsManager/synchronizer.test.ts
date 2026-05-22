@@ -28,6 +28,8 @@ jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
   isShuttingDown: jest.fn(() => false),
   addIntervalToTerminalHandlers: jest.fn(),
   addTimeoutToTerminalHandlers: jest.fn(),
+  clearAndRemoveInterval: jest.fn(),
+  clearAndRemoveTimeout: jest.fn(),
 }));
 
 const mockedPluginManager = jest.mocked(pluginManager);
@@ -472,7 +474,6 @@ describe('syncClientConfig', () => {
 
     it('clears the polling interval once polling is no longer required', async () => {
       process.env.NODE_ENV = 'production';
-      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
       // Cycle 1: no connections → polling required → interval registered.
       const pollingOpts = makeClientOpts(undefined);
@@ -485,7 +486,7 @@ describe('syncClientConfig', () => {
         .calls[0][0] as NodeJS.Timeout;
 
       // Cycle 2: configured connection with matching ws conns → polling
-      // not required → interval cleared.
+      // not required → interval cleared and removed from registry.
       const steadyOpts = makeClientOpts({
         'my-conn': {
           type: 'github',
@@ -499,8 +500,12 @@ describe('syncClientConfig', () => {
       ];
       await syncClientConfig(steadyOpts, wsConns, IDENTIFYING_METADATA);
 
-      expect(clearIntervalSpy).toHaveBeenCalledWith(registeredTimer);
-      clearIntervalSpy.mockRestore();
+      expect(mockedSignals.clearAndRemoveInterval).toHaveBeenCalledWith(
+        registeredTimer,
+      );
+      // Defensive: the bare clearInterval is not called from production code;
+      // the paired helper is the only path that removes from the registry.
+      clearInterval(registeredTimer);
     });
 
     it('re-arms a fresh interval after a clear if polling becomes required again', async () => {

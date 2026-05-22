@@ -43,6 +43,26 @@ export const addTimeoutToTerminalHandlers = (timeoutId: NodeJS.Timeout) => {
   timeouts.push(timeoutId);
 };
 
+/** Clear an interval and remove its handle from the registry. Paired so
+ *  callers can't clear-without-remove, which previously caused the registry
+ *  to grow with dead references whenever a timer was toggled at runtime. */
+export const clearAndRemoveInterval = (intervalId: NodeJS.Timeout) => {
+  clearInterval(intervalId);
+  const i = intervals.indexOf(intervalId);
+  if (i !== -1) {
+    intervals.splice(i, 1);
+  }
+};
+
+/** Clear a timeout and remove its handle from the registry. */
+export const clearAndRemoveTimeout = (timeoutId: NodeJS.Timeout) => {
+  clearTimeout(timeoutId);
+  const i = timeouts.indexOf(timeoutId);
+  if (i !== -1) {
+    timeouts.splice(i, 1);
+  }
+};
+
 const signalTerminationToServer = (signal) => {
   const [websocket] = getWebsocketConnections();
   if (websocket) {
