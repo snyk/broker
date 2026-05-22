@@ -550,6 +550,10 @@ describe('syncClientConfig', () => {
       const secondTimer = mockedSignals.addIntervalToTerminalHandlers.mock
         .calls[1][0] as NodeJS.Timeout;
       expect(secondTimer).not.toBe(firstTimer);
+      // clearAndRemoveInterval is mocked, so the underlying NodeJS interval
+      // from Cycle 1 is never actually cleared by production code — drain it
+      // here to avoid an open handle keeping Jest alive.
+      clearInterval(firstTimer);
       clearInterval(secondTimer);
     });
   });
