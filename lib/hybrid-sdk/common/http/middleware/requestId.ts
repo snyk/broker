@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { log as logger } from '../../../../logs/logger';
 import { isUUID } from '../../utils/uuid';
-import { extractBrokerTokenFromUrl, maskToken } from '../../utils/token';
+import { safeUrl } from '../../utils/token';
 
 /** Inbound headers inspected for an existing request ID, in priority order. */
 const DEFAULT_INHERITED_HEADERS: ReadonlyArray<string> = [
@@ -51,12 +51,8 @@ export const setRequestIdHeader = (
         req.requestId = inherited;
       } else {
         req.requestId = randomUUID();
-        const brokerToken = extractBrokerTokenFromUrl(req.url);
-        const safeUrl = brokerToken
-          ? req.url.replaceAll(brokerToken, maskToken(brokerToken))
-          : req.url;
         logger.debug(
-          { method: req.method, url: safeUrl },
+          { method: req.method, url: safeUrl(req.url) },
           'No valid request ID in inbound headers — new request ID generated',
         );
       }

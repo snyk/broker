@@ -7,6 +7,7 @@ import {
   maskToken,
   hashToken,
   extractBrokerTokenFromUrl,
+  safeUrl,
 } from '../utils/token';
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
@@ -49,15 +50,14 @@ export const webserver = (config, altPort: number) => {
   app.use((err, req, res, next) => {
     if (err) {
       const brokerToken = extractBrokerTokenFromUrl(req.url);
-      const maskedToken = maskToken(brokerToken);
       const hashedToken = hashToken(brokerToken);
       logger.error(
         {
-          url: req.url.replaceAll(brokerToken, maskedToken),
+          url: safeUrl(req.url),
           requestMethod: req.method,
           requestHeaders: req.headers,
           requestId: req.requestId ?? '',
-          maskedToken: maskedToken,
+          maskedToken: maskToken(brokerToken),
           hashedToken: hashedToken,
           error: err,
         },

@@ -6,7 +6,7 @@ import { bootstrap } from 'global-agent';
 import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { getConfig } from '../common/config/config';
-import { extractBrokerTokenFromUrl, maskToken } from '../common/utils/token';
+import { safeUrl } from '../common/utils/token';
 import { switchToInsecure } from './utils';
 import version from '../common/utils/version';
 
@@ -76,23 +76,19 @@ export const makeRequestToDownstream = async (
               response.statusCode >= 200 &&
               response.statusCode < 300
             ) {
-              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-              const maskedToken = maskToken(brokerToken);
               logger.trace(
                 {
                   statusCode: response.statusCode,
-                  url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                  url: safeUrl(localRequest.url),
                   requestDurationMs,
                 },
                 `Successful request`,
               );
             } else {
-              const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-              const maskedToken = maskToken(brokerToken);
               logger.debug(
                 {
                   statusCode: response.statusCode,
-                  url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                  url: safeUrl(localRequest.url),
                   requestDurationMs,
                 },
                 `Non 2xx HTTP Code Received`,
@@ -128,11 +124,9 @@ export const makeRequestToDownstream = async (
       request.on('error', (error) => {
         const requestDurationMs = performance.now() - startTime;
         if (retries > 0) {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-          const maskedToken = maskToken(brokerToken);
           logger.warn(
             {
-              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              url: safeUrl(localRequest.url),
               err: error,
               requestDurationMs,
               requestId,
@@ -143,11 +137,9 @@ export const makeRequestToDownstream = async (
             resolve(makeRequestToDownstream(localRequest, retries - 1));
           }, 500); // Wait for 0.5 second before retrying
         } else {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-          const maskedToken = maskToken(brokerToken);
           logger.error(
             {
-              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              url: safeUrl(localRequest.url),
               err: error,
               requestDurationMs,
               requestId,
@@ -208,24 +200,20 @@ export const makeStreamingRequestToDownstream = (
             response.statusCode >= 200 &&
             response.statusCode < 300
           ) {
-            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-            const maskedToken = maskToken(brokerToken);
             logger.debug(
               {
                 statusCode: response.statusCode,
-                url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                url: safeUrl(localRequest.url),
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
                 requestDurationMs,
               },
               `Successful downstream request.`,
             );
           } else {
-            const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-            const maskedToken = maskToken(brokerToken);
             logger.warn(
               {
                 statusCode: response.statusCode,
-                url: localRequest.url.replaceAll(brokerToken, maskedToken),
+                url: safeUrl(localRequest.url),
                 headers: response.headers,
                 requestDurationMs,
                 requestId,
@@ -261,11 +249,9 @@ export const makeStreamingRequestToDownstream = (
       request.on('error', (error) => {
         const requestDurationMs = performance.now() - startTime;
         if (retries > 0) {
-          const brokerToken = extractBrokerTokenFromUrl(req.url);
-          const maskedToken = maskToken(brokerToken);
           logger.warn(
             {
-              url: req.url.replaceAll(brokerToken, maskedToken),
+              url: safeUrl(req.url),
               err: error,
               requestDurationMs,
               requestId,
@@ -278,11 +264,9 @@ export const makeStreamingRequestToDownstream = (
             );
           }, 500); // Wait for 0.5 second before retrying
         } else {
-          const brokerToken = extractBrokerTokenFromUrl(localRequest.url);
-          const maskedToken = maskToken(brokerToken);
           logger.error(
             {
-              url: localRequest.url.replaceAll(brokerToken, maskedToken),
+              url: safeUrl(localRequest.url),
               err: error,
               requestDurationMs,
               requestId,

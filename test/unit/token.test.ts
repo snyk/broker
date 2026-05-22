@@ -3,6 +3,7 @@ import {
   extractBrokerTokenFromUrl,
   hashToken,
   maskToken,
+  safeUrl,
 } from '../../lib/hybrid-sdk/common/utils/token';
 
 describe('token', () => {
@@ -36,6 +37,29 @@ describe('token', () => {
 
       expect(maskedToken).toEqual('1234-...-2345');
       expect(maskedUUIDToken).toEqual('aaaa-...-dddd');
+    });
+  });
+
+  describe('safeUrl', () => {
+    it('masks the broker token in a URL path', () => {
+      const token = 'broker-token-12345';
+      const url = `/broker/${token}/github/repos`;
+      expect(safeUrl(url)).toBe(`/broker/${maskToken(token)}/github/repos`);
+      expect(safeUrl(url)).not.toContain(token);
+    });
+
+    it('masks the broker token in a full URL', () => {
+      const token = 'broker-token-12345';
+      const url = `http://my.hostname/broker/${token}/rest/of/path`;
+      expect(safeUrl(url)).toBe(
+        `http://my.hostname/broker/${maskToken(token)}/rest/of/path`,
+      );
+      expect(safeUrl(url)).not.toContain(token);
+    });
+
+    it('returns the URL unchanged when no broker token is present', () => {
+      const url = '/some/other/path';
+      expect(safeUrl(url)).toBe(url);
     });
   });
 
