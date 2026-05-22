@@ -104,6 +104,33 @@ describe('proxy requests originating from behind the broker client', () => {
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual('Received webhook via API');
   });
+
+  it('echoes broker snyk-request-id on HTTP fallback response even when caller omits it', async () => {
+    await closeBrokerServer(bs);
+
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-000000000000`,
+      { some: { example: 'json' } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(isUUID(response.headers['snyk-request-id'])).toBe(true);
+  });
+
+  it('preserves caller-supplied snyk-request-id on HTTP fallback response', async () => {
+    await closeBrokerServer(bs);
+    const supplied = '33333333-3333-4333-8333-333333333333';
+
+    const response = await axiosClient.post(
+      `http://localhost:${bc.port}/webhook/github/12345678-1234-1234-1234-000000000000`,
+      { some: { example: 'json' } },
+      { headers: { 'snyk-request-id': supplied } },
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.headers['snyk-request-id']).toEqual(supplied);
+  });
+
   it('successfully broker injects x-snyk-broker header to Webhook calls', async () => {
     await closeBrokerServer(bs);
 

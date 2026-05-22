@@ -114,6 +114,10 @@ export const prepareRequest = async (
     }
   }
 
+  if (payload.headers['snyk-request-id'] && !payload.headers['x-request-id']) {
+    payload.headers['x-request-id'] = payload.headers['snyk-request-id'];
+  }
+
   if (brokerToken && socketType === 'server') {
     Object.assign(payload.headers, { 'X-Broker-Token': brokerToken });
   }
