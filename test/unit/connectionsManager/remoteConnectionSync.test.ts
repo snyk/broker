@@ -3,6 +3,7 @@ import * as remoteConfig from '../../../lib/hybrid-sdk/client/config/remoteConfi
 import * as configHelpers from '../../../lib/hybrid-sdk/client/config/configHelpers';
 import * as validator from '../../../lib/hybrid-sdk/client/connectionsManager/validator';
 import * as signals from '../../../lib/hybrid-sdk/common/utils/signals';
+import * as fs from 'node:fs';
 import { log as logger } from '../../../lib/logs/logger';
 import { LoadedClientOpts } from '../../../lib/hybrid-sdk/common/types/options';
 
@@ -14,11 +15,16 @@ jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
   addIntervalToTerminalHandlers: jest.fn(),
   addTimeoutToTerminalHandlers: jest.fn(),
 }));
+jest.mock('node:fs', () => ({
+  ...jest.requireActual('node:fs'),
+  existsSync: jest.fn(),
+}));
 
 const mockedRemoteConfig = jest.mocked(remoteConfig);
 const mockedConfigHelpers = jest.mocked(configHelpers);
 const mockedValidator = jest.mocked(validator);
 const mockedSignals = jest.mocked(signals);
+const mockedExistsSync = jest.mocked(fs.existsSync);
 
 const clientOpts = {} as LoadedClientOpts;
 
@@ -26,6 +32,8 @@ describe('retrieveAndLoadRemoteConfigSync', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedSignals.isShuttingDown.mockReturnValue(false);
+    // Default: file exists, so validator/reloadConfig are reached.
+    mockedExistsSync.mockReturnValue(true);
   });
 
   it('returns early without doing any I/O when isShuttingDown() is true', async () => {
@@ -103,5 +111,29 @@ describe('retrieveAndLoadRemoteConfigSync', () => {
       mockedValidator.validateUniversalConnectionsRemoteConfig,
     ).toHaveBeenCalledTimes(1);
     expect(mockedConfigHelpers.reloadConfig).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips validation and reload (no warn) when the universal config file is missing after retrieve', async () => {
+    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    const debugSpy = jest.spyOn(logger, 'debug').mockImplementation(() => {});
+    mockedRemoteConfig.retrieveConnectionsForDeployment.mockResolvedValueOnce(
+      undefined,
+    );
+    mockedExistsSync.mockReturnValue(false);
+
+    await retrieveAndLoadRemoteConfigSync(clientOpts);
+
+    expect(
+      mockedValidator.validateUniversalConnectionsRemoteConfig,
+    ).not.toHaveBeenCalled();
+    expect(mockedConfigHelpers.reloadConfig).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(debugSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ universalFilePath: expect.any(String) }),
+      expect.stringContaining('missing'),
+    );
+
+    warnSpy.mockRestore();
+    debugSpy.mockRestore();
   });
 });

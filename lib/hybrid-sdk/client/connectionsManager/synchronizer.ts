@@ -24,10 +24,11 @@ interface SyncState {
  *  so we can detect changes (e.g. context updates) between sync cycles. */
 export const syncStateByConnection = new Map<string, SyncState>();
 
-/** Whether the singleton polling interval has been registered. The interval
- *  drives recurring syncClientConfig ticks; registering once avoids unbounded
- *  growth of the signals timer registry. */
-let pollingIntervalRegistered = false;
+/** Handle of the active polling interval, or null when polling is not running.
+ *  At most one interval exists at a time: registering only when null avoids
+ *  unbounded growth of the signals timer registry, and clearing it when
+ *  polling is no longer required stops the recurring sync cycles. */
+let pollingIntervalId: NodeJS.Timeout | null = null;
 
 /** Re-entrancy guard. Polling, backup-watcher, and RPC-triggered calls can
  *  race. We coalesce instead of drop: at most one extra cycle is queued, so
@@ -39,7 +40,10 @@ let resyncPending = false;
 /** Test-only reset. The registration flag is module-level state; tests that
  *  trigger the polling branch need to clear it between cases. */
 export const __resetSynchronizerStateForTests = () => {
-  pollingIntervalRegistered = false;
+  if (pollingIntervalId) {
+    clearInterval(pollingIntervalId);
+  }
+  pollingIntervalId = null;
   isSyncing = false;
   resyncPending = false;
 };
@@ -109,22 +113,24 @@ const runSyncCycle = async (
 
   if (isPollingRequired) {
     logger.debug({}, `Waiting for connections (polling).`);
-    if (process.env.NODE_ENV != 'test' && !pollingIntervalRegistered) {
-      pollingIntervalRegistered = true;
-      addIntervalToTerminalHandlers(
-        setInterval(
-          () =>
-            syncClientConfig(
-              clientOpts,
-              websocketConnections,
-              globalIdentifyingMetadata,
-            ),
-          clientOpts.config.connectionsManager.watcher.interval,
-        ),
+    if (process.env.NODE_ENV != 'test' && !pollingIntervalId) {
+      pollingIntervalId = setInterval(
+        () =>
+          syncClientConfig(
+            clientOpts,
+            websocketConnections,
+            globalIdentifyingMetadata,
+          ),
+        clientOpts.config.connectionsManager.watcher.interval,
       );
+      addIntervalToTerminalHandlers(pollingIntervalId);
     }
   } else {
     logger.debug({}, 'Disabling polling in favor of server notification.');
+    if (pollingIntervalId) {
+      clearInterval(pollingIntervalId);
+      pollingIntervalId = null;
+    }
   }
 
   for (const key of integrationsKeys) {

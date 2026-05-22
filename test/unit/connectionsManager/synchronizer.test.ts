@@ -469,6 +469,84 @@ describe('syncClientConfig', () => {
         mockedSignals.addIntervalToTerminalHandlers.mock.calls[0]?.[0];
       if (registeredTimer) clearInterval(registeredTimer as NodeJS.Timeout);
     });
+
+    it('clears the polling interval once polling is no longer required', async () => {
+      process.env.NODE_ENV = 'production';
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      // Cycle 1: no connections → polling required → interval registered.
+      const pollingOpts = makeClientOpts(undefined);
+      await syncClientConfig(pollingOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        1,
+      );
+      const registeredTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[0][0] as NodeJS.Timeout;
+
+      // Cycle 2: configured connection with matching ws conns → polling
+      // not required → interval cleared.
+      const steadyOpts = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: 'token-1',
+          friendlyName: 'my-conn',
+        },
+      });
+      const wsConns: WebSocketConnection[] = [
+        makeWsConn('my-conn', 'token-1'),
+        makeWsConn('my-conn', 'token-1'),
+      ];
+      await syncClientConfig(steadyOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(clearIntervalSpy).toHaveBeenCalledWith(registeredTimer);
+      clearIntervalSpy.mockRestore();
+    });
+
+    it('re-arms a fresh interval after a clear if polling becomes required again', async () => {
+      process.env.NODE_ENV = 'production';
+
+      // Cycle 1: register.
+      await syncClientConfig(
+        makeClientOpts(undefined),
+        [],
+        IDENTIFYING_METADATA,
+      );
+      const firstTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[0][0] as NodeJS.Timeout;
+
+      // Cycle 2: clear (polling not required).
+      const wsConns: WebSocketConnection[] = [
+        makeWsConn('my-conn', 'token-1'),
+        makeWsConn('my-conn', 'token-1'),
+      ];
+      await syncClientConfig(
+        makeClientOpts({
+          'my-conn': {
+            type: 'github',
+            identifier: 'token-1',
+            friendlyName: 'my-conn',
+          },
+        }),
+        wsConns,
+        IDENTIFYING_METADATA,
+      );
+
+      // Cycle 3: polling required again → fresh interval registered.
+      await syncClientConfig(
+        makeClientOpts(undefined),
+        [],
+        IDENTIFYING_METADATA,
+      );
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        2,
+      );
+      const secondTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[1][0] as NodeJS.Timeout;
+      expect(secondTimer).not.toBe(firstTimer);
+      clearInterval(secondTimer);
+    });
   });
 
   describe('re-entrancy coalescing', () => {
