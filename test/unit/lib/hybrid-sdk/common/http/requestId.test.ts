@@ -157,6 +157,25 @@ describe('setRequestIdHeader middleware', () => {
 
       expect(debugSpy).not.toHaveBeenCalled();
     });
+
+    it('masks broker token in URL when logging synthesis', async () => {
+      const debugSpy = jest.spyOn(logger, 'debug');
+      const brokerToken = 'broker-token-12345';
+
+      await request(setupApp())
+        .get(`/broker/${brokerToken}/github/repos`)
+        .set('snyk-request-id', 'not-a-uuid');
+
+      const synthCall = (debugSpy.mock.calls as any[]).find(
+        (args) =>
+          args[1] ===
+          'No valid request ID in inbound headers — new request ID generated',
+      );
+      expect(synthCall).toBeDefined();
+      const loggedUrl: string = synthCall[0].url;
+      expect(loggedUrl).not.toContain(brokerToken);
+      expect(loggedUrl).toContain('brok-...-2345');
+    });
   });
 
   it('forwards the error to Express and logs at error level when randomUUID throws', async () => {

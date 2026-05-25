@@ -83,6 +83,7 @@ export class HybridClientRequestHandler {
       streamSize: 0,
       brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
     });
+    this.res.setHeader('snyk-request-id', this.req.requestId);
     streamBuffer.pipe(this.res);
     const simplifiedContextWithStreamingID = this.simplifiedContext;
     simplifiedContextWithStreamingID['streamingID'] = streamingID;
@@ -161,7 +162,8 @@ export class HybridClientRequestHandler {
 
         const httpResponse = this.res
           .status(ioResponse.status)
-          .set(ioResponse.headers);
+          .set(ioResponse.headers)
+          .set('snyk-request-id', this.req.requestId);
 
         const encodingType = undefsafe(ioResponse, 'headers.transfer-encoding');
         try {
@@ -213,7 +215,11 @@ export class HybridClientRequestHandler {
     makeRequestToDownstream(filteredReq)
       .then((resp) => {
         if (resp.statusCode) {
-          this.res.status(resp.statusCode).set(resp.headers).send(resp.body);
+          this.res
+            .status(resp.statusCode)
+            .set(resp.headers)
+            .set('snyk-request-id', this.req.requestId)
+            .send(resp.body);
         } else {
           this.res.status(500).send(resp.statusText);
         }
