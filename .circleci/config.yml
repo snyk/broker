@@ -482,6 +482,7 @@ workflows:
           name: Release to GitHub and NPM
           context:
             - github-release
+            - nodejs-install
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
