@@ -1,8 +1,13 @@
 {
+  "verifyConditions": [
+    "@semantic-release/github"
+  ],
   "prepare": [
     [
       "@semantic-release/npm",
-      { "npmPublish": false }
+      {
+        "npmPublish": false
+      }
     ],
     {
       "//": "build the linux, macos, and windows binaries",
@@ -66,5 +71,7 @@
       ]
     }
   ],
-  "branches": ["master"]
+  "branches": [
+    "master"
+  ]
 }
