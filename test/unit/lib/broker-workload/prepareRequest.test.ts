@@ -8,6 +8,53 @@ jest.mock('../../../../lib/hybrid-sdk/client/scm', () => ({
   validateGitHubTreePayload: jest.fn(),
 }));
 
+describe('prepareRequest — requestId propagation', () => {
+  const baseResult = { url: 'https://example.com/path' } as any;
+  const baseOptions = {
+    config: { removeXForwardedHeaders: 'false', universalBrokerEnabled: false },
+  } as any;
+  const logContext: any = {};
+
+  it('propagates requestId from payload onto the prepared request', async () => {
+    const id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const payload = {
+      method: 'GET',
+      url: '/path',
+      headers: { 'snyk-request-id': id },
+      requestId: id,
+    };
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+    expect(req.requestId).toBe(id);
+  });
+
+  it('req.requestId matches snyk-request-id header after prepare', async () => {
+    const id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+    const payload = {
+      method: 'POST',
+      url: '/path',
+      headers: { 'snyk-request-id': id },
+      requestId: id,
+    };
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+    expect(req.requestId).toBe(id);
+    expect(req.headers['snyk-request-id']).toBe(id);
+  });
+});
+
 describe('prepareRequest — downstream x-request-id mirror', () => {
   const baseResult = { url: 'https://example.com/path' } as any;
   const baseOptions = {

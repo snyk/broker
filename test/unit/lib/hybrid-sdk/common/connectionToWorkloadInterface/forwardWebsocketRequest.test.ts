@@ -125,3 +125,50 @@ describe('forwardWebSocketRequest — snyk-request-id backfill', () => {
     });
   });
 });
+
+describe('forwardWebSocketRequest — payload.requestId typed accessor', () => {
+  it('sets payload.requestId to the synthesised UUID when header was absent', async () => {
+    const payload = { url: '/foo', method: 'GET', headers: {} };
+    const { capturedPayload } = await runHandler(payload);
+
+    expect(capturedPayload.requestId).toBe(
+      capturedPayload.headers['snyk-request-id'],
+    );
+    expect(isUUID(capturedPayload.requestId)).toBe(true);
+  });
+
+  it('sets payload.requestId to the existing valid UUID', async () => {
+    const payload = {
+      url: '/bar',
+      method: 'GET',
+      headers: { 'snyk-request-id': VALID_UUID },
+    };
+    const { capturedPayload } = await runHandler(payload);
+
+    expect(capturedPayload.requestId).toBe(VALID_UUID);
+    expect(capturedPayload.requestId).toBe(
+      capturedPayload.headers['snyk-request-id'],
+    );
+  });
+
+  it('payload.requestId matches headers entry in every case', async () => {
+    for (const headerValue of [
+      undefined,
+      'not-a-uuid',
+      '00000000-0000-0000-0000-000000000000',
+      VALID_UUID,
+    ]) {
+      const headers = headerValue ? { 'snyk-request-id': headerValue } : {};
+      const { capturedPayload } = await runHandler({
+        url: '/',
+        method: 'GET',
+        headers,
+      });
+
+      expect(capturedPayload.requestId).toBe(
+        capturedPayload.headers['snyk-request-id'],
+      );
+      expect(isUUID(capturedPayload.requestId)).toBe(true);
+    }
+  });
+});

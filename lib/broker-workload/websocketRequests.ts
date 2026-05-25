@@ -97,6 +97,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
         ? 'websocket'
         : 'http',
       ...correlationHeaders,
+      requestId: payload.requestId,
     };
 
     const responseHandler = new HybridResponseHandler(

@@ -38,6 +38,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         url: url.toString(),
         headers: req.headers,
         method: req.method,
+        requestId: req.requestId,
       };
       if (
         req.method == 'POST' ||
@@ -47,7 +48,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         postFilterPreparedRequest.body = req.body;
       }
       logger.debug(
-        { url: req.url, method: req.method },
+        { url: req.url, method: req.method, requestId },
         'Making request to primary',
       );
       try {
@@ -120,7 +121,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     }
   }
 
-  logger.debug({ url: req.url }, 'request');
+  logger.debug({ url: req.url, requestId }, 'request');
   next();
 };
 

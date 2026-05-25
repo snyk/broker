@@ -5,4 +5,5 @@ export interface RequestPayload {
   body?: any;
   streamingID?: string;
   connectionIdentifier?: string;
+  requestId: string;
 }

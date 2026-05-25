@@ -56,6 +56,8 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
       const connectionIdentifier = req.uri.pathname
         .replaceAll(/^\/primus\/([^/]+)\//g, '$1')
         .toLowerCase();
+      // Primus authorize callbacks receive the raw HTTP upgrade request before
+      // the Express middleware chain runs, so req.requestId is not available here.
       const requestId = req.headers['snyk-request-id'];
       try {
         const { brokerClientId, credentials, role } =

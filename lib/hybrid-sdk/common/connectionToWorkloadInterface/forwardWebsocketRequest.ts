@@ -32,6 +32,7 @@ export const forwardWebSocketRequest = (
       if (!isUUID(payload.headers['snyk-request-id'])) {
         payload.headers['snyk-request-id'] = randomUUID();
       }
+      payload.requestId = payload.headers['snyk-request-id'];
 
       const workloadName = options.config.remoteWorkloadName;
       const workloadModulePath = options.config.remoteWorkloadModulePath;

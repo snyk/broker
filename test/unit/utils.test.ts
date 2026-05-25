@@ -7,6 +7,7 @@ describe('utils', () => {
       url: 'dummy',
       headers: {},
       method: 'GET',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     };
     expect(computeContentLength(dummyReq)).toEqual(0);
   });
@@ -17,6 +18,7 @@ describe('utils', () => {
       headers: {},
       method: 'POST',
       body: '1234567890',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     };
     expect(computeContentLength(dummyReq)).toEqual(10);
   });
@@ -27,6 +29,7 @@ describe('utils', () => {
       headers: {},
       method: 'POST',
       body: '1234567890-1234567890',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     };
     expect(computeContentLength(dummyReq)).toEqual(21);
   });
@@ -36,6 +39,7 @@ describe('utils', () => {
       headers: {},
       method: 'POST',
       body: '1234567890–1234567890',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     };
     expect(computeContentLength(dummyReq)).toEqual(23);
   });

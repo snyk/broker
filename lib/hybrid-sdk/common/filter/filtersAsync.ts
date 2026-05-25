@@ -225,7 +225,10 @@ export const loadFilters: LOADEDFILTER = (
 
   return (payload: RequestPayload): false | Rule => {
     let res: false | Rule = false;
-    logger.debug({ rulesCount: tests.length }, 'looking for a rule match');
+    logger.debug(
+      { rulesCount: tests.length, requestId: payload.requestId },
+      'looking for a rule match',
+    );
 
     try {
       for (const test of tests) {
@@ -235,7 +238,7 @@ export const loadFilters: LOADEDFILTER = (
         }
       }
     } catch (e: unknown) {
-      const requestId = payload.headers?.['snyk-request-id'] || '';
+      const requestId = payload.requestId;
       logger.warn(
         { error: e, requestId },
         'Caught error checking request against rules.',

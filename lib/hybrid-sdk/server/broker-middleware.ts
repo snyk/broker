@@ -18,7 +18,7 @@ export const validateBrokerTypeMiddleware = (
       requestId: req.requestId,
     };
     logger.warn(
-      { logContext },
+      logContext,
       'Error: Request does not contain the x-snyk-broker-type header.',
     );
     // Will eventually return an error when all services will have this enabled

@@ -33,6 +33,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         expect(filterResponse).toStrictEqual({
@@ -60,6 +61,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url: '/repos/angular/angular/contents/test-main.js#/package.json',
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -68,6 +70,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url: '/repos/angular/angular/contents/path/to/docs/../../sensitive/file.js',
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -78,6 +81,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -100,6 +104,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PATCH',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -122,6 +127,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -144,6 +150,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PATCH',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -167,6 +174,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'DELETE',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -195,6 +203,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'DELETE',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeTruthy();
       });
@@ -211,6 +220,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -234,6 +244,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -257,6 +268,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -280,6 +292,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -303,6 +316,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -326,6 +340,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -349,6 +364,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -372,6 +388,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -402,6 +419,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -425,6 +443,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -448,6 +467,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -471,6 +491,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -494,6 +515,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -517,6 +539,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -540,6 +563,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -563,6 +587,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -586,6 +611,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -614,6 +640,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -637,6 +664,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -661,6 +689,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -685,6 +714,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -709,6 +739,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -733,6 +764,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
 
         expect(filterResponse).not.toEqual(false);
@@ -757,6 +789,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -780,6 +813,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PATCH',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -803,6 +837,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -830,6 +865,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -852,6 +888,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -874,6 +911,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -896,6 +934,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -917,6 +956,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -939,6 +979,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -961,6 +1002,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -983,6 +1025,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1006,6 +1049,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'PUT',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1028,6 +1072,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1050,6 +1095,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1072,6 +1118,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1094,6 +1141,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1117,6 +1165,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).not.toEqual(false);
         const filterResponseAsRule = filterResponse as Rule;
@@ -1150,6 +1199,7 @@ describe('filters and interpolates', () => {
             },
           ],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1179,6 +1229,7 @@ describe('filters and interpolates', () => {
             },
           ],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1208,6 +1259,7 @@ describe('filters and interpolates', () => {
             },
           ],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1219,6 +1271,7 @@ describe('filters and interpolates', () => {
         body: jsonBuffer({
           commits: [],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1260,6 +1313,7 @@ describe('filters and interpolates', () => {
         }
       }`,
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1313,6 +1367,7 @@ describe('filters and interpolates', () => {
             }`,
             /* eslint-enable no-useless-escape */
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -1327,6 +1382,7 @@ describe('filters and interpolates', () => {
                 '/../fixtures/client/github/graphql/find-pull-requests-invalid-query.txt',
             ).toString('utf-8'),
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -1341,6 +1397,7 @@ describe('filters and interpolates', () => {
                 '/../fixtures/client/github/graphql/find-pull-requests-open.txt',
             ).toString('utf-8'),
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1366,6 +1423,7 @@ describe('filters and interpolates', () => {
                 '/../fixtures/client/github/graphql/find-pull-requests-closed.txt',
             ).toString('utf-8'),
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1391,6 +1449,7 @@ describe('filters and interpolates', () => {
                 '/../fixtures/client/github/graphql/find-pull-request-threads.txt',
             ).toString('utf-8'),
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1416,6 +1475,7 @@ describe('filters and interpolates', () => {
                 '/../fixtures/client/github/graphql/resolve-pull-request-thread.txt',
             ).toString('utf-8'),
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1442,6 +1502,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1462,6 +1523,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1482,6 +1544,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1502,6 +1565,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1523,6 +1587,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1542,6 +1607,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url: '/filtered-on-query?filePath=secret.file',
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1550,6 +1616,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url: '/filtered-on-query',
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1560,6 +1627,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1579,6 +1647,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url: '/filtered-on-multiple-queries?filePath=package.json&download=false',
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1587,6 +1656,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url: '/filtered-on-multiple-queries?filePath=package.json',
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1596,6 +1666,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url: '/filtered-on-query?filePath=/path/to/sensitive/file#package.json',
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -1606,6 +1677,7 @@ describe('filters and interpolates', () => {
         const filterResponse = filter({
           url,
           method: 'GET',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1639,6 +1711,7 @@ describe('filters and interpolates', () => {
             },
           ],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1659,6 +1732,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url,
         method: 'POST',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       const filterResponseAsRule = filterResponse as Rule;
       const result = getInterpolatedRequest(
@@ -1688,6 +1762,7 @@ describe('filters and interpolates', () => {
             },
           ],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1699,6 +1774,7 @@ describe('filters and interpolates', () => {
         body: jsonBuffer({
           commits: [],
         }),
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1711,6 +1787,7 @@ describe('filters and interpolates', () => {
           body: jsonBuffer({
             commits: [],
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeFalsy();
       });
@@ -1724,6 +1801,7 @@ describe('filters and interpolates', () => {
           body: jsonBuffer({
             commits: [],
           }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         const filterResponseAsRule = filterResponse as Rule;
         const result = getInterpolatedRequest(
@@ -1751,6 +1829,7 @@ describe('filters and interpolates', () => {
         headers: {
           accept: 'unlisted.header',
         },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1759,6 +1838,7 @@ describe('filters and interpolates', () => {
       const filterResponse = filter({
         url: '/accept-header',
         method: 'GET',
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       });
       expect(filterResponse).toBeFalsy();
     });
@@ -1838,6 +1918,7 @@ describe('with auth', () => {
     const filterResponse = filter({
       url,
       method: 'GET',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     });
     const filterResponseAsRule = filterResponse as Rule;
     const result = getInterpolatedRequest(
@@ -1860,6 +1941,7 @@ describe('with auth', () => {
     const filterResponse = filter({
       url,
       method: 'GET',
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     });
     const filterResponseAsRule = filterResponse as Rule;
     const result = getInterpolatedRequest(
@@ -1891,6 +1973,7 @@ describe('Github big files (optional rules)', () => {
         query:
           '{\n        repository(owner: "some-owner", name: "some-name") {\n          object(expression: "refs/heads/some-thing:a/path/to/package-lock.json") {\n            ... on Blob {\n              oid,\n            }\n          }\n        }\n      }',
       }),
+      requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     });
     const filterResponseAsRule = filterResponse as Rule;
     const result = getInterpolatedRequest(

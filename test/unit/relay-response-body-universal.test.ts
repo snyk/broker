@@ -149,6 +149,7 @@ describe('body relay', () => {
 
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       (responseCallback) => {
         response = responseCallback;
@@ -224,6 +225,7 @@ describe('body relay', () => {
 
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       (responseCallback) => {
         response = responseCallback;

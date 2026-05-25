@@ -41,6 +41,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
         url: url.toString(),
         headers: req.headers,
         method: req.method,
+        requestId: req.requestId,
       };
       if (
         req.method == 'POST' ||
@@ -50,7 +51,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
         postFilterPreparedRequest.body = req.body;
       }
       logger.debug(
-        { url: req.url, method: req.method },
+        { url: req.url, method: req.method, requestId: req.requestId },
         'Making request to primary',
       );
       try {
@@ -61,12 +62,18 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
         res.writeHead(httpResponse.statusCode ?? 500, httpResponse.headers);
         return httpResponse.pipe(res);
       } catch (err) {
-        logger.error({ err }, `Error in HTTP middleware: ${err}`);
+        logger.error(
+          { err, requestId: req.requestId },
+          `Error in HTTP middleware: ${err}`,
+        );
         res.setHeader('x-broker-failure', 'error-forwarding-to-primary');
         res.status(500).send('Error forwarding request to primary.');
       }
     } else {
-      logger.warn({ desensitizedToken }, 'No matching connection found.');
+      logger.warn(
+        { desensitizedToken, requestId: req.requestId },
+        'No matching connection found.',
+      );
       res.setHeader('x-broker-failure', 'no-connection');
       return res.status(404).json({ ok: false });
     }

@@ -29,6 +29,7 @@ export interface PostFilterPreparedRequest {
   body?: any;
   timeoutMs?: number;
   tlsOptions?: Record<string, boolean | string>;
+  requestId?: string;
 }
 
 export const prepareRequest = async (
@@ -114,6 +115,8 @@ export const prepareRequest = async (
     }
   }
 
+  // Propagate under the generic x-request-id header for downstream services
+  // that do not read the snyk-specific header.
   if (payload.headers['snyk-request-id'] && !payload.headers['x-request-id']) {
     payload.headers['x-request-id'] = payload.headers['snyk-request-id'];
   }
@@ -209,6 +212,7 @@ export const prepareRequest = async (
     url: result.url,
     headers: payload.headers,
     method: payload.method,
+    requestId: payload.requestId,
   };
   if (payload.body) {
     req.body = payload.body;

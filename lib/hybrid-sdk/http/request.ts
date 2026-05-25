@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import http from 'node:http';
 import https from 'node:https';
 import { performance } from 'node:perf_hooks';
@@ -35,7 +36,8 @@ export const makeRequestToDownstream = async (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
-  const requestId = localRequest.headers['snyk-request-id'] || '';
+  const requestId = localRequest.requestId ?? randomUUID();
+  localRequest.headers['snyk-request-id'] = requestId;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -81,6 +83,7 @@ export const makeRequestToDownstream = async (
                   statusCode: response.statusCode,
                   url: safeUrl(localRequest.url),
                   requestDurationMs,
+                  requestId,
                 },
                 `Successful request`,
               );
@@ -90,6 +93,7 @@ export const makeRequestToDownstream = async (
                   statusCode: response.statusCode,
                   url: safeUrl(localRequest.url),
                   requestDurationMs,
+                  requestId,
                 },
                 `Non 2xx HTTP Code Received`,
               );
@@ -168,7 +172,8 @@ export const makeStreamingRequestToDownstream = (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
-  const requestId = localRequest.headers['snyk-request-id'] || '';
+  const requestId = localRequest.requestId ?? randomUUID();
+  localRequest.headers['snyk-request-id'] = requestId;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -206,6 +211,7 @@ export const makeStreamingRequestToDownstream = (
                 url: safeUrl(localRequest.url),
                 headers: config.LOG_INFO_VERBOSE ? response.headers : {},
                 requestDurationMs,
+                requestId,
               },
               `Successful downstream request.`,
             );
@@ -292,7 +298,8 @@ export const makeSingleRawRequestToDownstream = async (
   const startTime = performance.now();
   const config = getConfig();
   const localRequest = req;
-  const requestId = localRequest.headers['snyk-request-id'] || '';
+  const requestId = localRequest.requestId ?? randomUUID();
+  localRequest.headers['snyk-request-id'] = requestId;
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
@@ -335,6 +342,7 @@ export const makeSingleRawRequestToDownstream = async (
                 statusCode: response.statusCode,
                 url: localRequest.url,
                 requestDurationMs,
+                requestId,
               },
               'Successful raw request',
             );

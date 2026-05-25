@@ -10,6 +10,8 @@ export const serviceHandler = async (msg, cb) => {
   const clientOptions = getClientOpts();
   // strip off any query strings
   const command = msg.url.indexOf('?') < 0 ? msg.url : msg.url.split('?')[0];
+  // msg is a raw WebSocket payload, not an Express Request — there is no typed
+  // requestId accessor available here.
   const requestId = msg.headers['snyk-request-id'];
   logger.debug({ command, requestId }, 'Service message received.');
   if (!clientOptions) {
