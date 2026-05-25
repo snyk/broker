@@ -62,6 +62,7 @@ export class OtelClient implements Client {
   private readonly upstreamResponseBytesHistogram: Histogram;
   private readonly inflightRequestsCounter: UpDownCounter;
   private readonly pingLatencyHistogram: Histogram;
+  private readonly wsLifecycleCounter: Counter;
 
   constructor(config: OtelClientConfig) {
     const reader =
@@ -263,6 +264,15 @@ export class OtelClient implements Client {
         },
       },
     );
+
+    this.wsLifecycleCounter = meter.createCounter(
+      'broker.client.ws.lifecycle.total',
+      {
+        description:
+          'Websocket lifecycle events by type (connection_lost, connection_ended, connection_destroyed, connection_timed_out, connection_error, server_requested_close)',
+        valueType: ValueType.INT,
+      },
+    );
   }
 
   // --- Existing ---
@@ -363,5 +373,9 @@ export class OtelClient implements Client {
 
   recordPingLatency(durationSeconds: number): void {
     this.pingLatencyHistogram.record(durationSeconds);
+  }
+
+  recordWebsocketLifecycleEvent(event: string, role: string): void {
+    this.wsLifecycleCounter.add(1, { event, role });
   }
 }

@@ -59,7 +59,7 @@ jest.mock('../../../lib/hybrid-sdk/client/socketHandlers/openHandler', () => ({
   openHandler: jest.fn(),
 }));
 
-jest.mock('../../../lib/hybrid-sdk/client/socketHandlers/closeHandler', () => ({
+jest.mock('../../../lib/hybrid-sdk/client/socketHandlers/reportWebSocketClosureEvent', () => ({
   closeHandler: jest.fn(),
 }));
 
