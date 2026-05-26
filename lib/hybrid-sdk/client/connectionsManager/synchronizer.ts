@@ -8,7 +8,11 @@ import {
   IdentifyingMetadata,
   WebSocketConnection,
 } from '../types/client';
-import { addTimerToTerminalHandlers } from '../../common/utils/signals';
+import {
+  addIntervalToTerminalHandlers,
+  clearAndRemoveInterval,
+  isShuttingDown,
+} from '../../common/utils/signals';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
 
 /** Internal bookkeeping written by the synchronizer to detect config changes
@@ -21,6 +25,30 @@ interface SyncState {
  *  so we can detect changes (e.g. context updates) between sync cycles. */
 export const syncStateByConnection = new Map<string, SyncState>();
 
+/** Handle of the active polling interval, or null when polling is not running.
+ *  At most one interval exists at a time: registering only when null avoids
+ *  unbounded growth of the signals timer registry, and clearing it when
+ *  polling is no longer required stops the recurring sync cycles. */
+let pollingIntervalId: NodeJS.Timeout | null = null;
+
+/** Re-entrancy guard. Polling, backup-watcher, and RPC-triggered calls can
+ *  race. We coalesce instead of drop: at most one extra cycle is queued, so
+ *  an RPC reload arriving mid-sync still triggers a follow-up pass to pick
+ *  up the latest state. */
+let isSyncing = false;
+let resyncPending = false;
+
+/** Test-only reset. The registration flag is module-level state; tests that
+ *  trigger the polling branch need to clear it between cases. */
+export const __resetSynchronizerStateForTests = () => {
+  if (pollingIntervalId) {
+    clearAndRemoveInterval(pollingIntervalId);
+  }
+  pollingIntervalId = null;
+  isSyncing = false;
+  resyncPending = false;
+};
+
 /**
  * Keeps WebSocket connections and plugins in sync with configured integrations. For each
  * connection, detects whether it is new, removed, disabled, or changed (identifier rotation,
@@ -30,6 +58,39 @@ export const syncStateByConnection = new Map<string, SyncState>();
  * Mutates websocketConnections in place.
  */
 export const syncClientConfig = async (
+  clientOpts,
+  websocketConnections: WebSocketConnection[],
+  globalIdentifyingMetadata: IdentifyingMetadata,
+): Promise<void> => {
+  if (isShuttingDown()) {
+    return;
+  }
+  if (isSyncing) {
+    // Coalesce: queue exactly one follow-up cycle so the latest state is
+    // observed without stacking concurrent syncs.
+    resyncPending = true;
+    logger.debug(
+      {},
+      'syncClientConfig already in progress, queuing follow-up cycle.',
+    );
+    return;
+  }
+  isSyncing = true;
+  try {
+    do {
+      resyncPending = false;
+      await runSyncCycle(
+        clientOpts,
+        websocketConnections,
+        globalIdentifyingMetadata,
+      );
+    } while (resyncPending && !isShuttingDown());
+  } finally {
+    isSyncing = false;
+  }
+};
+
+const runSyncCycle = async (
   clientOpts,
   websocketConnections: WebSocketConnection[],
   globalIdentifyingMetadata: IdentifyingMetadata,
@@ -53,8 +114,8 @@ export const syncClientConfig = async (
 
   if (isPollingRequired) {
     logger.debug({}, `Waiting for connections (polling).`);
-    if (process.env.NODE_ENV != 'test') {
-      setTimeout(
+    if (process.env.NODE_ENV != 'test' && !pollingIntervalId) {
+      pollingIntervalId = setInterval(
         () =>
           syncClientConfig(
             clientOpts,
@@ -63,9 +124,14 @@ export const syncClientConfig = async (
           ),
         clientOpts.config.connectionsManager.watcher.interval,
       );
+      addIntervalToTerminalHandlers(pollingIntervalId);
     }
   } else {
     logger.debug({}, 'Disabling polling in favor of server notification.');
+    if (pollingIntervalId) {
+      clearAndRemoveInterval(pollingIntervalId);
+      pollingIntervalId = null;
+    }
   }
 
   for (const key of integrationsKeys) {
@@ -197,7 +263,7 @@ export const setBackupWatcher = async (
   globalIdentifyingMetadata: IdentifyingMetadata,
 ) => {
   if (process.env.NODE_ENV != 'test') {
-    addTimerToTerminalHandlers(
+    addIntervalToTerminalHandlers(
       setInterval(async () => {
         for (let i = 0; i < websocketConnections.length; i++) {
           if (isWebsocketConnOpen(websocketConnections[i])) {

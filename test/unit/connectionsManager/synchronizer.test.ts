@@ -1,4 +1,5 @@
 import {
+  __resetSynchronizerStateForTests,
   syncClientConfig,
   syncStateByConnection,
 } from '../../../lib/hybrid-sdk/client/connectionsManager/synchronizer';
@@ -11,6 +12,8 @@ import {
 import * as pluginManager from '../../../lib/hybrid-sdk/client/brokerClientPlugins/pluginManager';
 import * as socket from '../../../lib/hybrid-sdk/client/socket';
 import * as connectionHelpers from '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers';
+import * as signals from '../../../lib/hybrid-sdk/common/utils/signals';
+import * as remoteConnectionSync from '../../../lib/hybrid-sdk/client/connectionsManager/remoteConnectionSync';
 import { log as logger } from '../../../lib/logs/logger';
 
 jest.mock(
@@ -21,10 +24,19 @@ jest.mock('../../../lib/hybrid-sdk/client/socket');
 jest.mock(
   '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers',
 );
+jest.mock('../../../lib/hybrid-sdk/common/utils/signals', () => ({
+  isShuttingDown: jest.fn(() => false),
+  addIntervalToTerminalHandlers: jest.fn(),
+  addTimeoutToTerminalHandlers: jest.fn(),
+  clearAndRemoveInterval: jest.fn(),
+  clearAndRemoveTimeout: jest.fn(),
+}));
 
 const mockedPluginManager = jest.mocked(pluginManager);
 const mockedSocket = jest.mocked(socket);
 const mockedConnectionHelpers = jest.mocked(connectionHelpers);
+const mockedSignals = jest.mocked(signals);
+const mockedRemoteConnectionSync = jest.mocked(remoteConnectionSync);
 
 /** Create a minimal mock WebSocketConnection */
 function makeWsConn(
@@ -97,7 +109,10 @@ describe('syncClientConfig', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks resets call history but not mockReturnValue overrides.
+    mockedSignals.isShuttingDown.mockReturnValue(false);
     syncStateByConnection.clear();
+    __resetSynchronizerStateForTests();
     process.env.SKIP_REMOTE_CONFIG = 'true';
     process.env.NODE_ENV = 'test';
 
@@ -393,6 +408,261 @@ describe('syncClientConfig', () => {
         expect.anything(),
         'Shutting down connection',
       );
+    });
+  });
+
+  describe('shutdown gate', () => {
+    afterEach(() => {
+      mockedSignals.isShuttingDown.mockReturnValue(false);
+    });
+
+    it('returns immediately when isShuttingDown() is true, without calling retrieveAndLoadRemoteConfigSync', async () => {
+      mockedSignals.isShuttingDown.mockReturnValue(true);
+      delete process.env.SKIP_REMOTE_CONFIG;
+      const clientOpts = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: 'token-1',
+          friendlyName: 'my-conn',
+        },
+      });
+      const wsConns: WebSocketConnection[] = [];
+
+      await syncClientConfig(clientOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).not.toHaveBeenCalled();
+      expect(mockedPluginManager.runStartupPlugins).not.toHaveBeenCalled();
+      expect(
+        mockedSocket.createWebSocketConnectionPairs,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('polling interval registration', () => {
+    it('registers a single setInterval via addIntervalToTerminalHandlers across multiple polling cycles', async () => {
+      // Need NODE_ENV != 'test' for the setInterval branch to fire.
+      process.env.NODE_ENV = 'production';
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        1,
+      );
+      const registeredTimer =
+        mockedSignals.addIntervalToTerminalHandlers.mock.calls[0][0];
+      expect(registeredTimer).toBeDefined();
+      // Mock doesn't clear; do it manually so the interval doesn't fire post-test.
+      clearInterval(registeredTimer as NodeJS.Timeout);
+    });
+
+    it('does not register via addTimeoutToTerminalHandlers (intervals only)', async () => {
+      process.env.NODE_ENV = 'production';
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addTimeoutToTerminalHandlers).not.toHaveBeenCalled();
+      const registeredTimer =
+        mockedSignals.addIntervalToTerminalHandlers.mock.calls[0]?.[0];
+      if (registeredTimer) clearInterval(registeredTimer as NodeJS.Timeout);
+    });
+
+    it('clears the polling interval once polling is no longer required', async () => {
+      process.env.NODE_ENV = 'production';
+
+      // Cycle 1: no connections → polling required → interval registered.
+      const pollingOpts = makeClientOpts(undefined);
+      await syncClientConfig(pollingOpts, [], IDENTIFYING_METADATA);
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        1,
+      );
+      const registeredTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[0][0] as NodeJS.Timeout;
+
+      // Cycle 2: configured connection with matching ws conns → polling
+      // not required → interval cleared and removed from registry.
+      const steadyOpts = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: 'token-1',
+          friendlyName: 'my-conn',
+        },
+      });
+      const wsConns: WebSocketConnection[] = [
+        makeWsConn('my-conn', 'token-1'),
+        makeWsConn('my-conn', 'token-1'),
+      ];
+      await syncClientConfig(steadyOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(mockedSignals.clearAndRemoveInterval).toHaveBeenCalledWith(
+        registeredTimer,
+      );
+      // Defensive: the bare clearInterval is not called from production code;
+      // the paired helper is the only path that removes from the registry.
+      clearInterval(registeredTimer);
+    });
+
+    it('re-arms a fresh interval after a clear if polling becomes required again', async () => {
+      process.env.NODE_ENV = 'production';
+
+      // Cycle 1: register.
+      await syncClientConfig(
+        makeClientOpts(undefined),
+        [],
+        IDENTIFYING_METADATA,
+      );
+      const firstTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[0][0] as NodeJS.Timeout;
+
+      // Cycle 2: clear (polling not required).
+      const wsConns: WebSocketConnection[] = [
+        makeWsConn('my-conn', 'token-1'),
+        makeWsConn('my-conn', 'token-1'),
+      ];
+      await syncClientConfig(
+        makeClientOpts({
+          'my-conn': {
+            type: 'github',
+            identifier: 'token-1',
+            friendlyName: 'my-conn',
+          },
+        }),
+        wsConns,
+        IDENTIFYING_METADATA,
+      );
+
+      // Cycle 3: polling required again → fresh interval registered.
+      await syncClientConfig(
+        makeClientOpts(undefined),
+        [],
+        IDENTIFYING_METADATA,
+      );
+
+      expect(mockedSignals.addIntervalToTerminalHandlers).toHaveBeenCalledTimes(
+        2,
+      );
+      const secondTimer = mockedSignals.addIntervalToTerminalHandlers.mock
+        .calls[1][0] as NodeJS.Timeout;
+      expect(secondTimer).not.toBe(firstTimer);
+      // clearAndRemoveInterval is mocked, so the underlying NodeJS interval
+      // from Cycle 1 is never actually cleared by production code — drain it
+      // here to avoid an open handle keeping Jest alive.
+      clearInterval(firstTimer);
+      clearInterval(secondTimer);
+    });
+  });
+
+  describe('re-entrancy coalescing', () => {
+    it('coalesces a concurrent call into exactly one follow-up cycle', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      const secondCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      await secondCall;
+      // Second call returned immediately (coalesced) — only the first cycle has started.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(1);
+
+      resolveFirst!();
+      await firstCall;
+
+      // Follow-up cycle ran exactly once after the first completed.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('collapses multiple concurrent calls to a single follow-up cycle', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      // Three concurrent calls during the first in-flight sync.
+      await Promise.all([
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+        syncClientConfig(clientOpts, [], IDENTIFYING_METADATA),
+      ]);
+
+      resolveFirst!();
+      await firstCall;
+
+      // First cycle + exactly one coalesced follow-up = 2 total, not 4.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips the queued follow-up cycle if shutdown begins mid-sync', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      let resolveFirst: (() => void) | undefined;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      );
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+
+      const clientOpts = makeClientOpts(undefined);
+      const firstCall = syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA); // queues follow-up
+
+      // Shutdown begins before the first cycle finishes.
+      mockedSignals.isShuttingDown.mockReturnValue(true);
+      resolveFirst!();
+      await firstCall;
+
+      // Only the first cycle ran; the queued follow-up was skipped.
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows a subsequent call after the first completes', async () => {
+      delete process.env.SKIP_REMOTE_CONFIG;
+      mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync.mockResolvedValue(
+        undefined,
+      );
+      const clientOpts = makeClientOpts(undefined);
+
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(
+        mockedRemoteConnectionSync.retrieveAndLoadRemoteConfigSync,
+      ).toHaveBeenCalledTimes(2);
     });
   });
 

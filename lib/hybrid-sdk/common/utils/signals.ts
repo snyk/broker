@@ -1,11 +1,22 @@
 import { getWebsocketConnections } from '../../client';
 import { log as logger } from '../../../logs/logger';
 
-const timers: NodeJS.Timeout[] = [];
+const intervals: NodeJS.Timeout[] = [];
+const timeouts: NodeJS.Timeout[] = [];
 const GRACE_PERIOD_MS = 12000;
+
+let shuttingDown = false;
+export const isShuttingDown = (): boolean => shuttingDown;
+
+const clearAllTimers = () => {
+  intervals.forEach((id) => clearInterval(id));
+  timeouts.forEach((id) => clearTimeout(id));
+};
+
 export const handleTerminationSignal = (callback: () => void) => {
   process.on('SIGINT', () => {
-    timers.forEach((timer) => clearInterval(timer));
+    shuttingDown = true;
+    clearAllTimers();
     callback();
     signalTerminationToServer('SIGINT');
     setTimeout(() => {
@@ -14,7 +25,8 @@ export const handleTerminationSignal = (callback: () => void) => {
   });
 
   process.on('SIGTERM', async () => {
-    timers.forEach((timer) => clearInterval(timer));
+    shuttingDown = true;
+    clearAllTimers();
     callback();
     signalTerminationToServer('SIGTERM');
     setTimeout(() => {
@@ -23,8 +35,32 @@ export const handleTerminationSignal = (callback: () => void) => {
   });
 };
 
-export const addTimerToTerminalHandlers = (timerId: NodeJS.Timeout) => {
-  timers.push(timerId);
+export const addIntervalToTerminalHandlers = (intervalId: NodeJS.Timeout) => {
+  intervals.push(intervalId);
+};
+
+export const addTimeoutToTerminalHandlers = (timeoutId: NodeJS.Timeout) => {
+  timeouts.push(timeoutId);
+};
+
+/** Clear an interval and remove its handle from the registry. Paired so
+ *  callers can't clear-without-remove, which previously caused the registry
+ *  to grow with dead references whenever a timer was toggled at runtime. */
+export const clearAndRemoveInterval = (intervalId: NodeJS.Timeout) => {
+  clearInterval(intervalId);
+  const i = intervals.indexOf(intervalId);
+  if (i !== -1) {
+    intervals.splice(i, 1);
+  }
+};
+
+/** Clear a timeout and remove its handle from the registry. */
+export const clearAndRemoveTimeout = (timeoutId: NodeJS.Timeout) => {
+  clearTimeout(timeoutId);
+  const i = timeouts.indexOf(timeoutId);
+  if (i !== -1) {
+    timeouts.splice(i, 1);
+  }
 };
 
 const signalTerminationToServer = (signal) => {
