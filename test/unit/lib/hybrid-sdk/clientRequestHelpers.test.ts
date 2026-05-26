@@ -316,6 +316,7 @@ describe('HybridClientRequestHandler — WS paths include snyk-request-id in pay
       'request',
       expect.objectContaining({
         headers: expect.objectContaining({ 'snyk-request-id': BROKER_UUID }),
+        requestId: BROKER_UUID,
       }),
       expect.any(Function),
     );
@@ -343,6 +344,7 @@ describe('HybridClientRequestHandler — WS paths include snyk-request-id in pay
       'request',
       expect.objectContaining({
         headers: expect.objectContaining({ 'snyk-request-id': BROKER_UUID }),
+        requestId: BROKER_UUID,
       }),
     );
   });

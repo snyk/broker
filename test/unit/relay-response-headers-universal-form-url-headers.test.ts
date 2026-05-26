@@ -126,6 +126,7 @@ describe('header relay', () => {
         url: '/',
         method: 'GET',
         headers: headers,
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
@@ -201,6 +202,7 @@ describe('header relay', () => {
         url: '/',
         method: 'GET',
         headers: headers,
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);

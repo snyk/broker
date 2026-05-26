@@ -125,6 +125,7 @@ describe('body relay', () => {
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers,
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
@@ -184,6 +185,7 @@ describe('body relay', () => {
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
@@ -245,6 +247,7 @@ describe('body relay', () => {
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers: {},
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);
@@ -306,6 +309,7 @@ describe('body relay', () => {
         // @ts-ignore
         body: Buffer.from(JSON.stringify(body)),
         headers,
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       },
       () => {
         expect(makeRequestToDownstream).toHaveBeenCalledTimes(1);

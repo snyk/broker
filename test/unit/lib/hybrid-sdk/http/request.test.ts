@@ -251,4 +251,82 @@ describe('http/request', () => {
       expect(logContext.requestDurationMs).toBeGreaterThan(0);
     });
   });
+
+  describe('requestId typed accessor', () => {
+    const FIXED_UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+    it('makeRequestToDownstream uses requestId from the typed field, not the header bag', async () => {
+      nock(downstreamUrl).post(downstreamPath).reply(200, {});
+
+      await makeRequestToDownstream({
+        url: fullDownstreamUrl,
+        method: 'POST',
+        headers: {},
+        requestId: FIXED_UUID,
+      });
+
+      const [logContext] = (logger.trace as jest.Mock).mock.calls[0];
+      expect(logContext.requestId).toBe(FIXED_UUID);
+    });
+
+    it('makeRequestToDownstream synthesises a UUID when requestId is absent', async () => {
+      nock(downstreamUrl).post(downstreamPath).reply(200, {});
+
+      await makeRequestToDownstream({
+        url: fullDownstreamUrl,
+        method: 'POST',
+        headers: {},
+      });
+
+      const [logContext] = (logger.trace as jest.Mock).mock.calls[0];
+      expect(typeof logContext.requestId).toBe('string');
+      expect(logContext.requestId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+    });
+
+    it('makeSingleRawRequestToDownstream uses requestId from the typed field', async () => {
+      nock(downstreamUrl).post(downstreamPath).reply(200, {});
+
+      await makeSingleRawRequestToDownstream({
+        url: fullDownstreamUrl,
+        method: 'POST',
+        headers: {},
+        requestId: FIXED_UUID,
+      });
+
+      const [logContext] = (logger.trace as jest.Mock).mock.calls[0];
+      expect(logContext.requestId).toBe(FIXED_UUID);
+    });
+
+    it('makeStreamingRequestToDownstream uses requestId from the typed field', async () => {
+      nock(downstreamUrl).post(downstreamPath).reply(200, {});
+
+      await makeStreamingRequestToDownstream({
+        url: fullDownstreamUrl,
+        method: 'POST',
+        headers: {},
+        requestId: FIXED_UUID,
+      });
+
+      const [logContext] = (logger.debug as jest.Mock).mock.calls[0];
+      expect(logContext.requestId).toBe(FIXED_UUID);
+    });
+
+    it('makeStreamingRequestToDownstream synthesises a UUID when requestId is absent', async () => {
+      nock(downstreamUrl).post(downstreamPath).reply(200, {});
+
+      await makeStreamingRequestToDownstream({
+        url: fullDownstreamUrl,
+        method: 'POST',
+        headers: {},
+      });
+
+      const [logContext] = (logger.debug as jest.Mock).mock.calls[0];
+      expect(typeof logContext.requestId).toBe('string');
+      expect(logContext.requestId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+    });
+  });
 });

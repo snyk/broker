@@ -55,6 +55,8 @@ export class HttpDispatcherServiceClient implements DispatcherServiceClient {
           `Unexpected connection allocation server response - ${response.statusCode}: ${response.body}`,
         );
       }
+      // Reading the ID echoed by the remote API in its response headers — there
+      // is no typed accessor on the HTTP response type for this field.
       const snykRequestId = response.headers['snyk-request-id'] || '';
       logger.trace(
         { snykRequestId, apiResponse },

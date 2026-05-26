@@ -97,6 +97,7 @@ export class HybridClientRequestHandler {
       body: this.req.body,
       headers: this.req.headers,
       streamingID,
+      requestId: this.req.requestId,
     });
     incrementWebSocketRequestsTotal(false, 'outbound-request');
     return;
@@ -123,6 +124,7 @@ export class HybridClientRequestHandler {
         body: this.req.body,
         headers: this.req.headers,
         streamingID: '',
+        requestId: this.req.requestId,
       },
       (ioResponse) => {
         this.logContext.responseStatus = ioResponse.status;
@@ -209,6 +211,7 @@ export class HybridClientRequestHandler {
       method: this.req.method,
       body: this.req.body,
       headers: this.req.headers,
+      requestId: this.req.requestId,
     };
 
     // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version

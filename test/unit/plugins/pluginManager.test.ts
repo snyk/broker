@@ -208,6 +208,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
       const expectedRequestBody = Object.assign({}, requestDetails.body);
@@ -278,6 +279,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
       const expectedRequestBody = Object.assign({}, requestDetails.body);
@@ -332,6 +334,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
       const request = await runPreRequestPlugins(
@@ -390,6 +393,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
       const expectedRequestBody = Object.assign({}, requestDetails.body);
@@ -408,6 +412,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal2 = Object.assign(
         {},
@@ -489,6 +494,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal = Object.assign({}, requestDetails.body);
       const expectedRequestBody = Object.assign({}, requestDetails.body);
@@ -507,6 +513,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal2 = Object.assign(
         {},
@@ -525,6 +532,7 @@ describe('Plugin Manager', () => {
         headers: { myHeader: 'my_value' },
         method: 'POST',
         body: { myField: 'my field value' },
+        requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       };
       const requestBodyDetailsOriginal3 = Object.assign(
         {},

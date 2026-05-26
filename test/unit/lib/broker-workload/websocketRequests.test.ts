@@ -63,6 +63,34 @@ describe('BrokerWorkload', () => {
     );
   });
 
+  it('uses payload.requestId in logContext even when headers["snyk-request-id"] differs', async () => {
+    const workload = new BrokerWorkload(
+      connectionIdentifier,
+      options,
+      websocketConnectionHandler,
+    );
+    const payloadRequestId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const headerRequestId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const payload = {
+      url: '/',
+      method: 'GET',
+      headers: { 'snyk-request-id': headerRequestId },
+      streamingID: '',
+      requestId: payloadRequestId,
+    };
+
+    await workload.handler({ payload, websocketHandler: jest.fn() });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({ requestId: payloadRequestId }),
+      expect.stringContaining('[Websocket Flow] Received request'),
+    );
+    expect(logger.debug).not.toHaveBeenCalledWith(
+      expect.objectContaining({ requestId: headerRequestId }),
+      expect.stringContaining('[Websocket Flow] Received request'),
+    );
+  });
+
   it('sets contextId to undefined in logContext when x-snyk-broker-context-id header is absent', async () => {
     const workload = new BrokerWorkload(
       connectionIdentifier,

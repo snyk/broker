@@ -56,7 +56,7 @@ export const webserver = (config, altPort: number) => {
           url: safeUrl(req.url),
           requestMethod: req.method,
           requestHeaders: req.headers,
-          requestId: req.requestId ?? '',
+          requestId: req.requestId,
           maskedToken: maskToken(brokerToken),
           hashedToken: hashedToken,
           error: err,
