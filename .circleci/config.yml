@@ -397,8 +397,14 @@ jobs:
           name: Release to GitHub
           no_output_timeout: 20m
           command: |
-            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
             npm install --save-exact --save-dev semantic-release@25.0.3 @semantic-release/exec@7.1.0 pkg@5.8.1
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            # following lines can be removed after solving https://github.com/semantic-release/npm/issues/1121
+            export NPM_TOKEN=$(curl -fsS -X POST \
+              -H "Authorization: Bearer $NPM_ID_TOKEN" \
+              "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/snyk-broker" \
+              | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(JSON.parse(d).token))')
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
             npx semantic-release
 
 workflows:
@@ -482,7 +488,6 @@ workflows:
           name: Release to GitHub and NPM
           context:
             - github-release
-            - nodejs-install
             - snyk-bot-slack
             - team-hybrid-snyk
           requires:
