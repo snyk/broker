@@ -152,6 +152,12 @@
     "brace-expansion": "1.1.14",
     "form-data": "4.0.4",
     "ws": "7.5.10",
-    "setheader": "1.0.2"
+    "setheader": "1.0.2",
+    "@grpc/proto-loader": {
+      "protobufjs": "^7.6.1"
+    },
+    "@opentelemetry/otlp-transformer": {
+      "protobufjs": "^8.4.2"
+    }
   }
 }
