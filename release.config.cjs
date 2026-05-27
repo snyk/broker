@@ -38,8 +38,7 @@ module.exports = {
           'mkdir -p sboms && npx snyk sbom --format spdx2.3+json > sboms/broker.sbom.spdx.json',
       },
     ],
-    ['@semantic-release/npm', { npmPublish: false }],
-    ['@semantic-release/exec', { publishCmd: 'npm publish' }],
+    '@semantic-release/npm',
     [
       '@semantic-release/github',
       {

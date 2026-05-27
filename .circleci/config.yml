@@ -483,6 +483,7 @@ workflows:
           context:
             - github-release
             - snyk-bot-slack
+            - team-access-npm-release
             - team-hybrid-snyk
           requires:
             - Snyk Security Scans
