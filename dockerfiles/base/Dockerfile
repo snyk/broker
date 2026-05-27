@@ -24,6 +24,7 @@ RUN <<EOF
     apt install --assume-yes \
       curl \
       gpg \
+      libatomic1 \
       xz-utils
     # install node
     ARCH= && dpkgArch="$(dpkg --print-architecture)"
