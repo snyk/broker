@@ -1,7 +1,8 @@
 jest.mock('fs');
 jest.mock('../../../../lib/hybrid-sdk/http/request');
 jest.mock('../../../../lib/hybrid-sdk/client/auth/oauth', () => ({
-  getAuthConfig: () => ({ accessToken: { authHeader: 'Bearer test' } }),
+  getAccessToken: jest.fn().mockResolvedValue('Bearer test'),
+  invalidateToken: jest.fn(),
 }));
 
 import * as fs from 'fs';
