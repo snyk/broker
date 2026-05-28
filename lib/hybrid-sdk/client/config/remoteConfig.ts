@@ -5,7 +5,8 @@ import { isJson } from '../../common/utils/json';
 import { BrokerConnectionApiResponse } from '../types/api';
 import { capitalizeKeys } from '../utils/configurations';
 import version from '../../common/utils/version';
-import { getAuthConfig } from '../auth/oauth';
+import { getAccessToken, invalidateToken } from '../auth/oauth';
+import { log as logger } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { log as logger } from '../../../logs/logger';
 
@@ -26,13 +27,22 @@ export const retrieveConnectionsForDeployment = async (
     url: `${clientOpts.config.API_BASE_URL}/hidden/brokers/deployments/${deploymentId}/connections?version=${apiVersion}`,
     headers: {
       'Content-Type': 'application/vnd.api+json',
-      Authorization: `${getAuthConfig().accessToken?.authHeader}`,
+      Authorization: await getAccessToken(),
       'x-broker-client-id': `${clientOpts.config.brokerClientId}`,
       'x-broker-client-version': `${version}`,
     },
     method: 'GET',
   };
-  const connectionsResponse = await makeRequestToDownstream(request);
+  let connectionsResponse = await makeRequestToDownstream(request);
+  if (connectionsResponse.statusCode === 401) {
+    logger.warn(
+      {},
+      'Remote config retrieval returned 401; invalidating cached token and retrying once.',
+    );
+    invalidateToken();
+    request.headers['Authorization'] = await getAccessToken();
+    connectionsResponse = await makeRequestToDownstream(request);
+  }
   if (connectionsResponse.statusCode != 200) {
     if (connectionsResponse.statusCode == 404) {
       throw new Error(

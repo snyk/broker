@@ -17,24 +17,23 @@ import { requestHandler } from './socketHandlers/requestHandler';
 import { chunkHandler } from './socketHandlers/chunkHandler';
 import { initializeSocketHandlers } from './socketHandlers/init';
 
-import { CONFIGURATION, LoadedClientOpts } from '../common/types/options';
+import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
-import { getAuthConfig } from './auth/oauth';
+import {
+  getAccessToken,
+  getCachedAccessToken,
+  invalidateToken,
+  isOAuthClientInitialized,
+} from './auth/oauth';
 import { Client, NoopClient } from './metrics';
 import { getServerId } from './dispatcher';
 import { determineFilterType } from './utils/filterSelection';
 import { notificationHandler } from './socketHandlers/notificationHandler';
 import { renewBrokerServerConnection } from './auth/brokerServerConnection';
+import { AuthRenewalError } from './auth/errors';
 import version from '../common/utils/version';
 import { addServerIdAndRoleQS } from '../http/utils';
 import { serviceHandler } from './socketHandlers/serviceHandler';
-
-const getAuthExpirationTimeout = (config: CONFIGURATION) => {
-  return (
-    config.AUTH_EXPIRATION_OVERRIDE ??
-    (getAuthConfig().accessToken?.expiresIn - 60) * 1000
-  );
-};
 
 /**
  * Creates a pair of WebSocket connections (primary and secondary) for the given connection key.
@@ -179,8 +178,11 @@ export const createWebSocket = (
       'x-broker-client-version': version,
       'snyk-request-id': requestId,
     };
-    if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
-      headers.Authorization = getAuthConfig().accessToken.authHeader;
+    if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
+      const authorization = getCachedAccessToken();
+      if (authorization) {
+        headers.Authorization = authorization;
+      }
     }
     return headers;
   };
@@ -205,74 +207,95 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (getAuthConfig().accessToken && clientOpts.config.UNIVERSAL_BROKER_GA) {
+  if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
     // The access token is not sent when making requests over the websocket, so we must re-validate
     // the token periodically to keep the connection alive. Connections that do not re-validate the
     // access token will be marked as stale and closed by the server.
+    const renewalIntervalMs =
+      clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? 10 * 60 * 1000;
+
     const timeoutHandler = async () => {
       const commonLogFields = {
         connection: maskToken(identifyingMetadata.identifier),
         role: identifyingMetadata.role,
       };
 
-      websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
-
-      logger.debug(commonLogFields, 'Renewing auth.');
-      const renewResponse = await renewBrokerServerConnection(
-        {
-          connectionIdentifier: identifyingMetadata.identifier!,
-          brokerClientId: identifyingMetadata.clientId,
-          authorization: getAuthConfig().accessToken.authHeader,
-          role: identifyingMetadata.role,
-          serverId: serverId,
-        },
-        clientOpts.config,
-      );
-
-      const statusClass = Math.floor((renewResponse.statusCode ?? 0) / 100);
-      switch (statusClass) {
-        case 2: // 2XX - success
-          logger.debug(commonLogFields, 'Auth renewed.');
-          break;
-        case 4: // 4XX - client error - unrecoverable
-          logger.fatal(
+      try {
+        const renewOnce = async () =>
+          renewBrokerServerConnection(
             {
-              ...commonLogFields,
-              responseCode: renewResponse.statusCode,
+              connectionIdentifier: identifyingMetadata.identifier!,
+              brokerClientId: identifyingMetadata.clientId,
+              authorization: await getAccessToken(),
+              role: identifyingMetadata.role,
+              serverId: serverId,
             },
-            'Failed to renew connection due to a client error. Exiting...',
+            clientOpts.config,
           );
-          metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
-          metricsClient.recordProcessExit('auth_4xx');
-          await metricsClient.forceFlush().catch((err) => {
-            logger.warn(
-              { ...commonLogFields, err },
-              'Failed to flush metrics before exit',
+
+        logger.debug(commonLogFields, 'Renewing auth.');
+        let renewResponse = await renewOnce();
+
+        if (renewResponse.statusCode === 401) {
+          logger.debug(
+            commonLogFields,
+            'Auth renewal returned 401; invalidating cached token and retrying once.',
+          );
+          invalidateToken();
+          renewResponse = await renewOnce();
+        }
+
+        const statusCode = renewResponse.statusCode ?? 0;
+        const statusClass = Math.floor(statusCode / 100);
+        if (statusClass !== 2) {
+          throw new AuthRenewalError(statusCode);
+        }
+
+        logger.debug(commonLogFields, 'Auth renewed.');
+        // Re-read extraHeaders after renewal: the 401-retry path may have
+        // invalidated and refreshed the cached token, and the next reconnect
+        // needs to pick that up via the synchronous cache read.
+        websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
+      } catch (err) {
+        if (err instanceof AuthRenewalError) {
+          if (err.statusCode >= 400 && err.statusCode < 500) {
+            logger.fatal(
+              { ...commonLogFields, responseCode: err.statusCode },
+              'Failed to renew connection due to a client error. Exiting...',
             );
-          });
-          process.exit(1);
-          return; // process.exit is overridden during testing, so we return instead
-        default: // log and retry
+            metricsClient.recordAuthRenewalFailure(err.statusCode);
+            metricsClient.recordProcessExit('auth_4xx');
+            await metricsClient.forceFlush().catch((flushErr) => {
+              logger.warn(
+                { ...commonLogFields, err: flushErr },
+                'Failed to flush metrics before exit',
+              );
+            });
+            process.exit(1);
+            return;
+          }
           logger.warn(
             {
               ...commonLogFields,
-              responseCode: renewResponse.statusCode,
+              responseCode: err.statusCode,
             },
             'Failed to renew connection.',
           );
-          metricsClient.recordAuthRenewalFailure(renewResponse.statusCode ?? 0);
-      }
+          metricsClient.recordAuthRenewalFailure(err.statusCode);
+          return;
+        }
 
-      websocket.timeoutHandlerId = setTimeout(
-        timeoutHandler,
-        getAuthExpirationTimeout(clientOpts.config),
-      );
+        logger.warn({ ...commonLogFields, err }, 'Failed to renew connection.');
+        metricsClient.recordAuthRenewalFailure(0);
+      } finally {
+        websocket.timeoutHandlerId = setTimeout(
+          timeoutHandler,
+          renewalIntervalMs,
+        );
+      }
     };
 
-    websocket.timeoutHandlerId = setTimeout(
-      timeoutHandler,
-      getAuthExpirationTimeout(clientOpts.config),
-    );
+    websocket.timeoutHandlerId = setTimeout(timeoutHandler, renewalIntervalMs);
   }
 
   websocket.on('incoming::error', (e) => {

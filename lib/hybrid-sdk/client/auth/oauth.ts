@@ -1,112 +1,119 @@
-import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
-import { makeRequestToDownstream } from '../../http/request';
+import { AccessToken, ClientCredentials, ModuleOptions } from 'simple-oauth2';
 import { log as logger } from '../../../logs/logger';
 import type { Client as MetricsClient } from '../metrics/client';
 
-interface tokenExchangeResponse {
-  access_token: string;
-  expires_in: number;
-  scope: string;
-  token_type: string;
+export interface InitOAuthClientOptions {
+  apiHostname: string;
+  clientId: string;
+  clientSecret: string;
+  metricsClient?: MetricsClient;
+  expiryThresholdSeconds?: number;
 }
 
-const authConfig: Record<string, any> = {};
+const DEFAULT_EXPIRY_THRESHOLD_SECONDS = 60;
 
-export const getAuthConfig = () => {
-  return authConfig;
-};
+let client: ClientCredentials | null = null;
+let token: AccessToken | null = null;
+let metrics: MetricsClient | undefined;
+let thresholdSeconds = DEFAULT_EXPIRY_THRESHOLD_SECONDS;
+let inFlightRefresh: Promise<AccessToken> | null = null;
 
-export const setAuthConfigKey = (key: string, value: unknown) => {
-  authConfig[key] = value;
-};
-
-export async function fetchAndUpdateJwt(
-  apiHostname: string,
-  clientId: string,
-  clientSecret: string,
-) {
-  try {
-    const data = {
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-    };
-    const formData = new URLSearchParams(data);
-
-    const request: PostFilterPreparedRequest = {
-      url: `${apiHostname}/oauth2/token`,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      method: 'POST',
-      body: formData.toString(),
-    };
-    const oauthResponse = await makeRequestToDownstream(request);
-    if (oauthResponse.statusCode != 200) {
-      const errorBody = JSON.parse(oauthResponse.body);
-      throw new Error(
-        `${oauthResponse.statusCode}-${errorBody.error}:${errorBody.error_description}`,
-      );
-    }
-    const accessTokenJSON = JSON.parse(
-      oauthResponse.body,
-    ) as tokenExchangeResponse;
-    const jwt = accessTokenJSON.access_token;
-    const type = accessTokenJSON.token_type;
-    const expiresIn = accessTokenJSON.expires_in;
-
-    setAuthConfigKey('accessToken', {
-      expiresIn: expiresIn,
-      authHeader: `${type} ${jwt}`,
-    });
-    return { expiresIn: expiresIn, authHeader: `${type} ${jwt}` };
-  } catch (err) {
-    logger.error({ err }, 'Unable to retrieve JWT');
-  }
+export function isOAuthClientInitialized(): boolean {
+  return client !== null;
 }
 
-const refreshJwt = async (
-  clientConfig,
-  clientId,
-  clientSecret,
-  metricsClient?: MetricsClient,
-) => {
-  logger.debug({}, 'Refreshing oauth access token');
-  try {
-    const newJwt = await fetchAndUpdateJwt(
-      clientConfig.apiHostname,
-      clientId,
-      clientSecret,
+export function initOAuthClient(opts: InitOAuthClientOptions): void {
+  const config: ModuleOptions = {
+    client: { id: opts.clientId, secret: opts.clientSecret },
+    auth: {
+      tokenHost: opts.apiHostname,
+      tokenPath: '/oauth2/token',
+    },
+    options: {
+      authorizationMethod: 'body',
+    },
+  };
+  client = new ClientCredentials(config);
+  metrics = opts.metricsClient;
+  thresholdSeconds =
+    opts.expiryThresholdSeconds ?? DEFAULT_EXPIRY_THRESHOLD_SECONDS;
+  token = null;
+  inFlightRefresh = null;
+}
+
+function refreshToken(): Promise<AccessToken> {
+  if (!client) {
+    return Promise.reject(
+      new Error('OAuth client not initialized. Call initOAuthClient() first.'),
     );
-    if (!newJwt) {
-      throw new Error('Error retrieving new JWT:undefined.');
+  }
+  if (inFlightRefresh) {
+    return inFlightRefresh;
+  }
+  const activeClient = client;
+  inFlightRefresh = (async () => {
+    try {
+      token = await activeClient.getToken({});
+      logger.debug({}, 'Refreshed oauth access token');
+      return token;
+    } catch (err) {
+      metrics?.recordJwtRefreshFailure();
+      logger.error({ err }, 'Unable to retrieve JWT');
+      throw err;
+    } finally {
+      inFlightRefresh = null;
     }
-    setAuthConfigKey('accessToken', {
-      expiresIn: newJwt.expiresIn,
-      authHeader: newJwt.authHeader,
-    });
-    setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
-    }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
-  } catch (err) {
-    metricsClient?.recordJwtRefreshFailure();
-    logger.error({ err }, 'Error retrieving new JWT');
-  }
-};
+  })();
+  return inFlightRefresh;
+}
 
-export const setfetchAndUpdateJwt = async (
-  clientConfig,
-  clientId,
-  clientSecret,
-  metricsClient?: MetricsClient,
-) => {
-  const newJwt = await fetchAndUpdateJwt(
-    clientConfig.apiHostname,
-    clientId,
-    clientSecret,
-  );
-  logger.debug({}, 'Setting auth updater.');
-  if (newJwt) {
-    setTimeout(async () => {
-      refreshJwt(clientConfig, clientId, clientSecret, metricsClient);
-    }, clientConfig.AUTH_EXPIRATION_OVERRIDE ?? (newJwt.expiresIn - 60) * 1000);
+async function ensureToken(): Promise<AccessToken> {
+  if (!client) {
+    throw new Error(
+      'OAuth client not initialized. Call initOAuthClient() first.',
+    );
   }
-};
+  if (token && !token.expired(thresholdSeconds)) {
+    return token;
+  }
+  return refreshToken();
+}
+
+function formatAccessToken(accessToken: AccessToken): string {
+  const raw = accessToken.token as { token_type: string; access_token: string };
+  return `${raw.token_type} ${raw.access_token}`;
+}
+
+/**
+ * Returns a cached token synchronously. Triggers a background refresh when the
+ * cached token is within the expiry threshold (or absent/expired) so that
+ * subsequent sync reads see a fresh token. When the token is within the
+ * threshold but not yet expired, the still-valid token is returned for the
+ * current caller — better than returning undefined and forcing an unauth'd
+ * request.
+ */
+export function getCachedAccessToken(): string | undefined {
+  if (!client) {
+    return undefined;
+  }
+  if (!token || token.expired(0)) {
+    void refreshToken().catch(() => {
+      /* failure already logged and recorded in refreshToken */
+    });
+    return undefined;
+  }
+  if (token.expired(thresholdSeconds)) {
+    void refreshToken().catch(() => {
+      /* failure already logged and recorded in refreshToken */
+    });
+  }
+  return formatAccessToken(token);
+}
+
+export async function getAccessToken(): Promise<string> {
+  return formatAccessToken(await ensureToken());
+}
+
+export function invalidateToken(): void {
+  token = null;
+}
