@@ -8,7 +8,6 @@ import version from '../../common/utils/version';
 import { getAccessToken, invalidateToken } from '../auth/oauth';
 import { log as logger } from '../../../logs/logger';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
-import { log as logger } from '../../../logs/logger';
 
 export const retrieveConnectionsForDeployment = async (
   clientOpts: ClientOpts,
