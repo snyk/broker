@@ -222,6 +222,38 @@ describe('signals', () => {
       clearIntervalSpy.mockRestore();
     });
 
+    it('logs the missing-websocket termination signal at WARN (not ERROR) — shutdown still proceeds locally', () => {
+      // Re-load signals in an isolated module context with the client mock
+      // overridden to return [] (so the WARN branch runs). Spy on the
+      // *isolated* logger instance — the one signals.ts actually wrote to.
+      let signals!: SignalsModule;
+      let warnSpy!: jest.SpyInstance;
+      let errorSpy!: jest.SpyInstance;
+      jest.isolateModules(() => {
+        jest.doMock('../../../../../../lib/hybrid-sdk/client', () => ({
+          getWebsocketConnections: () => [],
+        }));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { log: logger } = require('../../../../../../lib/logs/logger');
+        warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+        errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+        signals = require('../../../../../../lib/hybrid-sdk/common/utils/signals');
+      });
+      signals.handleTerminationSignal(() => {});
+      process.emit('SIGTERM' as any);
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        'Unable to find websocket to signal termination to server.',
+      );
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Unable to find websocket to signal termination to server.',
+      );
+      warnSpy.mockRestore();
+      errorSpy.mockRestore();
+    });
+
     it('clearAndRemoveInterval is a no-op (no throw) on an unregistered handle', () => {
       const signals = loadSignals();
       signals.handleTerminationSignal(() => {});

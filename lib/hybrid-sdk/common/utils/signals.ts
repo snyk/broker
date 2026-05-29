@@ -70,7 +70,9 @@ const signalTerminationToServer = (signal) => {
       signal,
     });
   } else {
-    logger.error(
+    // Shutdown path: broker still terminates locally — server just doesn't
+    // get advance notice. WARN is the right floor (notable, not fatal).
+    logger.warn(
       {},
       'Unable to find websocket to signal termination to server.',
     );

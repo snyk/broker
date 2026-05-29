@@ -98,18 +98,21 @@ export const getConfigForIdentifier = (
   );
   const connectionKey = connection?.key || undefined;
   let connectionType = connection?.value.type || undefined;
-  if (!connectionType) {
-    logger.error(
-      { integrations: config.integrations },
-      `Unable to find configuration type for ${identifier}. Please review config.`,
-    );
-    // throw new Error(
-    //   `Unable to find configuration type for ${identifier}. Please review config.`,
-    // );
-  }
-  if (!connectionKey) {
-    logger.error(
-      { integrations: config.integrations },
+  if (!connectionType || !connectionKey) {
+    // Misroute: identifier was not found in configured connections. WARN, not
+    // ERROR — a single misconfigured connection used to fire continuously
+    // into customer alerting. Payload carries `configuredIdentifiers` so the
+    // customer can compare against their actual config.
+    //
+    // The throw below is intentionally still commented out (preserved from
+    // pre-existing behaviour): the function returns a best-effort empty
+    // config and the caller decides how to handle.
+    logger.warn(
+      {
+        identifier,
+        contextId,
+        configuredIdentifiers: Object.keys(config.connections),
+      },
       `Unable to find configuration type for ${identifier}. Please review config.`,
     );
     // throw new Error(
