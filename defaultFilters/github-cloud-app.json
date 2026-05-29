@@ -330,6 +330,36 @@
         }
       },
       {
+        "//": "list the user's info, and validate their credentials",
+        "method": "GET",
+        "path": "/user",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "list the user's orgs",
+        "method": "GET",
+        "path": "/user/orgs",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
+        "//": "list the logged in user's repos",
+        "method": "GET",
+        "path": "/user/repos",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
         "//": "list a user's repos",
         "method": "GET",
         "path": "/users/:username/repos",
