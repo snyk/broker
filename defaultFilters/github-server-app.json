@@ -330,6 +330,16 @@
         }
       },
       {
+        "//": "list the user's orgs",
+        "method": "GET",
+        "path": "/user/orgs",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
         "//": "list a user's repos",
         "method": "GET",
         "path": "/users/:username/repos",
