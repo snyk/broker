@@ -122,7 +122,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   } catch {
     // Retries exhausted while a handshake was still in progress — a genuinely
     // slow or stuck (re)connect. Transient, so signal it is safe to retry.
-    logger.warn(
+    logger.error(
       { desensitizedToken, requestId },
       'No ready connection after retries (client handshake still in progress).',
     );
@@ -135,7 +135,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     // Connections are present but missing required metadata (e.g. a legacy
     // client that never sends capabilities) — permanent for this client, so keep
     // the fast-fail 400 to avoid turning these into retry storms.
-    logger.warn(
+    logger.error(
       { desensitizedToken, requestId },
       'Connection metadata is missing required properties (version or capabilities).',
     );
