@@ -9,7 +9,7 @@ import {
   HttpResponse,
   makeSingleRawRequestToDownstream,
 } from '../../../http/request';
-import { retry } from '../../retry/exponential-backoff';
+import { retry } from '../../../http/exponential-backoff';
 
 export async function validateBrokerClientUrl(
   checkOptions: CheckOptions,

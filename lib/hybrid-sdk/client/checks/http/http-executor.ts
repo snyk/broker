@@ -1,5 +1,5 @@
 import { log as logger } from '../../../../logs/logger';
-import { retry } from '../../retry/exponential-backoff';
+import { retry } from '../../../http/exponential-backoff';
 import type { CheckId, CheckResult, CheckStatus } from '../types';
 import {
   HttpResponse,
