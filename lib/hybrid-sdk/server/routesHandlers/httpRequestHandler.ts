@@ -9,13 +9,7 @@ import { PostFilterPreparedRequest } from '../../../broker-workload/prepareReque
 import { makeStreamingRequestToDownstream } from '../../http/request';
 import { retry } from '../../http/exponential-backoff';
 
-// When no connection is ready yet, a client may still be completing its
-// handshake during a (re)connect. Retry a few times with exponential backoff to
-// let it become ready and serve the request transparently, rather than failing
-// back to the caller (bare git does not retry). Tunable via env for ops.
-const CONNECTION_READY_MAX_RETRIES = Number(
-  process.env.BROKER_CONNECTION_READY_MAX_RETRIES ?? 4,
-);
+const CONNECTION_READY_MAX_RETRIES = 4;
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req: Request,
