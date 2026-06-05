@@ -1,7 +1,7 @@
 import { log as logger } from '../../../../logs/logger';
 import type { CheckOptions, CheckResult } from '../types';
 import type { Config } from '../../types/config';
-import { validate } from 'uuid';
+import { validate } from '../../../common/utils/uuid';
 
 export async function validateBrokerToken(
   checkOptions: CheckOptions,

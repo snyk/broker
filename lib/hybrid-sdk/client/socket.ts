@@ -1,7 +1,7 @@
 // import '../common/http/patch-https-request-for-proxying';
 
 import Primus from 'primus';
-import { v4 as uuid } from 'uuid';
+import { uuidv4 } from '../common/utils/uuid';
 import { log as logger } from '../../logs/logger';
 import primusEmitter from 'primus-emitter';
 import {
@@ -170,7 +170,7 @@ export const createWebSocket = (
     timeout: parseInt(localClientOps.config.socketConnectTimeout) || 10000,
   };
 
-  let currentRequestId = uuid();
+  let currentRequestId = uuidv4();
   const buildExtraHeaders = (requestId: string): Record<string, string> => {
     const headers: Record<string, string> = {
       'x-snyk-broker-client-id': identifyingMetadata.clientId,
@@ -321,7 +321,7 @@ export const createWebSocket = (
     metricsClient.setConnectionState('reconnecting', identifyingMetadata.role);
     metricsClient.recordReconnect();
 
-    currentRequestId = uuid();
+    currentRequestId = uuidv4();
     websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
     reconnectScheduledHandler(opts, currentRequestId);
   });

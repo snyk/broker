@@ -117,8 +117,7 @@
     "snyk-config": "5.3.0",
     "then-fs": "^2.0.0",
     "tunnel": "0.0.6",
-    "undefsafe": "^2.0.2",
-    "uuid": "8.3.2"
+    "undefsafe": "^2.0.2"
   },
   "repository": {
     "type": "git",
