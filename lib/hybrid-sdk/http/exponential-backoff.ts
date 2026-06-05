@@ -1,4 +1,4 @@
-import { log as logger } from '../../../logs/logger';
+import { log as logger } from '../../logs/logger';
 
 export const retry = async <T>(
   fn: () => Promise<T> | T,

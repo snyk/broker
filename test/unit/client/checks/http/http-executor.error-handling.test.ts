@@ -1,9 +1,6 @@
-jest.mock(
-  '../../../../../lib/hybrid-sdk/client/retry/exponential-backoff',
-  () => ({
-    retry: async <T>(fn: () => Promise<T> | T) => fn(),
-  }),
-);
+jest.mock('../../../../../lib/hybrid-sdk/http/exponential-backoff', () => ({
+  retry: async <T>(fn: () => Promise<T> | T) => fn(),
+}));
 
 // Replace the downstream HTTP call with a jest.fn we can drive per test.
 jest.mock('../../../../../lib/hybrid-sdk/http/request', () => ({

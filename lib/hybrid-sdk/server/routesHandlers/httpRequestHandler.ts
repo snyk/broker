@@ -1,12 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { log as logger } from '../../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
-import { getSocketConnections } from '../socket';
+import { ClientSocket, getSocketConnections } from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
 import { URL, URLSearchParams } from 'node:url';
 import { PostFilterPreparedRequest } from '../../../broker-workload/prepareRequest';
 import { makeStreamingRequestToDownstream } from '../../http/request';
+import { retry } from '../../http/exponential-backoff';
+
+const CONNECTION_READY_MAX_RETRIES = 4;
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req: Request,
@@ -72,7 +75,7 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       return res.status(404).json({ ok: false });
     }
   }
-  // Grab a first (newest) client from the pool
+  // Grab the pool of connections for this token
   const connection = connections.get(token)!;
   // Make sure a connection actually exists before proceeding
   if (connection.length === 0) {
@@ -83,10 +86,50 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     res.setHeader('x-broker-failure', 'no-connection');
     return res.status(404).json({ ok: false });
   }
-  // Todo: We may not always want to select the first client from the pool
-  const client = connection[0];
-  if (!client.metadata?.version || !client.metadata?.capabilities) {
-    logger.warn(
+  const isReady = (c: ClientSocket): boolean =>
+    Boolean(c.socket && c.metadata?.version && c.metadata?.capabilities);
+
+  // The pool is newest-first, so find() returns the newest fully-ready
+  // connection. This keeps HA clients immune to reconnect churn, which will
+  // briefly create a not-yet-ready connection. If none is ready yet but a connection is still
+  // completing its handshake, retry with exponential backoff. A permanently-incomplete pool
+  // won't become ready, so return without retrying.
+  let client: ClientSocket | undefined;
+  try {
+    client = await retry<ClientSocket | undefined>(
+      () => {
+        const pool = connections.get(token) ?? [];
+        const ready = pool.find(isReady);
+        if (ready) {
+          return ready;
+        }
+        if (pool.some((c) => !c.socket || !c.metadata)) {
+          throw new Error('client handshake in progress');
+        }
+        return undefined;
+      },
+      {
+        retries: CONNECTION_READY_MAX_RETRIES,
+        operation: 'await-ready-broker-connection',
+      },
+    );
+  } catch {
+    // Retries exhausted while a handshake was still in progress — a genuinely
+    // slow or stuck (re)connect. Transient, so signal it is safe to retry.
+    logger.error(
+      { desensitizedToken, requestId },
+      'No ready connection after retries (client handshake still in progress).',
+    );
+    res.setHeader('x-broker-failure', 'connection-not-ready');
+    res.setHeader('Retry-After', '1');
+    return res.status(503).json({ ok: false });
+  }
+
+  if (!client) {
+    // Connections are present but missing required metadata (e.g. a legacy
+    // client that never sends capabilities) — permanent for this client, so keep
+    // the fast-fail 400 to avoid turning these into retry storms.
+    logger.error(
       { desensitizedToken, requestId },
       'Connection metadata is missing required properties (version or capabilities).',
     );
