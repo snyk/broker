@@ -1,7 +1,7 @@
 import http from 'http';
 import { AddressInfo, Socket } from 'net';
 import nock from 'nock';
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from '../../../../../lib/hybrid-sdk/common/utils/uuid';
 
 import { BrokerServerPostResponseHandler } from '../../../../../lib/hybrid-sdk/http/downstream-post-stream-to-server';
 import {

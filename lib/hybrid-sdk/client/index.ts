@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from '../common/utils/uuid';
 import { createWebSocket } from './socket';
 import { log as logger } from '../../logs/logger';
 import { forwardHttpRequest } from '../common/connectionToWorkloadInterface/forwardHttpRequest';

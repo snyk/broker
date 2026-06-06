@@ -9,7 +9,7 @@ import {
 } from './common/utils/metrics';
 import undefsafe from 'undefsafe';
 import { ExtendedLogContext } from './common/types/log';
-import { v4 as uuid } from 'uuid';
+import { uuidv4 } from './common/utils/uuid';
 import stream from 'stream';
 import { streamsStore } from './http/server-post-stream-handler';
 import { maskToken } from './common/utils/token';
@@ -57,7 +57,7 @@ export class HybridClientRequestHandler {
   }
 
   private makeWebsocketRequestWithStreamingResponse() {
-    const streamingID = uuid();
+    const streamingID = uuidv4();
     const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
     streamBuffer.on('error', (error) => {
       // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.

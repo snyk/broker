@@ -2,7 +2,7 @@ import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../../logs/logger';
 import { getConfig } from '../../common/config/config';
 
-import { v4 as uuid } from 'uuid';
+import { uuidv4 } from '../../common/utils/uuid';
 import { axiosInstance } from '../../http/axios';
 
 class DispatcherClient {
@@ -92,7 +92,7 @@ class DispatcherClient {
   }
 
   async #makeRequest(logContext, url, method, requestBody?, cb?) {
-    const requestId = uuid();
+    const requestId = uuidv4();
     // version *must* be provided
     const urlWithVersion = new URL(url);
     urlWithVersion.searchParams.append('version', this.#version);
