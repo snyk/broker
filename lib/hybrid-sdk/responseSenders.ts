@@ -9,12 +9,17 @@ import { RequestMetadata } from './types';
 import { WebSocketConnection } from './client/types/client';
 import { WebSocketServer } from './server/types/socket';
 import { ExtendedLogContext } from './common/types/log';
+import {
+  BrokerErrorCode,
+  BROKER_ERROR_CODES,
+  statusForErrorCode,
+} from './common/types/errorCodes';
 
 export interface HybridResponse {
   status: number;
   body?: any;
   headers?: any;
-  errorType?: any;
+  errorType?: BrokerErrorCode;
   originalBodySize?: any;
 }
 export class HybridResponseHandler {
@@ -77,10 +82,11 @@ export class HybridResponseHandler {
         errorMessage,
       });
       return this.sendResponse({
-        status: 502,
-        errorType: 'BODY_TOO_LARGE',
+        status: statusForErrorCode(BROKER_ERROR_CODES.BODY_TOO_LARGE),
+        errorType: BROKER_ERROR_CODES.BODY_TOO_LARGE,
         originalBodySize: contentLength,
         body: {
+          code: BROKER_ERROR_CODES.BODY_TOO_LARGE,
           message: errorMessage,
         },
       });

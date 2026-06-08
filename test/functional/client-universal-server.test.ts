@@ -125,6 +125,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/not-allowed',
@@ -151,6 +152,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/echo-body/filtered',
@@ -181,6 +183,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/echo-query/filtered?proxyMe=now!',
@@ -194,6 +197,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/echo-query/filtered',
@@ -207,6 +211,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -221,6 +226,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -256,6 +262,7 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/echo-param-protected/xyz',
