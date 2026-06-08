@@ -282,6 +282,54 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
+  describe('mid-stream downstream error', () => {
+    beforeEach(() => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+    });
+
+    it('ends the stream without synthesizing a status or error code', async () => {
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(200, 'OK');
+
+      const handler = createHandler();
+
+      const mockSocket = new Socket();
+      const mockResponse = new http.IncomingMessage(mockSocket);
+      mockResponse.statusCode = 200;
+      mockResponse.headers = { 'content-type': 'application/json' };
+
+      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
+      setTimeout(() => {
+        mockResponse.emit('error', new Error('mid-stream boom'));
+        mockResponse.push(null);
+      }, 50);
+      await forwardPromise;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const handlerError = testLogger.errorCalls.find(
+        (call) =>
+          call.message ===
+          'received error from downstream request while streaming data to Broker Server',
+      );
+      expect(handlerError).toBeDefined();
+
+      const anyErrorType = [
+        ...testLogger.errorCalls,
+        ...testLogger.warnCalls,
+        ...testLogger.debugCalls,
+      ].some((call) => 'errorType' in call.context);
+      expect(anyErrorType).toBe(false);
+
+      mockSocket.destroy();
+    });
+  });
+
   describe('duration tracking on successful requests', () => {
     beforeEach(() => {
       setConfig({

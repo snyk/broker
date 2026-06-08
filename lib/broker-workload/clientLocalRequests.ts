@@ -10,6 +10,10 @@ import {
   WorkloadType,
 } from '../hybrid-sdk/workloadFactory';
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
+import {
+  BROKER_ERROR_CODES,
+  statusForErrorCode,
+} from '../hybrid-sdk/common/types/errorCodes';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
 import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
 import { NoopClient } from '../hybrid-sdk/client/metrics/noopClient';
@@ -74,8 +78,13 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
       logger.warn(hybridClientRequestHandler.logContext, reason);
       // TODO: respect request headers, block according to content-type
       return this.res
-        .status(401)
-        .send({ message: 'blocked', reason, url: this.req.url });
+        .status(statusForErrorCode(BROKER_ERROR_CODES.FILTER_BLOCKED))
+        .send({
+          code: BROKER_ERROR_CODES.FILTER_BLOCKED,
+          message: 'blocked',
+          reason,
+          url: this.req.url,
+        });
     } else {
       hybridClientRequestHandler.makeRequest(
         getInterpolatedRequest(

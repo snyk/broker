@@ -51,6 +51,7 @@ describe('no filters broker', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason: 'Request does not match any accept rule, blocking HTTP request',
       url: '/echo-body',

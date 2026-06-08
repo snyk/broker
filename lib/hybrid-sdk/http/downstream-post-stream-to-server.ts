@@ -478,8 +478,6 @@ class BrokerServerPostResponseHandler {
   }
 
   #handleRequestError() {
-    // For reasons unknown, doing foo.on(this.#func)
-    // doesn't work - you need return a function from here
     return (error: Error) => {
       this.#logger.error(
         {
@@ -489,24 +487,8 @@ class BrokerServerPostResponseHandler {
         },
         'received error from downstream request while streaming data to Broker Server',
       );
-      // If we already have a buffer object, then we've already started sending data back to the original requestor,
-      // so we have to destroy the stream and let that flow through the system
-      // If we *don't* have a buffer object, then there was a major failure with the request (e.g., host not found), so
-      // we will forward that directly to the Broker Server
-      if (this.#buffer) {
-        this.#buffer.end(error.message);
-      } else {
-        const body = JSON.stringify({ error: error });
-        this.#sendIoData(
-          JSON.stringify({
-            status: 500,
-            headers: {
-              'Content-Length': `${body.length}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-        );
-      }
+      // Downstream status already streamed - cannot send an updated status code.
+      this.#buffer.end(error.message);
     };
   }
 

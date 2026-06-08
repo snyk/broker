@@ -20,6 +20,11 @@ import {
 import { prepareRequest } from './prepareRequest';
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import {
+  BROKER_ERROR_CODES,
+  classifyDownstreamError,
+  statusForErrorCode,
+} from '../hybrid-sdk/common/types/errorCodes';
+import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
 } from '../hybrid-sdk/common/utils/metrics';
@@ -135,10 +140,11 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
         '[Websocket Flow][Blocked Request] Does not match any accept rule';
       logContext.error = 'Blocked by filter rules';
       logger.warn(logContext, reason);
-      // TODO: need to type the response object
       return responseHandler.sendResponse({
-        status: 401,
+        status: statusForErrorCode(BROKER_ERROR_CODES.FILTER_BLOCKED),
+        errorType: BROKER_ERROR_CODES.FILTER_BLOCKED,
         body: {
+          code: BROKER_ERROR_CODES.FILTER_BLOCKED,
           message: 'blocked',
           reason,
           url: payload.url,
@@ -216,6 +222,12 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
               },
               '[Downstream] Caught error making streaming request to downstream ',
             );
+            const code = classifyDownstreamError(e);
+            return responseHandler.sendResponse({
+              status: statusForErrorCode(code),
+              errorType: code,
+              body: { code, message: (e as Error)?.message },
+            });
           }
         } else {
           // here if request against server had header x-broker-ws-response:true
@@ -252,9 +264,11 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
             );
             metricsClient?.recordDownstreamStatus('5xx');
             logError(logContext, error);
+            const code = classifyDownstreamError(error);
             return responseHandler.sendResponse({
-              status: 500,
-              body: error,
+              status: statusForErrorCode(code),
+              errorType: code,
+              body: { code, message: (error as Error)?.message },
             });
           }
         }

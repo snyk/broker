@@ -233,6 +233,7 @@ describe('proxy requests originating from behind the broker server', () => {
     );
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -270,6 +271,7 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -299,6 +301,7 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -313,6 +316,7 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',
@@ -394,6 +398,7 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(401);
     expect(response.data).toStrictEqual({
+      code: 'FILTER_BLOCKED',
       message: 'blocked',
       reason:
         '[Websocket Flow][Blocked Request] Does not match any accept rule',

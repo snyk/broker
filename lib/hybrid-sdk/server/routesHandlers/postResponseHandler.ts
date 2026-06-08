@@ -112,6 +112,7 @@ export const handlePostResponse = (req: Request, res: Response) => {
             const logData = {
               ...logContext,
               responseStatus: statusAndHeadersJson.status,
+              errorType: statusAndHeadersJson.errorType,
             };
             const logMessage = 'Handling response-data request - io bits';
             if (
