@@ -35,6 +35,7 @@ export interface IdentifyingMetadata {
   version: string;
   serverId?: string;
   identifier?: string;
+  deploymentId?: string;
   id: string;
   isDisabled: boolean;
   supportedIntegrationType?: string;

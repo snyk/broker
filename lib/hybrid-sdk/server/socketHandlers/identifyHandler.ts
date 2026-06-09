@@ -8,6 +8,8 @@ import { getForwardWebSocketRequestHandler } from './initHandlers';
 import semver from 'semver';
 import { legacyStreamResponseHandler } from '../../LegacyStreamResponseHandler';
 import { ISpark } from 'primus';
+import { CLIENT_EVENT_MESSAGE } from '../../common/types/telemetry';
+import { ClientEventIdentity, handleClientEvent } from './clientEventHandler';
 
 let response;
 const minimalSupportedBrokerVersion =
@@ -78,6 +80,17 @@ export const handleIdentifyOnSocket = (
   const { maskedToken, hashedToken } = getDesensitizedToken(token);
   const clientId = clientData.metadata.clientId;
   const clientVersion = clientData.metadata.version;
+  // Server-owned identity for the identify log and every client event.
+  const eventIdentity: ClientEventIdentity = {
+    hashedToken,
+    maskedToken,
+    clientId,
+    clientVersion,
+    mode: clientData.metadata.clientConfig?.universalBroker
+      ? 'universal'
+      : 'legacy',
+    deploymentId: clientData.metadata.deploymentId,
+  };
 
   if (
     clientVersion != 'local' &&
@@ -104,7 +117,10 @@ export const handleIdentifyOnSocket = (
     {
       maskedToken,
       hashedToken,
-      metadata: metadataWithoutFilters(clientData.metadata),
+      metadata: {
+        ...metadataWithoutFilters(clientData.metadata),
+        mode: eventIdentity.mode,
+      },
     },
     'New client connection identified.',
   );
@@ -136,6 +152,7 @@ export const handleIdentifyOnSocket = (
 
   socket.on('chunk', streamingResponse(token));
   socket.on('request', response(token));
+  socket.on(CLIENT_EVENT_MESSAGE, handleClientEvent(eventIdentity));
   socket.on('incoming::ping', (time) => {
     const isTerminating =
       terminatingClientIdsPerToken.get(token)?.includes(clientId) ?? false;
