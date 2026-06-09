@@ -93,21 +93,21 @@ export type ClientShutdownReason = ProcessExitReason | 'clean';
 export type ClientEvent =
   | {
       type: 'client-error';
-      error_code: BrokerErrorCode;
-      request_id?: string;
-      integration_type?: string;
+      errorCode: BrokerErrorCode;
+      requestId?: string;
+      integrationType?: string;
     }
   | {
       type: 'client-shutdown';
       reason: ClientShutdownReason;
-      uptime_seconds: number;
-      error_code?: string; // bounded Node errno, uncaught_exception only
+      uptimeSeconds: number;
+      errorCode?: string; // bounded Node errno, uncaught_exception only
     };
 
 export type ClientEventType = ClientEvent['type'];
 
 export interface ClientEventEnvelope {
-  schema_version: number;
+  schemaVersion: number;
   ts: number; // client clock; server stamps the authoritative receipt time
   event: ClientEvent;
 }
