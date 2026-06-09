@@ -23,7 +23,7 @@ import {
   BROKER_ERROR_CODES,
   classifyDownstreamError,
   statusForErrorCode,
-} from '../hybrid-sdk/common/types/errorCodes';
+} from '../hybrid-sdk/common/types/telemetry';
 import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,

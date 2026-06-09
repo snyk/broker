@@ -16,8 +16,11 @@ import {
   AggregationType,
 } from '@opentelemetry/sdk-metrics';
 import { Client } from './client';
-
-const CONNECTION_STATES = ['connected', 'reconnecting', 'failed'] as const;
+import {
+  CONNECTION_STATES,
+  ConnectionState,
+  ProcessExitReason,
+} from '../../common/types/telemetry';
 
 /** Constructor options for {@link OtelClient}. */
 export interface OtelClientConfig {
@@ -286,10 +289,7 @@ export class OtelClient implements Client {
    * Set the connection state gauge for a given role.
    * Sets the active state attribute to 1 and all other state attributes to 0.
    */
-  setConnectionState(
-    state: 'connected' | 'reconnecting' | 'failed',
-    role: string,
-  ): void {
+  setConnectionState(state: ConnectionState, role: string): void {
     for (const s of CONNECTION_STATES) {
       this.connectionStateGauge.record(s === state ? 1 : 0, {
         state: s,
@@ -302,13 +302,7 @@ export class OtelClient implements Client {
     this.reconnectCounter.add(1);
   }
 
-  recordProcessExit(
-    reason:
-      | 'reconnect_exhaustion'
-      | 'auth_4xx'
-      | 'oauth_token_unavailable'
-      | 'uncaught_exception',
-  ): void {
+  recordProcessExit(reason: ProcessExitReason): void {
     this.processExitCounter.add(1, { reason });
   }
 

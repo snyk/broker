@@ -11,6 +11,10 @@ export const BROKER_ERROR_CODES = {
   DOWNSTREAM_RATE_LIMITED: 'DOWNSTREAM_RATE_LIMITED',
   DOWNSTREAM_SERVER_ERROR: 'DOWNSTREAM_SERVER_ERROR',
   DOWNSTREAM_UNEXPECTED: 'DOWNSTREAM_UNEXPECTED',
+  // Event-only codes (see clientEvents.ts); never a response errorType.
+  SEND_BACK_FAILED: 'SEND_BACK_FAILED',
+  JWT_REFRESH_FAILED: 'JWT_REFRESH_FAILED',
+  AUTH_RENEWAL_FAILED: 'AUTH_RENEWAL_FAILED',
 } as const;
 
 export type BrokerErrorCode =
@@ -60,4 +64,50 @@ export const classifyDownstreamStatus = (
 export interface BrokerErrorBody {
   code: BrokerErrorCode;
   message: string;
+}
+
+// Reasons the client records before process.exit(); a subset feeds client-shutdown events.
+export const PROCESS_EXIT_REASONS = [
+  'reconnect_exhaustion',
+  'auth_4xx',
+  'uncaught_exception',
+  'oauth_token_unavailable',
+] as const;
+export type ProcessExitReason = (typeof PROCESS_EXIT_REASONS)[number];
+
+export const CONNECTION_STATES = [
+  'connected',
+  'reconnecting',
+  'failed',
+] as const;
+export type ConnectionState = (typeof CONNECTION_STATES)[number];
+
+// Structured events the broker client emits over the existing websocket.
+// Every field must stay bounded (enums, ids, numbers) — never free-form
+// strings — so customer data cannot reach server logs.
+export const CLIENT_EVENT_MESSAGE = 'client-event';
+
+// A process exit (fatal) or a clean shutdown.
+export type ClientShutdownReason = ProcessExitReason | 'clean';
+
+export type ClientEvent =
+  | {
+      type: 'client-error';
+      error_code: BrokerErrorCode;
+      request_id?: string;
+      integration_type?: string;
+    }
+  | {
+      type: 'client-shutdown';
+      reason: ClientShutdownReason;
+      uptime_seconds: number;
+      error_code?: string; // bounded Node errno, uncaught_exception only
+    };
+
+export type ClientEventType = ClientEvent['type'];
+
+export interface ClientEventEnvelope {
+  schema_version: number;
+  ts: number; // client clock; server stamps the authoritative receipt time
+  event: ClientEvent;
 }

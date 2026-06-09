@@ -14,7 +14,7 @@ import {
   BROKER_ERROR_CODES,
   classifyDownstreamStatus,
   statusForErrorCode,
-} from './common/types/errorCodes';
+} from './common/types/telemetry';
 
 export interface HybridResponse {
   status: number;

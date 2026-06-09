@@ -1,3 +1,8 @@
+import {
+  ConnectionState,
+  ProcessExitReason,
+} from '../../common/types/telemetry';
+
 /** Backend-agnostic interface for emitting broker client metrics. */
 export interface Client {
   /** Record a broker client initialization event. */
@@ -14,10 +19,7 @@ export interface Client {
    * Sets the active state to 1 and all other states to 0 on the
    * broker.client.connection.state gauge.
    */
-  setConnectionState(
-    state: 'connected' | 'reconnecting' | 'failed',
-    role: string,
-  ): void;
+  setConnectionState(state: ConnectionState, role: string): void;
 
   /** Increment broker.client.reconnect.total on each retry attempt. */
   recordReconnect(): void;
@@ -26,13 +28,7 @@ export interface Client {
    * Increment broker.client.process_exit.total before process.exit().
    * Best-effort — call forceFlush() if in an async context.
    */
-  recordProcessExit(
-    reason:
-      | 'reconnect_exhaustion'
-      | 'auth_4xx'
-      | 'oauth_token_unavailable'
-      | 'uncaught_exception',
-  ): void;
+  recordProcessExit(reason: ProcessExitReason): void;
 
   /** Increment broker.client.auth_renewal_failure.total for non-2xx auth renewal responses. */
   recordAuthRenewalFailure(statusCode: number): void;
