@@ -12,6 +12,7 @@ import { ExtendedLogContext } from './common/types/log';
 import {
   BrokerErrorCode,
   BROKER_ERROR_CODES,
+  classifyDownstreamStatus,
   statusForErrorCode,
 } from './common/types/errorCodes';
 
@@ -98,10 +99,12 @@ export class HybridResponseHandler {
     }
     const status = (response && response.statusCode) || 500;
     logResponse(logContext, status, response, this.config);
+    const errorType = classifyDownstreamStatus(status);
     this.sendResponse({
       status,
       body: response.body,
       headers: response.headers,
+      ...(errorType && { errorType }),
     });
   };
 

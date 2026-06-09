@@ -14,6 +14,7 @@ import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import type { ExtendedLogContext } from '../common/types/log';
 import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { classifyDownstreamStatus } from '../common/types/errorCodes';
 import { performance } from 'node:perf_hooks';
 
 const BROKER_CONTENT_TYPE = 'application/vnd.broker.stream+octet-stream';
@@ -550,9 +551,11 @@ class BrokerServerPostResponseHandler {
         );
       }
       const isResponseJson = isJson(response.headers);
+      const errorType = classifyDownstreamStatus(status);
       const ioData = JSON.stringify({
         status,
         headers: response.headers,
+        errorType,
       });
 
       await this.#initHttpClientRequest();

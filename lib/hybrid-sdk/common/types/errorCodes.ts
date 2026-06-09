@@ -1,10 +1,16 @@
-// BROKER_ERROR_CODES is a list of standard broker errors.
 export const BROKER_ERROR_CODES = {
+  // Carry a synthesized status; used when no downstream response exists.
   DOWNSTREAM_TIMEOUT: 'DOWNSTREAM_TIMEOUT',
   DOWNSTREAM_UNREACHABLE: 'DOWNSTREAM_UNREACHABLE',
   DOWNSTREAM_ERROR: 'DOWNSTREAM_ERROR',
   FILTER_BLOCKED: 'FILTER_BLOCKED',
   BODY_TOO_LARGE: 'BODY_TOO_LARGE',
+  // Label a status the downstream already returned; status from downstream response.
+  DOWNSTREAM_UNAUTHORIZED: 'DOWNSTREAM_UNAUTHORIZED',
+  DOWNSTREAM_FORBIDDEN: 'DOWNSTREAM_FORBIDDEN',
+  DOWNSTREAM_RATE_LIMITED: 'DOWNSTREAM_RATE_LIMITED',
+  DOWNSTREAM_SERVER_ERROR: 'DOWNSTREAM_SERVER_ERROR',
+  DOWNSTREAM_UNEXPECTED: 'DOWNSTREAM_UNEXPECTED',
 } as const;
 
 export type BrokerErrorCode =
@@ -37,6 +43,18 @@ const ERRNO_TO_CODE: Record<string, BrokerErrorCode> = {
 export const classifyDownstreamError = (error: unknown): BrokerErrorCode => {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
   return (code && ERRNO_TO_CODE[code]) || 'DOWNSTREAM_ERROR';
+};
+
+// undefined means the status needs no error code.
+export const classifyDownstreamStatus = (
+  status: number,
+): BrokerErrorCode | undefined => {
+  if (status === 401) return 'DOWNSTREAM_UNAUTHORIZED';
+  if (status === 403) return 'DOWNSTREAM_FORBIDDEN';
+  if (status === 429) return 'DOWNSTREAM_RATE_LIMITED';
+  if (status >= 500 && status <= 599) return 'DOWNSTREAM_SERVER_ERROR';
+  if (status >= 400 && status !== 404) return 'DOWNSTREAM_UNEXPECTED';
+  return undefined;
 };
 
 export interface BrokerErrorBody {

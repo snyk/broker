@@ -1,6 +1,7 @@
 import {
   BROKER_ERROR_CODES,
   classifyDownstreamError,
+  classifyDownstreamStatus,
   statusForErrorCode,
 } from '../../../../../../lib/hybrid-sdk/common/types/errorCodes';
 
@@ -55,5 +56,39 @@ describe('errorCodes catalog', () => {
     ])('returns %s -> %d', (code, status) => {
       expect(statusForErrorCode(code)).toBe(status);
     });
+
+    it.each([
+      [BROKER_ERROR_CODES.DOWNSTREAM_UNAUTHORIZED],
+      [BROKER_ERROR_CODES.DOWNSTREAM_FORBIDDEN],
+      [BROKER_ERROR_CODES.DOWNSTREAM_RATE_LIMITED],
+      [BROKER_ERROR_CODES.DOWNSTREAM_SERVER_ERROR],
+      [BROKER_ERROR_CODES.DOWNSTREAM_UNEXPECTED],
+    ])('throws for pass-through code %s (no synthesized status)', (code) => {
+      expect(() => statusForErrorCode(code)).toThrow(/No synthesized status/);
+    });
+  });
+
+  describe('classifyDownstreamStatus', () => {
+    it.each([
+      [401, BROKER_ERROR_CODES.DOWNSTREAM_UNAUTHORIZED],
+      [403, BROKER_ERROR_CODES.DOWNSTREAM_FORBIDDEN],
+      [429, BROKER_ERROR_CODES.DOWNSTREAM_RATE_LIMITED],
+      [500, BROKER_ERROR_CODES.DOWNSTREAM_SERVER_ERROR],
+      [502, BROKER_ERROR_CODES.DOWNSTREAM_SERVER_ERROR],
+      [599, BROKER_ERROR_CODES.DOWNSTREAM_SERVER_ERROR],
+      [400, BROKER_ERROR_CODES.DOWNSTREAM_UNEXPECTED],
+      [405, BROKER_ERROR_CODES.DOWNSTREAM_UNEXPECTED],
+      [409, BROKER_ERROR_CODES.DOWNSTREAM_UNEXPECTED],
+      [422, BROKER_ERROR_CODES.DOWNSTREAM_UNEXPECTED],
+    ])('maps actionable status %d to %s', (status, expected) => {
+      expect(classifyDownstreamStatus(status)).toBe(expected);
+    });
+
+    it.each([[200], [204], [301], [404]])(
+      'returns undefined for non-actionable status %d',
+      (status) => {
+        expect(classifyDownstreamStatus(status)).toBeUndefined();
+      },
+    );
   });
 });
