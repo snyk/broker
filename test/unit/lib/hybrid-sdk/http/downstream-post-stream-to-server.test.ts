@@ -1265,4 +1265,83 @@ describe('BrokerServerPostResponseHandler', () => {
       },
     );
   });
+
+  describe('SCM response errorType labeling', () => {
+    let realServer: http.Server;
+    let bodyPromise: Promise<Buffer>;
+
+    beforeEach((done) => {
+      let resolveBody: (b: Buffer) => void;
+      bodyPromise = new Promise<Buffer>((resolve) => {
+        resolveBody = resolve;
+      });
+      realServer = http.createServer((req, res) => {
+        const chunks: Buffer[] = [];
+        req.on('data', (chunk) => chunks.push(chunk));
+        req.on('end', () => {
+          resolveBody(Buffer.concat(chunks));
+          res.writeHead(200);
+          res.end('OK');
+        });
+      });
+      realServer.listen(0, '127.0.0.1', () => {
+        const addr = realServer.address() as AddressInfo;
+        setConfig({
+          brokerServerUrl: `http://127.0.0.1:${addr.port}`,
+          universalBrokerEnabled: false,
+          universalBrokerGa: false,
+        });
+        done();
+      });
+    });
+
+    afterEach((done) => {
+      realServer.close(done);
+    });
+
+    async function driveAndParseIoData(scmStatus: number) {
+      const handler = createHandler();
+      const mockSocket = new Socket();
+      const mockResponse = new http.IncomingMessage(mockSocket);
+      mockResponse.statusCode = scmStatus;
+      mockResponse.headers = { 'content-type': 'application/json' };
+
+      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
+      process.nextTick(() => mockResponse.push(null));
+      await forwardPromise;
+      const body = await bodyPromise;
+      mockSocket.destroy();
+
+      // Frame is a 4-byte little-endian length prefix followed by the JSON.
+      const ioDataLength = body.readUInt32LE(0);
+      const ioDataJson = body.subarray(4, 4 + ioDataLength).toString('utf8');
+      return JSON.parse(ioDataJson);
+    }
+
+    it.each([
+      [401, 'DOWNSTREAM_UNAUTHORIZED'],
+      [403, 'DOWNSTREAM_FORBIDDEN'],
+      [429, 'DOWNSTREAM_RATE_LIMITED'],
+      [500, 'DOWNSTREAM_SERVER_ERROR'],
+      [503, 'DOWNSTREAM_SERVER_ERROR'],
+      [400, 'DOWNSTREAM_UNEXPECTED'],
+      [422, 'DOWNSTREAM_UNEXPECTED'],
+    ])(
+      'labels SCM %d ioData with errorType %s, status unchanged',
+      async (scmStatus, expectedCode) => {
+        const ioData = await driveAndParseIoData(scmStatus as number);
+        expect(ioData.status).toBe(scmStatus);
+        expect(ioData.errorType).toBe(expectedCode);
+      },
+    );
+
+    it.each([200, 204, 301, 404])(
+      'leaves SCM %d ioData without an errorType',
+      async (scmStatus) => {
+        const ioData = await driveAndParseIoData(scmStatus);
+        expect(ioData.status).toBe(scmStatus);
+        expect(ioData.errorType).toBeUndefined();
+      },
+    );
+  });
 });

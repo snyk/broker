@@ -117,6 +117,29 @@ describe('handlePostResponse — errorType logging', () => {
     );
   });
 
+  it.each([
+    [401, 'DOWNSTREAM_UNAUTHORIZED'],
+    [429, 'DOWNSTREAM_RATE_LIMITED'],
+    [503, 'DOWNSTREAM_SERVER_ERROR'],
+  ])(
+    'logs a pass-through code on a downstream %d, status unchanged',
+    (status, errorType) => {
+      const { req, res } = createReqRes();
+      handlePostResponse(req, res);
+
+      req.emit('data', frameIoData({ status, errorType, headers: {} }));
+      req.emit('end');
+
+      expect(log.info).toHaveBeenCalledWith(
+        expect.objectContaining({ responseStatus: status, errorType }),
+        'Handling response-data request - io bits',
+      );
+      expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith(
+        expect.objectContaining({ status, errorType }),
+      );
+    },
+  );
+
   it('leaves errorType undefined for a normal 2xx response (debug branch)', () => {
     const { req, res } = createReqRes();
     handlePostResponse(req, res);

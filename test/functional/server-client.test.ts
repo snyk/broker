@@ -539,6 +539,17 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.data).toEqual(String(buf));
   });
 
+  it('relays a downstream 500 with its status unchanged', async () => {
+    const response = await axiosClient.get(
+      `http://localhost:${bs.port}/broker/${brokerToken}/test-blob/2`,
+      {
+        headers: {},
+      },
+    );
+    expect(response.status).toEqual(500);
+    expect(response.data).toEqual('Test Error');
+  });
+
   it('successfully redirect POST request to git client', async () => {
     const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/snykgit/echo-body`,
