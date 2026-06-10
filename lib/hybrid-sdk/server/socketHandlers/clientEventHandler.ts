@@ -32,10 +32,7 @@ export const handleClientEvent =
       | (Record<string, unknown> & { type?: string })
       | undefined;
     if (!event || typeof event.type !== 'string') {
-      logger.warn(
-        { ...identity, schemaVersion: message?.schemaVersion },
-        'Received malformed broker client event',
-      );
+      logger.warn({ ...identity }, 'Received malformed broker client event');
       return;
     }
 
@@ -44,7 +41,6 @@ export const handleClientEvent =
       {
         ...eventFields,
         eventType: type,
-        schemaVersion: message.schemaVersion,
         clientTs: message.ts,
         ...identity, // last, so nothing in the payload can override identity
       },

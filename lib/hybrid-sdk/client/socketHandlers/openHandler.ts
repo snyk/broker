@@ -3,6 +3,7 @@ import { hashToken } from '../../common/utils/token';
 import { log as logger } from '../../../logs/logger';
 import { IdentifyingMetadata } from '../types/client';
 import { Client } from '../metrics/client';
+import { registerEventSocket } from '../events';
 
 export const openHandler = (
   io,
@@ -21,6 +22,7 @@ export const openHandler = (
     clientConfig: identifyingMetadata.clientConfig,
     filters: identifyingMetadata.filters ?? {},
     role: identifyingMetadata.role,
+    deploymentId: clientOps.config.deploymentId,
   };
   if (clientOps.config.universalBrokerEnabled) {
     metadata['supportedIntegrationType'] =
@@ -52,4 +54,5 @@ export const openHandler = (
     metadata: metadata,
   };
   io.send('identify', clientData);
+  registerEventSocket(io);
 };

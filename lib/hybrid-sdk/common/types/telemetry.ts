@@ -107,7 +107,6 @@ export type ClientEvent =
 export type ClientEventType = ClientEvent['type'];
 
 export interface ClientEventEnvelope {
-  schemaVersion: number;
   ts: number; // client clock; server stamps the authoritative receipt time
   event: ClientEvent;
 }
