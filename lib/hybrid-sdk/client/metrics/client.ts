@@ -27,7 +27,11 @@ export interface Client {
    * Best-effort — call forceFlush() if in an async context.
    */
   recordProcessExit(
-    reason: 'reconnect_exhaustion' | 'auth_4xx' | 'uncaught_exception',
+    reason:
+      | 'reconnect_exhaustion'
+      | 'auth_4xx'
+      | 'oauth_token_unavailable'
+      | 'uncaught_exception',
   ): void;
 
   /** Increment broker.client.auth_renewal_failure.total for non-2xx auth renewal responses. */
