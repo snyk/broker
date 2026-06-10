@@ -133,7 +133,7 @@ export class OtelClient implements Client {
       'broker.client.process_exit.total',
       {
         description:
-          'Count of process exits by reason (reconnect_exhaustion, auth_4xx, uncaught_exception).',
+          'Count of process exits by reason (reconnect_exhaustion, auth_4xx, oauth_token_unavailable, uncaught_exception).',
         valueType: ValueType.INT,
       },
     );
@@ -303,7 +303,11 @@ export class OtelClient implements Client {
   }
 
   recordProcessExit(
-    reason: 'reconnect_exhaustion' | 'auth_4xx' | 'uncaught_exception',
+    reason:
+      | 'reconnect_exhaustion'
+      | 'auth_4xx'
+      | 'oauth_token_unavailable'
+      | 'uncaught_exception',
   ): void {
     this.processExitCounter.add(1, { reason });
   }

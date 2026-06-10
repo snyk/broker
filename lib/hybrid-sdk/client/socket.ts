@@ -35,6 +35,8 @@ import version from '../common/utils/version';
 import { addServerIdAndRoleQS } from '../http/utils';
 import { serviceHandler } from './socketHandlers/serviceHandler';
 
+const MAX_CONSECUTIVE_AUTH_FAILURES = 3;
+
 /**
  * Creates a pair of WebSocket connections (primary and secondary) for the given connection key.
  * Each logical connection is represented by two sockets so they can be managed as a pair
@@ -213,6 +215,7 @@ export const createWebSocket = (
     // access token will be marked as stale and closed by the server.
     const renewalIntervalMs =
       clientOpts.config.AUTH_EXPIRATION_OVERRIDE ?? 10 * 60 * 1000;
+    let consecutiveAuthFailures = 0;
 
     const timeoutHandler = async () => {
       const commonLogFields = {
@@ -251,42 +254,45 @@ export const createWebSocket = (
           throw new AuthRenewalError(statusCode);
         }
 
+        consecutiveAuthFailures = 0;
         logger.debug(commonLogFields, 'Auth renewed.');
         // Re-read extraHeaders after renewal: the 401-retry path may have
         // invalidated and refreshed the cached token, and the next reconnect
         // needs to pick that up via the synchronous cache read.
         websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
       } catch (err) {
-        if (err instanceof AuthRenewalError) {
-          if (err.statusCode >= 400 && err.statusCode < 500) {
-            logger.fatal(
-              { ...commonLogFields, responseCode: err.statusCode },
-              'Failed to renew connection due to a client error. Exiting...',
-            );
-            metricsClient.recordAuthRenewalFailure(err.statusCode);
-            metricsClient.recordProcessExit('auth_4xx');
-            await metricsClient.forceFlush().catch((flushErr) => {
-              logger.warn(
-                { ...commonLogFields, err: flushErr },
-                'Failed to flush metrics before exit',
-              );
-            });
-            process.exit(1);
-            return;
-          }
-          logger.warn(
-            {
-              ...commonLogFields,
-              responseCode: err.statusCode,
-            },
-            'Failed to renew connection.',
+        const statusCode = err instanceof AuthRenewalError ? err.statusCode : 0;
+        const errField = err instanceof AuthRenewalError ? undefined : err;
+        // Drop the token so the next attempt refreshes rather than reusing the rejected one.
+        invalidateToken();
+        consecutiveAuthFailures++;
+        metricsClient.recordAuthRenewalFailure(statusCode);
+
+        if (consecutiveAuthFailures >= MAX_CONSECUTIVE_AUTH_FAILURES) {
+          logger.fatal(
+            { ...commonLogFields, responseCode: statusCode, err: errField },
+            `Failed to renew connection ${consecutiveAuthFailures} consecutive times. Exiting...`,
           );
-          metricsClient.recordAuthRenewalFailure(err.statusCode);
+          metricsClient.recordProcessExit('oauth_token_unavailable');
+          await metricsClient.forceFlush().catch((flushErr) => {
+            logger.warn(
+              { ...commonLogFields, err: flushErr },
+              'Failed to flush metrics before exit',
+            );
+          });
+          process.exit(1);
           return;
         }
 
-        logger.warn({ ...commonLogFields, err }, 'Failed to renew connection.');
-        metricsClient.recordAuthRenewalFailure(0);
+        logger.warn(
+          {
+            ...commonLogFields,
+            responseCode: statusCode,
+            consecutiveAuthFailures,
+            err: errField,
+          },
+          'Failed to renew connection.',
+        );
       } finally {
         websocket.timeoutHandlerId = setTimeout(
           timeoutHandler,
@@ -354,6 +360,10 @@ export const createWebSocket = (
   );
   websocket.on('notification', notificationHandler);
   websocket.on('error', errorHandler);
+  if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
+    // Drop the cached token on connection errors so the next reconnect fetches a fresh one.
+    websocket.on('error', () => invalidateToken());
+  }
 
   websocket.on('open', () =>
     openHandler(websocket, localClientOps, identifyingMetadata, metricsClient),

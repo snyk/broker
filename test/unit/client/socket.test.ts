@@ -275,7 +275,8 @@ describe('createWebSocket - renew auth behaviour', () => {
   });
 
   describe('Client error case (4XX status)', () => {
-    it('should log fatal and exit process on 403 Forbidden (no retry)', async () => {
+    it('should not exit on a single 4XX; warns and reschedules', async () => {
+      const mockLoggerWarn = jest.spyOn(logger, 'warn').mockImplementation();
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
 
@@ -291,19 +292,22 @@ describe('createWebSocket - renew auth behaviour', () => {
 
       await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
-      clearTimeout(ws.timeoutHandlerId);
-
-      expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(1);
-      expect(mockInvalidateToken).not.toHaveBeenCalled();
-      expect(mockLoggerFatal).toHaveBeenCalledWith(
+      expect(mockLoggerFatal).not.toHaveBeenCalled();
+      expect(mockProcessExit).not.toHaveBeenCalled();
+      // A non-401 failure must still drop the token so the next attempt refreshes.
+      expect(mockInvalidateToken).toHaveBeenCalled();
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
         expect.objectContaining({
           connection: expect.any(String),
           role: Role.primary,
           responseCode: 403,
+          consecutiveAuthFailures: 1,
         }),
-        'Failed to renew connection due to a client error. Exiting...',
+        'Failed to renew connection.',
       );
-      expect(mockProcessExit).toHaveBeenCalledWith(1);
+      expect(ws.timeoutHandlerId).toBeDefined();
+
+      clearTimeout(ws.timeoutHandlerId);
     });
 
     it('should retry once on 401 and succeed without exiting', async () => {
@@ -328,7 +332,7 @@ describe('createWebSocket - renew auth behaviour', () => {
       expect(mockProcessExit).not.toHaveBeenCalled();
     });
 
-    it('should log fatal and exit when 401 retry also returns 401', async () => {
+    it('should count a 401 that survives its retry as a single failure (no exit)', async () => {
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
 
@@ -344,19 +348,69 @@ describe('createWebSocket - renew auth behaviour', () => {
 
       await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
 
-      clearTimeout(ws.timeoutHandlerId);
-
       expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
-      expect(mockInvalidateToken).toHaveBeenCalledTimes(1);
+      // Once in the in-cycle 401 retry, once in the catch so the next cycle refreshes.
+      expect(mockInvalidateToken).toHaveBeenCalledTimes(2);
+      expect(mockLoggerFatal).not.toHaveBeenCalled();
+      expect(mockProcessExit).not.toHaveBeenCalled();
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('should exit with oauth_token_unavailable after N consecutive failures and reset on success', async () => {
+      const recordProcessExitSpy = jest.spyOn(
+        require('../../../lib/hybrid-sdk/client/metrics/noopClient').NoopClient
+          .prototype,
+        'recordProcessExit',
+      );
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+      const fail = () =>
+        mockRenewBrokerServerConnection.mockResolvedValue({
+          statusCode: 403,
+          headers: {},
+          body: '{}',
+        });
+      const succeed = () =>
+        mockRenewBrokerServerConnection.mockResolvedValue({
+          statusCode: 200,
+          headers: {},
+          body: '{}',
+        });
+
+      // Two failures, then a success resets the counter.
+      fail();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      succeed();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      expect(mockProcessExit).not.toHaveBeenCalled();
+
+      // Three consecutive failures from a reset counter trips the exit.
+      fail();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      expect(mockProcessExit).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
       expect(mockLoggerFatal).toHaveBeenCalledWith(
         expect.objectContaining({
           connection: expect.any(String),
           role: Role.primary,
-          responseCode: 401,
+          responseCode: 403,
         }),
-        'Failed to renew connection due to a client error. Exiting...',
+        expect.stringContaining('consecutive times. Exiting...'),
+      );
+      expect(recordProcessExitSpy).toHaveBeenCalledWith(
+        'oauth_token_unavailable',
       );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
+
+      clearTimeout(ws.timeoutHandlerId);
     });
   });
 
@@ -442,6 +496,27 @@ describe('createWebSocket - renew auth behaviour', () => {
       // Second tick: loop survived and the 200 response is honored.
       await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
       expect(mockRenewBrokerServerConnection).toHaveBeenCalledTimes(2);
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+  });
+
+  describe('error handling', () => {
+    it('invalidates the cached token on a websocket error when OAuth is in use', async () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const errorHandlers = (ws.on as jest.Mock).mock.calls
+        .filter(([event]) => event === 'error')
+        .map(([, handler]) => handler);
+      expect(errorHandlers.length).toBeGreaterThan(0);
+
+      errorHandlers.forEach((handler) =>
+        handler({ type: 'TransportError', description: 'boom' }),
+      );
+
+      expect(mockInvalidateToken).toHaveBeenCalled();
 
       clearTimeout(ws.timeoutHandlerId);
     });

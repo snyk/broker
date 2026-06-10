@@ -9,7 +9,11 @@ import { bootstrap } from 'global-agent';
 import https from 'https';
 import http from 'http';
 
-import { getAccessToken, isOAuthClientInitialized } from '../client/auth/oauth';
+import {
+  getAccessToken,
+  invalidateToken,
+  isOAuthClientInitialized,
+} from '../client/auth/oauth';
 import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import type { ExtendedLogContext } from '../common/types/log';
@@ -371,6 +375,19 @@ class BrokerServerPostResponseHandler {
               'Stream Response error in POST to Broker Server',
             );
           });
+          if (
+            r.statusCode === 401 &&
+            this.#config.universalBrokerGa &&
+            isOAuthClientInitialized()
+          ) {
+            // Stream already sent; can't replay. Drop the rejected token so the
+            // next request/renewal fetches a fresh one.
+            logger.warn(
+              { streamingId: this.#streamingId },
+              'Broker Server rejected POST with 401; invalidating cached OAuth token.',
+            );
+            invalidateToken();
+          }
           if (r.statusCode !== 200) {
             const body = await readBody(r).catch(() => '');
             logger.error(
