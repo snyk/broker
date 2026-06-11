@@ -1,4 +1,5 @@
 import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
+import { hashToken } from '../../lib/hybrid-sdk/common/utils/token';
 
 const PORT = 9999;
 process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
@@ -6,12 +7,11 @@ const nock = require('nock');
 
 describe('Broker Server Dispatcher API interaction', () => {
   const apiVersion = '2022-12-02%7Eexperimental';
-  // token hashed with 256-sha algorithm
-  const token =
-    '3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0';
-  const hashedToken =
-    'db37d21181592000efad06f87a00afba59f9c99b11e119d118be2b929c3387ce';
-  const clientId = '40365f1c-8c8f-45d4-8311-788058652c4d';
+  // Obviously-fake fixtures so secret scanners don't flag this file. The hash is
+  // derived the same way the dispatcher does, so no sha256 literal is committed.
+  const token = 'broker-test-token';
+  const hashedToken = hashToken(token);
+  const clientId = '00000000-0000-0000-0000-000000000001';
   const clientVersion = '4.144.1';
 
   const serverUrl = 'http://broker-server-dispatcher';
@@ -149,11 +149,9 @@ describe('Broker Server Dispatcher API interaction', () => {
 
 describe('Broker Server Dispatcher dual-write to gateway', () => {
   const apiVersion = '2022-12-02%7Eexperimental';
-  const token =
-    '3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0';
-  const hashedToken =
-    'db37d21181592000efad06f87a00afba59f9c99b11e119d118be2b929c3387ce';
-  const clientId = '40365f1c-8c8f-45d4-8311-788058652c4d';
+  const token = 'broker-test-token';
+  const hashedToken = hashToken(token);
+  const clientId = '00000000-0000-0000-0000-000000000001';
   const clientVersion = '4.144.1';
   const primaryUrl = 'http://broker-server-dispatcher';
   const gatewayUrl = 'http://broker-gateway-dispatcher';
