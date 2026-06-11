@@ -18,6 +18,7 @@ import {
   WorkloadType,
 } from '../hybrid-sdk/workloadFactory';
 import { prepareRequest } from './prepareRequest';
+import { emitError } from '../hybrid-sdk/client/events';
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import {
   BROKER_ERROR_CODES,
@@ -223,6 +224,12 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
               '[Downstream] Caught error making streaming request to downstream ',
             );
             const code = classifyDownstreamError(e);
+            // Bounded classification only — never the downstream message/body.
+            emitError({
+              errorCode: code,
+              requestId: logContext.requestId,
+              integrationType: logContext.connectionName,
+            });
             return responseHandler.sendResponse({
               status: statusForErrorCode(code),
               errorType: code,

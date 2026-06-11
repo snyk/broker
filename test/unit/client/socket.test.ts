@@ -6,6 +6,11 @@ jest.mock('../../../lib/hybrid-sdk/client/auth/oauth', () => ({
   isOAuthClientInitialized: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('../../../lib/hybrid-sdk/client/events', () => ({
+  emitError: jest.fn(),
+  emitShutdown: jest.fn(),
+}));
+
 import { createWebSocket } from '../../../lib/hybrid-sdk/client/socket';
 import {
   LoadedClientOpts,
@@ -16,6 +21,7 @@ import {
   Role,
 } from '../../../lib/hybrid-sdk/client/types/client';
 import { log as logger } from '../../../lib/logs/logger';
+import { emitError } from '../../../lib/hybrid-sdk/client/events';
 
 jest.mock('primus', () => {
   const mockSocket = jest.fn().mockImplementation(() => {
@@ -305,6 +311,10 @@ describe('createWebSocket - renew auth behaviour', () => {
         }),
         'Failed to renew connection.',
       );
+      // Non-fatal renewal failure surfaces as a client-error event.
+      expect(emitError).toHaveBeenCalledWith({
+        errorCode: 'AUTH_RENEWAL_FAILED',
+      });
       expect(ws.timeoutHandlerId).toBeDefined();
 
       clearTimeout(ws.timeoutHandlerId);

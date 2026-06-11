@@ -1,4 +1,5 @@
 import { getWebsocketConnections } from '../../client';
+import { emitShutdown } from '../../client/events';
 import { log as logger } from '../../../logs/logger';
 
 const intervals: NodeJS.Timeout[] = [];
@@ -66,6 +67,10 @@ export const clearAndRemoveTimeout = (timeoutId: NodeJS.Timeout) => {
 const signalTerminationToServer = (signal) => {
   const [websocket] = getWebsocketConnections();
   if (websocket) {
+    emitShutdown({
+      reason: 'clean',
+      uptimeSeconds: Math.round(process.uptime()),
+    });
     websocket.send('terminate', {
       signal,
     });

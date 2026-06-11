@@ -30,6 +30,8 @@ import { findPluginFolder } from '../common/config/config';
 import { retrieveAndLoadFilters } from './utils/filterLoading';
 import { probeIpv6WithIpv4Fallback } from './utils/probeIpv6WithIpv4Fallback';
 import * as metrics from './metrics';
+import { emitShutdown } from './events';
+import { PROCESS_EXIT_REASONS } from '../common/types/telemetry';
 
 const ONEDAY = 24 * 3600 * 1000; // 24h in ms
 
@@ -291,7 +293,13 @@ export const handleUncaughtException = (
       error.message,
     );
   } else {
-    metricsClient.recordProcessExit('uncaught_exception');
+    metricsClient.recordProcessExit(PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION);
+    // Bounded Node errno only — never error.message (free-form).
+    emitShutdown({
+      reason: PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION,
+      uptimeSeconds: Math.round(process.uptime()),
+      errorCode: (error as NodeJS.ErrnoException).code,
+    });
     logger.error(
       { msg: error.message, stackTrace: error.stack },
       'Uncaught exception:',

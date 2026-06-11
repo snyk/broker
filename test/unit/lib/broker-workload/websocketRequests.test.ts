@@ -8,6 +8,7 @@ import {
   makeRequestToDownstream,
   makeStreamingRequestToDownstream,
 } from '../../../../lib/hybrid-sdk/http/request';
+import { emitError } from '../../../../lib/hybrid-sdk/client/events';
 
 const mockSendResponse = jest.fn();
 const mockStreamDataResponse = jest.fn();
@@ -37,6 +38,10 @@ jest.mock(
   '../../../../lib/hybrid-sdk/interpolateRequestWithConfigData',
   () => ({ getInterpolatedRequest: jest.fn(() => ({})) }),
 );
+jest.mock('../../../../lib/hybrid-sdk/client/events', () => ({
+  emitError: jest.fn(),
+  emitShutdown: jest.fn(),
+}));
 
 const mockFilterRequest = filterRequest as jest.MockedFunction<
   typeof filterRequest
@@ -264,6 +269,38 @@ describe('BrokerWorkload', () => {
           body: expect.objectContaining({ code: 'DOWNSTREAM_TIMEOUT' }),
         }),
       );
+    });
+
+    it('streaming failure emits a joinable client-error with a bounded code only (no downstream message)', async () => {
+      mockFilterRequest.mockReturnValue(matchedRule);
+      mockMakeStreamingRequest.mockRejectedValueOnce(
+        Object.assign(new Error('secret downstream detail'), {
+          code: 'ECONNREFUSED',
+        }),
+      );
+      const workload = new BrokerWorkload(
+        connectionIdentifier,
+        options,
+        websocketConnectionHandler,
+      );
+      const payload = {
+        url: '/stream',
+        method: 'GET',
+        headers: { 'snyk-request-id': '77777777-7777-4777-8777-777777777777' },
+        requestId: 'req-stream-1',
+        streamingID: 'stream-x',
+      };
+
+      await workload.handler({ payload, websocketHandler: jest.fn() });
+
+      expect(emitError).toHaveBeenCalledWith({
+        errorCode: 'DOWNSTREAM_UNREACHABLE',
+        requestId: 'req-stream-1',
+        integrationType: 'test-connection',
+      });
+      // The free-form downstream message must never ride the event.
+      const emitted = (emitError as jest.Mock).mock.calls[0][0];
+      expect(JSON.stringify(emitted)).not.toContain('secret downstream detail');
     });
   });
 });
