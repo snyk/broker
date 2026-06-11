@@ -11,7 +11,7 @@ export const BROKER_ERROR_CODES = {
   DOWNSTREAM_RATE_LIMITED: 'DOWNSTREAM_RATE_LIMITED',
   DOWNSTREAM_SERVER_ERROR: 'DOWNSTREAM_SERVER_ERROR',
   DOWNSTREAM_UNEXPECTED: 'DOWNSTREAM_UNEXPECTED',
-  // Event-only codes (see clientEvents.ts); never a response errorType.
+  // Event-only codes (emitted on client events); never a response errorType.
   SEND_BACK_FAILED: 'SEND_BACK_FAILED',
   JWT_REFRESH_FAILED: 'JWT_REFRESH_FAILED',
   AUTH_RENEWAL_FAILED: 'AUTH_RENEWAL_FAILED',
@@ -69,7 +69,6 @@ export interface BrokerErrorBody {
 // Reasons the client records before process.exit(); a subset feeds client-shutdown events.
 export const PROCESS_EXIT_REASONS = {
   RECONNECT_EXHAUSTION: 'reconnect_exhaustion',
-  AUTH_4XX: 'auth_4xx',
   UNCAUGHT_EXCEPTION: 'uncaught_exception',
   OAUTH_TOKEN_UNAVAILABLE: 'oauth_token_unavailable',
 } as const;

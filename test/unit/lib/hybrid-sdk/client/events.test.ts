@@ -1,9 +1,13 @@
 import {
   clearEventSocket,
   emitError,
+  emitShutdown,
   registerEventSocket,
 } from '../../../../../lib/hybrid-sdk/client/events';
-import { CLIENT_EVENT_MESSAGE } from '../../../../../lib/hybrid-sdk/common/types/telemetry';
+import {
+  CLIENT_EVENT_MESSAGE,
+  PROCESS_EXIT_REASONS,
+} from '../../../../../lib/hybrid-sdk/common/types/telemetry';
 
 describe('client/events — emitError', () => {
   const makeSocket = () => ({ send: jest.fn() });
@@ -14,9 +18,7 @@ describe('client/events — emitError', () => {
   });
 
   it('no-ops (does not throw) when no socket is registered', () => {
-    expect(() =>
-      emitError({ errorCode: 'JWT_REFRESH_FAILED' }),
-    ).not.toThrow();
+    expect(() => emitError({ errorCode: 'JWT_REFRESH_FAILED' })).not.toThrow();
   });
 
   it('sends a client-error envelope over the registered socket', () => {
@@ -74,8 +76,60 @@ describe('client/events — emitError', () => {
     };
     registerEventSocket(socket);
 
+    expect(() => emitError({ errorCode: 'AUTH_RENEWAL_FAILED' })).not.toThrow();
+  });
+});
+
+describe('client/events — emitShutdown', () => {
+  const makeSocket = () => ({ send: jest.fn() });
+
+  afterEach(() => {
+    clearEventSocket();
+    jest.restoreAllMocks();
+  });
+
+  it('no-ops (does not throw) when no socket is registered', () => {
     expect(() =>
-      emitError({ errorCode: 'AUTH_RENEWAL_FAILED' }),
+      emitShutdown({ reason: 'clean', uptimeSeconds: 5 }),
     ).not.toThrow();
+  });
+
+  it('sends a client-shutdown envelope over the registered socket', () => {
+    const socket = makeSocket();
+    registerEventSocket(socket);
+
+    emitShutdown({
+      reason: PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION,
+      uptimeSeconds: 42,
+    });
+
+    expect(socket.send).toHaveBeenCalledTimes(1);
+    const [message, envelope] = socket.send.mock.calls[0];
+    expect(message).toBe(CLIENT_EVENT_MESSAGE);
+    expect(typeof envelope.ts).toBe('number');
+    expect(envelope.event).toEqual({
+      type: 'client-shutdown',
+      reason: PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION,
+      uptimeSeconds: 42,
+    });
+  });
+
+  it('carries the bounded errno code only when provided (uncaught_exception)', () => {
+    const socket = makeSocket();
+    registerEventSocket(socket);
+
+    emitShutdown({
+      reason: PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION,
+      uptimeSeconds: 7,
+      errorCode: 'ECONNRESET',
+    });
+
+    const envelope = socket.send.mock.calls[0][1];
+    expect(envelope.event).toEqual({
+      type: 'client-shutdown',
+      reason: PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION,
+      uptimeSeconds: 7,
+      errorCode: 'ECONNRESET',
+    });
   });
 });
