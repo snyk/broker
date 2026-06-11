@@ -34,6 +34,11 @@ import { AuthRenewalError } from './auth/errors';
 import version from '../common/utils/version';
 import { addServerIdAndRoleQS } from '../http/utils';
 import { serviceHandler } from './socketHandlers/serviceHandler';
+import { emitError } from './events';
+import {
+  BROKER_ERROR_CODES,
+  PROCESS_EXIT_REASONS,
+} from '../common/types/telemetry';
 
 const MAX_CONSECUTIVE_AUTH_FAILURES = 3;
 
@@ -273,7 +278,9 @@ export const createWebSocket = (
             { ...commonLogFields, responseCode: statusCode, err: errField },
             `Failed to renew connection ${consecutiveAuthFailures} consecutive times. Exiting...`,
           );
-          metricsClient.recordProcessExit('oauth_token_unavailable');
+          metricsClient.recordProcessExit(
+            PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
+          );
           await metricsClient.forceFlush().catch((flushErr) => {
             logger.warn(
               { ...commonLogFields, err: flushErr },
@@ -293,6 +300,7 @@ export const createWebSocket = (
           },
           'Failed to renew connection.',
         );
+        emitError({ errorCode: BROKER_ERROR_CODES.AUTH_RENEWAL_FAILED });
       } finally {
         websocket.timeoutHandlerId = setTimeout(
           timeoutHandler,
@@ -334,7 +342,7 @@ export const createWebSocket = (
 
   websocket.on('reconnect failed', () => {
     metricsClient.setConnectionState('failed', identifyingMetadata.role);
-    metricsClient.recordProcessExit('reconnect_exhaustion');
+    metricsClient.recordProcessExit(PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION);
     metricsClient.forceFlush().catch((err) => {
       logger.warn({ err }, 'Failed to flush metrics before exit');
     });

@@ -9,6 +9,7 @@ import { RequestMetadata } from './types';
 import { WebSocketConnection } from './client/types/client';
 import { WebSocketServer } from './server/types/socket';
 import { ExtendedLogContext } from './common/types/log';
+import { emitError } from './client/events';
 import {
   BrokerErrorCode,
   BROKER_ERROR_CODES,
@@ -151,6 +152,13 @@ export class HybridResponseHandler {
         { ...this.logContext, err },
         `Error Posting via Emit callback.`,
       );
+      // Silent on the response path: the server's request times out with no
+      // payload. Emit a joinable signal so the timeout has a cause.
+      emitError({
+        errorCode: BROKER_ERROR_CODES.SEND_BACK_FAILED,
+        requestId: this.requestMetadata.requestId,
+        integrationType: this.logContext.connectionName,
+      });
     }
   };
 

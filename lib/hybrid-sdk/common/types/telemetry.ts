@@ -67,13 +67,15 @@ export interface BrokerErrorBody {
 }
 
 // Reasons the client records before process.exit(); a subset feeds client-shutdown events.
-export const PROCESS_EXIT_REASONS = [
-  'reconnect_exhaustion',
-  'auth_4xx',
-  'uncaught_exception',
-  'oauth_token_unavailable',
-] as const;
-export type ProcessExitReason = (typeof PROCESS_EXIT_REASONS)[number];
+export const PROCESS_EXIT_REASONS = {
+  RECONNECT_EXHAUSTION: 'reconnect_exhaustion',
+  AUTH_4XX: 'auth_4xx',
+  UNCAUGHT_EXCEPTION: 'uncaught_exception',
+  OAUTH_TOKEN_UNAVAILABLE: 'oauth_token_unavailable',
+} as const;
+
+export type ProcessExitReason =
+  (typeof PROCESS_EXIT_REASONS)[keyof typeof PROCESS_EXIT_REASONS];
 
 export const CONNECTION_STATES = [
   'connected',

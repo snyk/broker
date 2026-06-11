@@ -1,3 +1,8 @@
+jest.mock('../../../../lib/hybrid-sdk/client/events', () => ({
+  emitError: jest.fn(),
+  emitShutdown: jest.fn(),
+}));
+
 import {
   getAccessToken,
   getCachedAccessToken,
@@ -7,6 +12,7 @@ import {
 } from '../../../../lib/hybrid-sdk/client/auth/oauth';
 import { log as logger } from '../../../../lib/logs/logger';
 import type { Client as MetricsClient } from '../../../../lib/hybrid-sdk/client/metrics/client';
+import { emitError } from '../../../../lib/hybrid-sdk/client/events';
 
 const nock = require('nock');
 
@@ -57,6 +63,7 @@ describe('client/auth/oauth (simple-oauth2)', () => {
 
   beforeEach(() => {
     nock.cleanAll();
+    (emitError as jest.Mock).mockClear();
     errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => logger);
   });
 
@@ -167,6 +174,23 @@ describe('client/auth/oauth (simple-oauth2)', () => {
       expect.objectContaining({ err: expect.anything() }),
       'Unable to retrieve JWT',
     );
+    expect(emitError).toHaveBeenCalledWith({ errorCode: 'JWT_REFRESH_FAILED' });
+  });
+
+  it('does NOT emit a client-error when the fetch succeeds', async () => {
+    initOAuthClient({
+      apiHostname: API_HOST,
+      clientId: 'cid',
+      clientSecret: 'csecret',
+    });
+
+    nock(API_HOST)
+      .post(TOKEN_PATH)
+      .reply(200, tokenResponse({ access_token: 'ok' }));
+
+    await getAccessToken();
+
+    expect(emitError).not.toHaveBeenCalled();
   });
 
   it('does NOT fire recordJwtRefreshFailure when fetch succeeds', async () => {

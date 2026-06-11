@@ -1,5 +1,8 @@
 import { log as logger } from '../../../logs/logger';
-import { ClientEventEnvelope } from '../../common/types/telemetry';
+import {
+  ClientEventEnvelope,
+  PROCESS_EXIT_REASONS,
+} from '../../common/types/telemetry';
 
 // Server-owned identity, captured from the connection at identify time and
 // stamped onto every client event. Never taken from the event payload, so a
@@ -13,7 +16,10 @@ export interface ClientEventIdentity {
   deploymentId?: string;
 }
 
-const FATAL_SHUTDOWN_REASONS = new Set(['uncaught_exception', 'auth_4xx']);
+const FATAL_SHUTDOWN_REASONS = new Set<string>([
+  PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION,
+  PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
+]);
 
 const severityFor = (event: { type?: string; reason?: string }) => {
   if (event.type === 'client-error') return 'warn' as const;
