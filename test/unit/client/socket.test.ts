@@ -21,7 +21,8 @@ import {
   Role,
 } from '../../../lib/hybrid-sdk/client/types/client';
 import { log as logger } from '../../../lib/logs/logger';
-import { emitError } from '../../../lib/hybrid-sdk/client/events';
+import { emitError, emitShutdown } from '../../../lib/hybrid-sdk/client/events';
+import { PROCESS_EXIT_REASONS } from '../../../lib/hybrid-sdk/common/types/telemetry';
 
 jest.mock('primus', () => {
   const mockSocket = jest.fn().mockImplementation(() => {
@@ -416,8 +417,12 @@ describe('createWebSocket - renew auth behaviour', () => {
         expect.stringContaining('consecutive times. Exiting...'),
       );
       expect(recordProcessExitSpy).toHaveBeenCalledWith(
-        'oauth_token_unavailable',
+        PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
       );
+      expect(emitShutdown).toHaveBeenCalledWith({
+        reason: PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
+        uptimeSeconds: expect.any(Number),
+      });
       expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       clearTimeout(ws.timeoutHandlerId);
@@ -560,6 +565,25 @@ describe('createWebSocket - renew auth behaviour', () => {
         Authorization: 'Bearer cached',
         'snyk-request-id': expect.any(String),
       });
+    });
+  });
+
+  describe('reconnect failed', () => {
+    it('does NOT emit a client-shutdown (socket is already gone — undeliverable)', () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+
+      const reconnectFailed = (ws.on as jest.Mock).mock.calls.find(
+        ([event]) => event === 'reconnect failed',
+      )?.[1];
+      expect(reconnectFailed).toBeDefined();
+
+      reconnectFailed();
+
+      // reconnect_exhaustion is reported via the process_exit metric, not a WS
+      // event — by this point 'close' has cleared the event socket.
+      expect(emitShutdown).not.toHaveBeenCalled();
     });
   });
 

@@ -7,9 +7,8 @@ import {
 } from '../common/types/telemetry';
 import { log as logger } from '../../logs/logger';
 
-// Best-effort, fire-and-forget emission of client events over the existing
-// websocket. Events are only sent while connected, never queued. A failure
-// to emit must never disrupt request handling.
+// The socket is registered on WS 'open' and cleared on 'close', so a non-null
+// eventSocket is always connected — hence emit() needs no readyState check.
 
 interface EventSocket {
   send(event: string, data: unknown): void;

@@ -2,6 +2,13 @@ jest.mock('../../../../../../lib/hybrid-sdk/client', () => ({
   getWebsocketConnections: jest.fn(() => [{ send: jest.fn() }]),
 }));
 
+jest.mock('../../../../../../lib/hybrid-sdk/client/events', () => ({
+  emitError: jest.fn(),
+  emitShutdown: jest.fn(),
+}));
+
+import { emitShutdown } from '../../../../../../lib/hybrid-sdk/client/events';
+
 type SignalsModule =
   typeof import('../../../../../../lib/hybrid-sdk/common/utils/signals');
 
@@ -79,6 +86,34 @@ describe('signals', () => {
       });
       process.emit('SIGTERM' as any);
       expect(observedDuringCallback).toBe(true);
+    });
+  });
+
+  describe('clean shutdown event', () => {
+    it('emits a clean client-shutdown when notifying the server on SIGTERM', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      (emitShutdown as jest.Mock).mockClear();
+
+      process.emit('SIGTERM' as any);
+
+      expect(emitShutdown).toHaveBeenCalledWith({
+        reason: 'clean',
+        uptimeSeconds: expect.any(Number),
+      });
+    });
+
+    it('emits a clean client-shutdown on SIGINT too', () => {
+      const signals = loadSignals();
+      signals.handleTerminationSignal(() => {});
+      (emitShutdown as jest.Mock).mockClear();
+
+      process.emit('SIGINT' as any);
+
+      expect(emitShutdown).toHaveBeenCalledWith({
+        reason: 'clean',
+        uptimeSeconds: expect.any(Number),
+      });
     });
   });
 

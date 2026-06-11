@@ -1,6 +1,7 @@
 import * as metrics from '../../../../lib/hybrid-sdk/client/metrics';
 import { parse } from '../../../../lib/hybrid-sdk/client/metrics/config';
 import { DataPointType, MetricReader } from '@opentelemetry/sdk-metrics';
+import { PROCESS_EXIT_REASONS } from '../../../../lib/hybrid-sdk/common/types/telemetry';
 
 class TestMetricReader extends MetricReader {
   protected async onShutdown(): Promise<void> {}
@@ -146,7 +147,7 @@ describe('client/metrics', () => {
     const noopMethods: Array<[string, Parameters<any>]> = [
       ['setConnectionState', ['connected', 'primary']],
       ['recordReconnect', []],
-      ['recordProcessExit', ['reconnect_exhaustion']],
+      ['recordProcessExit', [PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION]],
       ['recordAuthRenewalFailure', [503]],
       ['recordJwtRefreshFailure', []],
       ['recordUncaughtException', ['ECONNRESET']],
@@ -284,11 +285,11 @@ describe('client/metrics', () => {
     });
 
     it('records broker.client.process_exit.total with reason attribute', async () => {
-      client.recordProcessExit('reconnect_exhaustion');
+      client.recordProcessExit(PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION);
       const metric = await findMetric('broker.client.process_exit.total');
       expect(metric!.dataPoints[0].value).toBe(1);
       expect(metric!.dataPoints[0].attributes['reason']).toBe(
-        'reconnect_exhaustion',
+        PROCESS_EXIT_REASONS.RECONNECT_EXHAUSTION,
       );
     });
 
