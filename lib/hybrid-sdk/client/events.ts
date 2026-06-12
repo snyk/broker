@@ -7,31 +7,32 @@ import {
 } from '../common/types/telemetry';
 import { log as logger } from '../../logs/logger';
 
-// The socket is registered on WS 'open' and cleared on 'close', so a non-null
-// eventSocket is always connected — hence emit() needs no readyState check.
+// One entry per live websocket connection, added on 'open' and removed on 'close'.
 
 interface EventSocket {
   send(event: string, data: unknown): void;
 }
 
-let eventSocket: EventSocket | null = null;
+const eventSockets = new Set<EventSocket>();
 
 export const registerEventSocket = (socket: EventSocket): void => {
-  eventSocket = socket;
+  eventSockets.add(socket);
 };
 
-export const clearEventSocket = (): void => {
-  eventSocket = null;
+export const clearEventSocket = (socket: EventSocket): void => {
+  eventSockets.delete(socket);
 };
 
+// emit selects a single websocket to send the event.
 const emit = (event: ClientEvent): void => {
-  if (!eventSocket) return;
+  const socket = eventSockets.values().next().value;
+  if (!socket) return;
   const envelope: ClientEventEnvelope = {
     ts: Date.now(),
     event,
   };
   try {
-    eventSocket.send(CLIENT_EVENT_MESSAGE, envelope);
+    socket.send(CLIENT_EVENT_MESSAGE, envelope);
   } catch (err) {
     logger.debug({ err }, 'Failed to emit broker client event');
   }

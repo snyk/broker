@@ -10,7 +10,7 @@ export const closeHandler = (
   identifyingMetadata,
   metricsClient: Client,
 ) => {
-  clearEventSocket();
+  clearEventSocket(websocket);
   // default duration of -1 so that it is obvious if this misbehaves
   let durationMs = -1;
   if (websocket.connectionStartTime) {
