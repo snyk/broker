@@ -109,6 +109,43 @@ describe('Broker Server Dispatcher API interaction', () => {
     });
   });
 
+  it('should invoke the shutdown callback after de-registering on serverStopping', async () => {
+    nock(`${serverUrl}`)
+      .delete(`/internal/brokerservers/0?version=${apiVersion}`)
+      .reply(() => {
+        return [200, 'OK'];
+      });
+
+    process.env.DISPATCHER_URL = `${serverUrl}`;
+    process.env.hostname = '0';
+    await loadBrokerConfig();
+    const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
+
+    await expect(dispatcher.serverStopping(spyFn)).resolves.not.toThrowError();
+
+    // Regression guard: the callback used to be passed into #makeRequest's
+    // requestBody slot instead of the cb slot, so it never ran and the process
+    // never exited on SIGTERM.
+    expect(spyFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should still invoke the shutdown callback when the dispatcher errors', async () => {
+    nock(`${serverUrl}`)
+      .delete(`/internal/brokerservers/0?version=${apiVersion}`)
+      .reply(500, 'NOK')
+      .persist();
+
+    process.env.DISPATCHER_URL = `${serverUrl}`;
+    process.env.hostname = '0';
+    await loadBrokerConfig();
+    const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
+
+    await expect(dispatcher.serverStopping(spyFn)).resolves.not.toThrowError();
+
+    // Shutdown must not hang on a failing de-register: the cb still fires.
+    expect(spyFn).toHaveBeenCalledTimes(1);
+  });
+
   it('should fire off clientConnected call successfully with warnings', async () => {
     nock(`${serverUrl}`)
       .post(
