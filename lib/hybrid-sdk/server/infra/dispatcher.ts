@@ -4,18 +4,22 @@ import { getConfig } from '../../common/config/config';
 
 import { uuidv4 } from '../../common/utils/uuid';
 import { axiosInstance } from '../../http/axios';
+import { incrementDispatcherWrite } from '../../common/utils/metrics';
 
 class DispatcherClient {
   #url;
   #hostname;
   #id;
   #version;
+  #target;
 
-  constructor(url, hostname, id, version) {
+  // `target` labels which dispatcher this client writes to (node-dispatcher or envoy-dispatcher) for the broker_dispatcher_write_total metric.
+  constructor(url, hostname, id, version, target) {
     this.#url = url;
     this.#hostname = hostname;
     this.#id = id || 0;
     this.#version = version || '2022-12-02~experimental';
+    this.#target = target;
   }
 
   async serverStarting() {
@@ -126,11 +130,13 @@ class DispatcherClient {
           },
           'received unexpected status code communicating with Dispatcher',
         );
+        incrementDispatcherWrite(this.#target, 'failure');
       } else {
         logger.trace(
           { ...logContext, serverId: this.#id, requestId },
           'successfully sent request to Dispatcher',
         );
+        incrementDispatcherWrite(this.#target, 'success');
       }
     } catch (e: any) {
       logger.error(
@@ -145,6 +151,7 @@ class DispatcherClient {
         },
         'received error communicating with Dispatcher',
       );
+      incrementDispatcherWrite(this.#target, 'failure');
     }
 
     if (cb) cb();
@@ -160,19 +167,59 @@ export let serverStopping;
 const config = getConfig();
 
 if (config.dispatcherUrl) {
+  const serverId = config.hostname?.substring(
+    config.hostname?.lastIndexOf('-') + 1,
+  );
+
   const kc = new DispatcherClient(
     config.dispatcherUrl,
     config.hostname,
-    config.hostname?.substring(config.hostname?.lastIndexOf('-') + 1),
+    serverId,
     config.dispatcherVersion,
+    'node-dispatcher',
   );
 
+  // Optional dual-write to the broker-gateway (Go) dispatcher. When
+  // GATEWAY_DISPATCHER_URL is set, each lifecycle event is mirrored so the new
+  // dispatcher's Redis state matches the primary, enabling an eventual read-path
+  // cutover. Same server id/hostname keeps the mirrored state identical; the
+  // version defaults to the primary's and only needs overriding if the two
+  // dispatchers' API versions ever diverge.
+  const gatewayClient = config.gatewayDispatcherUrl
+    ? new DispatcherClient(
+        config.gatewayDispatcherUrl,
+        config.hostname,
+        serverId,
+        config.gatewayDispatcherVersion || config.dispatcherVersion,
+        'envoy-dispatcher',
+      )
+    : undefined;
+
+  // The mirror is fire-and-forget: we never await it on the primary path, so a
+  // slow or unhealthy gateway cannot add latency to (or fail) the primary write.
+  // DispatcherClient already swallows its own errors, so the promise resolves
+  // even on failure; the guard catch is belt-and-braces against a synchronous
+  // throw (e.g. URL construction) becoming an unhandledRejection.
+  const mirror = (write?: Promise<void>) => {
+    void write?.catch(() => {});
+  };
+
   clientConnected = async function (token, clientId, clientVersion) {
-    return kc.clientConnected(token, clientId, clientVersion);
+    mirror(gatewayClient?.clientConnected(token, clientId, clientVersion));
+    await kc.clientConnected(token, clientId, clientVersion);
   };
 
   clientPinged = async function (token, clientId, clientVersion, time) {
-    return kc.clientConnected(
+    mirror(
+      gatewayClient?.clientConnected(
+        token,
+        clientId,
+        clientVersion,
+        'client-pinged',
+        time,
+      ),
+    );
+    await kc.clientConnected(
       token,
       clientId,
       clientVersion,
@@ -182,15 +229,20 @@ if (config.dispatcherUrl) {
   };
 
   clientDisconnected = async function (token, clientId) {
-    return kc.clientDisconnected(token, clientId);
+    mirror(gatewayClient?.clientDisconnected(token, clientId));
+    await kc.clientDisconnected(token, clientId);
   };
 
   serverStarting = async function () {
-    return kc.serverStarting();
+    mirror(gatewayClient?.serverStarting());
+    await kc.serverStarting();
   };
 
   serverStopping = async function (cb) {
-    return kc.serverStopping(cb);
+    // Primary owns the shutdown callback; mirror with a no-op so the gateway
+    // write cannot influence shutdown.
+    mirror(gatewayClient?.serverStopping(() => {}));
+    await kc.serverStopping(cb);
   };
 } else {
   logger.error(
