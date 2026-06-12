@@ -23,10 +23,6 @@ import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 import { serviceHandler } from './routesHandlers/serviceHandler';
 
-// Upper bound on graceful shutdown: de-register from the Dispatcher and drain
-// the server within this window, otherwise force exit before k8s sends SIGKILL.
-const SHUTDOWN_TIMEOUT_MS = 15000;
-
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode.');
 
@@ -54,23 +50,8 @@ export const main = async (serverOpts: ServerOpts) => {
   }
 
   const onSignal = async () => {
-    logger.debug('Received exit signal, draining and closing server.');
-    // Guard against a hung de-registration (axios retries can stack up) so the
-    // process always exits even if the Dispatcher never responds.
-    const forceExit = setTimeout(() => {
-      logger.warn('Shutdown timed out, forcing exit.');
-      process.exit(0);
-    }, SHUTDOWN_TIMEOUT_MS);
-    forceExit.unref();
-    try {
-      await serverStopping(() => {});
-    } catch (err) {
-      logger.warn({ err }, 'Error de-registering from Dispatcher on shutdown.');
-    }
-    server.close();
-    websocket.destroy(() => {
-      clearTimeout(forceExit);
-      logger.info('Server closed, exiting.');
+    logger.debug('Received exit signal, closing server.');
+    await serverStopping(() => {
       process.exit(0);
     });
   };
