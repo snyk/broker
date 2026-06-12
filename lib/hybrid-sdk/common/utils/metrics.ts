@@ -46,6 +46,12 @@ const socketCloseReasonCount = new Counter({
   labelNames: ['reason'],
 });
 
+const dispatcherWriteTotal = new Counter({
+  name: 'broker_dispatcher_write_total',
+  help: 'Dispatcher lifecycle writes by target dispatcher (node-dispatcher/envoy-dispatcher) and result. During dual-write, drift is the gap between the two targets.',
+  labelNames: ['target', 'result'],
+});
+
 function incrementSocketConnectionGauge() {
   socketConnectionGauge.inc(1);
 }
@@ -80,6 +86,10 @@ function incrementSocketCloseReasonCount(reason) {
   socketCloseReasonCount.inc({ reason }, 1);
 }
 
+function incrementDispatcherWrite(target, result) {
+  dispatcherWriteTotal.inc({ target, result }, 1);
+}
+
 export {
   incrementSocketConnectionGauge,
   decrementSocketConnectionGauge,
@@ -88,4 +98,5 @@ export {
   incrementHttpRequestsTotal,
   incrementWebSocketRequestsTotal,
   incrementSocketCloseReasonCount,
+  incrementDispatcherWrite,
 };
