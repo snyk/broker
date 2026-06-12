@@ -9,14 +9,22 @@ import {
   PROCESS_EXIT_REASONS,
 } from '../../../../../lib/hybrid-sdk/common/types/telemetry';
 
+// Track every socket handed out so afterEach can remove it from the registry
+// (the registry is module-level and persists across tests).
+const registeredSockets: Array<{ send: jest.Mock }> = [];
+const makeSocket = () => {
+  const socket = { send: jest.fn() };
+  registeredSockets.push(socket);
+  return socket;
+};
+
+afterEach(() => {
+  registeredSockets.forEach((socket) => clearEventSocket(socket));
+  registeredSockets.length = 0;
+  jest.restoreAllMocks();
+});
+
 describe('client/events — emitError', () => {
-  const makeSocket = () => ({ send: jest.fn() });
-
-  afterEach(() => {
-    clearEventSocket();
-    jest.restoreAllMocks();
-  });
-
   it('no-ops (does not throw) when no socket is registered', () => {
     expect(() => emitError({ errorCode: 'JWT_REFRESH_FAILED' })).not.toThrow();
   });
@@ -58,10 +66,10 @@ describe('client/events — emitError', () => {
     expect(Object.keys(envelope.event).sort()).toEqual(['errorCode', 'type']);
   });
 
-  it('stops sending after clearEventSocket', () => {
+  it('stops sending after the registered socket is cleared', () => {
     const socket = makeSocket();
     registerEventSocket(socket);
-    clearEventSocket();
+    clearEventSocket(socket);
 
     emitError({ errorCode: 'AUTH_RENEWAL_FAILED' });
 
@@ -69,25 +77,60 @@ describe('client/events — emitError', () => {
   });
 
   it('swallows a socket.send failure (best-effort, never disrupts the caller)', () => {
-    const socket = {
-      send: jest.fn(() => {
-        throw new Error('socket gone');
-      }),
-    };
+    const socket = makeSocket();
+    socket.send.mockImplementation(() => {
+      throw new Error('socket gone');
+    });
     registerEventSocket(socket);
 
     expect(() => emitError({ errorCode: 'AUTH_RENEWAL_FAILED' })).not.toThrow();
   });
 });
 
-describe('client/events — emitShutdown', () => {
-  const makeSocket = () => ({ send: jest.fn() });
+describe('client/events — multiple concurrent connections', () => {
+  it('keeps emitting over a surviving socket when another connection closes', () => {
+    const closed = makeSocket();
+    const healthy = makeSocket();
+    registerEventSocket(closed);
+    registerEventSocket(healthy);
 
-  afterEach(() => {
-    clearEventSocket();
-    jest.restoreAllMocks();
+    // One connection drops — its socket is removed, the rest stay live.
+    clearEventSocket(closed);
+
+    emitError({ errorCode: 'AUTH_RENEWAL_FAILED' });
+
+    expect(closed.send).not.toHaveBeenCalled();
+    expect(healthy.send).toHaveBeenCalledTimes(1);
   });
 
+  it('emits over exactly one socket (does not broadcast to every connection)', () => {
+    const a = makeSocket();
+    const b = makeSocket();
+    registerEventSocket(a);
+    registerEventSocket(b);
+
+    emitError({ errorCode: 'AUTH_RENEWAL_FAILED' });
+
+    expect(a.send.mock.calls.length + b.send.mock.calls.length).toBe(1);
+  });
+
+  it('goes silent only once every connection has closed', () => {
+    const a = makeSocket();
+    const b = makeSocket();
+    registerEventSocket(a);
+    registerEventSocket(b);
+    clearEventSocket(a);
+    clearEventSocket(b);
+
+    expect(() =>
+      emitShutdown({ reason: 'clean', uptimeSeconds: 1 }),
+    ).not.toThrow();
+    expect(a.send).not.toHaveBeenCalled();
+    expect(b.send).not.toHaveBeenCalled();
+  });
+});
+
+describe('client/events — emitShutdown', () => {
   it('no-ops (does not throw) when no socket is registered', () => {
     expect(() =>
       emitShutdown({ reason: 'clean', uptimeSeconds: 5 }),
