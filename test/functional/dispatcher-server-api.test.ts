@@ -300,4 +300,46 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
     expect(gatewayAttempts).toBeGreaterThan(0);
     await new Promise((resolve) => setTimeout(resolve, 1600));
   });
+
+  it('registers the full pod name with the gateway while the node dispatcher keeps the ordinal', async () => {
+    const podName = 'broker-server-3-0';
+    // Node keeps the truncated ordinal ("0"); the gateway must get the full pod
+    // name so the envoy sidecar can resolve the exact pod FQDN from Redis.
+    const nodePath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
+    const gatewayPath = `/internal/brokerservers/${podName}/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
+
+    const spyNode = jest.fn();
+    const spyGateway = jest.fn();
+    let resolveGatewayWritten;
+    const gatewayWritten = new Promise<void>((resolve) => {
+      resolveGatewayWritten = resolve;
+    });
+
+    nock(primaryUrl)
+      .post(nodePath)
+      .reply(() => {
+        spyNode();
+        return [200, 'OK'];
+      });
+    nock(gatewayUrl)
+      .post(gatewayPath)
+      .reply(() => {
+        spyGateway();
+        resolveGatewayWritten();
+        return [201, 'Created'];
+      });
+
+    process.env.DISPATCHER_URL = primaryUrl;
+    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
+    process.env.hostname = podName;
+    const dispatcher = await loadDispatcher();
+
+    await dispatcher.clientConnected(token, clientId, clientVersion);
+    await gatewayWritten;
+
+    // Each interceptor only matches its own path, so these passing proves the
+    // node used the ordinal and the gateway used the full pod name.
+    expect(spyNode).toBeCalledTimes(1);
+    expect(spyGateway).toBeCalledTimes(1);
+  });
 });

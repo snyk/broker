@@ -181,15 +181,17 @@ if (config.dispatcherUrl) {
 
   // Optional dual-write to the broker-gateway (Go) dispatcher. When
   // GATEWAY_DISPATCHER_URL is set, each lifecycle event is mirrored so the new
-  // dispatcher's Redis state matches the primary, enabling an eventual read-path
-  // cutover. Same server id/hostname keeps the mirrored state identical; the
-  // version defaults to the primary's and only needs overriding if the two
-  // dispatchers' API versions ever diverge.
+  // dispatcher's Redis state is populated ahead of a read-path cutover. Unlike
+  // the node dispatcher (which registers the truncated pod ordinal), the gateway
+  // registers the FULL pod name (config.hostname) as its server id, so the envoy
+  // sidecar can resolve the exact pod FQDN from Redis alone — no token-hash
+  // sharding, any pod count. The version defaults to the primary's and only needs
+  // overriding if the two dispatchers' API versions ever diverge.
   const gatewayClient = config.gatewayDispatcherUrl
     ? new DispatcherClient(
         config.gatewayDispatcherUrl,
         config.hostname,
-        serverId,
+        config.hostname,
         config.gatewayDispatcherVersion || config.dispatcherVersion,
         'envoy-dispatcher',
       )
