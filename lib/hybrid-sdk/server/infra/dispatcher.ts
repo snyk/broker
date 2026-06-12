@@ -42,6 +42,7 @@ class DispatcherClient {
       { requestType: 'server-stopping' },
       `${this.#url}/internal/brokerservers/${this.#id}`,
       'delete',
+      undefined,
       cb,
     );
   }

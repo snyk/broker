@@ -51,11 +51,6 @@ export const main = async (serverOpts: ServerOpts) => {
 
   const onSignal = async () => {
     logger.debug('Received exit signal, closing server.');
-    // TODO: possible bug. serverStopping passes it into DispatcherClient.serverStopping,
-    // which forwards it to #makeRequest in the requestBody arg slot (not the cb slot),
-    // so process.exit is never called. We also never close the web server here, so on
-    // SIGTERM the pod de-registers but keeps running until k8s SIGKILLs it. Proper fix:
-    // close/drain the server and exit after de-registration lands.
     await serverStopping(() => {
       process.exit(0);
     });
