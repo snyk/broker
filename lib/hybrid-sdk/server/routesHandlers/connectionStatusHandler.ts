@@ -36,7 +36,7 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
       const primaryPodName = localHostname.replace(/-1$/, '-0');
       const serviceName = localHostname.replace(/-[0-1]$/, '') + '-headless';
       const url = new URL(`http://${primaryPodName}.${serviceName}${req.url}`);
-      url.port = req.socket.localPort?.toString() ?? '';
+      url.port = req.socket.localPort?.toString() ?? '5000';
       url.searchParams.append('connection_role', 'primary');
 
       const postFilterPreparedRequest: PostFilterPreparedRequest = {
