@@ -33,8 +33,10 @@ export const connectionStatusHandler = async (req: Request, res: Response) => {
       localHostname.endsWith('-1') &&
       localHostname.match(regex)
     ) {
-      const url = new URL(`http://${req.hostname}${req.url}`);
-      url.hostname = req.hostname.replace(/-[0-9]{1,2}\./, '.');
+      const primaryPodName = localHostname.replace(/-1$/, '-0');
+      const serviceName = localHostname.replace(/-[0-1]$/, '') + '-headless';
+      const url = new URL(`http://${primaryPodName}.${serviceName}${req.url}`);
+      url.port = req.socket.localPort?.toString() ?? '';
       url.searchParams.append('connection_role', 'primary');
 
       const postFilterPreparedRequest: PostFilterPreparedRequest = {
