@@ -1,10 +1,11 @@
 import bodyParser from 'body-parser';
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
+import { makeStreamingRequestToDownstream } from '../../lib/hybrid-sdk/http/request';
 import express from 'express';
 import request from 'supertest';
-import nock from 'nock';
 import path from 'path';
 import { readFileSync } from 'node:fs';
+import { PassThrough } from 'stream';
 import { connectionStatusHandler } from '../../lib/hybrid-sdk/server/routesHandlers/connectionStatusHandler';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -23,9 +24,6 @@ jest.mock('../../lib/hybrid-sdk/server/socket', () => {
       map.set('7fe7a57b-aa0d-416a-97fc-472061737e24', [
         { socket: {}, socketVersion: '1', metadata: { capabilities: {} } },
       ]);
-      // map.set('7fe7a57b-aa0d-416a-97fc-472061737e26', [
-      //   { metadata: {version: '123', filter: {}} },
-      // ]);
       return map;
     },
   };
@@ -43,16 +41,28 @@ jest.mock('node:os', () => {
   };
 });
 
+jest.mock('../../lib/hybrid-sdk/http/request');
+
+const mockedMakeStreamingRequest =
+  makeStreamingRequestToDownstream as jest.Mock;
+
+function createMockResponse(statusCode: number, body: unknown) {
+  const stream = new PassThrough();
+  (stream as any).statusCode = statusCode;
+  (stream as any).headers = { 'content-type': 'application/json' };
+  stream.end(JSON.stringify(body));
+  return stream;
+}
+
 describe('Testing older clients specific logic', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('Testing the old client redirected to primary from secondary pods', async () => {
-    nock(`http://my-server-name.default.svc.cluster`)
-      .persist()
-      .get(
-        '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
-      )
-      .reply(() => {
-        return [200, { test: 'value' }];
-      });
+    mockedMakeStreamingRequest.mockResolvedValue(
+      createMockResponse(200, { test: 'value' }),
+    );
     const app = express();
     app.use(
       bodyParser.raw({
@@ -73,16 +83,17 @@ describe('Testing older clients specific logic', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ test: 'value' });
+    const forwardedUrl = mockedMakeStreamingRequest.mock.calls[0][0].url;
+    expect(forwardedUrl).toContain(
+      'my-server-name-10-0.my-server-name-10-headless',
+    );
+    expect(forwardedUrl).toContain('connection_role=primary');
   });
+
   it('Testing the old client redirected to primary from secondary pods - POST request', async () => {
-    nock(`http://my-server-name.default.svc.cluster`)
-      .persist()
-      .post(
-        '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/path?connection_role=primary',
-      )
-      .reply((_uri, requestBody) => {
-        return [200, requestBody];
-      });
+    mockedMakeStreamingRequest.mockResolvedValue(
+      createMockResponse(200, { test: 'value2' }),
+    );
     const app = express();
     app.use(
       bodyParser.raw({
@@ -104,19 +115,16 @@ describe('Testing older clients specific logic', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ test: 'value2' });
+    expect(mockedMakeStreamingRequest.mock.calls[0][0].method).toBe('POST');
   });
+
   it('Testing the old client redirected to primary from secondary pods - get request', async () => {
     const fileJson = JSON.parse(
       readFileSync(`${fixtures}/accept/ghe.json`).toString(),
     );
-    nock(`http://my-server-name.default.svc.cluster`)
-      .persist()
-      .get(
-        '/broker/7fe7a57b-aa0d-416a-97fc-472061737e25/file?connection_role=primary',
-      )
-      .reply(() => {
-        return [200, fileJson];
-      });
+    mockedMakeStreamingRequest.mockResolvedValue(
+      createMockResponse(200, fileJson),
+    );
     const app = express();
     app.use(
       bodyParser.raw({
@@ -140,14 +148,9 @@ describe('Testing older clients specific logic', () => {
   });
 
   it('Testing the connection-status old client redirected to primary from secondary pods', async () => {
-    nock(`http://my-server-name.default.svc.cluster`)
-      .persist()
-      .get(
-        '/connection-status/7fe7a57b-aa0d-416a-97fc-472061737e26?connection_role=primary',
-      )
-      .reply(() => {
-        return [200, { test: 'value' }];
-      });
+    mockedMakeStreamingRequest.mockResolvedValue(
+      createMockResponse(200, { test: 'value' }),
+    );
     const app = express();
     app.use(
       bodyParser.raw({
@@ -165,5 +168,10 @@ describe('Testing older clients specific logic', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ test: 'value' });
+    const forwardedUrl = mockedMakeStreamingRequest.mock.calls[0][0].url;
+    expect(forwardedUrl).toContain(
+      'my-server-name-10-0.my-server-name-10-headless',
+    );
+    expect(forwardedUrl).toContain('connection_role=primary');
   });
 });

@@ -1,11 +1,21 @@
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../../../../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
 import { getSocketConnections } from '../../../../../../lib/hybrid-sdk/server/socket';
+import { makeStreamingRequestToDownstream } from '../../../../../../lib/hybrid-sdk/http/request';
+import { hostname } from 'node:os';
 import { NextFunction } from 'express';
 import httpMocks from 'node-mocks-http';
 
 jest.mock('../../../../../../lib/hybrid-sdk/server/socket');
+jest.mock('../../../../../../lib/hybrid-sdk/http/request');
+jest.mock('node:os', () => ({
+  ...jest.requireActual('node:os'),
+  hostname: jest.fn(),
+}));
 
 const mockedGetSocketConnections = getSocketConnections as jest.Mock;
+const mockedMakeStreamingRequest =
+  makeStreamingRequestToDownstream as jest.Mock;
+const mockedHostname = hostname as jest.Mock;
 
 describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
   let next: NextFunction;
@@ -13,6 +23,8 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     next = jest.fn();
+    mockedHostname.mockReturnValue('broker-snyk-server-v2-0-0');
+    delete process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED;
   });
 
   afterEach(() => {
@@ -172,5 +184,187 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     expect(res.locals.capabilities).toEqual(connection.metadata.capabilities);
     expect(res.locals.socketVersion).toEqual(connection.socketVersion);
     expect(res.locals.brokerAppClientId).toEqual('');
+  });
+
+  describe('secondary pod forwarding to primary via headless DNS', () => {
+    beforeEach(() => {
+      mockedGetSocketConnections.mockReturnValue(new Map());
+    });
+
+    it('should forward to primary pod via headless service DNS (single-digit shard)', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-1-1');
+      mockedMakeStreamingRequest.mockResolvedValue({
+        statusCode: 404,
+        headers: { 'x-broker-failure': 'no-connection' },
+        pipe: jest.fn(),
+      });
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-1.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(mockedMakeStreamingRequest).toHaveBeenCalledTimes(1);
+      const forwardedUrl = mockedMakeStreamingRequest.mock.calls[0][0].url;
+      expect(forwardedUrl).toContain(
+        'broker-snyk-server-v2-1-0.broker-snyk-server-v2-1-headless',
+      );
+      expect(forwardedUrl).toContain(':5000');
+      expect(forwardedUrl).toContain('connection_role=primary');
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should forward to primary pod via headless service DNS (double-digit shard)', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-15-1');
+      mockedMakeStreamingRequest.mockResolvedValue({
+        statusCode: 404,
+        headers: { 'x-broker-failure': 'no-connection' },
+        pipe: jest.fn(),
+      });
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-15.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      const forwardedUrl = mockedMakeStreamingRequest.mock.calls[0][0].url;
+      expect(forwardedUrl).toContain(
+        'broker-snyk-server-v2-15-0.broker-snyk-server-v2-15-headless',
+      );
+    });
+
+    it('should relay the primary response verbatim (status + headers)', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-3-1');
+      const mockPipe = jest.fn();
+      mockedMakeStreamingRequest.mockResolvedValue({
+        statusCode: 404,
+        headers: {
+          'x-broker-failure': 'no-connection',
+          'content-type': 'application/json',
+        },
+        pipe: mockPipe,
+      });
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-3.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(res.statusCode).toBe(404);
+      expect(mockPipe).toHaveBeenCalledWith(res);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should relay a successful response from primary (legacy token found)', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-5-1');
+      const mockPipe = jest.fn();
+      mockedMakeStreamingRequest.mockResolvedValue({
+        statusCode: 200,
+        headers: { 'content-type': 'application/json' },
+        pipe: mockPipe,
+      });
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-5.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(res.statusCode).toBe(200);
+      expect(mockPipe).toHaveBeenCalledWith(res);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 with x-broker-failure when forward to primary fails', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-7-1');
+      mockedMakeStreamingRequest.mockRejectedValue(
+        new Error('getaddrinfo NXDOMAIN'),
+      );
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-7.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(res.statusCode).toBe(500);
+      expect(res.getHeader('x-broker-failure')).toBe(
+        'error-forwarding-to-primary',
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should forward POST body to primary', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-2-1');
+      mockedMakeStreamingRequest.mockResolvedValue({
+        statusCode: 200,
+        headers: {},
+        pipe: jest.fn(),
+      });
+      const req = httpMocks.createRequest({
+        method: 'POST',
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+        hostname: 'broker-snyk-server-v2-2.default.svc.cluster.local',
+        socket: { localPort: 5000 },
+        body: { key: 'value' },
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      const forwardedReq = mockedMakeStreamingRequest.mock.calls[0][0];
+      expect(forwardedReq.body).toEqual({ key: 'value' });
+      expect(forwardedReq.method).toBe('POST');
+    });
+
+    it('should NOT forward on primary pod (hostname ends with -0)', async () => {
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-1-0');
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(mockedMakeStreamingRequest).not.toHaveBeenCalled();
+      expect(res.statusCode).toBe(404);
+      expect(res.getHeader('x-broker-failure')).toBe('no-connection');
+    });
+
+    it('should NOT forward when BROKER_SERVER_MANDATORY_AUTH_ENABLED is set (universal)', async () => {
+      process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED = 'true';
+      mockedHostname.mockReturnValue('broker-snyk-server-v2-1-1');
+      const req = httpMocks.createRequest({
+        params: { token: 'test-token' },
+        url: '/broker/test-token/some/path',
+      });
+      const res = httpMocks.createResponse();
+
+      await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+      expect(mockedMakeStreamingRequest).not.toHaveBeenCalled();
+      expect(res.statusCode).toBe(404);
+      expect(res.getHeader('x-broker-failure')).toBe('no-connection');
+    });
   });
 });
