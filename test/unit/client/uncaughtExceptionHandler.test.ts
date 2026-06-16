@@ -53,7 +53,7 @@ describe('handleUncaughtException — log levels', () => {
 
   it('emits an uncaught_exception shutdown carrying the bounded errno code only', () => {
     const err = Object.assign(new Error('boom with secret detail'), {
-      code: 'ERR_FATAL',
+      code: 'ECONNRESET',
     });
 
     handleUncaughtException(err, metricsClientStub);
@@ -61,10 +61,21 @@ describe('handleUncaughtException — log levels', () => {
     expect(emitShutdown).toHaveBeenCalledWith({
       reason: PROCESS_EXIT_REASONS.UNCAUGHT_EXCEPTION,
       uptimeSeconds: expect.any(Number),
-      errorCode: 'ERR_FATAL',
+      errorCode: 'ECONNRESET',
     });
     // The free-form error message must never ride the event.
     const emitted = (emitShutdown as jest.Mock).mock.calls[0][0];
     expect(JSON.stringify(emitted)).not.toContain('secret detail');
+  });
+
+  it('strips a non-standard third-party .code value (not in the known errno allowlist)', () => {
+    const err = Object.assign(new Error('boom'), {
+      code: 'ERR_TLS_CERT_ALTNAME_INVALID',
+    });
+
+    handleUncaughtException(err, metricsClientStub);
+
+    const emitted = (emitShutdown as jest.Mock).mock.calls[0]?.[0];
+    expect(emitted?.errorCode).toBeUndefined();
   });
 });

@@ -102,7 +102,7 @@ export type ClientEvent =
       type: 'client-shutdown';
       reason: ClientShutdownReason;
       uptimeSeconds: number;
-      errorCode?: string; // bounded Node errno, uncaught_exception only
+      errorCode?: SafeNodeErrno; // callers must use safeNodeErrno(); type enforces this
     };
 
 export type ClientEventType = ClientEvent['type'];
@@ -111,3 +111,33 @@ export interface ClientEventEnvelope {
   ts: number; // client clock; server stamps the authoritative receipt time
   event: ClientEvent;
 }
+
+// OS-level errno codes that are safe to include in server logs.
+// All other values — including library-defined codes like ERR_TLS_CERT_ALTNAME_INVALID
+// — are stripped by safeNodeErrno() before the event is emitted.
+const KNOWN_NODE_ERRNO_LIST = [
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'ENOTFOUND',
+  'EPIPE',
+  'EADDRINUSE',
+  'EACCES',
+  'ENOENT',
+  'EBUSY',
+  'EMFILE',
+  'ENOMEM',
+  'EPROTO',
+  'ESOCKETTIMEDOUT',
+] as const;
+
+export type SafeNodeErrno = (typeof KNOWN_NODE_ERRNO_LIST)[number];
+export const KNOWN_NODE_ERRNOS = new Set<string>(KNOWN_NODE_ERRNO_LIST);
+
+/** Returns `code` only when it is a known OS-level errno; strips everything else. */
+export const safeNodeErrno = (
+  code: string | undefined,
+): SafeNodeErrno | undefined =>
+  code !== undefined && KNOWN_NODE_ERRNOS.has(code)
+    ? (code as SafeNodeErrno)
+    : undefined;

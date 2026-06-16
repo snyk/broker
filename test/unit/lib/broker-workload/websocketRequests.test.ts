@@ -271,6 +271,33 @@ describe('BrokerWorkload', () => {
       );
     });
 
+    it('non-streaming downstream error does NOT emit a client-error event (observable via HTTP response)', async () => {
+      mockFilterRequest.mockReturnValue(matchedRule);
+      mockMakeRequest.mockRejectedValueOnce(
+        Object.assign(new Error('connect ECONNREFUSED'), {
+          code: 'ECONNREFUSED',
+        }),
+      );
+      const workload = new BrokerWorkload(
+        connectionIdentifier,
+        options,
+        websocketConnectionHandler,
+      );
+      const payload = {
+        url: '/non-stream',
+        method: 'GET',
+        headers: { 'snyk-request-id': '88888888-8888-4888-8888-888888888888' },
+        requestId: 'req-ns-1',
+        streamingID: '',
+      };
+
+      await workload.handler({ payload, websocketHandler: jest.fn() });
+
+      // Non-streaming errors surface as a structured response; the caller can observe
+      // them there. Only streaming failures are silent to the server, hence that path emits.
+      expect(emitError).not.toHaveBeenCalled();
+    });
+
     it('streaming failure emits a joinable client-error with a bounded code only (no downstream message)', async () => {
       mockFilterRequest.mockReturnValue(matchedRule);
       mockMakeStreamingRequest.mockRejectedValueOnce(
