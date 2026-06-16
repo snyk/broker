@@ -272,6 +272,10 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
             metricsClient?.recordDownstreamStatus('5xx');
             logError(logContext, error);
             const code = classifyDownstreamError(error);
+            // emitError is intentionally absent here: the caller receives a
+            // structured HTTP error response, making the failure observable
+            // via the response path. Only the streaming catch emits, because
+            // streaming failures are otherwise silent to the server.
             return responseHandler.sendResponse({
               status: statusForErrorCode(code),
               errorType: code,

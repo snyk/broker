@@ -152,6 +152,14 @@ export const handleIdentifyOnSocket = (
 
   socket.on('chunk', streamingResponse(token));
   socket.on('request', response(token));
+  // Primus Spark extends EventEmitter at runtime. CLIENT_EVENT_MESSAGE is
+  // registered only here; removeAllListeners is therefore equivalent to
+  // removeListener on the one function we registered — safe to use because
+  // no other code registers on this event name.
+  // This guard prevents duplicate log writes if a client re-sends 'identify'.
+  (socket as unknown as import('events').EventEmitter).removeAllListeners(
+    CLIENT_EVENT_MESSAGE,
+  );
   socket.on(CLIENT_EVENT_MESSAGE, handleClientEvent(eventIdentity));
   socket.on('incoming::ping', (time) => {
     const isTerminating =

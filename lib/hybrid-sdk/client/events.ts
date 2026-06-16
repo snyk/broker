@@ -4,6 +4,7 @@ import {
   ClientEvent,
   ClientEventEnvelope,
   ClientShutdownReason,
+  SafeNodeErrno,
 } from '../common/types/telemetry';
 import { log as logger } from '../../logs/logger';
 
@@ -47,5 +48,5 @@ export const emitError = (error: {
 export const emitShutdown = (shutdown: {
   reason: ClientShutdownReason;
   uptimeSeconds: number;
-  errorCode?: string;
+  errorCode?: SafeNodeErrno;
 }): void => emit({ type: 'client-shutdown', ...shutdown });
