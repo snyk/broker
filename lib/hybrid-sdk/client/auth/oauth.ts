@@ -1,6 +1,8 @@
 import { AccessToken, ClientCredentials, ModuleOptions } from 'simple-oauth2';
 import { log as logger } from '../../../logs/logger';
 import type { Client as MetricsClient } from '../metrics/client';
+import { emitError } from '../events';
+import { BROKER_ERROR_CODES } from '../../common/types/telemetry';
 
 export interface InitOAuthClientOptions {
   apiHostname: string;
@@ -58,6 +60,7 @@ function refreshToken(): Promise<AccessToken> {
       return token;
     } catch (err) {
       metrics?.recordJwtRefreshFailure();
+      emitError({ errorCode: BROKER_ERROR_CODES.JWT_REFRESH_FAILED });
       logger.error({ err }, 'Unable to retrieve JWT');
       throw err;
     } finally {

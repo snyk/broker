@@ -3,9 +3,9 @@ import {
   classifyDownstreamError,
   classifyDownstreamStatus,
   statusForErrorCode,
-} from '../../../../../../lib/hybrid-sdk/common/types/errorCodes';
+} from '../../../../../../lib/hybrid-sdk/common/types/telemetry';
 
-describe('errorCodes catalog', () => {
+describe('telemetry catalog', () => {
   describe('classifyDownstreamError', () => {
     it.each([
       ['ETIMEDOUT', BROKER_ERROR_CODES.DOWNSTREAM_TIMEOUT],

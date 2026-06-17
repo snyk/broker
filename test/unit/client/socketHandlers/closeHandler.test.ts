@@ -1,8 +1,14 @@
+jest.mock('../../../../lib/hybrid-sdk/client/events', () => ({
+  clearEventSocket: jest.fn(),
+  registerEventSocket: jest.fn(),
+}));
+
 import { closeHandler } from '../../../../lib/hybrid-sdk/client/socketHandlers/closeHandler';
 import { log as logger } from '../../../../lib/logs/logger';
 import { WebSocketConnection } from '../../../../lib/hybrid-sdk/client/types/client';
 import { LoadedClientOpts } from '../../../../lib/hybrid-sdk/common/types/options';
 import { NoopClient } from '../../../../lib/hybrid-sdk/client/metrics';
+import { clearEventSocket } from '../../../../lib/hybrid-sdk/client/events';
 
 jest.mock('../../../../lib/logs/logger');
 
@@ -22,6 +28,11 @@ describe('closeHandler', () => {
         universalBrokerEnabled: false,
       },
     } as unknown as LoadedClientOpts;
+  });
+
+  it('calls clearEventSocket with the websocket before any other close logic', () => {
+    closeHandler(mockWebsocket, mockClientOpts, {}, new NoopClient());
+    expect(clearEventSocket).toHaveBeenCalledWith(mockWebsocket);
   });
 
   it('should log warning with durationMs when connectionStartTime is present', () => {

@@ -13,7 +13,7 @@ import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import {
   BROKER_ERROR_CODES,
   statusForErrorCode,
-} from '../hybrid-sdk/common/types/errorCodes';
+} from '../hybrid-sdk/common/types/telemetry';
 import { incrementHttpRequestsTotal } from '../hybrid-sdk/common/utils/metrics';
 import type { Client as MetricsClient } from '../hybrid-sdk/client/metrics/client';
 import { NoopClient } from '../hybrid-sdk/client/metrics/noopClient';

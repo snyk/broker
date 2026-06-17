@@ -18,12 +18,13 @@ import {
   WorkloadType,
 } from '../hybrid-sdk/workloadFactory';
 import { prepareRequest } from './prepareRequest';
+import { emitError } from '../hybrid-sdk/client/events';
 import { ExtendedLogContext } from '../hybrid-sdk/common/types/log';
 import {
   BROKER_ERROR_CODES,
   classifyDownstreamError,
   statusForErrorCode,
-} from '../hybrid-sdk/common/types/errorCodes';
+} from '../hybrid-sdk/common/types/telemetry';
 import {
   incrementWebSocketRequestsTotal,
   incrementHttpRequestsTotal,
@@ -223,6 +224,12 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
               '[Downstream] Caught error making streaming request to downstream ',
             );
             const code = classifyDownstreamError(e);
+            // Bounded classification only — never the downstream message/body.
+            emitError({
+              errorCode: code,
+              requestId: logContext.requestId,
+              integrationType: logContext.connectionName,
+            });
             return responseHandler.sendResponse({
               status: statusForErrorCode(code),
               errorType: code,
@@ -265,6 +272,10 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
             metricsClient?.recordDownstreamStatus('5xx');
             logError(logContext, error);
             const code = classifyDownstreamError(error);
+            // emitError is intentionally absent here: the caller receives a
+            // structured HTTP error response, making the failure observable
+            // via the response path. Only the streaming catch emits, because
+            // streaming failures are otherwise silent to the server.
             return responseHandler.sendResponse({
               status: statusForErrorCode(code),
               errorType: code,

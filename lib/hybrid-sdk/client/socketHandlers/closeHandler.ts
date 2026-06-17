@@ -2,6 +2,7 @@ import { LoadedClientOpts } from '../../common/types/options';
 import { log as logger } from '../../../logs/logger';
 import { WebSocketConnection } from '../types/client';
 import { Client } from '../metrics/client';
+import { clearEventSocket } from '../events';
 
 export const closeHandler = (
   websocket: WebSocketConnection,
@@ -9,6 +10,7 @@ export const closeHandler = (
   identifyingMetadata,
   metricsClient: Client,
 ) => {
+  clearEventSocket(websocket);
   // default duration of -1 so that it is obvious if this misbehaves
   let durationMs = -1;
   if (websocket.connectionStartTime) {

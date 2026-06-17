@@ -1,4 +1,23 @@
+jest.mock('../../../../lib/hybrid-sdk/client/events', () => ({
+  emitError: jest.fn(),
+  emitShutdown: jest.fn(),
+}));
+jest.mock(
+  '../../../../lib/hybrid-sdk/http/downstream-post-stream-to-server',
+  () => ({
+    BrokerServerPostResponseHandler: jest.fn().mockImplementation(() => ({
+      sendData: jest.fn(() => {
+        throw new Error('send-back failed');
+      }),
+      forwardRequest: jest.fn(() => {
+        throw new Error('send-back failed');
+      }),
+    })),
+  }),
+);
+
 import { HybridResponseHandler } from '../../../../lib/hybrid-sdk/responseSenders';
+import { emitError } from '../../../../lib/hybrid-sdk/client/events';
 
 describe('HybridResponseHandler.sendDataResponse — downstream relay classification', () => {
   const createHandler = () => {
@@ -57,4 +76,28 @@ describe('HybridResponseHandler.sendDataResponse — downstream relay classifica
       expect(payload).not.toHaveProperty('errorType');
     },
   );
+});
+
+describe('HybridResponseHandler — send-back failure emits a joinable client-error', () => {
+  beforeEach(() => (emitError as jest.Mock).mockClear());
+
+  it('emits SEND_BACK_FAILED with request id + integration type when the post throws', () => {
+    const handler = new HybridResponseHandler(
+      { connectionIdentifier: 'conn-1', requestId: 'req-77' } as any,
+      { capabilities: ['receive-post-streams'] } as any,
+      undefined as any,
+      { socketMaxResponseLength: '20971520' } as any,
+      { connectionName: 'gitlab' } as any,
+    );
+
+    // Post handler throws (mocked); the response path stays silent, so the
+    // emitted event is the only trace the server can join on request id.
+    handler.sendResponse({ status: 200, body: 'ok' } as any);
+
+    expect(emitError).toHaveBeenCalledWith({
+      errorCode: 'SEND_BACK_FAILED',
+      requestId: 'req-77',
+      integrationType: 'gitlab',
+    });
+  });
 });
