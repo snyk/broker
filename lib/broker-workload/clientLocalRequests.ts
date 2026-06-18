@@ -86,9 +86,12 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
           url: this.req.url,
         });
     } else {
+      // Extract connection identifier from the selected websocket connection
+      const connectionIdentifier =
+        this.res.locals.websocket?.identifier || null;
       hybridClientRequestHandler.makeRequest(
         getInterpolatedRequest(
-          null,
+          connectionIdentifier,
           matchedFilterRule,
           this.req,
           logContext,
