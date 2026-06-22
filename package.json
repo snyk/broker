@@ -157,6 +157,13 @@
     "ws": "7.5.11",
     "setheader": "1.0.2",
     "@grpc/grpc-js": "^1.14.4",
+    "@opentelemetry/core": "2.8.0",
+    "engine.io": {
+      "ws": "8.21.0"
+    },
+    "engine.io-client": {
+      "ws": "7.5.11"
+    },
     "@grpc/proto-loader": {
       "protobufjs": "^7.6.5"
     },
