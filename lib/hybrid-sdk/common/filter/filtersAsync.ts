@@ -179,7 +179,10 @@ export const loadFilters: LOADEDFILTER = (
               const re = new RegExp(regex!); //paths without regexes got filtered out earlier, hence the !
               return re.test(undefsafe(parsedBody, filterPath!));
             } catch (error) {
-              logger.error(
+              // Per-request, recoverable: the request is blocked (returns
+              // false) and the broker continues. WARN is the right floor —
+              // operator visibility without alert fatigue.
+              logger.warn(
                 { error, path: filterPath, regex },
                 'failed to test regex rule',
               );

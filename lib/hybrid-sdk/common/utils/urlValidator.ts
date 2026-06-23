@@ -10,7 +10,9 @@ export function urlContainsProtocol(url: string, protocol: string): boolean {
     const givenUrl = new URL(url);
     return givenUrl.protocol === protocol;
   } catch (error) {
-    logger.error({ error }, 'Error parsing url');
+    // Parse failure is the answer the caller wants (returns false); not an
+    // operator-actionable failure. Keep at DEBUG for triage without spamming.
+    logger.debug({ error, url }, 'Error parsing url');
     return false;
   }
 }
@@ -26,7 +28,10 @@ export function isHttpUrl(brokerClientUrl: string): boolean {
       urlContainsProtocol(brokerClientUrl, 'https:')
     );
   } catch (error) {
-    logger.error({ error }, 'Error checking URL HTTP protocol');
+    logger.debug(
+      { error, url: brokerClientUrl },
+      'Error checking URL HTTP protocol',
+    );
     return false;
   }
 }
