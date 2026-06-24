@@ -13,7 +13,8 @@ import {
   waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
-import { DEFAULT_TEST_WEB_SERVER_PORT } from '../setup/constants';
+import { TestApiServer, createTestApiServer } from '../setup/test-api-server';
+import { DEFAULT_TEST_API_SERVER_PORT } from '../setup/constants';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
@@ -22,12 +23,14 @@ const serverAccept = path.join(fixtures, 'server', 'filters-cra.json');
 
 describe('proxy requests originating from behind the broker client', () => {
   let tws: TestWebServer;
+  let tas: TestApiServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
-  process.env.API_BASE_URL = `http://localhost:${DEFAULT_TEST_WEB_SERVER_PORT}`;
+  process.env.API_BASE_URL = `http://localhost:${DEFAULT_TEST_API_SERVER_PORT}`;
 
   beforeAll(async () => {
     tws = await createTestWebServer();
+    tas = await createTestApiServer();
 
     bs = await createBrokerServer({ port: PORT, filters: serverAccept });
 
@@ -44,9 +47,11 @@ describe('proxy requests originating from behind the broker client', () => {
 
   afterAll(async () => {
     await tws.server.close();
+    await tas.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
     delete process.env.BROKER_SERVER_URL;
+    delete process.env.API_BASE_URL;
   });
 
   it('successfully broker CRA results call', async () => {
