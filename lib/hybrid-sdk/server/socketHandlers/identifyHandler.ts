@@ -10,8 +10,26 @@ import { legacyStreamResponseHandler } from '../../LegacyStreamResponseHandler';
 import { ISpark } from 'primus';
 import { CLIENT_EVENT_MESSAGE } from '../../common/types/telemetry';
 import { ClientEventIdentity, handleClientEvent } from './clientEventHandler';
+import { StreamResponseHandler } from '../../http/server-post-stream-handler';
 
 let response;
+
+export const handleStreamAbort = (
+  streamingID: string,
+  reason: string,
+): void => {
+  const streamHandler = StreamResponseHandler.create(streamingID);
+  if (streamHandler) {
+    logger.warn(
+      { streamingID, reason },
+      'Client aborted response-data stream; failing originating request.',
+    );
+    streamHandler.destroy(
+      new Error(`Client aborted response-data stream: ${reason}`),
+    );
+  }
+};
+
 const minimalSupportedBrokerVersion =
   process.env.MINIMAL_SUPPORTED_BROKER_VERSION ?? '4.100.0';
 const minimalRecommendedBrokerVersion =
@@ -152,6 +170,7 @@ export const handleIdentifyOnSocket = (
 
   socket.on('chunk', streamingResponse(token));
   socket.on('request', response(token));
+  socket.on('abort', handleStreamAbort);
   // Primus Spark extends EventEmitter at runtime. CLIENT_EVENT_MESSAGE is
   // registered only here; removeAllListeners is therefore equivalent to
   // removeListener on the one function we registered — safe to use because
