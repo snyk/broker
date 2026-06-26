@@ -52,6 +52,7 @@ export class OtelClient implements Client {
   private readonly connectionStateGauge: Gauge;
   private readonly reconnectCounter: Counter;
   private readonly processExitCounter: Counter;
+  private readonly connectionTeardownCounter: Counter;
   private readonly authRenewalFailureCounter: Counter;
   private readonly jwtRefreshFailureCounter: Counter;
   private readonly uncaughtExceptionCounter: Counter;
@@ -137,6 +138,15 @@ export class OtelClient implements Client {
       {
         description:
           'Count of process exits by reason (reconnect_exhaustion, oauth_token_unavailable, uncaught_exception).',
+        valueType: ValueType.INT,
+      },
+    );
+
+    this.connectionTeardownCounter = meter.createCounter(
+      'broker.client.connection_teardown.total',
+      {
+        description:
+          'Count of single-connection teardowns by reason (auth_renewal_exhaustion).',
         valueType: ValueType.INT,
       },
     );
@@ -304,6 +314,10 @@ export class OtelClient implements Client {
 
   recordProcessExit(reason: ProcessExitReason): void {
     this.processExitCounter.add(1, { reason });
+  }
+
+  recordConnectionTeardown(reason: string): void {
+    this.connectionTeardownCounter.add(1, { reason });
   }
 
   recordAuthRenewalFailure(statusCode: number): void {
