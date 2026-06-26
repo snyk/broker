@@ -1,6 +1,7 @@
 import { log as globalLogger } from '../../logs/logger';
 import stream from 'stream';
 import { pipeline } from 'stream/promises';
+import { emitResponseDataAbort } from './response-data-abort';
 
 import version from '../common/utils/version';
 
@@ -131,6 +132,9 @@ class BrokerServerPostResponseHandler {
   #requestId: string;
   #brokerSrvPostRequestHandler?: http.ClientRequest;
   #logger: Logger;
+  #websocketConnectionHandler?: {
+    send: (event: string, ...args: any[]) => void;
+  };
 
   /**
    * Creates a new handler for posting responses to the Broker Server.
@@ -141,6 +145,7 @@ class BrokerServerPostResponseHandler {
    * @param requestId - Unique request identifier
    * @param role - Broker role
    * @param logger - Optional logger instance (defaults to global logger)
+   * @param websocketConnectionHandler - Optional websocket handler used to emit abort signals on upload failure
    */
   constructor(
     logContext: ExtendedLogContext,
@@ -150,6 +155,9 @@ class BrokerServerPostResponseHandler {
     requestId: string,
     role,
     logger: Logger = globalLogger,
+    websocketConnectionHandler?: {
+      send: (event: string, ...args: any[]) => void;
+    },
   ) {
     this.#logger = logger.child({ ...logContext, requestId });
     this.#logContext = logContext;
@@ -158,6 +166,7 @@ class BrokerServerPostResponseHandler {
     this.#serverId = serverId;
     this.#role = role;
     this.#requestId = requestId;
+    this.#websocketConnectionHandler = websocketConnectionHandler;
     this.#buffer = new stream.PassThrough({ highWaterMark: 1048576 }); // 1MB
     this.#buffer.on('error', (e) =>
       this.#logger.error(
@@ -401,6 +410,12 @@ class BrokerServerPostResponseHandler {
               },
               'Received unexpected HTTP response POSTing data to Broker Server',
             );
+            emitResponseDataAbort(
+              this.#websocketConnectionHandler,
+              this.#streamingId!,
+              `Broker Server returned ${r.statusCode} for response-data POST`,
+              this.#config,
+            );
           }
         })
         .on('finish', () => {
@@ -631,6 +646,12 @@ class BrokerServerPostResponseHandler {
         { errorDetails: err },
         'Error in forwarding the request to broker server pipeline',
       );
+      emitResponseDataAbort(
+        this.#websocketConnectionHandler,
+        this.#streamingId!,
+        'Response-data upload pipeline error',
+        this.#config,
+      );
       this.#buffer.destroy();
     }
   }
@@ -655,6 +676,12 @@ class BrokerServerPostResponseHandler {
       this.#logger.error(
         { errorDetails: err },
         'Error establishing connection for POST to Broker Server',
+      );
+      emitResponseDataAbort(
+        this.#websocketConnectionHandler,
+        this.#streamingId!,
+        'Response-data upload pipeline error',
+        this.#config,
       );
       this.#buffer.destroy();
       return;
