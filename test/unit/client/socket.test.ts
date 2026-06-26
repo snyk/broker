@@ -106,6 +106,15 @@ jest.mock('../../../lib/hybrid-sdk/client/auth/brokerServerConnection', () => ({
   renewBrokerServerConnection: jest.fn(),
 }));
 
+const mockShutDownConnectionPair = jest.fn();
+jest.mock(
+  '../../../lib/hybrid-sdk/client/connectionsManager/connectionHelpers',
+  () => ({
+    shutDownConnectionPair: (...args: any[]) =>
+      mockShutDownConnectionPair(...args),
+  }),
+);
+
 jest.useFakeTimers();
 
 describe('createWebSocket - renew auth behaviour', () => {
@@ -424,6 +433,84 @@ describe('createWebSocket - renew auth behaviour', () => {
         uptimeSeconds: expect.any(Number),
       });
       expect(mockProcessExit).toHaveBeenCalledWith(1);
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('universal mode: tears down only the failing connection (no process.exit) after N consecutive auth failures', async () => {
+      const {
+        websocketConnections,
+      } = require('../../../lib/hybrid-sdk/client/connectionsManager/manager');
+      websocketConnections.length = 0;
+
+      const clientOpts = createMockClientOpts();
+      clientOpts.config.universalBrokerEnabled = 'true';
+      clientOpts.config.brokerRenewalConnectionScopedTeardownEnabled = true;
+
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      identifyingMetadata.friendlyName = 'conn-A';
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+      // Seed the registry so findIndex(friendlyName) resolves.
+      ws.friendlyName = 'conn-A';
+      websocketConnections.push(ws);
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+      mockRenewBrokerServerConnection.mockResolvedValue({
+        statusCode: 403,
+        headers: {},
+        body: '{}',
+      });
+
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      expect(mockShutDownConnectionPair).toHaveBeenCalledTimes(1);
+      expect(mockShutDownConnectionPair).toHaveBeenCalledWith(
+        websocketConnections,
+        0,
+      );
+      expect(mockProcessExit).not.toHaveBeenCalled();
+      // Universal teardown must NOT emit client-shutdown (process is still running)
+      expect(emitShutdown).not.toHaveBeenCalled();
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('universal mode: closes the socket directly when it is not in the registry (idx === -1)', async () => {
+      const {
+        websocketConnections,
+      } = require('../../../lib/hybrid-sdk/client/connectionsManager/manager');
+      websocketConnections.length = 0; // empty registry => findIndex returns -1
+
+      const clientOpts = createMockClientOpts();
+      clientOpts.config.universalBrokerEnabled = 'true';
+      clientOpts.config.brokerRenewalConnectionScopedTeardownEnabled = true;
+
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      identifyingMetadata.friendlyName = 'conn-orphan';
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+      ws.end = jest.fn();
+      ws.destroy = jest.fn();
+      // Intentionally NOT pushed into websocketConnections, so idx === -1.
+
+      const expectedTimeoutMs = 10 * 60 * 1000;
+      mockRenewBrokerServerConnection.mockResolvedValue({
+        statusCode: 403,
+        headers: {},
+        body: '{}',
+      });
+
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+      await jest.advanceTimersByTimeAsync(expectedTimeoutMs);
+
+      expect(mockShutDownConnectionPair).not.toHaveBeenCalled();
+      expect(ws.end).toHaveBeenCalledTimes(1);
+      expect(ws.destroy).toHaveBeenCalledTimes(1);
+      expect(mockProcessExit).not.toHaveBeenCalled();
 
       clearTimeout(ws.timeoutHandlerId);
     });
