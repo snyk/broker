@@ -39,6 +39,8 @@ import {
   BROKER_ERROR_CODES,
   PROCESS_EXIT_REASONS,
 } from '../common/types/telemetry';
+import { websocketConnections } from './connectionsManager/manager';
+import { shutDownConnectionPair } from './connectionsManager/connectionHelpers';
 
 const MAX_CONSECUTIVE_AUTH_FAILURES = 3;
 
@@ -228,6 +230,8 @@ export const createWebSocket = (
         role: identifyingMetadata.role,
       };
 
+      let connectionTornDown = false;
+
       try {
         const renewOnce = async () =>
           renewBrokerServerConnection(
@@ -273,18 +277,59 @@ export const createWebSocket = (
         consecutiveAuthFailures++;
         metricsClient.recordAuthRenewalFailure(statusCode);
 
+        const teardownEnabled =
+          String(
+            clientOpts.config.brokerRenewalConnectionScopedTeardownEnabled,
+          ) !== 'false';
+
         if (consecutiveAuthFailures >= MAX_CONSECUTIVE_AUTH_FAILURES) {
+          if (clientOpts.config.universalBrokerEnabled && teardownEnabled) {
+            // Universal mode: drop ONLY this connection's pair; keep the process (and
+            // every other connection) alive.
+            logger.error(
+              { ...commonLogFields, responseCode: statusCode, err: errField },
+              `Failed to renew connection ${consecutiveAuthFailures} consecutive times. Tearing down this connection.`,
+            );
+            metricsClient.recordConnectionTeardown('auth_renewal_exhaustion');
+            connectionTornDown = true;
+            const idx = websocketConnections.findIndex(
+              (c) => c.friendlyName === identifyingMetadata.friendlyName,
+            );
+            if (idx !== -1) {
+              shutDownConnectionPair(websocketConnections, idx);
+            } else {
+              logger.warn(
+                commonLogFields,
+                'Connection not found in registry during teardown; closing this socket directly.',
+              );
+              if (websocket.timeoutHandlerId) {
+                clearTimeout(websocket.timeoutHandlerId);
+                websocket.timeoutHandlerId = undefined;
+              }
+              websocket.end();
+              websocket.destroy();
+            }
+            await metricsClient.forceFlush().catch((flushErr) => {
+              logger.warn(
+                { ...commonLogFields, err: flushErr },
+                'Failed to flush metrics before teardown',
+              );
+            });
+            return;
+          }
+
+          // Classic mode (one process == one connection): exit so the supervisor restarts.
           logger.fatal(
             { ...commonLogFields, responseCode: statusCode, err: errField },
             `Failed to renew connection ${consecutiveAuthFailures} consecutive times. Exiting...`,
-          );
-          metricsClient.recordProcessExit(
-            PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
           );
           emitShutdown({
             reason: PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
             uptimeSeconds: Math.round(process.uptime()),
           });
+          metricsClient.recordProcessExit(
+            PROCESS_EXIT_REASONS.OAUTH_TOKEN_UNAVAILABLE,
+          );
           await metricsClient.forceFlush().catch((flushErr) => {
             logger.warn(
               { ...commonLogFields, err: flushErr },
@@ -306,10 +351,12 @@ export const createWebSocket = (
         );
         emitError({ errorCode: BROKER_ERROR_CODES.AUTH_RENEWAL_FAILED });
       } finally {
-        websocket.timeoutHandlerId = setTimeout(
-          timeoutHandler,
-          renewalIntervalMs,
-        );
+        if (!connectionTornDown) {
+          websocket.timeoutHandlerId = setTimeout(
+            timeoutHandler,
+            renewalIntervalMs,
+          );
+        }
       }
     };
 

@@ -30,6 +30,9 @@ export interface Client {
    */
   recordProcessExit(reason: ProcessExitReason): void;
 
+  /** Increment broker.client.connection_teardown.total when a single connection is torn down (not a process exit). */
+  recordConnectionTeardown(reason: string): void;
+
   /** Increment broker.client.auth_renewal_failure.total for non-2xx auth renewal responses. */
   recordAuthRenewalFailure(statusCode: number): void;
 

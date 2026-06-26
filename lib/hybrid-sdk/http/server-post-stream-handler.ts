@@ -16,6 +16,7 @@ export interface StreamResponse {
   response: Response;
   streamSize?: number;
   brokerAppClientId: string | null;
+  deadlineTimer?: NodeJS.Timeout;
 }
 
 export class StreamResponseHandler {
@@ -37,16 +38,24 @@ export class StreamResponseHandler {
       streamResponse.streamBuffer,
       streamResponse.response,
       streamResponse.brokerAppClientId ?? null,
+      streamResponse.deadlineTimer,
     );
   }
 
-  constructor(streamingID, streamBuffer, response, brokerAppClientId) {
+  constructor(
+    streamingID,
+    streamBuffer,
+    response,
+    brokerAppClientId,
+    deadlineTimer?,
+  ) {
     this.streamingID = streamingID;
     this.streamResponse = {
       streamBuffer,
       response,
       streamSize: 0,
       brokerAppClientId,
+      deadlineTimer,
     };
   }
 
@@ -64,6 +73,8 @@ export class StreamResponseHandler {
   };
 
   finished = () => {
+    if (this.streamResponse.deadlineTimer)
+      clearTimeout(this.streamResponse.deadlineTimer);
     this.streamResponse.streamBuffer.end();
     streamsStore.del(this.streamingID);
     observeResponseSize({
@@ -73,6 +84,8 @@ export class StreamResponseHandler {
   };
 
   destroy = (error) => {
+    if (this.streamResponse.deadlineTimer)
+      clearTimeout(this.streamResponse.deadlineTimer);
     this.streamResponse.streamBuffer.destroy(error);
     streamsStore.del(this.streamingID);
   };
