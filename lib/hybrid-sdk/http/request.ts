@@ -228,27 +228,6 @@ export const makeStreamingRequestToDownstream = (
             );
           }
 
-          response.on('error', (error) => {
-            const requestDurationMs = performance.now() - startTime;
-            if (retries > 0) {
-              logger.warn(
-                { msg: localRequest.url, requestDurationMs, requestId },
-                `Downstream Response failed. Retrying after 500ms...`,
-              );
-              setTimeout(() => {
-                resolve(
-                  makeStreamingRequestToDownstream(localRequest, retries - 1),
-                );
-              }, 500); // Wait for 0.5 second before retrying
-            } else {
-              logger.error(
-                { error, requestDurationMs, requestId },
-                `Error getting response from downstream. Giving up after ${MAX_RETRY} retries.`,
-              );
-              reject(error);
-            }
-          });
-
           resolve(response);
         },
       );
