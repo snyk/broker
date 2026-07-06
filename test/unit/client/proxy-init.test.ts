@@ -1,7 +1,14 @@
+// Mock global-agent so bootstrap() cannot patch shared http/https and leak
+// into sibling test files.
+jest.mock('global-agent', () => ({ bootstrap: jest.fn() }));
+
+import { bootstrap } from 'global-agent';
 import {
   initGlobalProxy,
   normalizeProxyEnv,
 } from '../../../lib/hybrid-sdk/common/utils/proxy';
+
+const bootstrapMock = bootstrap as unknown as jest.Mock;
 
 const PROXY_ENV_KEYS = [
   'HTTP_PROXY',
@@ -12,10 +19,6 @@ const PROXY_ENV_KEYS = [
   'no_proxy',
 ];
 
-// global-agent records its config on global.GLOBAL_AGENT once bootstrap() runs;
-// its presence is the observable signal that proxy support was installed.
-const globalAgent = () => (global as any).GLOBAL_AGENT;
-
 describe('common/utils/proxy initGlobalProxy', () => {
   let savedEnv: Record<string, string | undefined>;
 
@@ -25,7 +28,7 @@ describe('common/utils/proxy initGlobalProxy', () => {
       savedEnv[key] = process.env[key];
       delete process.env[key];
     }
-    delete (global as any).GLOBAL_AGENT;
+    bootstrapMock.mockClear();
   });
 
   afterEach(() => {
@@ -36,39 +39,39 @@ describe('common/utils/proxy initGlobalProxy', () => {
         process.env[key] = savedEnv[key];
       }
     }
-    delete (global as any).GLOBAL_AGENT;
   });
 
   it('bootstraps global-agent when a proxy applies to the url', () => {
-    process.env.HTTP_PROXY = 'http://proxy:10224';
     process.env.HTTPS_PROXY = 'http://proxy:10224';
 
     initGlobalProxy('https://api.snyk.io');
 
-    expect(globalAgent()).toBeDefined();
+    expect(bootstrapMock).toHaveBeenCalledWith({
+      environmentVariableNamespace: '',
+    });
   });
 
   it('does not bootstrap when the url is excluded via NO_PROXY', () => {
-    process.env.HTTP_PROXY = 'http://proxy:10224';
     process.env.HTTPS_PROXY = 'http://proxy:10224';
     process.env.NO_PROXY = 'api.snyk.io';
 
     initGlobalProxy('https://api.snyk.io');
 
-    expect(globalAgent()).toBeUndefined();
+    expect(bootstrapMock).not.toHaveBeenCalled();
   });
 
-  it('is a no-op when no proxy env is configured', () => {
-    expect(() => initGlobalProxy('https://api.snyk.io')).not.toThrow();
-    expect(globalAgent()).toBeUndefined();
+  it('does not bootstrap when no proxy env is configured', () => {
+    initGlobalProxy('https://api.snyk.io');
+
+    expect(bootstrapMock).not.toHaveBeenCalled();
   });
 
-  it('can be called repeatedly without throwing (idempotent)', () => {
+  it('does not bootstrap when the url is undefined', () => {
     process.env.HTTPS_PROXY = 'http://proxy:10224';
 
-    initGlobalProxy('https://api.snyk.io');
-    expect(() => initGlobalProxy('https://api.snyk.io')).not.toThrow();
-    expect(globalAgent()).toBeDefined();
+    initGlobalProxy(undefined);
+
+    expect(bootstrapMock).not.toHaveBeenCalled();
   });
 
   it('normalizes lowercase proxy env vars to uppercase', () => {
