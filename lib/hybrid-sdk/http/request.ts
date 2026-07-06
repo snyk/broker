@@ -2,8 +2,7 @@ import { randomUUID } from 'crypto';
 import http from 'node:http';
 import https from 'node:https';
 import { performance } from 'node:perf_hooks';
-import { getProxyForUrl } from 'proxy-from-env';
-import { bootstrap } from 'global-agent';
+import { initGlobalProxy } from '../common/utils/proxy';
 import { log as logger } from '../../logs/logger';
 import { PostFilterPreparedRequest } from '../../broker-workload/prepareRequest';
 import { getConfig } from '../common/config/config';
@@ -19,16 +18,6 @@ export interface HttpResponse {
 }
 const MAX_RETRY = getConfig().MAX_RETRY || 3;
 
-if (process.env.HTTP_PROXY || process.env.http_proxy) {
-  process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
-}
-if (process.env.HTTPS_PROXY || process.env.https_proxy) {
-  process.env.HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.https_proxy;
-}
-if (process.env.NO_PROXY || process.env.no_proxy) {
-  process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
-}
-
 export const makeRequestToDownstream = async (
   req: PostFilterPreparedRequest,
   retries = MAX_RETRY,
@@ -41,12 +30,7 @@ export const makeRequestToDownstream = async (
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
-  const proxyUri = getProxyForUrl(localRequest.url);
-  if (proxyUri) {
-    bootstrap({
-      environmentVariableNamespace: '',
-    });
-  }
+  initGlobalProxy(localRequest.url);
   localRequest.headers['x-broker-origin-ua'] =
     localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
@@ -177,12 +161,7 @@ export const makeStreamingRequestToDownstream = (
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
-  const proxyUri = getProxyForUrl(localRequest.url);
-  if (proxyUri) {
-    bootstrap({
-      environmentVariableNamespace: '',
-    });
-  }
+  initGlobalProxy(localRequest.url);
   localRequest.headers['x-broker-origin-ua'] =
     localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;
@@ -303,12 +282,7 @@ export const makeSingleRawRequestToDownstream = async (
   if (config.INSECURE_DOWNSTREAM) {
     localRequest.url = switchToInsecure(localRequest.url);
   }
-  const proxyUri = getProxyForUrl(localRequest.url);
-  if (proxyUri) {
-    bootstrap({
-      environmentVariableNamespace: '',
-    });
-  }
+  initGlobalProxy(localRequest.url);
   localRequest.headers['x-broker-origin-ua'] =
     localRequest.headers['user-agent'] ?? 'not-provided';
   localRequest.headers['user-agent'] = `Snyk Broker Client ${version}`;

@@ -23,7 +23,7 @@ export function normalizeProxyEnv(): void {
  * Call before outbound requests so they route through the proxy (respects
  * NO_PROXY); idempotent.
  */
-export function initGlobalProxy(url: string): void {
+export function initGlobalProxy(url: string | undefined): void {
   normalizeProxyEnv();
   if (url && getProxyForUrl(url)) {
     bootstrap({
