@@ -29,6 +29,7 @@ import { manageWebsocketConnections } from './connectionsManager/manager';
 import { findPluginFolder } from '../common/config/config';
 import { retrieveAndLoadFilters } from './utils/filterLoading';
 import { probeIpv6WithIpv4Fallback } from './utils/probeIpv6WithIpv4Fallback';
+import { initGlobalProxy } from '../common/utils/proxy';
 import * as metrics from './metrics';
 import { emitShutdown } from './events';
 import { PROCESS_EXIT_REASONS, safeNodeErrno } from '../common/types/telemetry';
@@ -105,6 +106,9 @@ export const main = async (clientOpts: ClientOpts) => {
       process.env.SNYK_DISPATCHER_URL_PREFIX = '/hidden/brokers';
     }
     await validateMinimalConfig(clientOpts);
+
+    // Initialize global proxy support before the first outbound request.
+    initGlobalProxy(clientOpts.config.apiHostname);
 
     if (clientOpts.config.IPV6_CONNECTIVITY_CHECK_ENABLED !== 'false') {
       const brokerServerHost = new URL(
