@@ -4,8 +4,7 @@ import { pipeline } from 'stream/promises';
 
 import version from '../common/utils/version';
 
-import { getProxyForUrl } from 'proxy-from-env';
-import { bootstrap } from 'global-agent';
+import { initGlobalProxy } from '../common/utils/proxy';
 import https from 'https';
 import http from 'http';
 
@@ -35,21 +34,7 @@ const CONNECTION_RETRY_DELAY_MS = 500;
 
 const client = getConfig().brokerServerUrl?.startsWith('https') ? https : http;
 
-if (process.env.HTTP_PROXY || process.env.http_proxy) {
-  process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
-}
-if (process.env.HTTPS_PROXY || process.env.https_proxy) {
-  process.env.HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.https_proxy;
-}
-if (process.env.NO_PROXY || process.env.no_proxy) {
-  process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
-}
-const proxyUri = getProxyForUrl(getConfig().brokerServerUrl);
-if (proxyUri) {
-  bootstrap({
-    environmentVariableNamespace: '',
-  });
-}
+initGlobalProxy(getConfig().brokerServerUrl);
 
 interface Logger {
   debug(message: string): void;
