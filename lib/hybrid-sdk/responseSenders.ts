@@ -124,6 +124,10 @@ export class HybridResponseHandler {
           '',
         this.requestMetadata.requestId,
         (this.websocketConnectionHandler as { role?: string })?.role ?? '',
+        undefined,
+        this.websocketConnectionHandler as unknown as {
+          send: (event: string, ...args: any[]) => void;
+        },
       );
       if (streamingRequestData) {
         // POST Streaming

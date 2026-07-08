@@ -11,7 +11,11 @@ import undefsafe from 'undefsafe';
 import { ExtendedLogContext } from './common/types/log';
 import { uuidv4 } from './common/utils/uuid';
 import stream from 'stream';
-import { streamsStore } from './http/server-post-stream-handler';
+import {
+  streamsStore,
+  StreamResponseHandler,
+  StreamResponse,
+} from './http/server-post-stream-handler';
 import { maskToken } from './common/utils/token';
 import { makeRequestToDownstream } from './http/request';
 
@@ -77,12 +81,27 @@ export class HybridClientRequestHandler {
       '[HTTP Flow][Relay] Sending request over websocket connection expecting POST stream response',
     );
 
-    streamsStore.set(streamingID, {
+    // useClones is false on streamsStore, so the stored object is this same
+    // reference — keep it to arm the deadline without re-fetching.
+    const entry: StreamResponse = {
       response: this.res,
       streamBuffer,
       streamSize: 0,
       brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
-    });
+    };
+    streamsStore.set(streamingID, entry);
+    const deadlineMs = parseInt(getConfig().responseDataTimeoutMs) || 1800000; // 30 min backstop
+    entry.deadlineTimer = setTimeout(() => {
+      const handler = StreamResponseHandler.create(streamingID);
+      if (handler) {
+        logger.error(
+          { streamingID, deadlineMs },
+          '[HTTP Flow][Relay] Response-data deadline exceeded; failing originating request.',
+        );
+        handler.destroy(new Error('Response-data deadline exceeded'));
+      }
+    }, deadlineMs);
+    entry.deadlineTimer.unref();
     this.res.setHeader('snyk-request-id', this.req.requestId);
     streamBuffer.pipe(this.res);
     const simplifiedContextWithStreamingID = this.simplifiedContext;
