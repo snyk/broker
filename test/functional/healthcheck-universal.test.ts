@@ -9,6 +9,7 @@ import {
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
+import { websocketConnections } from '../../lib/hybrid-sdk/client/connectionsManager/manager';
 
 const fixtures = path.resolve(__dirname, '..', 'fixtures');
 const serverAccept = path.join(fixtures, 'server', 'filters.json');
@@ -145,6 +146,39 @@ describe('proxy requests originating from behind the broker client', () => {
         websocketConnectionOpen: true,
       }),
     );
+
+    // --- Torn-down connection reporting ---
+    const downedConnection = 'my jira pat';
+    // Simulate an auth-renewal teardown: remove the connection's socket pair
+    // from the live registry (mirrors shutDownConnectionPair's splice).
+    for (let i = websocketConnections.length - 1; i >= 0; i--) {
+      if (websocketConnections[i].friendlyName === downedConnection) {
+        websocketConnections.splice(i, 1);
+      }
+    }
+
+    // While re-establishing: the missing connection is surfaced as degraded,
+    // but the endpoint stays 200 (the other connections are healthy).
+    const retrying = await axiosClient.get(
+      `http://localhost:${bc.port}/healthcheck`,
+    );
+    expect(retrying.status).toEqual(200);
+    expect(
+      retrying.data.find((d) => d.friendlyName === downedConnection),
+    ).toEqual(
+      expect.objectContaining({
+        ok: false,
+        websocketConnectionOpen: false,
+        degraded: true,
+        reestablishment: 'reestablishing',
+      }),
+    );
+    expect(
+      retrying.data.some(
+        (d) => d.friendlyName === 'my github connection' && d.ok,
+      ),
+    ).toBe(true);
+
     delete process.env.UNIVERSAL_BROKER_ENABLED;
     delete process.env.SERVICE_ENV;
     delete process.env.BROKER_TOKEN_1;

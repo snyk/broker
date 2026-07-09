@@ -6,12 +6,16 @@ import { maskToken } from '../../common/utils/token';
 export interface healthcheckData {
   ok: boolean;
   identifier?: string;
+  friendlyName?: string;
   websocketConnectionOpen: boolean;
   brokerServerUrl: string;
   version: string;
   transport: string;
+  degraded?: boolean;
+  reestablishment?: 'reestablishing' | 'gave_up';
 }
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
+import { getReestablishmentState } from '../connectionsManager/reestablishment';
 
 export const healthCheckHandler =
   // io is available in res.locals.websocket
@@ -44,10 +48,52 @@ export const healthCheckHandler =
         statusesMap.set(tunnelData['identifier'], isConnOpen ? 200 : 500);
       }
     }
+    // Surface configured-but-missing connections (e.g. torn down by auth-renewal
+    // exhaustion) — the pair is spliced out, so the loop above never sees them.
+    let hasGaveUp = false;
+    const configuredConnections = res.locals.clientOpts?.config?.connections as
+      | Record<string, { identifier?: string; isDisabled?: boolean }>
+      | undefined;
+    if (configuredConnections) {
+      const established = new Set(
+        websocketConnsArray.map((conn) => conn.friendlyName),
+      );
+      for (const friendlyName of Object.keys(configuredConnections)) {
+        const connection = configuredConnections[friendlyName];
+        // Mirror the synchronizer: only enabled connections with a resolved
+        // identifier are expected to be established.
+        if (connection?.isDisabled || !connection?.identifier) {
+          continue;
+        }
+        if (established.has(friendlyName)) {
+          continue;
+        }
+        const reestablishment =
+          getReestablishmentState(friendlyName) ?? 'reestablishing';
+        if (reestablishment === 'gave_up') {
+          hasGaveUp = true;
+        }
+        data.push({
+          ok: false,
+          websocketConnectionOpen: false,
+          degraded: true,
+          reestablishment,
+          friendlyName,
+          identifier: maskToken(connection.identifier),
+          brokerServerUrl: '',
+          version,
+          transport: '',
+        });
+      }
+    }
+
     const statuses = [...statusesMap.values()];
-    // healthcheck state depends on websocket connection status
-    // value of primus.Spark.OPEN means the websocket connection is open
-    return res
-      .status(statuses.some((status) => status == 200) ? 200 : 500)
-      .json(data.length == 1 ? data[0] : data); // So we don't break current
+    // A gave_up connection forces 500 so the probe restarts the pod; otherwise
+    // healthy (200) if at least one tunnel is open (Spark.OPEN), else 500.
+    const httpStatus = hasGaveUp
+      ? 500
+      : statuses.some((status) => status == 200)
+      ? 200
+      : 500;
+    return res.status(httpStatus).json(data.length == 1 ? data[0] : data); // So we don't break current
   };

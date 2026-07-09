@@ -198,6 +198,7 @@ export const main = async (clientOpts: ClientOpts) => {
       clientOpts.config.brokerHealthcheckPath || '/healthcheck',
       (req, res, next) => {
         res.locals.websocketConnections = websocketConnections;
+        res.locals.clientOpts = clientOpts;
         next();
       },
       healthCheckHandler,
