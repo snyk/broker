@@ -30,6 +30,20 @@ export interface Client {
    */
   recordProcessExit(reason: ProcessExitReason): void;
 
+  /** Increment broker.client.connection_teardown.total when a single connection is torn down (not a process exit). */
+  recordConnectionTeardown(reason: string, friendlyName?: string): void;
+
+  /**
+   * Increment broker.client.connection_reestablishment.total when a torn-down
+   * connection is being self-healed. outcome: 'attempt' (a re-establishment try
+   * was scheduled/fired), 'success' (the connection recovered), 'exhausted'
+   * (retries capped out — the connection is given up on and reported unhealthy).
+   */
+  recordConnectionReestablishment(
+    outcome: 'attempt' | 'success' | 'exhausted',
+    friendlyName: string,
+  ): void;
+
   /** Increment broker.client.auth_renewal_failure.total for non-2xx auth renewal responses. */
   recordAuthRenewalFailure(statusCode: number): void;
 

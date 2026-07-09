@@ -52,6 +52,8 @@ export class OtelClient implements Client {
   private readonly connectionStateGauge: Gauge;
   private readonly reconnectCounter: Counter;
   private readonly processExitCounter: Counter;
+  private readonly connectionTeardownCounter: Counter;
+  private readonly connectionReestablishmentCounter: Counter;
   private readonly authRenewalFailureCounter: Counter;
   private readonly jwtRefreshFailureCounter: Counter;
   private readonly uncaughtExceptionCounter: Counter;
@@ -137,6 +139,24 @@ export class OtelClient implements Client {
       {
         description:
           'Count of process exits by reason (reconnect_exhaustion, oauth_token_unavailable, uncaught_exception).',
+        valueType: ValueType.INT,
+      },
+    );
+
+    this.connectionTeardownCounter = meter.createCounter(
+      'broker.client.connection_teardown.total',
+      {
+        description:
+          'Count of single-connection teardowns by reason (auth_renewal_exhaustion).',
+        valueType: ValueType.INT,
+      },
+    );
+
+    this.connectionReestablishmentCounter = meter.createCounter(
+      'broker.client.connection_reestablishment.total',
+      {
+        description:
+          'Count of connection re-establishment events by outcome (attempt, success, exhausted) and friendly_name.',
         valueType: ValueType.INT,
       },
     );
@@ -304,6 +324,23 @@ export class OtelClient implements Client {
 
   recordProcessExit(reason: ProcessExitReason): void {
     this.processExitCounter.add(1, { reason });
+  }
+
+  recordConnectionTeardown(reason: string, friendlyName?: string): void {
+    this.connectionTeardownCounter.add(1, {
+      reason,
+      ...(friendlyName ? { friendly_name: friendlyName } : {}),
+    });
+  }
+
+  recordConnectionReestablishment(
+    outcome: 'attempt' | 'success' | 'exhausted',
+    friendlyName: string,
+  ): void {
+    this.connectionReestablishmentCounter.add(1, {
+      outcome,
+      friendly_name: friendlyName,
+    });
   }
 
   recordAuthRenewalFailure(statusCode: number): void {
