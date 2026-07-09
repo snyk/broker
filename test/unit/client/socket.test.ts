@@ -1,6 +1,5 @@
 jest.mock('../../../lib/hybrid-sdk/client/auth/oauth', () => ({
   getAccessToken: jest.fn().mockResolvedValue('Bearer test-token'),
-  getCachedAccessToken: jest.fn().mockReturnValue('Bearer test-token'),
   invalidateToken: jest.fn(),
   initOAuthClient: jest.fn(),
   isOAuthClientInitialized: jest.fn().mockReturnValue(true),
@@ -11,7 +10,10 @@ jest.mock('../../../lib/hybrid-sdk/client/events', () => ({
   emitShutdown: jest.fn(),
 }));
 
-import { createWebSocket } from '../../../lib/hybrid-sdk/client/socket';
+import {
+  createWebSocket,
+  createWebSocketConnectionPairs,
+} from '../../../lib/hybrid-sdk/client/socket';
 import {
   LoadedClientOpts,
   CONFIGURATION,
@@ -25,10 +27,10 @@ import { emitError, emitShutdown } from '../../../lib/hybrid-sdk/client/events';
 import { PROCESS_EXIT_REASONS } from '../../../lib/hybrid-sdk/common/types/telemetry';
 
 jest.mock('primus', () => {
-  const mockSocket = jest.fn().mockImplementation(() => {
+  const mockSocket = jest.fn().mockImplementation((_url, settings) => {
     return {
       transport: {
-        extraHeaders: {},
+        extraHeaders: settings?.transport?.extraHeaders ?? {},
       },
       on: jest.fn(),
       emit: jest.fn(),
@@ -106,6 +108,10 @@ jest.mock('../../../lib/hybrid-sdk/client/auth/brokerServerConnection', () => ({
   renewBrokerServerConnection: jest.fn(),
 }));
 
+jest.mock('../../../lib/hybrid-sdk/client/utils/filterSelection', () => ({
+  determineFilterType: jest.fn(() => 'github'),
+}));
+
 jest.useFakeTimers();
 
 describe('createWebSocket - renew auth behaviour', () => {
@@ -124,6 +130,7 @@ describe('createWebSocket - renew auth behaviour', () => {
       brokerServerUrl: 'http://localhost:8000',
       brokerToken: 'test-broker-token',
       API_BASE_URL: 'http://api.example.com',
+      universalBrokerEnabled: true,
       UNIVERSAL_BROKER_GA: 'true',
     };
     return {
@@ -176,8 +183,11 @@ describe('createWebSocket - renew auth behaviour', () => {
       body: '{}',
     });
 
-    mockInvalidateToken =
-      require('../../../lib/hybrid-sdk/client/auth/oauth').invalidateToken;
+    const oauth = require('../../../lib/hybrid-sdk/client/auth/oauth');
+    mockInvalidateToken = oauth.invalidateToken;
+    // clearAllMocks resets call data but not implementations; restore defaults.
+    oauth.getAccessToken.mockResolvedValue('Bearer test-token');
+    oauth.isOAuthClientInitialized.mockReturnValue(true);
 
     mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       return undefined as never;
@@ -517,7 +527,9 @@ describe('createWebSocket - renew auth behaviour', () => {
   });
 
   describe('error handling', () => {
-    it('invalidates the cached token on a websocket error when OAuth is in use', async () => {
+    it('does NOT invalidate the cached token on a transient websocket error', async () => {
+      // A transient websocket error does not imply a bad token; invalidating would
+      // force an unnecessary refetch. The sticky header keeps the connection auth'd.
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
       const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
@@ -531,23 +543,123 @@ describe('createWebSocket - renew auth behaviour', () => {
         handler({ type: 'TransportError', description: 'boom' }),
       );
 
-      expect(mockInvalidateToken).toHaveBeenCalled();
+      expect(mockInvalidateToken).not.toHaveBeenCalled();
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('refreshes the sticky auth header on a websocket error', async () => {
+      const {
+        getAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (getAccessToken as jest.Mock).mockResolvedValue('Bearer refreshed');
+
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(
+        clientOpts,
+        identifyingMetadata,
+        Role.primary,
+        undefined,
+        'Bearer seeded',
+      );
+
+      const errorHandlers = (ws.on as jest.Mock).mock.calls
+        .filter(([event]) => event === 'error')
+        .map(([, handler]) => handler);
+      errorHandlers.forEach((handler) =>
+        handler({ type: 'TransportError', description: 'boom' }),
+      );
+
+      // Let the async getAccessToken().then update the sticky header.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const reconnectHandler = (ws.on as jest.Mock).mock.calls.find(
+        ([event]) => event === 'reconnect scheduled',
+      )?.[1];
+      reconnectHandler({ attempt: 1, retries: 3, scheduled: 5000 });
+
+      expect(getAccessToken).toHaveBeenCalled();
+      expect(ws.transport.extraHeaders?.Authorization).toBe('Bearer refreshed');
 
       clearTimeout(ws.timeoutHandlerId);
     });
   });
 
-  describe('reconnect scheduled', () => {
-    it('updates extraHeaders synchronously without awaiting getAccessToken', async () => {
+  describe('authentication misconfiguration', () => {
+    it('throws when GA is enabled but the OAuth client is not initialized', () => {
       const {
-        getAccessToken,
-        getCachedAccessToken,
+        isOAuthClientInitialized,
       } = require('../../../lib/hybrid-sdk/client/auth/oauth');
-      (getCachedAccessToken as jest.Mock).mockReturnValue('Bearer cached');
+      (isOAuthClientInitialized as jest.Mock).mockReturnValueOnce(false);
+      const mockLoggerFatal2 = jest.spyOn(logger, 'fatal').mockImplementation();
 
       const clientOpts = createMockClientOpts();
       const identifyingMetadata = createMockIdentifyingMetadata();
+
+      expect(() =>
+        createWebSocket(clientOpts, identifyingMetadata, Role.primary),
+      ).toThrow(/OAuth client is not initialized/);
+      expect(mockLoggerFatal2).toHaveBeenCalled();
+    });
+
+    it('does not require OAuth in SKIP_REMOTE_CONFIG (local-config) mode even if GA is set', () => {
+      const {
+        isOAuthClientInitialized,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (isOAuthClientInitialized as jest.Mock).mockReturnValue(false);
+
+      const baseOpts = createMockClientOpts();
+      const clientOpts = createMockClientOpts({
+        config: { ...baseOpts.config, SKIP_REMOTE_CONFIG: 'true' },
+      });
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
       const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+      expect(ws).toBeDefined();
+      // No auth header is set and no renewal timer is scheduled.
+      expect(ws.transport.extraHeaders?.Authorization).toBeUndefined();
+      expect(ws.timeoutHandlerId).toBeUndefined();
+
+      (isOAuthClientInitialized as jest.Mock).mockReturnValue(true);
+    });
+
+    it('does not require OAuth for a non-universal (legacy) client even if GA is set', () => {
+      const {
+        isOAuthClientInitialized,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (isOAuthClientInitialized as jest.Mock).mockReturnValue(false);
+
+      const baseOpts = createMockClientOpts();
+      const clientOpts = createMockClientOpts({
+        config: { ...baseOpts.config, universalBrokerEnabled: false },
+      });
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const ws = createWebSocket(clientOpts, identifyingMetadata, Role.primary);
+      expect(ws).toBeDefined();
+
+      (isOAuthClientInitialized as jest.Mock).mockReturnValue(true);
+      clearTimeout(ws.timeoutHandlerId);
+    });
+  });
+
+  describe('reconnect scheduled', () => {
+    it('rebuilds extraHeaders synchronously from the sticky header without awaiting getAccessToken', async () => {
+      const {
+        getAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(
+        clientOpts,
+        identifyingMetadata,
+        Role.primary,
+        undefined,
+        'Bearer seeded',
+      );
 
       const reconnectHandler = (ws.on as jest.Mock).mock.calls.find(
         ([event]) => event === 'reconnect scheduled',
@@ -562,9 +674,34 @@ describe('createWebSocket - renew auth behaviour', () => {
 
       expect(getAccessToken).not.toHaveBeenCalled();
       expect(ws.transport.extraHeaders).toMatchObject({
-        Authorization: 'Bearer cached',
+        Authorization: 'Bearer seeded',
         'snyk-request-id': expect.any(String),
       });
+
+      clearTimeout(ws.timeoutHandlerId);
+    });
+
+    it('retains the last-known-good header across a reconnect', async () => {
+      const clientOpts = createMockClientOpts();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+      const ws = createWebSocket(
+        clientOpts,
+        identifyingMetadata,
+        Role.primary,
+        undefined,
+        'Bearer seeded',
+      );
+
+      const reconnectHandler = (ws.on as jest.Mock).mock.calls.find(
+        ([event]) => event === 'reconnect scheduled',
+      )?.[1];
+      expect(reconnectHandler).toBeDefined();
+
+      reconnectHandler({ attempt: 1, retries: 3, scheduled: 5000 });
+
+      expect(ws.transport.extraHeaders?.Authorization).toBe('Bearer seeded');
+
+      clearTimeout(ws.timeoutHandlerId);
     });
   });
 
@@ -584,6 +721,78 @@ describe('createWebSocket - renew auth behaviour', () => {
       // reconnect_exhaustion is reported via the process_exit metric, not a WS
       // event — by this point 'close' has cleared the event socket.
       expect(emitShutdown).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createWebSocketConnectionPairs - auth backstop', () => {
+    const optsWithConnection = (
+      configOverrides?: Partial<CONFIGURATION>,
+    ): LoadedClientOpts => {
+      const base = createMockClientOpts();
+      return createMockClientOpts({
+        config: {
+          ...base.config,
+          connections: {
+            myconn: {
+              identifier: 'conn-identifier',
+              id: 'conn-id',
+              type: 'github',
+              isDisabled: false,
+            },
+          },
+          ...configOverrides,
+        },
+      });
+    };
+
+    it('awaits getAccessToken and seeds the Authorization header when authenticating', async () => {
+      const {
+        getAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (getAccessToken as jest.Mock).mockResolvedValue('Bearer seeded');
+
+      const clientOpts = optsWithConnection();
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const [primary, secondary] = await createWebSocketConnectionPairs(
+        clientOpts,
+        identifyingMetadata,
+        'myconn',
+      );
+
+      expect(getAccessToken).toHaveBeenCalled();
+      expect(primary.transport.extraHeaders?.Authorization).toBe(
+        'Bearer seeded',
+      );
+      expect(secondary.transport.extraHeaders?.Authorization).toBe(
+        'Bearer seeded',
+      );
+
+      clearTimeout(primary.timeoutHandlerId);
+      clearTimeout(secondary.timeoutHandlerId);
+    });
+
+    it('does not fetch a token or set a header in SKIP_REMOTE_CONFIG mode', async () => {
+      const {
+        getAccessToken,
+      } = require('../../../lib/hybrid-sdk/client/auth/oauth');
+      (getAccessToken as jest.Mock).mockClear();
+
+      const clientOpts = optsWithConnection({ SKIP_REMOTE_CONFIG: 'true' });
+      const identifyingMetadata = createMockIdentifyingMetadata();
+
+      const [primary, secondary] = await createWebSocketConnectionPairs(
+        clientOpts,
+        identifyingMetadata,
+        'myconn',
+      );
+
+      expect(getAccessToken).not.toHaveBeenCalled();
+      expect(primary.transport.extraHeaders?.Authorization).toBeUndefined();
+      expect(secondary.transport.extraHeaders?.Authorization).toBeUndefined();
+
+      clearTimeout(primary.timeoutHandlerId);
+      clearTimeout(secondary.timeoutHandlerId);
     });
   });
 

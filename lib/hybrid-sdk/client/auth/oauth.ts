@@ -87,32 +87,6 @@ function formatAccessToken(accessToken: AccessToken): string {
   return `${raw.token_type} ${raw.access_token}`;
 }
 
-/**
- * Returns a cached token synchronously. Triggers a background refresh when the
- * cached token is within the expiry threshold (or absent/expired) so that
- * subsequent sync reads see a fresh token. When the token is within the
- * threshold but not yet expired, the still-valid token is returned for the
- * current caller — better than returning undefined and forcing an unauth'd
- * request.
- */
-export function getCachedAccessToken(): string | undefined {
-  if (!client) {
-    return undefined;
-  }
-  if (!token || token.expired(0)) {
-    void refreshToken().catch(() => {
-      /* failure already logged and recorded in refreshToken */
-    });
-    return undefined;
-  }
-  if (token.expired(thresholdSeconds)) {
-    void refreshToken().catch(() => {
-      /* failure already logged and recorded in refreshToken */
-    });
-  }
-  return formatAccessToken(token);
-}
-
 export async function getAccessToken(): Promise<string> {
   return formatAccessToken(await ensureToken());
 }

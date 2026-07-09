@@ -21,7 +21,6 @@ import { LoadedClientOpts } from '../common/types/options';
 import { maskToken } from '../common/utils/token';
 import {
   getAccessToken,
-  getCachedAccessToken,
   invalidateToken,
   isOAuthClientInitialized,
 } from './auth/oauth';
@@ -41,6 +40,17 @@ import {
 } from '../common/types/telemetry';
 
 const MAX_CONSECUTIVE_AUTH_FAILURES = 3;
+
+// A GA universal client always authenticates.
+// SKIP_REMOTE_CONFIG (local-config) mode never initializes OAuth and is exempt.
+const clientShouldAuthenticate = (
+  config: LoadedClientOpts['config'],
+): boolean =>
+  Boolean(
+    config.universalBrokerEnabled &&
+      config.UNIVERSAL_BROKER_GA &&
+      !config.SKIP_REMOTE_CONFIG,
+  );
 
 /**
  * Creates a pair of WebSocket connections (primary and secondary) for the given connection key.
@@ -109,18 +119,27 @@ export const createWebSocketConnectionPairs = async (
     clientOpts.config.connections[`${socketIdentifyingMetadata.friendlyName}`]
       .serverId ?? '';
 
+  // Ensure a token is fetched before constructing sockets so the initial
+  // handshake carries an Authorization header regardless of the caller.
+  let initialAuthHeader: string | undefined;
+  if (clientShouldAuthenticate(clientOpts.config)) {
+    initialAuthHeader = await getAccessToken();
+  }
+
   return [
     createWebSocket(
       clientOpts,
       socketIdentifyingMetadata,
       Role.primary,
       metricsClient,
+      initialAuthHeader,
     ),
     createWebSocket(
       clientOpts,
       socketIdentifyingMetadata,
       Role.secondary,
       metricsClient,
+      initialAuthHeader,
     ),
   ];
 };
@@ -130,6 +149,7 @@ export const createWebSocket = (
   originalIdentifyingMetadata: IdentifyingMetadata,
   role?: Role,
   metricsClient: Client = new NoopClient(),
+  initialAuthHeader?: string,
 ): WebSocketConnection => {
   const identifyingMetadata = Object.assign({}, originalIdentifyingMetadata);
   identifyingMetadata.role = role ?? Role.primary;
@@ -141,6 +161,20 @@ export const createWebSocket = (
       `Invalid Broker identifier in websocket tunnel creation step.`,
     );
   }
+
+  // Missing OAuth for an authenticating client is fatal rather than a silent
+  // downgrade to an unauthenticated (legacy-routed) connection.
+  const shouldAuthenticate = clientShouldAuthenticate(clientOpts.config);
+  if (shouldAuthenticate && !isOAuthClientInitialized()) {
+    logger.fatal(
+      { connection: maskToken(identifyingMetadata.identifier) },
+      'UNIVERSAL_BROKER_GA is enabled but the OAuth client is not initialized; cannot authenticate.',
+    );
+    throw new Error(
+      'UNIVERSAL_BROKER_GA is enabled but the OAuth client is not initialized.',
+    );
+  }
+
   const Socket = Primus.createSocket({
     transformer: 'engine.io',
     parser: 'EJSON',
@@ -178,6 +212,10 @@ export const createWebSocket = (
   };
 
   let currentRequestId = uuidv4();
+  // Last-known-good auth header. Seeded before the first handshake and refreshed
+  // by the renewal timer and the error handler, so header building stays
+  // synchronous and never drops to unauthenticated for an authenticating client.
+  let lastAuthHeader = initialAuthHeader;
   const buildExtraHeaders = (requestId: string): Record<string, string> => {
     const headers: Record<string, string> = {
       'x-snyk-broker-client-id': identifyingMetadata.clientId,
@@ -185,11 +223,8 @@ export const createWebSocket = (
       'x-broker-client-version': version,
       'snyk-request-id': requestId,
     };
-    if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
-      const authorization = getCachedAccessToken();
-      if (authorization) {
-        headers.Authorization = authorization;
-      }
+    if (shouldAuthenticate && lastAuthHeader) {
+      headers.Authorization = lastAuthHeader;
     }
     return headers;
   };
@@ -214,7 +249,7 @@ export const createWebSocket = (
   websocket.clientConfig = identifyingMetadata.clientConfig;
   websocket.role = identifyingMetadata.role;
 
-  if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
+  if (shouldAuthenticate) {
     // The access token is not sent when making requests over the websocket, so we must re-validate
     // the token periodically to keep the connection alive. Connections that do not re-validate the
     // access token will be marked as stale and closed by the server.
@@ -229,17 +264,19 @@ export const createWebSocket = (
       };
 
       try {
-        const renewOnce = async () =>
-          renewBrokerServerConnection(
+        const renewOnce = async () => {
+          lastAuthHeader = await getAccessToken();
+          return renewBrokerServerConnection(
             {
               connectionIdentifier: identifyingMetadata.identifier!,
               brokerClientId: identifyingMetadata.clientId,
-              authorization: await getAccessToken(),
+              authorization: lastAuthHeader,
               role: identifyingMetadata.role,
               serverId: serverId,
             },
             clientOpts.config,
           );
+        };
 
         logger.debug(commonLogFields, 'Renewing auth.');
         let renewResponse = await renewOnce();
@@ -261,9 +298,8 @@ export const createWebSocket = (
 
         consecutiveAuthFailures = 0;
         logger.debug(commonLogFields, 'Auth renewed.');
-        // Re-read extraHeaders after renewal: the 401-retry path may have
-        // invalidated and refreshed the cached token, and the next reconnect
-        // needs to pick that up via the synchronous cache read.
+        // Rebuild extraHeaders so the next reconnect uses the token just
+        // refreshed into lastAuthHeader (including via the 401-retry path).
         websocket.transport.extraHeaders = buildExtraHeaders(currentRequestId);
       } catch (err) {
         const statusCode = err instanceof AuthRenewalError ? err.statusCode : 0;
@@ -376,9 +412,18 @@ export const createWebSocket = (
   );
   websocket.on('notification', notificationHandler);
   websocket.on('error', errorHandler);
-  if (isOAuthClientInitialized() && clientOpts.config.UNIVERSAL_BROKER_GA) {
-    // Drop the cached token on connection errors so the next reconnect fetches a fresh one.
-    websocket.on('error', () => invalidateToken());
+  if (shouldAuthenticate) {
+    // Refresh the sticky auth header on a connection error so the next backoff
+    // reconnect carries a fresh token; the current header is retained meanwhile.
+    websocket.on('error', () => {
+      void getAccessToken()
+        .then((header) => {
+          lastAuthHeader = header;
+        })
+        .catch(() => {
+          /* failure already logged/recorded in the oauth layer */
+        });
+    });
   }
 
   websocket.on('open', () =>
