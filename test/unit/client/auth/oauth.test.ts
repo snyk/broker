@@ -5,7 +5,6 @@ jest.mock('../../../../lib/hybrid-sdk/client/events', () => ({
 
 import {
   getAccessToken,
-  getCachedAccessToken,
   initOAuthClient,
   invalidateToken,
   isOAuthClientInitialized,
@@ -88,30 +87,6 @@ describe('client/auth/oauth (simple-oauth2)', () => {
 
     expect(header).toBe('Bearer first');
     expect(scope.isDone()).toBe(true);
-  });
-
-  it('returns the cached token synchronously via getCachedAccessToken', async () => {
-    initOAuthClient({
-      apiHostname: API_HOST,
-      clientId: 'cid',
-      clientSecret: 'csecret',
-    });
-
-    nock(API_HOST)
-      .post(TOKEN_PATH)
-      .reply(200, tokenResponse({ access_token: 'sync-cached' }));
-
-    await getAccessToken();
-
-    expect(getCachedAccessToken()).toBe('Bearer sync-cached');
-    expect(nock.pendingMocks()).toHaveLength(0);
-  });
-
-  it('returns undefined from getCachedAccessToken when no token is cached', async () => {
-    await jest.isolateModulesAsync(async () => {
-      const mod = await import('../../../../lib/hybrid-sdk/client/auth/oauth');
-      expect(mod.getCachedAccessToken()).toBeUndefined();
-    });
   });
 
   it('returns the cached token on subsequent calls without re-fetching', async () => {
@@ -268,63 +243,6 @@ describe('client/auth/oauth (simple-oauth2)', () => {
       await expect(mod.getAccessToken()).rejects.toThrow(
         /OAuth client not initialized/,
       );
-    });
-  });
-
-  it('getCachedAccessToken returns the still-valid token when within threshold and kicks off a background refresh', async () => {
-    // Threshold larger than the issued lifetime — the freshly-fetched token is
-    // immediately within the threshold but not actually expired (still valid
-    // for ~3600s).
-    initOAuthClient({
-      apiHostname: API_HOST,
-      clientId: 'cid',
-      clientSecret: 'csecret',
-      expiryThresholdSeconds: 7200,
-    });
-
-    nock(API_HOST)
-      .post(TOKEN_PATH)
-      .reply(200, tokenResponse({ access_token: 'first', expires_in: 3600 }));
-
-    await getAccessToken();
-
-    nock(API_HOST)
-      .post(TOKEN_PATH)
-      .reply(200, tokenResponse({ access_token: 'second', expires_in: 3600 }));
-
-    // Still valid (expires in 3600s, > 0s), so returned synchronously.
-    expect(getCachedAccessToken()).toBe('Bearer first');
-
-    // Background refresh was kicked off. getAccessToken returns the in-flight
-    // promise, so awaiting it deterministically waits for the refresh.
-    expect(await getAccessToken()).toBe('Bearer second');
-    expect(nock.pendingMocks()).toHaveLength(0);
-  });
-
-  it('getCachedAccessToken returns undefined when no token is cached and kicks off a background refresh', async () => {
-    initOAuthClient({
-      apiHostname: API_HOST,
-      clientId: 'cid',
-      clientSecret: 'csecret',
-    });
-
-    nock(API_HOST)
-      .post(TOKEN_PATH)
-      .reply(200, tokenResponse({ access_token: 'fresh', expires_in: 3600 }));
-
-    // No prior fetch — cache is empty.
-    expect(getCachedAccessToken()).toBeUndefined();
-
-    // Background refresh was kicked off; await it via getAccessToken which
-    // returns the in-flight promise.
-    expect(await getAccessToken()).toBe('Bearer fresh');
-    expect(nock.pendingMocks()).toHaveLength(0);
-  });
-
-  it('getCachedAccessToken returns undefined and does nothing when client not initialized', async () => {
-    await jest.isolateModulesAsync(async () => {
-      const mod = await import('../../../../lib/hybrid-sdk/client/auth/oauth');
-      expect(mod.getCachedAccessToken()).toBeUndefined();
     });
   });
 
