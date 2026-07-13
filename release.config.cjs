@@ -38,7 +38,9 @@ module.exports = {
           'mkdir -p sboms && npx snyk sbom --format spdx2.3+json > sboms/broker.sbom.spdx.json',
       },
     ],
-    '@semantic-release/npm',
+    // Publish via `npm publish` for CircleCI OIDC (semantic-release/npm#1121).
+    ['@semantic-release/npm', { npmPublish: false }],
+    ['@semantic-release/exec', { publishCmd: 'npm publish' }],
     [
       '@semantic-release/github',
       {
