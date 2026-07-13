@@ -2,31 +2,14 @@
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-RHEL8-BROTLI-14213465:
+  SNYK-JS-BRACEEXPANSION-17706650:
     - '*':
-        reason: No fix for rhel-ubi8 available yet
-        expires: 2026-06-08T12:02:28.307Z
-        created: 2025-12-09T12:02:28.315Z
-  SNYK-RHEL8-GNUPG2-15128939:
-    - '*':
-        reason: No fix for rhel-ubi8 available yet
-        created: 2026-01-28T00:00:00.000Z
-        expires: 2026-04-28T00:00:00.000Z
-  SNYK-RHEL8-GNUPG2-15128992:
-    - '*':
-        reason: No fix for rhel-ubi8 available yet
-        created: 2026-01-28T00:00:00.000Z
-        expires: 2026-04-28T00:00:00.000Z
-  SNYK-RHEL8-GLIBC-15885581:
-    - '*':
-        reason: No fix for rhel-ubi8 available yet
-        created: 2026-04-07T00:00:00.000Z
-        expires: 2026-07-07T00:00:00.000Z
-  SNYK-RHEL8-LIBCAP-16000755:
-    - '*':
-        reason: No fix for rhel-ubi8 available yet
-        created: 2026-04-14T00:00:00.000Z
-        expires: 2026-07-14T00:00:00.000Z
+        reason: >-
+          Fix is backported to brace-expansion 1.1.16 (CVE-2026-13149
+          mitigations present); Snyk only recognises 5.0.7 as fixed. minimatch
+          3.x requires the 1.x CommonJS function export, so 5.x cannot be used.
+        created: 2026-07-13T00:00:00.000Z
+        expires: 2026-10-13T00:00:00.000Z
 patch: {}
 exclude:
   global:
