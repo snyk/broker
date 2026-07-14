@@ -3,6 +3,9 @@
  */
 module.exports = {
   branches: 'master',
+  verifyConditions: [
+    '@semantic-release/github'
+  ], 
   plugins: [
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',

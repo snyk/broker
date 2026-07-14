@@ -397,8 +397,8 @@ jobs:
           name: Release to GitHub
           no_output_timeout: 20m
           command: |
-            npm install --save-exact --save-dev semantic-release@25.0.3 @semantic-release/exec@7.1.0 pkg@5.8.1
             export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            npm install --save-exact --save-dev semantic-release@25.0.3 @semantic-release/exec@7.1.0 pkg@5.8.1
             npx semantic-release
 
 workflows:
