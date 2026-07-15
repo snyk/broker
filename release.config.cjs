@@ -43,7 +43,7 @@ module.exports = {
     ],
     // Publish via `npm publish` for CircleCI OIDC (semantic-release/npm#1121).
     ['@semantic-release/npm', { npmPublish: false }],
-    ['@semantic-release/exec', { publishCmd: 'npm publish' }],
+    ['@semantic-release/exec', { publishCmd: 'export NPM_ID_TOKEN=$(circleci run oidc get --claims \'{"aud": "npm:registry.npmjs.org"}\') && npm publish' }],
     [
       '@semantic-release/github',
       {
