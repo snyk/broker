@@ -93,7 +93,7 @@
     "dotenv": "17.3.1",
     "ejson": "^2.2.0",
     "engine.io": "^6.6.7",
-    "engine.io-client": "^5.2.0",
+    "engine.io-client": "^6.6.6",
     "express": "4.22.1",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
