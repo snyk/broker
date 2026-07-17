@@ -9,7 +9,7 @@ import {
   reconnectScheduledHandler,
 } from './socketHandlers/reconnectHandler';
 import { identifyHandler } from './socketHandlers/identifyHandler';
-import { errorHandler } from './socketHandlers/errorHandler';
+import { createErrorHandler } from './socketHandlers/errorHandler';
 import { openHandler } from './socketHandlers/openHandler';
 import { closeHandler } from './socketHandlers/closeHandler';
 import { IdentifyingMetadata, Role, WebSocketConnection } from './types/client';
@@ -411,7 +411,10 @@ export const createWebSocket = (
     ),
   );
   websocket.on('notification', notificationHandler);
-  websocket.on('error', errorHandler);
+  websocket.on(
+    'error',
+    createErrorHandler(websocket, localClientOps, identifyingMetadata),
+  );
   if (shouldAuthenticate) {
     // Refresh the sticky auth header on a connection error so the next backoff
     // reconnect carries a fresh token; the current header is retained meanwhile.

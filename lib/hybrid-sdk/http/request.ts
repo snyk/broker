@@ -72,14 +72,14 @@ export const makeRequestToDownstream = async (
                 `Successful request`,
               );
             } else {
-              logger.debug(
+              logger.info(
                 {
                   statusCode: response.statusCode,
                   url: safeUrl(localRequest.url),
                   requestDurationMs,
                   requestId,
                 },
-                `Non 2xx HTTP Code Received`,
+                `Non-2xx response from downstream`,
               );
             }
             resolve({
