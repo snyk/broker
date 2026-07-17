@@ -203,7 +203,7 @@ export const makeStreamingRequestToDownstream = (
                 requestDurationMs,
                 requestId,
               },
-              `Non 2xx HTTP Code Received`,
+              `Non-2xx response from downstream`,
             );
           }
 

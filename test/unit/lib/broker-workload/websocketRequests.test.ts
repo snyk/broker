@@ -95,7 +95,7 @@ describe('BrokerWorkload', () => {
 
     await workload.handler({ payload, websocketHandler });
 
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       expect.objectContaining({
         contextId: 'some-uuid',
       }),
@@ -121,11 +121,11 @@ describe('BrokerWorkload', () => {
 
     await workload.handler({ payload, websocketHandler: jest.fn() });
 
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       expect.objectContaining({ requestId: payloadRequestId }),
       expect.stringContaining('[Websocket Flow] Received request'),
     );
-    expect(logger.debug).not.toHaveBeenCalledWith(
+    expect(logger.info).not.toHaveBeenCalledWith(
       expect.objectContaining({ requestId: headerRequestId }),
       expect.stringContaining('[Websocket Flow] Received request'),
     );
@@ -147,7 +147,7 @@ describe('BrokerWorkload', () => {
 
     await workload.handler({ payload, websocketHandler });
 
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       expect.objectContaining({
         contextId: undefined,
       }),

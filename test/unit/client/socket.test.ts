@@ -69,6 +69,7 @@ jest.mock(
 
 jest.mock('../../../lib/hybrid-sdk/client/socketHandlers/errorHandler', () => ({
   errorHandler: jest.fn(),
+  createErrorHandler: jest.fn(() => jest.fn()),
 }));
 
 jest.mock('../../../lib/hybrid-sdk/client/socketHandlers/openHandler', () => ({
