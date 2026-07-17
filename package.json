@@ -154,15 +154,15 @@
     "form-data": "4.0.6",
     "qs": "$qs",
     "joi": "^17.13.4",
-    "ws": "7.5.11",
+    "ws": "8.21.1",
     "setheader": "1.0.2",
     "@grpc/grpc-js": "^1.14.4",
     "@opentelemetry/core": "2.8.0",
     "engine.io": {
-      "ws": "8.21.0"
+      "ws": "8.21.1"
     },
     "engine.io-client": {
-      "ws": "7.5.11"
+      "ws": "8.21.1"
     },
     "@grpc/proto-loader": {
       "protobufjs": "^7.6.5"
