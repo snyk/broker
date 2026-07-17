@@ -1,0 +1,16 @@
+ARG BASE_IMAGE=broker-chisel:latest
+ARG BROKER_TYPE=github-com
+
+
+FROM ${BASE_IMAGE}
+
+ARG BROKER_TYPE
+ENV BROKER_TYPE=${BROKER_TYPE}
+
+# Generate default accept filter
+RUN broker init $BROKER_TYPE
+
+EXPOSE $PORT
+
+CMD ["broker", "--verbose"]
+
