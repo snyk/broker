@@ -45,11 +45,9 @@ export const handlePostResponse = (req: Request, res: Response) => {
       res.status(401).json({ message: 'Invalid Broker client credentials.' });
       return;
     }
-    const decodedJwt = credentials
-      ? decode(credentials!.replace(/bearer /i, ''), {
-          complete: true,
-        })
-      : null;
+    const bearerToken = credentials.replace(/bearer /i, '');
+    // deepcode ignore JwtDecodeMethod: signature is validated remotely by Snyk's authorization service; decode only extracts the azp claim for a defence-in-depth match against the stream's stored, already-validated brokerAppClientId
+    const decodedJwt = decode(bearerToken, { complete: true });
 
     const brokerAppClientId = decodedJwt ? decodedJwt?.payload['azp'] : '';
     if (

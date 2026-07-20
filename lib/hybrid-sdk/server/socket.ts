@@ -66,6 +66,7 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
             req.headers,
             connectionIdentifier,
           );
+        // deepcode ignore JwtDecodeMethod: credentials were just validated by validateBrokerClientCredentials (remote Snyk authorization service); decode only extracts the azp claim
         const decodedJwt = decode(credentials, { complete: true });
         const brokerAppClientId = decodedJwt?.payload['azp'] ?? '';
         const nowDate = new Date().toISOString();

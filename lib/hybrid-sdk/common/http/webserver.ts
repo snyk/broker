@@ -74,7 +74,8 @@ export const webserver = (config, altPort: number) => {
   }
 
   const server = isHttp
-    ? createHttpServer(app)
+    ? // deepcode ignore HttpToHttps: plain HTTP is used only when no TLS cert/key is configured; the broker terminates TLS at the customer's ingress/network boundary
+      createHttpServer(app)
     : createHttpsServer(
         {
           key: fs.readFileSync(httpsKey),
