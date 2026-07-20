@@ -11,5 +11,5 @@ export const retrieveAndLoadFilters = async (
   const filters = await filterRulesLoader(clientOpts.config as CONFIGURATION);
   clientOpts.filters = filters;
   globalFilterConfig.loadedFilters = loadAllFilters(filters, clientOpts.config);
-  logger.debug('Loading Filters');
+  logger.info('Loading accept filters');
 };

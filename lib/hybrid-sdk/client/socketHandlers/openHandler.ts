@@ -41,7 +41,7 @@ export const openHandler = (
   );
   io.connectionStartTime = Date.now();
   metricsClient.setConnectionState('connected', identifyingMetadata.role);
-  logger.debug(
+  logger.info(
     {
       metadata,
     },

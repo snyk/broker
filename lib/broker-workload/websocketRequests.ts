@@ -120,7 +120,7 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
 
     const simplifiedContext = structuredClone(logContext);
     delete simplifiedContext.requestHeaders;
-    logger.debug(
+    logger.info(
       simplifiedContext,
       `[Websocket Flow] Received request from ${
         process.env.BROKER_TYPE == 'client' ? 'client' : 'server'

@@ -125,7 +125,7 @@ export const prepareRequest = async (
     Object.assign(payload.headers, { 'X-Broker-Token': brokerToken });
   }
 
-  logger.debug(logContext, '[Relay] Preparing Downstream Request');
+  logger.info(logContext, '[Relay] Preparing request for downstream');
 
   // Sometimes we receive the body as a {type, data} object
   // Unsure why - possibly Primus?
@@ -206,7 +206,7 @@ export const prepareRequest = async (
     logContext.requestBody = payload.body;
   }
   logContext.requestHeaders = payload.headers;
-  logger.debug(logContext, 'Prepared request');
+  logger.info(logContext, '[Relay] Request prepared and ready to send downstream');
 
   const req: PostFilterPreparedRequest = {
     url: result.url,

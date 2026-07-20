@@ -56,16 +56,16 @@ describe('http/request', () => {
 
       await makeRequestToDownstream(request);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           requestDurationMs: expect.any(Number),
           statusCode: 500,
           url: fullDownstreamUrl,
         }),
-        'Non 2xx HTTP Code Received',
+        'Non-2xx response from downstream',
       );
 
-      const [logContext] = (logger.debug as jest.Mock).mock.calls[0];
+      const [logContext] = (logger.info as jest.Mock).mock.calls[0];
       expect(logContext.requestDurationMs).toBeGreaterThan(0);
     });
 
@@ -139,7 +139,7 @@ describe('http/request', () => {
           statusCode: 500,
           url: fullDownstreamUrl,
         }),
-        'Non 2xx HTTP Code Received',
+        'Non-2xx response from downstream',
       );
 
       const [logContext] = (logger.warn as jest.Mock).mock.calls[0];

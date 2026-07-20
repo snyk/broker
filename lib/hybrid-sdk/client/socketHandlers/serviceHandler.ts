@@ -13,7 +13,7 @@ export const serviceHandler = async (msg, cb) => {
   // msg is a raw WebSocket payload, not an Express Request — there is no typed
   // requestId accessor available here.
   const requestId = msg.headers['snyk-request-id'];
-  logger.debug({ command, requestId }, 'Service message received.');
+  logger.info({ command, requestId }, 'Service message received.');
   if (!clientOptions) {
     cb({
       status: 501,
