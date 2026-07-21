@@ -274,7 +274,11 @@ export const main = async (clientOpts: ClientOpts) => {
       },
     };
   } catch (err) {
-    logger.warn({ err }, `Shutting down client.`);
+    // Startup-fatal: anything thrown inside the try block aborts boot, the
+    // throw below propagates to the caller (bin/index.ts) and the process
+    // exits. ERROR is the right floor — operators whose alerting fires on
+    // ERROR need to see the broker failing to come up.
+    logger.error({ err }, `Shutting down client.`);
     throw err;
   }
 };

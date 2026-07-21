@@ -19,6 +19,11 @@ import { isWebsocketConnOpen } from '../utils/socketHelpers';
  *  between sync cycles. Not part of the websocket protocol or identity. */
 interface SyncState {
   contexts?: Record<string, ConnectionContext>;
+  /** True if the connection was observed in `isDisabled` state on the
+   *  previous cycle. Used to log the disabled ERROR (and the recovery INFO)
+   *  on transitions only, not on every polling cycle while the connection
+   *  remains disabled. Absent ↔ unknown/never-observed ↔ treated as false. */
+  wasDisabled?: boolean;
 }
 
 /** Synchronizer bookkeeping — tracks the last-seen config per connection
@@ -140,15 +145,46 @@ const runSyncCycle = async (
     const currentWebsocketConnectionIndex = websocketConnections.findIndex(
       (conn) => conn.friendlyName === key,
     );
-    if (connectionConfig.isDisabled) {
-      logger.error(
+
+    // Log the disabled ERROR (and its INFO recovery) on transitions only.
+    // Before: every poll cycle while a connection stayed disabled produced
+    // a fresh ERROR — unbounded alert noise from a single misconfigured
+    // connection. After: one ERROR per enabled→disabled transition,
+    // one INFO per disabled→enabled recovery.
+    const prevWasDisabled =
+      syncStateByConnection.get(key)?.wasDisabled === true;
+    const nowIsDisabled = connectionConfig.isDisabled === true;
+
+    if (nowIsDisabled) {
+      if (!prevWasDisabled) {
+        logger.error(
+          {
+            id: connectionConfig.id,
+            name: connectionConfig.friendlyName,
+          },
+          `Connection is disabled due to (a) missing environment variable(s). Please provide the value and restart the broker client.`,
+        );
+      }
+      // Mark disabled in state so subsequent cycles dedupe. We deliberately
+      // keep this state inside the disabled branch (the existing
+      // syncStateByConnection.set below runs only on the fall-through path).
+      syncStateByConnection.set(key, {
+        ...syncStateByConnection.get(key),
+        wasDisabled: true,
+      });
+      continue;
+    }
+
+    if (prevWasDisabled) {
+      // Recovery: previous cycle saw isDisabled=true, this cycle does not.
+      // INFO so operators see "the disabled state cleared" without alerting.
+      logger.info(
         {
           id: connectionConfig.id,
           name: connectionConfig.friendlyName,
         },
-        `Connection is disabled due to (a) missing environment variable(s). Please provide the value and restart the broker client.`,
+        'Connection recovered from disabled state; resuming setup.',
       );
-      continue;
     }
     if (!connectionConfig.identifier) {
       if (currentWebsocketConnectionIndex > -1) {

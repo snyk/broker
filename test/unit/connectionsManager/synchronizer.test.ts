@@ -411,6 +411,148 @@ describe('syncClientConfig', () => {
     });
   });
 
+  describe('disabled-state transition logging', () => {
+    let infoSpy: jest.SpyInstance;
+    let errorSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
+      errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+      jest.spyOn(logger, 'debug').mockImplementation(() => {});
+    });
+    afterEach(() => jest.restoreAllMocks());
+
+    const disabledConn = () => ({
+      type: 'github',
+      identifier: 'token-1',
+      friendlyName: 'my-conn',
+      isDisabled: true,
+      id: 'conn-id',
+    });
+
+    it('logs ERROR exactly once on the first disabled-state observation', async () => {
+      const clientOpts = makeClientOpts({ 'my-conn': disabledConn() });
+      const wsConns: WebSocketConnection[] = [];
+
+      await syncClientConfig(clientOpts, wsConns, IDENTIFYING_METADATA);
+
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conn-id',
+          name: 'my-conn',
+        }),
+        expect.stringContaining('Connection is disabled'),
+      );
+    });
+
+    it('does NOT re-log ERROR on subsequent sync cycles while the connection stays disabled', async () => {
+      const clientOpts = makeClientOpts({ 'my-conn': disabledConn() });
+      const wsConns: WebSocketConnection[] = [];
+
+      // Five consecutive sync cycles, all observing the same disabled state.
+      for (let i = 0; i < 5; i++) {
+        await syncClientConfig(clientOpts, wsConns, IDENTIFYING_METADATA);
+      }
+
+      // The "Connection is disabled" ERROR fires exactly once — on the
+      // first transition into the disabled state. Not five times.
+      const disabledErrorCalls = errorSpy.mock.calls.filter((c) =>
+        String(c[1]).includes('Connection is disabled'),
+      );
+      expect(disabledErrorCalls).toHaveLength(1);
+    });
+
+    it('records wasDisabled=true in syncStateByConnection so the dedupe survives across cycles', async () => {
+      const clientOpts = makeClientOpts({ 'my-conn': disabledConn() });
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      expect(syncStateByConnection.get('my-conn')?.wasDisabled).toBe(true);
+    });
+
+    it('logs INFO on the disabled → enabled transition (recovery)', async () => {
+      // Cycle 1: disabled.
+      const cycle1 = makeClientOpts({ 'my-conn': disabledConn() });
+      await syncClientConfig(cycle1, [], IDENTIFYING_METADATA);
+      errorSpy.mockClear();
+      infoSpy.mockClear();
+
+      // Cycle 2: same connection, now enabled.
+      const cycle2 = makeClientOpts({
+        'my-conn': {
+          type: 'github',
+          identifier: 'token-1',
+          friendlyName: 'my-conn',
+          id: 'conn-id',
+        },
+      });
+      await syncClientConfig(cycle2, [], IDENTIFYING_METADATA);
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'my-conn' }),
+        expect.stringContaining('recovered from disabled state'),
+      );
+      // After recovery the connection sets up normally; ERROR must not fire.
+      const disabledErrorCalls = errorSpy.mock.calls.filter((c) =>
+        String(c[1]).includes('Connection is disabled'),
+      );
+      expect(disabledErrorCalls).toHaveLength(0);
+      // The follow-up state write should clear wasDisabled.
+      expect(syncStateByConnection.get('my-conn')?.wasDisabled).toBeFalsy();
+    });
+
+    it('logs ERROR again if the connection re-enters the disabled state after recovery', async () => {
+      // disabled → enabled → disabled
+      await syncClientConfig(
+        makeClientOpts({ 'my-conn': disabledConn() }),
+        [],
+        IDENTIFYING_METADATA,
+      );
+      await syncClientConfig(
+        makeClientOpts({
+          'my-conn': {
+            type: 'github',
+            identifier: 'token-1',
+            friendlyName: 'my-conn',
+            id: 'conn-id',
+          },
+        }),
+        [],
+        IDENTIFYING_METADATA,
+      );
+      errorSpy.mockClear();
+      await syncClientConfig(
+        makeClientOpts({ 'my-conn': disabledConn() }),
+        [],
+        IDENTIFYING_METADATA,
+      );
+
+      const disabledErrorCalls = errorSpy.mock.calls.filter((c) =>
+        String(c[1]).includes('Connection is disabled'),
+      );
+      expect(disabledErrorCalls).toHaveLength(1);
+    });
+
+    it('treats a brand-new disabled connection (no prior state) as a transition (fires ERROR once)', async () => {
+      // Connection appears mid-flight in disabled state — no prior cycle saw
+      // this key. We treat absence-of-state as wasDisabled=false, so the
+      // first observation is a transition and ERRORs once.
+      syncStateByConnection.clear();
+      const clientOpts = makeClientOpts({
+        'fresh-conn': {
+          ...disabledConn(),
+          friendlyName: 'fresh-conn',
+        },
+      });
+      await syncClientConfig(clientOpts, [], IDENTIFYING_METADATA);
+
+      const disabledErrorCalls = errorSpy.mock.calls.filter((c) =>
+        String(c[1]).includes('Connection is disabled'),
+      );
+      expect(disabledErrorCalls).toHaveLength(1);
+    });
+  });
+
   describe('shutdown gate', () => {
     afterEach(() => {
       mockedSignals.isShuttingDown.mockReturnValue(false);
