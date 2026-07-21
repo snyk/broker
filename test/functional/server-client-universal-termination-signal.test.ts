@@ -8,6 +8,7 @@ import {
   waitForUniversalBrokerClientsConnection,
 } from '../setup/broker-server';
 import { TestWebServer, createTestWebServer } from '../setup/test-web-server';
+import { TestApiServer, createTestApiServer } from '../setup/test-api-server';
 import { createUniversalBrokerClient } from '../setup/broker-universal-client';
 
 import * as dispatcher from '../../lib/hybrid-sdk/server/infra/dispatcher';
@@ -20,6 +21,7 @@ const clientAccept = path.join(fixtures, 'client', 'filters.json');
 
 describe('client send termination signal to broker server', () => {
   let tws: TestWebServer;
+  let tas: TestApiServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
   const spyClientDisconnected = jest.spyOn(dispatcher, 'clientDisconnected');
@@ -36,11 +38,12 @@ describe('client send termination signal to broker server', () => {
   beforeAll(async () => {
     const PORT = 9999;
     tws = await createTestWebServer();
+    tas = await createTestApiServer();
     process.env.RESPONSE_DATA_HIDDEN_ENABLED = 'true';
     bs = await createBrokerServer({ filters: serverAccept, port: PORT });
 
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
-    process.env.API_BASE_URL = `http://localhost:${bs.port}`;
+    process.env.API_BASE_URL = `http://localhost:${tas.port}`;
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
     process.env.SERVICE_ENV = 'universaltest';
     process.env.BROKER_TOKEN_1 = 'brokertoken1';
@@ -79,8 +82,10 @@ describe('client send termination signal to broker server', () => {
     spyAddClientIdToTerminationMap.mockReset();
     spyProcessExit.mockReset();
     await tws.server.close();
+    await tas.server.close();
     await closeBrokerClient(bc);
     await closeBrokerServer(bs);
+    delete process.env.API_BASE_URL;
     delete process.env.BROKER_SERVER_URL;
     delete process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED;
     delete process.env

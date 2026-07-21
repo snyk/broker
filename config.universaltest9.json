@@ -3,7 +3,6 @@
       "common": {
         "default": {
           "BROKER_SERVER_URL": "https://broker.dev.snyk.io",
-          "BROKER_HA_MODE_ENABLED": "false",
           "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
         },
         "oauth": {
