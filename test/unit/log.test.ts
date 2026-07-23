@@ -154,7 +154,7 @@ describe('log', () => {
 
     // Test headers with various sensitive patterns
     const sensitiveHeaders = {
-      'authorization': 'Bearer secret-token-12345',
+      authorization: 'Bearer secret-token-12345',
       'x-broker-token': 'broker-secret-98765',
       'X-Api-Token': 'api-token-secret',
       'private-token': 'gitlab-private-token',
@@ -201,7 +201,7 @@ describe('log', () => {
 
     // Test headers with empty/falsy values
     const headersWithFalsyValues = {
-      'authorization': '',
+      authorization: '',
       'x-api-token': null,
       'private-token': undefined,
       'content-type': 'application/json',

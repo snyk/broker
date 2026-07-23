@@ -191,12 +191,12 @@ function sanitisePlugins(pluginData) {
 
 function sanitiseHeaders(headers) {
   const hdrs = JSON.parse(JSON.stringify(headers));
-  
+
   // Iterate through all headers and sanitize those matching credential patterns
   for (const key in hdrs) {
     if (hdrs.hasOwnProperty(key)) {
       const lowerKey = key.toLowerCase();
-      
+
       // Check if the header name matches known credential patterns
       if (CREDENTIAL_KEY_PATTERN.test(key)) {
         // Only sanitize if the value is truthy (preserve empty/falsy values for debugging)
@@ -209,15 +209,14 @@ function sanitiseHeaders(headers) {
         if (hdrs[key]) {
           hdrs[key] = '${AUTHORIZATION}';
         }
-      }
-      else if (lowerKey === 'x-broker-token') {
+      } else if (lowerKey === 'x-broker-token') {
         if (hdrs[key]) {
           hdrs[key] = '${BROKER_TOKEN}';
         }
       }
     }
   }
-  
+
   return sanitiseObject(hdrs);
 }
 
