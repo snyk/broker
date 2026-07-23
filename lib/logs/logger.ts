@@ -10,6 +10,7 @@ import {
   COMMON_CREDENTIAL_ENV_VARS,
   PER_CONNECTION_CREDENTIAL_ENV_VARS,
   PER_PLUGIN_CREDENTIAL_ENV_VARS,
+  CREDENTIAL_KEY_PATTERN,
 } from './redact';
 
 // Pre-compute the per-connection list once at module load, not per sanitise()
@@ -190,15 +191,32 @@ function sanitisePlugins(pluginData) {
 
 function sanitiseHeaders(headers) {
   const hdrs = JSON.parse(JSON.stringify(headers));
-  if (hdrs.authorization) {
-    hdrs.authorization = '${AUTHORIZATION}';
+
+  // Iterate through all headers and sanitize those matching credential patterns
+  for (const key in hdrs) {
+    if (hdrs.hasOwnProperty(key)) {
+      const lowerKey = key.toLowerCase();
+
+      // Check if the header name matches known credential patterns
+      if (CREDENTIAL_KEY_PATTERN.test(key)) {
+        // Only sanitize if the value is truthy (preserve empty/falsy values for debugging)
+        if (hdrs[key]) {
+          hdrs[key] = '${' + key.toUpperCase().replace(/-/g, '_') + '}';
+        }
+      }
+      // Explicit handling for common authentication headers (case-insensitive)
+      else if (lowerKey === 'authorization') {
+        if (hdrs[key]) {
+          hdrs[key] = '${AUTHORIZATION}';
+        }
+      } else if (lowerKey === 'x-broker-token') {
+        if (hdrs[key]) {
+          hdrs[key] = '${BROKER_TOKEN}';
+        }
+      }
+    }
   }
-  if (hdrs['X-Broker-Token']) {
-    hdrs['X-Broker-Token'] = '${BROKER_TOKEN}';
-  }
-  if (hdrs['x-broker-token']) {
-    hdrs['x-broker-token'] = '${BROKER_TOKEN}';
-  }
+
   return sanitiseObject(hdrs);
 }
 
