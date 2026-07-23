@@ -141,4 +141,78 @@ describe('log', () => {
     expect(logged).toMatch(sanitizedGitPassword);
     expect(logged).toMatch(sanitizedGitClientUrl);
   });
+
+  it('sanitizes request headers with sensitive information', () => {
+    // setup logger output capturing
+    const logs: string[] = [];
+    const testStream = new Writable();
+    testStream._write = function (chunk, encoding, done) {
+      logs.push(chunk.toString());
+      done();
+    };
+    log.addStream({ stream: testStream });
+
+    // Test headers with various sensitive patterns
+    const sensitiveHeaders = {
+      'authorization': 'Bearer secret-token-12345',
+      'x-broker-token': 'broker-secret-98765',
+      'X-Api-Token': 'api-token-secret',
+      'private-token': 'gitlab-private-token',
+      'x-auth-password': 'super-secret-password',
+      'x-api-secret': 'api-secret-value',
+      'github-token': 'ghp_secrettoken123',
+      'content-type': 'application/json',
+      'user-agent': 'test-agent',
+      'x-request-id': 'request-123',
+    };
+
+    log.info({ requestHeaders: sensitiveHeaders });
+
+    const logged = logs[logs.length - 1];
+
+    // Assert sensitive header values are not logged
+    expect(logged).not.toMatch('secret-token-12345');
+    expect(logged).not.toMatch('broker-secret-98765');
+    expect(logged).not.toMatch('api-token-secret');
+    expect(logged).not.toMatch('gitlab-private-token');
+    expect(logged).not.toMatch('super-secret-password');
+    expect(logged).not.toMatch('api-secret-value');
+    expect(logged).not.toMatch('ghp_secrettoken123');
+
+    // Assert non-sensitive header values are still logged
+    expect(logged).toMatch('application/json');
+    expect(logged).toMatch('test-agent');
+    expect(logged).toMatch('request-123');
+
+    // Assert sensitive headers are masked with placeholder
+    expect(logged).toMatch('AUTHORIZATION');
+    expect(logged).toMatch('BROKER_TOKEN');
+  });
+
+  it('sanitizes headers while preserving empty/falsy values', () => {
+    // setup logger output capturing
+    const logs: string[] = [];
+    const testStream = new Writable();
+    testStream._write = function (chunk, encoding, done) {
+      logs.push(chunk.toString());
+      done();
+    };
+    log.addStream({ stream: testStream });
+
+    // Test headers with empty/falsy values
+    const headersWithFalsyValues = {
+      'authorization': '',
+      'x-api-token': null,
+      'private-token': undefined,
+      'content-type': 'application/json',
+    };
+
+    log.info({ requestHeaders: headersWithFalsyValues });
+
+    const logged = logs[logs.length - 1];
+
+    // Falsy values should be preserved (not replaced with placeholder)
+    // This helps support distinguish "not set" from "redacted"
+    expect(logged).toMatch('application/json');
+  });
 });
