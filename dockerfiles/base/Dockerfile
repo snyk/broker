@@ -66,6 +66,8 @@ RUN <<EOF
     npm install --global npm@latest
     npm cache clean --force
     npm --version
+    # remove non-needed binaries not intalled as packages
+    rm -f /usr/bin/pebble && rm -rf /var/lib/pebble
     # remove non-needed packages and clean apt cache
     apt remove --assume-yes \
       curl \
