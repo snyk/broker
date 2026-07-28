@@ -9,21 +9,9 @@ describe('validateConnection (credentials-in-url)', () => {
   });
 
   it('does not mutate the connection config and keeps sending credentials across repeated calls', async () => {
-    // Regression test for the state-mutation bug (ACC-3477). The universal
-    // systemcheck handler validates each connection against the SHARED, cached
-    // connection config returned by getConfigForConnections(). For
-    // credentials-in-url connections (nexus, nexus2, artifactory) the default
-    // auth branch used to strip the embedded credentials and write the result
-    // back into `validation.url` — mutating that shared cache in place. The
-    // first call authenticated; every subsequent call parsed a creds-free URL,
-    // sent no Authorization header, and failed (e.g. Nexus 403/401).
     const originalUrl =
       'https://user:name@nexus.local/service/rest/v1/status/check';
     const expectedAuth = `Basic ${Buffer.from('user:name').toString('base64')}`;
-
-    // Reply 200 only when the derived Basic auth header is present; otherwise
-    // 401 — exactly the failure the bug produced on the second call. Both
-    // interceptors cover the path, so there is never a network fall-through.
     nock('https://nexus.local')
       .persist()
       .matchHeader('authorization', expectedAuth)
