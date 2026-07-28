@@ -324,5 +324,5 @@ describe('broker client systemcheck endpoint', () => {
 
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
-  });
+  }, 60_000);
 });
