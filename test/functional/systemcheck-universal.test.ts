@@ -197,4 +197,113 @@ describe('broker client systemcheck endpoint', () => {
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
   });
+
+  it('sends credentials on every call (credentials-in-url not stripped from cached config across repeated systemchecks)', async () => {
+    // Regression test for the state-mutation bug: the universal systemcheck
+    // handler validates connections against the SHARED cached connection
+    // config. The credentials-in-url branch used to write the creds-stripped
+    // URL back into `validation.url`, permanently destroying both the
+    // credentials and the `${VAR}` placeholder in the cache. The first call
+    // authenticated; every subsequent call sent no Authorization header and
+    // failed (e.g. Nexus 403). This test calls /systemcheck twice and asserts
+    // the second call still authenticates and returns an identical result.
+    process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
+    process.env.UNIVERSAL_BROKER_ENABLED = 'true';
+    process.env.SERVICE_ENV = 'universaltest8';
+    process.env.BROKER_TOKEN_1 = 'brokertoken1';
+    process.env.BROKER_TOKEN_2 = 'brokertoken2';
+    process.env.BROKER_TOKEN_3 = 'brokertoken3';
+    process.env.CLIENT_ID = 'clienid';
+    process.env.CLIENT_SECRET = 'clientsecret';
+    process.env.MY_ARTIFACTORY_URL = 'user:name@artifactory.local/artifactory';
+    process.env.MY_BASE_NEXUS_URL = 'https://user:name@nexus.local';
+    process.env.MY_BASE_NEXUS2_URL = 'https://user:name@nexus2.local';
+
+    process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
+    process.env.SNYK_FILTER_RULES_PATHS__artifactory = clientAccept;
+    bc = await createUniversalBrokerClient();
+    await waitForUniversalBrokerClientsConnection(bs, 3);
+
+    // All three connections embed the same credentials (user:name), so they
+    // all derive the same Basic Authorization header. matchHeader ensures the
+    // mock ONLY replies 200 when the header is present — if the bug regresses,
+    // the second call sends no header, no interceptor matches, and that
+    // connection fails validation (surfacing as a non-200 overall status).
+    const expectedAuth = `Basic ${Buffer.from('user:name').toString('base64')}`;
+    nock('https://artifactory.local')
+      .persist()
+      .matchHeader('authorization', expectedAuth)
+      .get('/artifactory/api/system/ping')
+      .reply(() => [200, 'artifactory - ok']);
+    nock('https://nexus.local')
+      .persist()
+      .matchHeader('authorization', expectedAuth)
+      .get('/service/rest/v1/status/check')
+      .reply(() => [200, 'nexus - ok']);
+    nock('https://nexus2.local')
+      .persist()
+      .matchHeader('authorization', expectedAuth)
+      .get('/nexus/service/local/status')
+      .reply(() => [200, 'nexus2 - ok']);
+
+    const first = await axiosClient.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      { timeout: 10_000 },
+    );
+    const second = await axiosClient.get(
+      `http://localhost:${bc.port}/systemcheck`,
+      { timeout: 10_000 },
+    );
+
+    // Before the fix, the second call would be 500 (credentials stripped from
+    // the cached config -> no auth header -> no nock match).
+    expect(first.status).toEqual(200);
+    expect(second.status).toEqual(200);
+
+    // Every connection validates on BOTH calls, and the reported (sanitised)
+    // url keeps its ${VAR} placeholder form on both calls.
+    const expectedBody = [
+      {
+        connectionName: 'my artifactory credentials-in-url connection',
+        validated: true,
+        results: [
+          {
+            data: 'artifactory - ok',
+            statusCode: 200,
+            url: 'https://${ARTIFACTORY_URL}/api/system/ping',
+          },
+        ],
+      },
+      {
+        connectionName: 'my nexus credentials-in-url connection',
+        validated: true,
+        results: [
+          {
+            data: 'nexus - ok',
+            statusCode: 200,
+            url: '${BASE_NEXUS_URL}/service/rest/v1/status/check',
+          },
+        ],
+      },
+      {
+        connectionName: 'my nexus2 credentials-in-url connection',
+        validated: true,
+        results: [
+          {
+            data: 'nexus2 - ok',
+            statusCode: 200,
+            url: '${BASE_NEXUS2_URL}/nexus/service/local/status',
+          },
+        ],
+      },
+    ];
+    expect(first.data).toMatchObject(expectedBody);
+    expect(second.data).toMatchObject(expectedBody);
+
+    // The second call must be identical to the first (no cross-call drift).
+    expect(second.data).toEqual(first.data);
+
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+  });
 });
