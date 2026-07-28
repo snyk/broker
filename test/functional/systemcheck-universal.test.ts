@@ -117,8 +117,8 @@ describe('broker client systemcheck endpoint', () => {
     process.env.CLIENT_ID = 'clienid';
     process.env.CLIENT_SECRET = 'clientsecret';
     process.env.MY_ARTIFACTORY_URL = 'user:name@artifactory.local/artifactory';
-    process.env.MY_BASE_NEXUS_URL = 'user:name@nexus.local';
-    process.env.MY_BASE_NEXUS2_URL = 'user:name@nexus2.local';
+    process.env.MY_BASE_NEXUS_URL = 'https://user:name@nexus.local';
+    process.env.MY_BASE_NEXUS2_URL = 'https://user:name@nexus2.local';
 
     process.env.SNYK_BROKER_CLIENT_CONFIGURATION__common__default__BROKER_SERVER_URL = `http://localhost:${bs.port}`;
     process.env.SNYK_FILTER_RULES_PATHS__artifactory = clientAccept;
@@ -133,7 +133,7 @@ describe('broker client systemcheck endpoint', () => {
       });
     nock('https://nexus.local')
       .persist()
-      .get('/service/rest/v1/status/check/api/system/ping')
+      .get('/service/rest/v1/status/check')
       .reply(() => {
         return [500, 'nexus - failed healthcheck'];
       });
@@ -174,7 +174,7 @@ describe('broker client systemcheck endpoint', () => {
           {
             data: 'nexus - failed healthcheck',
             statusCode: 500,
-            url: 'https://${BASE_NEXUS_URL}/service/rest/v1/status/check/api/system/ping',
+            url: '${BASE_NEXUS_URL}/service/rest/v1/status/check',
           },
         ],
         validated: false,
@@ -187,7 +187,7 @@ describe('broker client systemcheck endpoint', () => {
           {
             data: 'nexus2 - failed healthcheck',
             statusCode: 500,
-            url: 'https://${BASE_NEXUS2_URL}/nexus/service/local/status',
+            url: '${BASE_NEXUS2_URL}/nexus/service/local/status',
           },
         ],
         validated: false,

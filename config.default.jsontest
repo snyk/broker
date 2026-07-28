@@ -431,12 +431,7 @@
     "nexus": {
       "validations": [
         {
-          "url": "https://$BASE_NEXUS_URL/service/rest/v1/status/check/api/system/ping",
-          "auth": {
-            "type": "basic",
-            "username": "$NEXUS_USERNAME",
-            "password": "$NEXUS_PASSWORD"
-          }
+          "url": "$BASE_NEXUS_URL/service/rest/v1/status/check"
         }
       ],
       "default": {
@@ -451,12 +446,7 @@
     "nexus2": {
       "validations": [
         {
-          "url": "https://$BASE_NEXUS2_URL/nexus/service/local/status",
-          "auth": {
-            "type": "basic",
-            "username": "$NEXUS2_USERNAME",
-            "password": "$NEXUS2_PASSWORD"
-          }
+          "url": "$BASE_NEXUS2_URL/nexus/service/local/status"
         }
       ],
       "default": {
