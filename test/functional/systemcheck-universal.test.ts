@@ -225,26 +225,37 @@ describe('broker client systemcheck endpoint', () => {
     await waitForUniversalBrokerClientsConnection(bs, 3);
 
     // All three connections embed the same credentials (user:name), so they
-    // all derive the same Basic Authorization header. matchHeader ensures the
-    // mock ONLY replies 200 when the header is present — if the bug regresses,
-    // the second call sends no header, no interceptor matches, and that
-    // connection fails validation (surfacing as a non-200 overall status).
+    // all derive the same Basic Authorization header. Each mock records the
+    // Authorization header it received and always replies 200, so a regression
+    // fails fast on an assertion (missing header) instead of falling through
+    // to the real network and hanging.
     const expectedAuth = `Basic ${Buffer.from('user:name').toString('base64')}`;
+    const authHeadersSeen: Record<string, (string | undefined)[]> = {
+      artifactory: [],
+      nexus: [],
+      nexus2: [],
+    };
     nock('https://artifactory.local')
       .persist()
-      .matchHeader('authorization', expectedAuth)
       .get('/artifactory/api/system/ping')
-      .reply(() => [200, 'artifactory - ok']);
+      .reply(function (this: any) {
+        authHeadersSeen.artifactory.push(this.req.headers['authorization']);
+        return [200, 'artifactory - ok'];
+      });
     nock('https://nexus.local')
       .persist()
-      .matchHeader('authorization', expectedAuth)
       .get('/service/rest/v1/status/check')
-      .reply(() => [200, 'nexus - ok']);
+      .reply(function (this: any) {
+        authHeadersSeen.nexus.push(this.req.headers['authorization']);
+        return [200, 'nexus - ok'];
+      });
     nock('https://nexus2.local')
       .persist()
-      .matchHeader('authorization', expectedAuth)
       .get('/nexus/service/local/status')
-      .reply(() => [200, 'nexus2 - ok']);
+      .reply(function (this: any) {
+        authHeadersSeen.nexus2.push(this.req.headers['authorization']);
+        return [200, 'nexus2 - ok'];
+      });
 
     const first = await axiosClient.get(
       `http://localhost:${bc.port}/systemcheck`,
@@ -255,10 +266,18 @@ describe('broker client systemcheck endpoint', () => {
       { timeout: 10_000 },
     );
 
-    // Before the fix, the second call would be 500 (credentials stripped from
-    // the cached config -> no auth header -> no nock match).
     expect(first.status).toEqual(200);
     expect(second.status).toEqual(200);
+
+    // The crux of the regression: each connection must receive the Basic auth
+    // header on BOTH calls. Before the fix, the second call stripped the
+    // credentials from the cached config and sent no Authorization header
+    // (undefined here) on every credentials-in-url connection.
+    for (const svc of ['artifactory', 'nexus', 'nexus2']) {
+      expect(authHeadersSeen[svc]).toHaveLength(2);
+      expect(authHeadersSeen[svc][0]).toEqual(expectedAuth);
+      expect(authHeadersSeen[svc][1]).toEqual(expectedAuth);
+    }
 
     // Every connection validates on BOTH calls, and the reported (sanitised)
     // url keeps its ${VAR} placeholder form on both calls.
