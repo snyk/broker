@@ -14,6 +14,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
     const { auth, url } = validation;
     const headers: Record<string, string> = validation?.headers ?? {};
     const originalUrl = validation.url;
+    let requestUrl = validation.url;
     const sanitisedOriginalUrl = sanitise(originalUrl);
 
     switch (auth?.type) {
@@ -36,7 +37,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
             headers['Authorization'] = `Bearer ${parsed.auth}`;
           }
           parsed.auth = null;
-          validation.url = format(parsed);
+          requestUrl = format(parsed);
         } else {
           logger.warn({ validation }, 'No auth validation.');
         }
@@ -45,7 +46,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
     }
     const request: PostFilterPreparedRequest = {
       method: method,
-      url: validation.url,
+      url: requestUrl,
       headers: headers,
     };
     if (validation.body) {
