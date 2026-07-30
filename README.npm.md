@@ -229,7 +229,7 @@ The first, `:param` is an expression that is matched against the URL being reque
 
 The second, `${PARAM}` is populated with the matching value in your configuration. This way you can keep your tokens or environment details private.
 
-The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/master/package.json`.
+The final result is that the broker will accept and forward `GET` requests to my local server that will respond to `https://12345678@foo-bar.com/snyk/broker/main/package.json`.
 
 ### Authorization
 

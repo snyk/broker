@@ -94,7 +94,7 @@ export abstract class Workload<
   > {
     if (!path) {
       throw new Error(
-        `Unable to instantiate workload, path is undefined. Please check config.default.json to contain workload directives. Refer to https://github.com/snyk/broker/blob/master/config.default.json.`,
+        `Unable to instantiate workload, path is undefined. Please check config.default.json to contain workload directives. Refer to https://github.com/snyk/broker/blob/main/config.default.json.`,
       );
     }
     switch (type) {

@@ -1,5 +1,5 @@
 - [ ] Ready for review
-- [ ] Follows [CONTRIBUTING](https://github.com/snyk/broker/blob/master/.github/CONTRIBUTING.md) rules
+- [ ] Follows [CONTRIBUTING](https://github.com/snyk/broker/blob/main/.github/CONTRIBUTING.md) rules
 
 #### What does this PR do?
 

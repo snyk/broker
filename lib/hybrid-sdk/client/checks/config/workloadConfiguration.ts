@@ -15,7 +15,7 @@ export const validateWorkloadConfig = (
       id: checkOptions.id,
       name: checkOptions.name,
       status: 'error',
-      output: `Workload configuration missing. Please use or update config from https://github.com/snyk/broker/blob/master/config.default.json.`,
+      output: `Workload configuration missing. Please use or update config from https://github.com/snyk/broker/blob/main/config.default.json.`,
     } satisfies CheckResult;
   }
 

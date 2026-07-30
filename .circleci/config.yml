@@ -247,7 +247,7 @@ jobs:
       - prodsec/security_scans:
           mode: auto
           open-source-additional-arguments: --exclude=test
-          release-branch: master
+          release-branch: main
   build-and-save-docker-image:
     <<: *defaults
     environment:
@@ -408,7 +408,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: hybrid-cicd-alerts
-          trusted-branch: master
+          trusted-branch: main
 
       - install-npm-packages:
           name: Install NPM packages
@@ -493,7 +493,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
 
   Release Docker UBI images:
     jobs:
@@ -502,7 +502,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: hybrid-cicd-alerts
-          trusted-branch: master
+          trusted-branch: main
           <<: *filter-tags-only
 
       - approve-ubi-images-pushing:
@@ -992,7 +992,7 @@ workflows:
           context:
             - snyk-bot-slack
           channel: hybrid-cicd-alerts
-          trusted-branch: master
+          trusted-branch: main
           filters:
             tags:
               only: /^v.*/
