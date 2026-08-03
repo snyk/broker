@@ -86,9 +86,15 @@ export class BrokerClientRequestWorkload extends Workload<WorkloadType.localClie
           url: this.req.url,
         });
     } else {
+      // Use the identifier of the connection selected by
+      // websocketConnectionSelectorMiddleware so credential interpolation
+      // resolves against the correct connection when multiple CR connections
+      // of the same type exist.
+      const connectionIdentifier =
+        this.res.locals.websocket?.identifier || null;
       hybridClientRequestHandler.makeRequest(
         getInterpolatedRequest(
-          null,
+          connectionIdentifier,
           matchedFilterRule,
           this.req,
           logContext,
