@@ -407,6 +407,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
+            - prodsec-orb-runtime
           channel: hybrid-cicd-alerts
           trusted-branch: main
 
@@ -435,6 +436,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Install NPM packages
 
@@ -451,6 +453,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Build base image (Ubuntu)
           mode: "gate"
@@ -470,6 +473,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Build base image (RHEL)
           mode: "gate"
@@ -501,6 +505,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
+            - prodsec-orb-runtime
           channel: hybrid-cicd-alerts
           trusted-branch: main
           <<: *filter-tags-only
@@ -529,6 +534,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Build base UBI image
           mode: "upload"
@@ -991,6 +997,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
+            - prodsec-orb-runtime
           channel: hybrid-cicd-alerts
           trusted-branch: main
           filters:
@@ -1025,6 +1032,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Build base image
           mode: "upload"
@@ -1070,6 +1078,7 @@ workflows:
           context:
             - snyk-bot-slack
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - Build base image (edge)
           mode: "upload"
@@ -1835,6 +1844,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - github-com-dev image
           additional_arguments: "--build-arg BROKER_TYPE=github-com"
@@ -1852,6 +1862,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - github-com-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=github-com"
@@ -1876,6 +1887,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - gitlab-dev image
           additional_arguments: "--build-arg BROKER_TYPE=gitlab"
@@ -1893,6 +1905,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - gitlab-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=gitlab"
@@ -1917,6 +1930,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - bitbucket-server-dev image
           additional_arguments: "--build-arg BROKER_TYPE=bitbucket-server"
@@ -1941,6 +1955,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - nexus-dev image
           additional_arguments: "--build-arg BROKER_TYPE=nexus"
@@ -1958,6 +1973,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - nexus-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge --build-arg BROKER_TYPE=nexus"
@@ -1982,6 +1998,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - universal-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base"
@@ -1999,6 +2016,7 @@ workflows:
             - team-broker-cosign
             - team-broker-docker-hub
             - platformeng_access
+            - prodsec-orb-runtime
           requires:
             - universal-dev image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:base-edge"
