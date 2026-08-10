@@ -69,8 +69,11 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
   } catch (err) {
     currentClient?.socket?.end();
     if (err instanceof BrokerAuthError) {
-      return res.status(401).send(err.message);
+      return res.status(401).type('txt').send(err.message);
     }
-    return res.status(500).send(`Unable to complete auth refresh: ${err}.`);
+    return res
+      .status(500)
+      .type('txt')
+      .send(`Unable to complete auth refresh: ${err}.`);
   }
 };

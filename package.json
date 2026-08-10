@@ -84,7 +84,7 @@
     "@opentelemetry/instrumentation": "0.212.0",
     "@opentelemetry/instrumentation-runtime-node": "0.25.0",
     "@opentelemetry/sdk-metrics": "2.9.0",
-    "axios": "1.18.0",
+    "axios": "1.19.0",
     "axios-retry": "4.5.0",
     "body-parser": "1.20.6",
     "bunyan": "^1.8.12",
@@ -97,7 +97,7 @@
     "express": "4.22.1",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
-    "js-yaml": "4.3.0",
+    "js-yaml": "4.3.1",
     "jsonwebtoken": "9.0.3",
     "lodash.escaperegexp": "^4.1.2",
     "lodash.mapvalues": "^4.6.0",
@@ -150,7 +150,7 @@
     "express": {
       "path-to-regexp": "^0.1.13"
     },
-    "brace-expansion": "1.1.16",
+    "brace-expansion": "1.1.18",
     "form-data": "4.0.6",
     "qs": "$qs",
     "joi": "^17.13.4",
