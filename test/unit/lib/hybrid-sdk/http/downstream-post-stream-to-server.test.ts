@@ -330,6 +330,136 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
+  describe('downstream socket listener lifecycle', () => {
+    beforeEach(() => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+    });
+
+    it('returns a reused socket error listener count to baseline after each streamed response', async () => {
+      const responseCount = 100;
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .times(responseCount)
+        .reply(200, 'OK');
+
+      const sharedSocket = new Socket();
+      const initialErrorListenerCount = sharedSocket.listenerCount('error');
+
+      for (
+        let responseIndex = 0;
+        responseIndex < responseCount;
+        responseIndex++
+      ) {
+        const handler = createHandler();
+        const mockResponse = new http.IncomingMessage(sharedSocket);
+        mockResponse.statusCode = 200;
+        mockResponse.headers = { 'content-type': 'application/json' };
+
+        const forwardPromise = handler.forwardRequest(
+          mockResponse,
+          streamingId,
+        );
+        process.nextTick(() => mockResponse.push(null));
+        await forwardPromise;
+
+        expect(sharedSocket.listenerCount('error')).toBe(
+          initialErrorListenerCount,
+        );
+      }
+
+      sharedSocket.destroy();
+    });
+
+    it('returns the socket listener count to baseline when the pipeline fails', async () => {
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(200, 'OK');
+
+      const sharedSocket = new Socket();
+      const initialErrorListenerCount = sharedSocket.listenerCount('error');
+      const handler = createHandler();
+      const mockResponse = new http.IncomingMessage(sharedSocket);
+      mockResponse.statusCode = 200;
+      mockResponse.headers = { 'content-type': 'application/json' };
+
+      const forwardPromise = handler.forwardRequest(mockResponse, streamingId);
+      setTimeout(() => {
+        const socketError = Object.assign(new Error('read ECONNRESET'), {
+          code: 'ECONNRESET',
+        });
+        mockResponse.destroy(socketError);
+      }, 50);
+      await forwardPromise;
+
+      expect(sharedSocket.listenerCount('error')).toBe(
+        initialErrorListenerCount,
+      );
+      expect(
+        testLogger.errorCalls.filter(
+          (call) =>
+            call.message ===
+            'received error from downstream request while streaming data to Broker Server',
+        ),
+      ).toHaveLength(1);
+
+      sharedSocket.destroy();
+    });
+
+    it('logs an actual downstream socket failure exactly once', async () => {
+      nock(brokerServerUrl)
+        .post(`/response-data/${brokerToken}/${streamingId}`)
+        .query(true)
+        .reply(200, 'OK');
+
+      const downstreamServer = http.createServer((_req, res) => {
+        res.writeHead(200, { 'content-type': 'text/plain' });
+        res.write('partial response');
+        setTimeout(() => res.socket?.destroy(), 100);
+      });
+      await new Promise<void>((resolve, reject) => {
+        downstreamServer.once('error', reject);
+        downstreamServer.listen(0, '127.0.0.1', () => {
+          downstreamServer.off('error', reject);
+          resolve();
+        });
+      });
+
+      try {
+        const downstreamAddress = downstreamServer.address() as AddressInfo;
+        const response = await new Promise<http.IncomingMessage>(
+          (resolve, reject) => {
+            http
+              .get(`http://127.0.0.1:${downstreamAddress.port}`, resolve)
+              .once('error', reject);
+          },
+        );
+
+        const handler = createHandler();
+        await handler.forwardRequest(response, streamingId);
+
+        expect(
+          testLogger.errorCalls.filter(
+            (call) =>
+              call.message ===
+              'received error from downstream request while streaming data to Broker Server',
+          ),
+        ).toHaveLength(1);
+      } finally {
+        if (downstreamServer.listening) {
+          await new Promise<void>((resolve) =>
+            downstreamServer.close(() => resolve()),
+          );
+        }
+      }
+    });
+  });
+
   describe('duration tracking on successful requests', () => {
     beforeEach(() => {
       setConfig({
