@@ -506,17 +506,6 @@ class BrokerServerPostResponseHandler {
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;
-      response.socket.on('error', (err) => {
-        this.#logger.error(
-          {
-            error: err.message,
-            errDetails: err,
-            stackTrace: new Error('stacktrace generator').stack,
-            streamingID: this.#streamingId,
-          },
-          'Socket Response error in Streaming from downstream',
-        );
-      });
       const downstreamSocket = response.socket;
       this.#logger.debug(
         {
