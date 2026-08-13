@@ -21,7 +21,8 @@ export type GitHubCreateTreePayload = {
 };
 
 export type GitHubTree = {
-  content: string;
+  content?: string;
+  sha?: string | null;
   mode: '040000' | '100644' | '100755' | '120000' | '160000';
   path: string;
   type: 'blob' | 'commit' | 'tree';

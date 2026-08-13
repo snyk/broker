@@ -2,7 +2,9 @@ import { aConfig } from '../../../helpers/test-factories';
 import {
   commitSigningEnabled,
   signGitHubCommit,
+  validateGitHubTreePayload,
 } from '../../../../lib/hybrid-sdk/client/scm';
+import { GitHubTreeValidationError } from '../../../../lib/hybrid-sdk/client/scm/github/errors';
 
 describe('client/scm', () => {
   describe('commitSigningEnabled()', () => {
@@ -117,6 +119,42 @@ describe('client/scm', () => {
       await expect(signGitHubCommit({}, 123456)).rejects.toThrowError(
         'body must be string or Uint8Array',
       );
+    });
+  });
+
+  describe('validateGitHubTreePayload()', () => {
+    it('rejects a symlink represented in the GitHub Trees API format', () => {
+      const body = JSON.stringify({
+        base_tree: '0000000000000000000000000000000000000000',
+        tree: [
+          {
+            path: 'config/malicious_link',
+            mode: '120000',
+            type: 'blob',
+            content: '/etc/passwd',
+          },
+        ],
+      });
+
+      expect(() => validateGitHubTreePayload(body)).toThrowError(
+        GitHubTreeValidationError,
+      );
+    });
+
+    it('accepts a regular blob represented in the GitHub Trees API format', () => {
+      const body = JSON.stringify({
+        base_tree: '0000000000000000000000000000000000000000',
+        tree: [
+          {
+            path: 'config/settings.json',
+            mode: '100644',
+            type: 'blob',
+            content: '{}',
+          },
+        ],
+      });
+
+      expect(() => validateGitHubTreePayload(body)).not.toThrowError();
     });
   });
 });

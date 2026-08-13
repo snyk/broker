@@ -1,12 +1,25 @@
 import { prepareRequest } from '../../../../lib/broker-workload/prepareRequest';
+import {
+  gitHubTreeCheckNeeded,
+  validateGitHubTreePayload,
+} from '../../../../lib/hybrid-sdk/client/scm';
 
 jest.mock('../../../../lib/logs/logger');
 jest.mock('../../../../lib/hybrid-sdk/client/scm', () => ({
-  gitHubCommitSigningEnabled: () => false,
-  gitHubTreeCheckNeeded: () => false,
+  gitHubCommitSigningEnabled: jest.fn(() => false),
+  gitHubTreeCheckNeeded: jest.fn(() => false),
   signGitHubCommit: jest.fn(),
   validateGitHubTreePayload: jest.fn(),
 }));
+
+const mockGitHubTreeCheckNeeded = jest.mocked(gitHubTreeCheckNeeded);
+const mockValidateGitHubTreePayload = jest.mocked(validateGitHubTreePayload);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGitHubTreeCheckNeeded.mockReturnValue(false);
+  mockValidateGitHubTreePayload.mockReset();
+});
 
 describe('prepareRequest — requestId propagation', () => {
   const baseResult = { url: 'https://example.com/path' } as any;
@@ -115,5 +128,100 @@ describe('prepareRequest — downstream x-request-id mirror', () => {
       'client',
     );
     expect(req.headers['x-request-id']).toBeUndefined();
+  });
+});
+
+describe('prepareRequest — GitHub create tree validation', () => {
+  const baseResult = {
+    url: 'https://api.github.com/repos/owner/repo/git/trees',
+  } as any;
+  const baseOptions = {
+    config: { removeXForwardedHeaders: 'false', universalBrokerEnabled: false },
+  } as any;
+  const logContext: any = {};
+  const treeBody = JSON.stringify({
+    base_tree: '0000000000000000000000000000000000000000',
+    tree: [
+      {
+        path: 'config/malicious_link',
+        mode: '120000',
+        type: 'blob',
+        content: '/etc/passwd',
+      },
+    ],
+  });
+
+  it('returns the existing preparation error when tree validation fails', async () => {
+    mockGitHubTreeCheckNeeded.mockReturnValue(true);
+    mockValidateGitHubTreePayload.mockImplementation(() => {
+      throw new Error(
+        'Symlinks are not allowed in GitHub tree payload: config/malicious_link',
+      );
+    });
+    const payload = {
+      method: 'POST',
+      url: '/repos/owner/repo/git/trees',
+      headers: {},
+      body: treeBody,
+    };
+
+    const { error } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(error).toEqual({
+      status: 401,
+      errorMsg:
+        'Symlinks are not allowed in GitHub tree payload: config/malicious_link',
+    });
+    expect(mockValidateGitHubTreePayload).toHaveBeenCalledWith(treeBody);
+  });
+
+  it('returns no preparation error when tree validation succeeds', async () => {
+    mockGitHubTreeCheckNeeded.mockReturnValue(true);
+    const payload = {
+      method: 'POST',
+      url: '/repos/owner/repo/git/trees',
+      headers: {},
+      body: treeBody,
+    };
+
+    const { error } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(error).toBeNull();
+    expect(mockValidateGitHubTreePayload).toHaveBeenCalledWith(treeBody);
+  });
+
+  it('does not validate tree payloads when the commit-signing check is disabled', async () => {
+    const payload = {
+      method: 'POST',
+      url: '/repos/owner/repo/git/trees',
+      headers: {},
+      body: treeBody,
+    };
+
+    const { error } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(error).toBeNull();
+    expect(mockValidateGitHubTreePayload).not.toHaveBeenCalled();
   });
 });
