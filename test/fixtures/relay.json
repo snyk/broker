@@ -115,6 +115,28 @@
     ]
   },
   {
+    "//": "used to test body-regex filtering in isolation",
+    "method": "POST",
+    "path": "/filtered-on-body-regex",
+    "valid": [
+      {
+        "path": "message",
+        "regex": "^allowed-.*"
+      }
+    ]
+  },
+  {
+    "//": "only rule is a malformed regex - should never match, not crash",
+    "method": "POST",
+    "path": "/filtered-on-malformed-body-regex",
+    "valid": [
+      {
+        "path": "message",
+        "regex": "INVALID regex ("
+      }
+    ]
+  },
+  {
     "//": "basic auth route",
     "method": "GET",
     "path": "/basic-auth",

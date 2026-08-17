@@ -1276,6 +1276,41 @@ describe('filters and interpolates', () => {
       expect(filterResponse).toBeFalsy();
     });
 
+    describe('body regex', () => {
+      it('allows requests whose body value matches the regex', () => {
+        const filterResponse = filter({
+          url: '/filtered-on-body-regex',
+          method: 'POST',
+          body: jsonBuffer({ message: 'allowed-value' }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        });
+        expect(filterResponse).toBeTruthy();
+      });
+
+      it('blocks requests whose body value does not match the regex', () => {
+        const filterResponse = filter({
+          url: '/filtered-on-body-regex',
+          method: 'POST',
+          body: jsonBuffer({ message: 'blocked-value' }),
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        });
+        expect(filterResponse).toBeFalsy();
+      });
+
+      it('blocks requests where the only regex rule failed to compile, without throwing', () => {
+        const callFilter = () =>
+          filter({
+            url: '/filtered-on-malformed-body-regex',
+            method: 'POST',
+            body: jsonBuffer({ message: 'anything' }),
+            requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          });
+
+        expect(callFilter).not.toThrow();
+        expect(callFilter()).toBeFalsy();
+      });
+    });
+
     describe('graphql', () => {
       it('find globs - valid query', () => {
         const filterResponse = filter({

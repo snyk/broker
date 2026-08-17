@@ -95,9 +95,20 @@ export const loadFilters: LOADEDFILTER = (
     method = (method || 'get').toLowerCase();
 
     const bodyFilters = valid ? valid.filter((v) => !!v.path && !v.regex) : [];
-    const bodyRegexFilters = valid
-      ? valid.filter((v) => !!v.path && !!v.regex)
-      : [];
+    const bodyRegexFilters = (
+      valid ? valid.filter((v) => !!v.path && !!v.regex) : []
+    ).map((v) => {
+      let compiledRegex: RegExp | undefined;
+      try {
+        compiledRegex = new RegExp(v.regex!); //paths without regexes got filtered out earlier, hence the !
+      } catch (error) {
+        logger.error(
+          { error, path: v.path, regex: v.regex },
+          'failed to compile regex rule',
+        );
+      }
+      return { ...v, compiledRegex };
+    });
     const queryFilters = valid ? valid.filter((v) => !!v.queryParam) : [];
     const headerFilters = valid ? valid.filter((v) => !!v.header) : [];
 
@@ -174,18 +185,22 @@ export const loadFilters: LOADEDFILTER = (
           parsedBody = parsedBody || tryJSONParse(req.body);
 
           // validate against the body by regex
-          isValid = bodyRegexFilters.some(({ path: filterPath, regex }) => {
-            try {
-              const re = new RegExp(regex!); //paths without regexes got filtered out earlier, hence the !
-              return re.test(undefsafe(parsedBody, filterPath!));
-            } catch (error) {
-              logger.error(
-                { error, path: filterPath, regex },
-                'failed to test regex rule',
-              );
-              return false;
-            }
-          });
+          isValid = bodyRegexFilters.some(
+            ({ path: filterPath, compiledRegex }) => {
+              if (!compiledRegex) {
+                return false;
+              }
+              try {
+                return compiledRegex.test(undefsafe(parsedBody, filterPath!));
+              } catch (error) {
+                logger.error(
+                  { error, path: filterPath },
+                  'failed to test regex rule',
+                );
+                return false;
+              }
+            },
+          );
         }
 
         // no need to check query filters if the request is already valid
