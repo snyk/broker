@@ -20,18 +20,24 @@ const universalBrokerConnectionsVariables: readonly string[] = [
   ...PER_CONNECTION_CREDENTIAL_ENV_VARS,
 ];
 
+// Global regexes are safe to reuse: replace() resets lastIndex to 0 each call.
+const compiledRedactionRegexes = new Map<string, RegExp>();
+
+const getRedactionRegex = (value: string): RegExp => {
+  let regex = compiledRedactionRegexes.get(value);
+  if (!regex) {
+    regex = new RegExp(escapeRegExp(value), 'igm');
+    compiledRedactionRegexes.set(value, regex);
+  }
+  return regex;
+};
+
 const sanitiseConfigVariable = (raw: string, variable: string) =>
-  raw.replace(
-    new RegExp(escapeRegExp(getConfig()[variable]), 'igm'),
-    '${' + variable + '}',
-  );
+  raw.replace(getRedactionRegex(getConfig()[variable]), '${' + variable + '}');
 
 const sanitiseConfigVariables = (raw: string, variable: string) => {
   for (const pool of getConfig()[variable]) {
-    raw = raw.replace(
-      new RegExp(escapeRegExp(pool), 'igm'),
-      '${' + variable + '}',
-    );
+    raw = raw.replace(getRedactionRegex(pool), '${' + variable + '}');
   }
 
   return raw;
@@ -46,7 +52,7 @@ const sanitiseConnectionConfigVariables = (
   for (const cfgVar of Object.keys(connections[connectionKey])) {
     if (cfgVar == variable) {
       raw = raw.replace(
-        new RegExp(escapeRegExp(connections[connectionKey][cfgVar]), 'igm'),
+        getRedactionRegex(connections[connectionKey][cfgVar]),
         '${' + variable + '}',
       );
     }
@@ -68,11 +74,8 @@ const sanitiseConnectionContextConfigVariables = (
       )) {
         if (cfgVar == variable) {
           raw = raw.replace(
-            new RegExp(
-              escapeRegExp(
-                connections[connectionKey].contexts[contextKey][cfgVar],
-              ),
-              'igm',
+            getRedactionRegex(
+              connections[connectionKey].contexts[contextKey][cfgVar],
             ),
             '${' + variable + '}',
           );
@@ -92,7 +95,7 @@ const sanitisePluginsConfigVariables = (
   for (const cfgVar of Object.keys(pluginConfig)) {
     if (cfgVar == variable) {
       raw = raw.replace(
-        new RegExp(escapeRegExp(pluginConfig[cfgVar]), 'igm'),
+        getRedactionRegex(pluginConfig[cfgVar]),
         '${' + variable + '}',
       );
     }

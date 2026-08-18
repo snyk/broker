@@ -31,7 +31,16 @@ const gpgPassphrase = (process.env.GPG_PASSPHRASE = 'GPG_PASS_DO_NOT_LEAK');
 
 import { Writable } from 'stream';
 import { log } from '../../lib/logs/logger';
-import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
+import {
+  loadBrokerConfig,
+  getConfig,
+  setConfig,
+} from '../../lib/hybrid-sdk/common/config/config';
+import {
+  getPluginConfigByConnectionKey,
+  setPluginConfigKey,
+  setPluginConfigParamByConnectionKey,
+} from '../../lib/hybrid-sdk/common/config/pluginsConfig';
 
 describe('log', () => {
   beforeAll(async () => {
@@ -140,5 +149,60 @@ describe('log', () => {
     expect(logged).toMatch(sanitizedGitUsername);
     expect(logged).toMatch(sanitizedGitPassword);
     expect(logged).toMatch(sanitizedGitClientUrl);
+  });
+
+  it('sanitizes universal-broker connection, context and plugin credentials', () => {
+    const connectionClientId = 'CONN_CLIENT_ID_SECRET';
+    const contextClientId = 'CTX_CLIENT_ID_SECRET';
+    const pluginToken = 'PLUGIN_TOKEN_SECRET';
+    const connectionKey = 'test-connection';
+
+    const originalConfig = Object.assign({}, getConfig());
+    const originalPluginConfig = getPluginConfigByConnectionKey(connectionKey);
+
+    setConfig({
+      ...originalConfig,
+      universalBrokerEnabled: true,
+      connections: {
+        [connectionKey]: {
+          identifier: 'test-connection-id',
+          GITHUB_APP_CLIENT_ID: connectionClientId,
+          contexts: {
+            ctx1: {
+              GITHUB_APP_CLIENT_ID: contextClientId,
+            },
+          },
+        },
+      },
+    });
+    setPluginConfigParamByConnectionKey(
+      connectionKey,
+      'GHA_ACCESS_TOKEN',
+      pluginToken,
+    );
+
+    try {
+      const logs: string[] = [];
+      const testStream = new Writable();
+      testStream._write = function (chunk, encoding, done) {
+        logs.push(chunk.toString());
+        done();
+      };
+      log.addStream({ stream: testStream });
+
+      log.info({
+        token: [connectionClientId, contextClientId, pluginToken].join(),
+      });
+
+      const logged = logs[0];
+      expect(logged).not.toMatch(connectionClientId);
+      expect(logged).not.toMatch(contextClientId);
+      expect(logged).not.toMatch(pluginToken);
+      expect(logged.match(/\$\{GITHUB_APP_CLIENT_ID\}/g)).toHaveLength(2);
+      expect(logged).toMatch('${GHA_ACCESS_TOKEN}');
+    } finally {
+      setConfig(originalConfig);
+      setPluginConfigKey(connectionKey, originalPluginConfig);
+    }
   });
 });
