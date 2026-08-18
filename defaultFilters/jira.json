@@ -133,6 +133,17 @@
         }
       },
       {
+        "//": "used to find groups for group picker",
+        "method": "GET",
+        "path": "/rest/api/2/groups/picker",
+        "origin": "https://${JIRA_HOSTNAME}",
+        "auth": {
+          "scheme": "basic",
+          "username": "${JIRA_USERNAME}",
+          "password": "${JIRA_PASSWORD}"
+        }
+      },
+      {
         "//": "used to get available components",
         "method": "GET",
         "path": "/rest/api/2/project/:project/components",
