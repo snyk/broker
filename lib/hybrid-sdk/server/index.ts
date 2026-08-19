@@ -22,9 +22,20 @@ import filterRulesLoader from '../common/filter/filter-rules-loading';
 import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 import { serviceHandler } from './routesHandlers/serviceHandler';
+import * as metrics from './metrics';
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode.');
+
+  let metricsClient: metrics.Client;
+  try {
+    metricsClient = metrics.createClient(
+      serverOpts.config as metrics.RawOtelConfig,
+    );
+  } catch (err) {
+    logger.fatal({ err }, 'Failed to initialize metrics client.');
+    process.exit(1);
+  }
 
   const filters = await filterRulesLoader(serverOpts.config);
   if (!filters) {
@@ -96,7 +107,7 @@ export const main = async (serverOpts: ServerOpts) => {
     );
 
     setInterval(
-      disconnectConnectionsWithStaleCreds,
+      () => disconnectConnectionsWithStaleCreds(metricsClient),
       loadedServerOpts.config.STALE_CONNECTIONS_CLEANUP_FREQUENCY ??
         10 * 60 * 1000,
     );
@@ -115,6 +126,9 @@ export const main = async (serverOpts: ServerOpts) => {
     close: (done) => {
       logger.info('Server websocket is closing.');
       server.close();
+      metricsClient.shutdown().catch((err) => {
+        logger.warn({ err }, 'Error shutting down metrics client.');
+      });
       websocket.destroy(function () {
         logger.info('Server websocket is closed.');
         if (done) {

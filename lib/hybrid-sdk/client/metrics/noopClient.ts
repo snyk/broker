@@ -1,7 +1,7 @@
 import { Client } from './client';
 
 /**
- * {@link Client} that does nothing.
+ * Client implementation that does nothing.
  * Used when no metrics endpoint is configured.
  */
 export class NoopClient implements Client {

@@ -7,14 +7,12 @@ import {
 } from '@opentelemetry/api';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import {
-  AggregationTemporality,
   MeterProvider,
   MetricReader,
-  PeriodicExportingMetricReader,
   AggregationType,
 } from '@opentelemetry/sdk-metrics';
+import { createMeterProvider } from '../../common/metrics/otel';
 import { Client } from './client';
 import {
   CONNECTION_STATES,
@@ -22,7 +20,7 @@ import {
   ProcessExitReason,
 } from '../../common/types/telemetry';
 
-/** Constructor options for {@link OtelClient}. */
+/** Constructor options for OtelClient. */
 export interface OtelClientConfig {
   /** OTLP/gRPC collector endpoint URL. */
   endpoint: URL;
@@ -33,15 +31,17 @@ export interface OtelClientConfig {
 }
 
 /**
- * {@link Client} implementation backed by OpenTelemetry.
+ * Client implementation backed by OpenTelemetry.
  * Exports metrics to an OTLP/gRPC endpoint using delta temporality.
  *
  * Automatically registers the Node.js event loop delay p99 metric via
- * {@link RuntimeNodeInstrumentation}, renamed to 'broker.nodejs.eventloop.delay.p99'
+ * RuntimeNodeInstrumentation, renamed to 'broker.nodejs.eventloop.delay.p99'
  * for pipeline compatibility. Other runtime metrics are filtered out.
  *
  * For non-Kubernetes environments, container metrics (CPU, memory, network I/O)
  * are already provided by the infrastructure via cAdvisor.
+ *
+ * @param config - Constructor options.
  */
 export class OtelClient implements Client {
   private readonly meterProvider: MeterProvider;
@@ -67,35 +67,31 @@ export class OtelClient implements Client {
   private readonly pingLatencyHistogram: Histogram;
 
   constructor(config: OtelClientConfig) {
-    const reader =
-      config.reader ??
-      new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter({
-          url: config.endpoint.toString(),
-          temporalityPreference: AggregationTemporality.DELTA,
-        }),
-        exportIntervalMillis: config.exportIntervalMs,
-      });
-
-    this.meterProvider = new MeterProvider({
-      readers: [reader],
-      views: [
-        // Rename p99 event loop delay metric with `broker.` prefix to avoid being filtered out
-        // by the metrics pipeline.
-        {
-          instrumentName: 'nodejs.eventloop.delay.p99',
-          meterName: '@opentelemetry/instrumentation-runtime-node',
-          name: 'broker.nodejs.eventloop.delay.p99',
-        },
-        // Drop all other NodeJS runtime metrics. Infra automatically filter these runtime
-        // metrics out due to the large volume emitted, so we want to be selective.
-        {
-          instrumentName: '*',
-          meterName: '@opentelemetry/instrumentation-runtime-node',
-          aggregation: { type: AggregationType.DROP },
-        },
-      ],
-    });
+    this.meterProvider = createMeterProvider(
+      {
+        otelEndpoint: config.endpoint,
+        otelExportIntervalMs: config.exportIntervalMs,
+      },
+      {
+        reader: config.reader,
+        views: [
+          // Rename p99 event loop delay metric with `broker.` prefix to avoid being filtered out
+          // by the metrics pipeline.
+          {
+            instrumentName: 'nodejs.eventloop.delay.p99',
+            meterName: '@opentelemetry/instrumentation-runtime-node',
+            name: 'broker.nodejs.eventloop.delay.p99',
+          },
+          // Drop all other NodeJS runtime metrics. Infra automatically filter these runtime
+          // metrics out due to the large volume emitted, so we want to be selective.
+          {
+            instrumentName: '*',
+            meterName: '@opentelemetry/instrumentation-runtime-node',
+            aggregation: { type: AggregationType.DROP },
+          },
+        ],
+      },
+    );
 
     this.runtimeInstrumentation = new RuntimeNodeInstrumentation();
     registerInstrumentations({

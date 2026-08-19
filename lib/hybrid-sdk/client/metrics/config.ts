@@ -1,42 +1,20 @@
-/**
- * Raw string input for metrics configuration.
- * All values are optional strings; type coercion happens in {@link parse}.
- */
-export interface RawConfig {
-  metricsOtelEndpoint?: string;
-  metricsOtelExportIntervalMs?: string;
-}
+import {
+  OtelConfig,
+  parseOtelConfig,
+  RawOtelConfig,
+} from '../../common/metrics/otel';
 
-/** Validated and typed metrics configuration. */
-export interface Config {
-  /** OTLP/gRPC endpoint for the metric exporter. Undefined when metrics are disabled. */
-  otelEndpoint?: URL;
-  /** How often (ms) the periodic metric reader exports collected metrics. */
-  otelExportIntervalMs: number;
-}
-
-const DEFAULT_EXPORT_INTERVAL_MS = 10_000;
+export type RawConfig = RawOtelConfig;
+export type Config = OtelConfig;
 
 /**
- * Parse and validate raw string input into a typed {@link Config}.
- * Coerces the export interval to a number, falling back to 10 000 ms.
+ * Parse and validate raw string input into a typed Config.
+ * Delegates to the shared parseOtelConfig.
+ *
+ * @param raw - Raw string config values (e.g. from env vars).
+ * @returns The validated, typed config.
+ * @throws If metricsOtelEndpoint is set but not a valid URL.
  */
 export function parse(raw: RawConfig): Config {
-  const rawEndpoint = raw.metricsOtelEndpoint;
-
-  let otelEndpoint: URL | undefined;
-  if (rawEndpoint) {
-    try {
-      otelEndpoint = new URL(rawEndpoint);
-    } catch {
-      throw new Error(
-        `Invalid metricsOtelEndpoint: "${rawEndpoint}" is not a valid URL`,
-      );
-    }
-  }
-
-  const otelExportIntervalMs =
-    Number(raw.metricsOtelExportIntervalMs) || DEFAULT_EXPORT_INTERVAL_MS;
-
-  return { otelEndpoint, otelExportIntervalMs };
+  return parseOtelConfig(raw);
 }
