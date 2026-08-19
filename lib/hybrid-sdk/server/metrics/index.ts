@@ -1,5 +1,7 @@
-import { createOtelBackedClient } from '../../common/metrics/otel';
-import { RawConfig } from './config';
+import {
+  createOtelBackedClient,
+  RawOtelConfig,
+} from '../../common/metrics/otel';
 import { Client } from './client';
 import { NoopClient } from './noopClient';
 import { OtelClient } from './otelClient';
@@ -13,11 +15,11 @@ import { OtelClient } from './otelClient';
  * @throws If the raw config is invalid, or constructing the OTel-backed
  *   client fails.
  */
-export function createClient(raw: RawConfig): Client {
+export function createClient(raw: RawOtelConfig): Client {
   return createOtelBackedClient<Client>(raw, NoopClient, OtelClient);
 }
 
-export { RawConfig } from './config';
+export { RawOtelConfig } from '../../common/metrics/otel';
 export { Client } from './client';
 export { NoopClient } from './noopClient';
 export { OtelClient } from './otelClient';
