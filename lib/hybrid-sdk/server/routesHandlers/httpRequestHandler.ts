@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { log as logger } from '../../../logs/logger';
 import { getDesensitizedToken } from '../utils/token';
-import { ClientSocket, getSocketConnections } from '../socket';
+import {
+  ClientSocket,
+  getSocketConnections,
+  wasRecentlyDisconnected,
+} from '../socket';
 import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
 import { hostname } from 'node:os';
 import { URL, URLSearchParams } from 'node:url';
@@ -137,6 +141,15 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
         return res.status(500).send('Error forwarding request to primary.');
       }
     } else {
+      if (wasRecentlyDisconnected(token)) {
+        logger.warn(
+          { desensitizedToken, requestId },
+          'No connection; client recently disconnected and may be reconnecting.',
+        );
+        res.setHeader('x-broker-failure', 'connection-not-ready');
+        res.setHeader('Retry-After', '1');
+        return res.status(503).json({ ok: false });
+      }
       logger.warn(
         { desensitizedToken, requestId },
         'No matching connection found.',

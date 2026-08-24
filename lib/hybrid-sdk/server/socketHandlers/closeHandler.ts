@@ -1,7 +1,11 @@
 import { decrementSocketConnectionGauge } from '../../common/utils/metrics';
 import { log as logger } from '../../../logs/logger';
 import { clientDisconnected } from '../infra/dispatcher';
-import { getSocketConnections, removePendingHandshake } from '../socket';
+import {
+  getSocketConnections,
+  removePendingHandshake,
+  removeSocketConnection,
+} from '../socket';
 import { getHandshakeIdentityFromHeaders } from '../auth/authHelpers';
 import { getDesensitizedToken } from '../utils/token';
 import { rmClientIdFromTerminationMap } from './identifyHandler';
@@ -36,7 +40,7 @@ export const handleConnectionCloseOnSocket = (
         connections.set(token, filteredClientPool);
       } else {
         logger.info({ maskedToken, hashedToken }, 'Removing client.');
-        connections.delete(token);
+        removeSocketConnection(token);
       }
       decrementSocketConnectionGauge();
       rmClientIdFromTerminationMap(token, clientId);
