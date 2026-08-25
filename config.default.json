@@ -372,16 +372,16 @@
     "gitlab": {
       "validations": [
         {
-          "url": "https://$GITLAB/api/v3/user",
+          "url": "https://$GITLAB/api/v4/user",
           "auth": {
             "type": "header",
-            "name": "private_token",
+            "name": "private-token",
             "value": "$GITLAB_TOKEN"
           }
         }
       ],
       "default": {
-        "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v3/user?private_token=$GITLAB_TOKEN",
+        "BROKER_CLIENT_VALIDATION_URL": "https://$GITLAB/api/v4/user?private_token=$GITLAB_TOKEN",
         "GIT_URL": "$GITLAB",
         "GIT_USERNAME": "oauth2",
         "GIT_PASSWORD": "$GITLAB_TOKEN",
