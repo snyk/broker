@@ -27,8 +27,16 @@ export const handleSocketConnection = (socket: ISpark) => {
     identified = handleIdentifyOnSocket(clientData, socket, token);
   });
 
+  // Primus can emit more than one terminal event for the same socket. Treat
+  // teardown as one lifecycle transition so metrics, dispatcher calls and pool
+  // cleanup happen exactly once.
+  let terminalEventHandled = false;
   ['close', 'end', 'disconnection', 'destroy', 'timeout'].forEach((e) =>
     socket.on(e, () => {
+      if (terminalEventHandled) {
+        return;
+      }
+      terminalEventHandled = true;
       incrementSocketCloseReasonCount(e);
       handleConnectionCloseOnSocket(e, socket, token, clientId!, identified);
     }),

@@ -10,6 +10,74 @@ import { makeStreamingRequestToDownstream } from '../../http/request';
 import { retry } from '../../http/exponential-backoff';
 
 const CONNECTION_READY_MAX_RETRIES = 4;
+const CONNECTION_HANDSHAKE_TTL_MS = Number(
+  process.env.BROKER_CONNECTION_HANDSHAKE_TTL_MS ?? 30_000,
+);
+
+const isReady = (client: ClientSocket): boolean =>
+  Boolean(
+    client.socket && client.metadata?.version && client.metadata?.capabilities,
+  );
+
+/**
+ * Drops authorization placeholders that never completed the identify handshake.
+ * Ready connections and legacy entries without a handshake timestamp are kept.
+ */
+const removeExpiredPendingHandshakes = (
+  connections: Map<string, ClientSocket[]>,
+  token: string,
+  now = Date.now(),
+): void => {
+  const activePool = (connections.get(token) ?? []).filter((client) => {
+    if (isReady(client)) {
+      return true;
+    }
+    // Only authorize-only entries are pending. An identified socket with
+    // incomplete metadata must remain tracked and follow the bad-metadata path.
+    if (
+      client.socket ||
+      client.metadata ||
+      client.handshakeStartTime === undefined
+    ) {
+      return true;
+    }
+    return now - client.handshakeStartTime < CONNECTION_HANDSHAKE_TTL_MS;
+  });
+
+  if (activePool.length > 0) {
+    connections.set(token, activePool);
+  } else {
+    connections.delete(token);
+  }
+};
+
+// The pool is newest-first, so find() returns the newest fully-ready connection.
+// This keeps HA clients immune to reconnect churn, which briefly creates a
+// not-yet-ready connection.
+type ConnectionLookup =
+  | { status: 'ready'; client: ClientSocket }
+  | { status: 'no-connection' }
+  | { status: 'bad-metadata' };
+
+const findReadyConnection = (
+  connections: Map<string, ClientSocket[]>,
+  token: string,
+): ConnectionLookup => {
+  removeExpiredPendingHandshakes(connections, token);
+  const pool = connections.get(token) ?? [];
+  if (pool.length === 0) {
+    return { status: 'no-connection' };
+  }
+  const ready = pool.find(isReady);
+  if (ready) {
+    return { status: 'ready', client: ready };
+  }
+  if (pool.some((client) => !client.socket || !client.metadata)) {
+    // Still completing the handshake. Throwing asks retry() for another attempt.
+    throw new Error('client handshake in progress');
+  }
+  return { status: 'bad-metadata' };
+};
 
 export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
   req: Request,
@@ -77,39 +145,13 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
       return res.status(404).json({ ok: false });
     }
   }
-  // Grab the pool of connections for this token
-  const connection = connections.get(token)!;
-  // Make sure a connection actually exists before proceeding
-  if (connection.length === 0) {
-    logger.warn(
-      { desensitizedToken, requestId },
-      'No connection in pool found.',
-    );
-    res.setHeader('x-broker-failure', 'no-connection');
-    return res.status(404).json({ ok: false });
-  }
-  const isReady = (c: ClientSocket): boolean =>
-    Boolean(c.socket && c.metadata?.version && c.metadata?.capabilities);
-
-  // The pool is newest-first, so find() returns the newest fully-ready
-  // connection. This keeps HA clients immune to reconnect churn, which will
-  // briefly create a not-yet-ready connection. If none is ready yet but a connection is still
-  // completing its handshake, retry with exponential backoff. A permanently-incomplete pool
-  // won't become ready, so return without retrying.
-  let client: ClientSocket | undefined;
+  // If no connection is ready yet but one is still completing its handshake,
+  // retry with exponential backoff. A permanently-incomplete pool won't become
+  // ready, so return without retrying.
+  let lookup: ConnectionLookup;
   try {
-    client = await retry<ClientSocket | undefined>(
-      () => {
-        const pool = connections.get(token) ?? [];
-        const ready = pool.find(isReady);
-        if (ready) {
-          return ready;
-        }
-        if (pool.some((c) => !c.socket || !c.metadata)) {
-          throw new Error('client handshake in progress');
-        }
-        return undefined;
-      },
+    lookup = await retry<ConnectionLookup>(
+      () => findReadyConnection(connections, token),
       {
         retries: CONNECTION_READY_MAX_RETRIES,
         operation: 'await-ready-broker-connection',
@@ -127,7 +169,18 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     return res.status(503).json({ ok: false });
   }
 
-  if (!client) {
+  if (lookup.status === 'no-connection') {
+    // The pool was empty on entry, or every entry in it was an expired
+    // handshake and was pruned. Either way there is nothing to serve.
+    logger.warn(
+      { desensitizedToken, requestId },
+      'No connection in pool found.',
+    );
+    res.setHeader('x-broker-failure', 'no-connection');
+    return res.status(404).json({ ok: false });
+  }
+
+  if (lookup.status === 'bad-metadata') {
     // Connections are present but missing required metadata (e.g. a legacy
     // client that never sends capabilities) — permanent for this client, so keep
     // the fast-fail 400 to avoid turning these into retry storms.
@@ -138,6 +191,8 @@ export const overloadHttpRequestWithConnectionDetailsMiddleware = async (
     res.setHeader('x-broker-failure', 'bad-request');
     return res.status(400).json({ ok: false });
   }
+
+  const client = lookup.client;
 
   res.locals.websocket = client.socket;
   res.locals.socketVersion = client.socketVersion;

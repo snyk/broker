@@ -54,6 +54,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
       {
         // mid-handshake: seated but not yet identified
         socketVersion: '1.0',
+        handshakeStartTime: Date.now(),
         // socket and metadata are intentionally missing, and never arrive
       },
     ]);
@@ -84,7 +85,10 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     jest.useFakeTimers();
     const mockConnections = new Map();
     // Starts mid-handshake; identify() completes after the first backoff.
-    const entry: Record<string, unknown> = { socketVersion: '1.0' };
+    const entry: Record<string, unknown> = {
+      socketVersion: '1.0',
+      handshakeStartTime: Date.now(),
+    };
     mockConnections.set('test-token', [entry]);
     mockedGetSocketConnections.mockReturnValue(mockConnections);
     const req = httpMocks.createRequest({
@@ -119,7 +123,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     };
     mockConnections.set('test-token', [
       // newest-first: an authorize-only entry sits at index 0 during reconnect
-      { socketVersion: '1.0' },
+      { socketVersion: '1.0', handshakeStartTime: Date.now() },
       readyConnection,
     ]);
     mockedGetSocketConnections.mockReturnValue(mockConnections);
@@ -135,6 +139,135 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     expect(next).toHaveBeenCalled();
     expect(res.locals.websocket).toEqual(readyConnection.socket);
     expect(res.locals.clientVersion).toEqual(readyConnection.metadata.version);
+  });
+
+  it('should prune an expired handshake and return no-connection', async () => {
+    const mockConnections = new Map();
+    mockConnections.set('test-token', [
+      {
+        socketVersion: '1.0',
+        handshakeStartTime: Date.now() - 31_000,
+      },
+    ]);
+    mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(404);
+    expect(res.getHeader('x-broker-failure')).toBe('no-connection');
+    expect(mockConnections.has('test-token')).toBe(false);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  // The handshake is still inside the TTL on the first attempt and crosses it
+  // during the first backoff. The pool empties, so this is a no-connection, not
+  // a bad-request.
+  it('should return 404 when the handshake expires mid-retry', async () => {
+    jest.useFakeTimers();
+    const mockConnections = new Map();
+    mockConnections.set('test-token', [
+      {
+        socketVersion: '1.0',
+        handshakeStartTime: Date.now() - 29_950,
+      },
+    ]);
+    mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    const pending = overloadHttpRequestWithConnectionDetailsMiddleware(
+      req,
+      res,
+      next,
+    );
+    await jest.advanceTimersByTimeAsync(5000);
+    await pending;
+
+    expect(res.statusCode).toBe(404);
+    expect(res.getHeader('x-broker-failure')).toBe('no-connection');
+    expect(mockConnections.has('test-token')).toBe(false);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('should prune an expired handshake while preserving a ready connection', async () => {
+    const mockConnections = new Map();
+    const readyConnection = {
+      socket: {},
+      socketVersion: '1.0',
+      metadata: { version: '1.2.3', capabilities: ['test'] },
+    };
+    mockConnections.set('test-token', [
+      {
+        socketVersion: '1.0',
+        handshakeStartTime: Date.now() - 31_000,
+      },
+      readyConnection,
+    ]);
+    mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(200);
+    expect(next).toHaveBeenCalled();
+    expect(mockConnections.get('test-token')).toEqual([readyConnection]);
+  });
+
+  it('should preserve an expired identified socket with incomplete metadata', async () => {
+    const mockConnections = new Map();
+    const identifiedConnection = {
+      socket: {},
+      socketVersion: '1.0',
+      metadata: { version: '1.2.3' },
+      handshakeStartTime: Date.now() - 31_000,
+    };
+    mockConnections.set('test-token', [identifiedConnection]);
+    mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(400);
+    expect(mockConnections.get('test-token')).toEqual([identifiedConnection]);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('should preserve an incomplete legacy entry without a handshake timestamp', async () => {
+    const mockConnections = new Map();
+    mockConnections.set('test-token', [
+      {
+        socket: {},
+        socketVersion: '1.0',
+        metadata: { version: '1.2.3' },
+      },
+    ]);
+    mockedGetSocketConnections.mockReturnValue(mockConnections);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(400);
+    expect(mockConnections.has('test-token')).toBe(true);
   });
 
   it('should return 400 if capabilities are missing from metadata', async () => {
