@@ -1,7 +1,8 @@
 import { decrementSocketConnectionGauge } from '../../common/utils/metrics';
 import { log as logger } from '../../../logs/logger';
 import { clientDisconnected } from '../infra/dispatcher';
-import { getSocketConnections } from '../socket';
+import { getSocketConnections, removePendingHandshake } from '../socket';
+import { getHandshakeIdentityFromHeaders } from '../auth/authHelpers';
 import { getDesensitizedToken } from '../utils/token';
 import { rmClientIdFromTerminationMap } from './identifyHandler';
 import { ISpark } from 'primus';
@@ -38,13 +39,19 @@ export const handleConnectionCloseOnSocket = (
         connections.delete(token);
       }
       decrementSocketConnectionGauge();
+      rmClientIdFromTerminationMap(token, clientId);
+      setImmediate(async () => await clientDisconnected(token, clientId));
     } else {
+      // No pool entry references this socket, because the socket is only
+      // attached by identify. The authorize hook still seated an entry for this
+      // handshake, and nothing else removes it. Without this the entry remains
+      // until an inbound request prunes it by handshake TTL.
+      const identity = getHandshakeIdentityFromHeaders(socket.request.headers);
+      const removed = removePendingHandshake(token, identity);
       logger.warn(
-        { maskedToken, hashedToken },
+        { maskedToken, hashedToken, ...identity, removed },
         'Client disconnected before identifying itself.',
       );
     }
-    rmClientIdFromTerminationMap(token, clientId);
-    setImmediate(async () => await clientDisconnected(token, clientId));
   }
 };

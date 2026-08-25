@@ -58,6 +58,31 @@ export interface ValidatedBrokerCredentials {
   role: string;
 }
 
+export interface HandshakeIdentity {
+  brokerClientId: string | undefined;
+  role: string;
+  /**
+   * Identifies one connection attempt. The client sends a fresh
+   * `snyk-request-id` for every attempt, including each reconnect, so this
+   * distinguishes two overlapping handshakes that share a client id and role.
+   */
+  handshakeId: string | undefined;
+}
+
+/**
+ * Reads the handshake identity from the websocket upgrade headers. This is the
+ * only identity available before the client sends `identify`, so it is also the
+ * only way to correlate a socket back to the pool entry the authorize hook
+ * registered for it.
+ */
+export const getHandshakeIdentityFromHeaders = (
+  headers: IncomingHttpHeaders,
+): HandshakeIdentity => ({
+  brokerClientId: getHeader(headers, BROKER_CLIENT_ID_HEADER),
+  role: getHeader(headers, BROKER_CLIENT_ROLE_HEADER) ?? '',
+  handshakeId: getHeader(headers, SNYK_REQUEST_ID_HEADER),
+});
+
 export const validateBrokerClientCredentials = async (
   headers: IncomingHttpHeaders,
   brokerConnectionIdentifier: string,
@@ -65,10 +90,10 @@ export const validateBrokerClientCredentials = async (
   brokerClientId?: string,
 ): Promise<ValidatedBrokerCredentials> => {
   const authHeader = getHeader(headers, AUTHORIZATION_HEADER);
-  brokerClientId =
-    brokerClientId ?? getHeader(headers, BROKER_CLIENT_ID_HEADER);
-  const role = getHeader(headers, BROKER_CLIENT_ROLE_HEADER) ?? '';
-  const requestId = getHeader(headers, SNYK_REQUEST_ID_HEADER) ?? '';
+  const identity = getHandshakeIdentityFromHeaders(headers);
+  brokerClientId = brokerClientId ?? identity.brokerClientId;
+  const role = identity.role;
+  const requestId = identity.handshakeId ?? '';
   const maskedToken = maskToken(brokerConnectionIdentifier);
 
   logger.debug(

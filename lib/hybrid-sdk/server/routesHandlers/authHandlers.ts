@@ -4,7 +4,11 @@ import {
   validateBrokerClientCredentials,
 } from '../auth/authHelpers';
 import { log as logger } from '../../../logs/logger';
-import { type ClientSocket, getSocketConnectionByIdentifier } from '../socket';
+import {
+  type ClientSocket,
+  findClientToRefreshCreds,
+  getSocketConnectionByIdentifier,
+} from '../socket';
 import { maskToken } from '../../common/utils/token';
 
 interface BrokerConnectionAuthRequest {
@@ -35,9 +39,7 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
 
     const connection = getSocketConnectionByIdentifier(identifier);
     currentClient = connection
-      ? connection.find(
-          (x) => x.metadata.clientId === brokerClientId && x.role === role,
-        )
+      ? findClientToRefreshCreds(connection, brokerClientId, role)
       : null;
 
     if (brokerAppClientId === undefined || !connection || !currentClient) {
@@ -55,25 +57,15 @@ export const authRefreshHandler = async (req: Request, res: Response) => {
       true,
       brokerClientId,
     );
-    // Refresh client validation time
-    const nowDate = new Date().toISOString();
-    currentClient.credsValidationTime = nowDate;
-    const currentClientIndex = connection.findIndex(
-      (x) => x.brokerClientId === brokerClientId && x.role === role,
-    );
-    if (currentClientIndex === -1) {
-      throw new Error('Unable to find client connection.');
-    }
-    connection[currentClientIndex] = currentClient;
+    // Update the live pool entry directly so a pending reconnect is not replaced.
+    currentClient.credsValidationTime = new Date().toISOString();
     return res.status(201).send('OK');
   } catch (err) {
     currentClient?.socket?.end();
     if (err instanceof BrokerAuthError) {
       return res.status(401).type('txt').send(err.message);
     }
-    return res
-      .status(500)
-      .type('txt')
-      .send(`Unable to complete auth refresh: ${err}.`);
+    logger.error({ err }, 'Unable to complete auth refresh.');
+    return res.status(500).type('txt').send('Unable to complete auth refresh.');
   }
 };

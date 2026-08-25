@@ -9,6 +9,8 @@ import { log as logger } from '../../logs/logger';
 import { maskToken } from '../common/utils/token';
 import {
   BrokerAuthError,
+  getHandshakeIdentityFromHeaders,
+  type HandshakeIdentity,
   validateBrokerClientCredentials,
 } from './auth/authHelpers';
 
@@ -24,6 +26,8 @@ export interface ClientSocket {
   role: Role;
   metadata?: any;
   credsValidationTime?: string;
+  handshakeStartTime?: number;
+  handshakeId?: string;
 }
 const socketConnections = new Map<string, ClientSocket[]>();
 
@@ -33,6 +37,88 @@ export const getSocketConnections = () => {
 
 export const getSocketConnectionByIdentifier = (identifier: string) => {
   return socketConnections.get(identifier);
+};
+
+/**
+ * Removes the pending entry for a handshake that closed before identifying.
+ *
+ * The handshake id ensures an older connection cannot remove a newer reconnect.
+ * If the client did not send enough identity headers, the entry is left for the
+ * TTL cleanup.
+ *
+ * Returns true if an entry was removed.
+ */
+export const removePendingHandshake = (
+  identifier: string,
+  { brokerClientId, role, handshakeId }: HandshakeIdentity,
+): boolean => {
+  if (!brokerClientId || !handshakeId) {
+    return false;
+  }
+  const clientPool = socketConnections.get(identifier);
+  if (!clientPool) {
+    return false;
+  }
+  const pendingIndex = clientPool.findIndex(
+    (client) =>
+      !client.socket &&
+      client.handshakeId === handshakeId &&
+      client.brokerClientId === brokerClientId &&
+      client.role === role,
+  );
+  if (pendingIndex < 0) {
+    return false;
+  }
+  clientPool.splice(pendingIndex, 1);
+  if (clientPool.length === 0) {
+    socketConnections.delete(identifier);
+  }
+  return true;
+};
+
+/**
+ * Adds a handshake to the connection pool after it has been authorized.
+ *
+ * A reconnect stays separate from the existing live connection, so closing the
+ * old socket cannot remove the new handshake. If there is already a pending
+ * handshake for the same client and role, the newer attempt replaces it.
+ */
+export const addAuthorizedHandshake = (
+  identifier: string,
+  currentClient: ClientSocket,
+): void => {
+  const clientPool = socketConnections.get(identifier) ?? [];
+  const pendingHandshakeIndex = clientPool.findIndex(
+    (client) =>
+      !client.socket &&
+      client.brokerClientId === currentClient.brokerClientId &&
+      client.role === currentClient.role,
+  );
+  if (pendingHandshakeIndex < 0) {
+    // Keep an identified connection separate from its reconnect attempt.
+    // If the old socket closes first, the new handshake must remain seated.
+    clientPool.unshift(currentClient);
+  } else {
+    clientPool[pendingHandshakeIndex] = currentClient;
+  }
+  socketConnections.set(identifier, clientPool);
+};
+
+/**
+ * Finds the connection to update after an auth refresh.
+ * Prefers the live connection when a reconnect is also pending, so the active
+ * socket does not get disconnected for using stale credentials.
+ */
+export const findClientToRefreshCreds = (
+  clientPool: ClientSocket[],
+  brokerClientId: string,
+  role: unknown,
+): ClientSocket | undefined => {
+  const matches = clientPool.filter(
+    (client) =>
+      client.brokerClientId === brokerClientId && client.role === role,
+  );
+  return matches.find((client) => client.socket) ?? matches[0];
 };
 
 const socket = ({ server, loadedServerOpts }): SocketHandler => {
@@ -58,7 +144,10 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
         .toLowerCase();
       // Primus authorize callbacks receive the raw HTTP upgrade request before
       // the Express middleware chain runs, so req.requestId is not available here.
-      const requestId = req.headers['snyk-request-id'];
+      // The client sends a fresh snyk-request-id per connection attempt, so it
+      // also identifies this handshake when the socket later closes.
+      const { handshakeId } = getHandshakeIdentityFromHeaders(req.headers);
+      const requestId = handshakeId;
       try {
         const { brokerClientId, credentials, role } =
           // deepcode ignore Ssrf: request URL comes from the filter response, with the origin url being injected by the filtered version
@@ -76,24 +165,10 @@ const socket = ({ server, loadedServerOpts }): SocketHandler => {
           brokerAppClientId,
           role: (role ?? Role.primary) as Role,
           credsValidationTime: nowDate,
+          handshakeStartTime: Date.now(),
+          handshakeId,
         };
-        const connections = getSocketConnections();
-        const clientPool =
-          (connections.get(connectionIdentifier) as Array<ClientSocket>) || [];
-        const currentClientIndex = clientPool.findIndex(
-          (x) =>
-            x.brokerClientId === currentClient.brokerClientId &&
-            x.role === currentClient.role,
-        );
-        if (currentClientIndex < 0) {
-          clientPool.unshift(currentClient);
-        } else {
-          clientPool[currentClientIndex] = {
-            ...clientPool[currentClientIndex],
-            ...currentClient,
-          };
-        }
-        connections.set(connectionIdentifier, clientPool);
+        addAuthorizedHandshake(connectionIdentifier, currentClient);
       } catch (err) {
         if (err instanceof BrokerAuthError) {
           logger.warn(
