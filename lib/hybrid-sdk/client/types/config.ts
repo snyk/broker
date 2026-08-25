@@ -51,6 +51,7 @@ export interface ConnectionValidation {
 
 export interface ConnectionHeaderAuth {
   type: 'header';
+  name?: string;
   value: string;
 }
 

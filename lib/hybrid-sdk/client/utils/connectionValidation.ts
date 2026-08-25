@@ -24,7 +24,7 @@ export const validateConnection = async (config: ConnectionConfig) => {
         ).toString('base64')}`;
         break;
       case 'header':
-        headers['Authorization'] = `${auth.value}`;
+        headers[auth.name ?? 'Authorization'] = `${auth.value}`;
         break;
       default: {
         const parsed = parse(url);
