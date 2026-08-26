@@ -33,9 +33,11 @@ const socketConnections = new Map<string, ClientSocket[]>();
 const RECONNECT_GRACE_MS = 60_000;
 const recentlyDisconnectedExpiryTimers = new Map<string, NodeJS.Timeout>();
 
-export const removeSocketConnection = (token: string) => {
-  socketConnections.delete(token);
-
+/**
+ * Starts or refreshes the reconnect grace period without changing the pool.
+ * A token can still have authorized handshakes even when it has no live socket.
+ */
+export const markRecentlyDisconnected = (token: string) => {
   const previousExpiryTimer = recentlyDisconnectedExpiryTimers.get(token);
   if (previousExpiryTimer) {
     clearTimeout(previousExpiryTimer);
@@ -48,6 +50,11 @@ export const removeSocketConnection = (token: string) => {
   }, RECONNECT_GRACE_MS);
   expiryTimer.unref();
   recentlyDisconnectedExpiryTimers.set(token, expiryTimer);
+};
+
+export const removeSocketConnection = (token: string) => {
+  socketConnections.delete(token);
+  markRecentlyDisconnected(token);
 };
 
 export const wasRecentlyDisconnected = (token: string): boolean =>

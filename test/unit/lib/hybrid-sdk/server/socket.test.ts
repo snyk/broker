@@ -3,6 +3,7 @@ import {
   ClientSocket,
   findClientToRefreshCreds,
   getSocketConnections,
+  markRecentlyDisconnected,
   removePendingHandshake,
   removeSocketConnection,
   wasRecentlyDisconnected,
@@ -222,11 +223,21 @@ describe('recently disconnected socket connections', () => {
     expect(wasRecentlyDisconnected(token)).toBe(false);
   });
 
-  it('refreshes the full grace period when a token disconnects again', () => {
-    removeSocketConnection(token);
+  it('marks a token without removing its connection pool', () => {
+    const pendingReconnect = pendingEntry();
+    getSocketConnections().set(token, [pendingReconnect]);
+
+    markRecentlyDisconnected(token);
+
+    expect(getSocketConnections().get(token)).toEqual([pendingReconnect]);
+    expect(wasRecentlyDisconnected(token)).toBe(true);
+  });
+
+  it('refreshes the full grace period when a token is marked again', () => {
+    markRecentlyDisconnected(token);
     jest.advanceTimersByTime(30_000);
 
-    removeSocketConnection(token);
+    markRecentlyDisconnected(token);
     jest.advanceTimersByTime(30_001);
 
     expect(wasRecentlyDisconnected(token)).toBe(true);

@@ -16,6 +16,7 @@ import { clientDisconnected } from '../../../../../../lib/hybrid-sdk/server/infr
 import {
   ClientSocket,
   getSocketConnections,
+  wasRecentlyDisconnected,
 } from '../../../../../../lib/hybrid-sdk/server/socket';
 import { Role } from '../../../../../../lib/hybrid-sdk/client/types/client';
 
@@ -47,10 +48,13 @@ const pendingEntry = (overrides: Partial<ClientSocket> = {}): ClientSocket => ({
 
 describe('handleConnectionCloseOnSocket', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     getSocketConnections().clear();
   });
   afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
     getSocketConnections().clear();
   });
 
@@ -62,6 +66,7 @@ describe('handleConnectionCloseOnSocket', () => {
     handleConnectionCloseOnSocket('close', closingSpark(), TOKEN, '', false);
 
     expect(getSocketConnections().has(TOKEN)).toBe(false);
+    expect(wasRecentlyDisconnected(TOKEN)).toBe(false);
     expect(clientDisconnected).not.toHaveBeenCalled();
   });
 
@@ -108,8 +113,11 @@ describe('handleConnectionCloseOnSocket', () => {
     expect(getSocketConnections().get(TOKEN)).toEqual([liveEntry]);
   });
 
-  it('preserves a pending reconnect when the old identified socket closes', () => {
+  it('retains the disconnect marker when a pending reconnect also closes', () => {
     const oldSocket = closingSpark({ 'snyk-request-id': 'request-a' });
+    const reconnectingSocket = closingSpark({
+      'snyk-request-id': 'request-b',
+    });
     const pendingReconnect = pendingEntry({
       handshakeId: 'request-b',
       handshakeStartTime: Date.now(),
@@ -130,6 +138,47 @@ describe('handleConnectionCloseOnSocket', () => {
     );
 
     expect(getSocketConnections().get(TOKEN)).toEqual([pendingReconnect]);
+    expect(wasRecentlyDisconnected(TOKEN)).toBe(true);
+
+    handleConnectionCloseOnSocket(
+      'close',
+      reconnectingSocket,
+      TOKEN,
+      '',
+      false,
+    );
+
+    expect(getSocketConnections().has(TOKEN)).toBe(false);
+    expect(wasRecentlyDisconnected(TOKEN)).toBe(true);
+  });
+
+  it('does not mark the token when another live socket remains', () => {
+    const closingSocket = closingSpark({ 'snyk-request-id': 'request-a' });
+    const remainingSocket = closingSpark({
+      'snyk-request-id': 'request-b',
+    });
+    const closingConnection = pendingEntry({
+      socket: closingSocket as unknown as { end() },
+      metadata: { version: '1.2.3', capabilities: ['test'] },
+      handshakeId: 'request-a',
+    });
+    const remainingConnection = pendingEntry({
+      socket: remainingSocket as unknown as { end() },
+      metadata: { version: '1.2.3', capabilities: ['test'] },
+      handshakeId: 'request-b',
+    });
+    getSocketConnections().set(TOKEN, [closingConnection, remainingConnection]);
+
+    handleConnectionCloseOnSocket(
+      'close',
+      closingSocket,
+      TOKEN,
+      BROKER_CLIENT_ID,
+      true,
+    );
+
+    expect(getSocketConnections().get(TOKEN)).toEqual([remainingConnection]);
+    expect(wasRecentlyDisconnected(TOKEN)).toBe(false);
   });
 
   it('removes the entry by socket identity when the client had identified', () => {

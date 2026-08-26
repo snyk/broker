@@ -3,6 +3,7 @@ import { log as logger } from '../../../logs/logger';
 import { clientDisconnected } from '../infra/dispatcher';
 import {
   getSocketConnections,
+  markRecentlyDisconnected,
   removePendingHandshake,
   removeSocketConnection,
 } from '../socket';
@@ -22,22 +23,22 @@ export const handleConnectionCloseOnSocket = (
     const { maskedToken, hashedToken } = getDesensitizedToken(token);
     if (identified) {
       const connections = getSocketConnections();
-      const clientPool = connections
-        .get(token)
-        ?.filter((_) => _.socket !== socket);
-      const filteredClientPool =
-        clientPool?.filter((_) => _.socket !== socket) || [];
+      const remainingConnections =
+        connections.get(token)?.filter((_) => _.socket !== socket) || [];
       logger.info(
         {
           closeReason,
           maskedToken,
           hashedToken,
-          remainingConnectionsCount: clientPool?.length || 0,
+          remainingConnectionsCount: remainingConnections.length,
         },
         'Client connection closed.',
       );
-      if (filteredClientPool?.length) {
-        connections.set(token, filteredClientPool);
+      if (remainingConnections.length) {
+        connections.set(token, remainingConnections);
+        if (!remainingConnections.some((connection) => connection.socket)) {
+          markRecentlyDisconnected(token);
+        }
       } else {
         logger.info({ maskedToken, hashedToken }, 'Removing client.');
         removeSocketConnection(token);
