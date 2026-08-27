@@ -3,7 +3,10 @@ import {
   ClientSocket,
   findClientToRefreshCreds,
   getSocketConnections,
+  markRecentlyDisconnected,
   removePendingHandshake,
+  removeSocketConnection,
+  wasRecentlyDisconnected,
 } from '../../../../../lib/hybrid-sdk/server/socket';
 import { HandshakeIdentity } from '../../../../../lib/hybrid-sdk/server/auth/authHelpers';
 import { Role } from '../../../../../lib/hybrid-sdk/client/types/client';
@@ -190,5 +193,57 @@ describe('removePendingHandshake', () => {
 
   it('does nothing when the token has no pool', () => {
     expect(removePendingHandshake(TOKEN, identity())).toBe(false);
+  });
+});
+
+describe('recently disconnected socket connections', () => {
+  const token = 'test-token';
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    getSocketConnections().clear();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    getSocketConnections().clear();
+  });
+
+  it('removes the pool, marks the token, and expires the mark', () => {
+    getSocketConnections().set(token, []);
+
+    removeSocketConnection(token);
+
+    expect(getSocketConnections().has(token)).toBe(false);
+    expect(wasRecentlyDisconnected(token)).toBe(true);
+
+    jest.advanceTimersByTime(60_001);
+
+    expect(wasRecentlyDisconnected(token)).toBe(false);
+  });
+
+  it('marks a token without removing its connection pool', () => {
+    const pendingReconnect = pendingEntry();
+    getSocketConnections().set(token, [pendingReconnect]);
+
+    markRecentlyDisconnected(token);
+
+    expect(getSocketConnections().get(token)).toEqual([pendingReconnect]);
+    expect(wasRecentlyDisconnected(token)).toBe(true);
+  });
+
+  it('refreshes the full grace period when a token is marked again', () => {
+    markRecentlyDisconnected(token);
+    jest.advanceTimersByTime(30_000);
+
+    markRecentlyDisconnected(token);
+    jest.advanceTimersByTime(30_001);
+
+    expect(wasRecentlyDisconnected(token)).toBe(true);
+
+    jest.advanceTimersByTime(30_000);
+
+    expect(wasRecentlyDisconnected(token)).toBe(false);
   });
 });

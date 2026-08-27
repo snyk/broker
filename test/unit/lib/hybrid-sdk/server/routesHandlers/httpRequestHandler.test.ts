@@ -1,5 +1,8 @@
 import { overloadHttpRequestWithConnectionDetailsMiddleware } from '../../../../../../lib/hybrid-sdk/server/routesHandlers/httpRequestHandler';
-import { getSocketConnections } from '../../../../../../lib/hybrid-sdk/server/socket';
+import {
+  getSocketConnections,
+  wasRecentlyDisconnected,
+} from '../../../../../../lib/hybrid-sdk/server/socket';
 import { makeStreamingRequestToDownstream } from '../../../../../../lib/hybrid-sdk/http/request';
 import { hostname } from 'node:os';
 import { NextFunction } from 'express';
@@ -13,6 +16,7 @@ jest.mock('node:os', () => ({
 }));
 
 const mockedGetSocketConnections = getSocketConnections as jest.Mock;
+const mockedWasRecentlyDisconnected = wasRecentlyDisconnected as jest.Mock;
 const mockedMakeStreamingRequest =
   makeStreamingRequestToDownstream as jest.Mock;
 const mockedHostname = hostname as jest.Mock;
@@ -24,6 +28,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     jest.resetAllMocks();
     next = jest.fn();
     mockedHostname.mockReturnValue('broker-snyk-server-v2-0-0');
+    mockedWasRecentlyDisconnected.mockReturnValue(false);
     delete process.env.BROKER_SERVER_MANDATORY_AUTH_ENABLED;
   });
 
@@ -32,6 +37,7 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
   });
 
   it('should return 404 if no connections are found for the token', async () => {
+    mockedWasRecentlyDisconnected.mockReturnValue(false);
     mockedGetSocketConnections.mockReturnValue(new Map());
     const req = httpMocks.createRequest({
       params: { token: 'test-token' },
@@ -44,6 +50,24 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
     expect(res.statusCode).toBe(404);
     expect(res._getJSONData()).toEqual({ ok: false });
     expect(res.getHeader('x-broker-failure')).toBe('no-connection');
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('should return 503 when the token was recently disconnected', async () => {
+    mockedGetSocketConnections.mockReturnValue(new Map());
+    mockedWasRecentlyDisconnected.mockReturnValue(true);
+    const req = httpMocks.createRequest({
+      params: { token: 'test-token' },
+      url: '/broker/test-token/some/path',
+    });
+    const res = httpMocks.createResponse();
+
+    await overloadHttpRequestWithConnectionDetailsMiddleware(req, res, next);
+
+    expect(res.statusCode).toBe(503);
+    expect(res._getJSONData()).toEqual({ ok: false });
+    expect(res.getHeader('x-broker-failure')).toBe('connection-not-ready');
+    expect(res.getHeader('Retry-After')).toBe('1');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -400,8 +424,9 @@ describe('overloadHttpRequestWithConnectionDetailsMiddleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should relay a successful response from primary (legacy token found)', async () => {
+    it('should still forward to primary when a secondary pod was recently disconnected', async () => {
       mockedHostname.mockReturnValue('broker-snyk-server-v2-5-1');
+      mockedWasRecentlyDisconnected.mockReturnValue(true);
       const mockPipe = jest.fn();
       mockedMakeStreamingRequest.mockResolvedValue({
         statusCode: 200,
