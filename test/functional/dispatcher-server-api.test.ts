@@ -184,15 +184,28 @@ describe('Broker Server Dispatcher API interaction', () => {
   });
 });
 
-describe('Broker Server selectable dispatcher', () => {
-  const dispatcherUrl = 'http://configured-dispatcher';
-  const token = 'token';
+describe('Broker Server Dispatcher dual-write to gateway', () => {
+  const apiVersion = '2022-12-02%7Eexperimental';
+  const token = 'broker-test-token';
   const hashedToken = hashToken(token);
-  const clientId = 'client-id';
-  const clientVersion = '1.2.3';
-  const apiVersion = '2022-12-02~experimental';
-  const podName = 'broker-server-3-0';
+  const clientId = '00000000-0000-0000-0000-000000000001';
+  const clientVersion = '4.144.1';
+  const primaryUrl = 'http://broker-server-dispatcher';
+  const gatewayUrl = 'http://broker-gateway-dispatcher';
 
+  const expectedBody = {
+    data: {
+      attributes: {
+        broker_client_version: clientVersion,
+        health_check_link: 'http://0/healthcheck',
+      },
+    },
+  };
+
+  const connectionPath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
+
+  // Each test re-requires config + dispatcher from a fresh module graph so the
+  // module-level `if (config.dispatcherUrl)` wiring picks up that test's env.
   const loadDispatcher = async () => {
     jest.resetModules();
     const {
@@ -204,37 +217,166 @@ describe('Broker Server selectable dispatcher', () => {
 
   beforeEach(() => {
     nock.cleanAll();
-    process.env.hostname = podName;
-    process.env.DISPATCHER_URL = dispatcherUrl;
+    process.env.hostname = '0';
   });
 
   afterEach(() => {
     nock.cleanAll();
     delete process.env.DISPATCHER_URL;
-    delete process.env.USE_GATEWAY_DISPATCHER;
     delete process.env.GATEWAY_DISPATCHER_URL;
-    delete process.env.hostname;
   });
 
-  it('uses the full pod name when gateway dispatcher is selected', async () => {
-    process.env.USE_GATEWAY_DISPATCHER = 'true';
+  it('writes clientConnected to the primary gateway and legacy mirror', async () => {
+    const spyPrimary = jest.fn();
+    const spyGateway = jest.fn();
+    // The legacy mirror is fire-and-forget; await this to deterministically
+    // observe both writes landing.
+    let resolveGatewayWritten;
+    const gatewayWritten = new Promise<void>((resolve) => {
+      resolveGatewayWritten = resolve;
+    });
+
+    nock(primaryUrl)
+      .post(connectionPath)
+      .reply((_uri, body) => {
+        spyPrimary(JSON.parse(body as string));
+        return [200, 'OK'];
+      });
+    nock(gatewayUrl)
+      .post(connectionPath)
+      .reply((_uri, body) => {
+        spyGateway(JSON.parse(body as string));
+        resolveGatewayWritten();
+        return [201, 'Created'];
+      });
+
+    process.env.DISPATCHER_URL = primaryUrl;
+    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
+    const dispatcher = await loadDispatcher();
+
+    await expect(
+      dispatcher.clientConnected(token, clientId, clientVersion),
+    ).resolves.not.toThrowError();
+    await gatewayWritten;
+
+    expect(spyPrimary).toBeCalledWith(expectedBody);
+    expect(spyGateway).toBeCalledWith(expectedBody);
+  });
+
+  it('does not write to the gateway when GATEWAY_DISPATCHER_URL is unset', async () => {
+    const spyPrimary = jest.fn();
+
+    nock(primaryUrl)
+      .post(connectionPath)
+      .reply((_uri, body) => {
+        spyPrimary(JSON.parse(body as string));
+        return [200, 'OK'];
+      });
+    // Any contact with the gateway host would consume this interceptor.
+    const gatewayScope = nock(gatewayUrl).post(/.*/).reply(200);
+
+    process.env.DISPATCHER_URL = primaryUrl;
+    delete process.env.GATEWAY_DISPATCHER_URL;
+    const dispatcher = await loadDispatcher();
+
+    await expect(
+      dispatcher.clientConnected(token, clientId, clientVersion),
+    ).resolves.not.toThrowError();
+
+    expect(spyPrimary).toBeCalledTimes(1);
+    expect(gatewayScope.isDone()).toBe(false);
+  });
+
+  it('isolates the primary gateway path from an unhealthy legacy mirror', async () => {
+    const spyPrimary = jest.fn();
+    let gatewayAttempts = 0;
+    let resolveFirstAttempt;
+    const firstGatewayAttempt = new Promise<void>((resolve) => {
+      resolveFirstAttempt = resolve;
+    });
+
+    nock(gatewayUrl)
+      .post(connectionPath)
+      .reply((_uri, body) => {
+        spyPrimary(JSON.parse(body as string));
+        return [200, 'OK'];
+      });
+    // Unhealthy legacy mirror: every attempt (and axios-retry's retries) 500s.
+    // persist() keeps the failures inside nock so the background retry budget
+    // (~1.4s for 5xx, up to ~11s if it were black-holing) never touches the
+    // real network.
+    nock(primaryUrl)
+      .persist()
+      .post(connectionPath)
+      .reply(() => {
+        gatewayAttempts += 1;
+        resolveFirstAttempt();
+        return [500, 'Internal Server Error'];
+      });
+
+    process.env.DISPATCHER_URL = primaryUrl;
+    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
+    const dispatcher = await loadDispatcher();
+
+    const start = Date.now();
+    await expect(
+      dispatcher.clientConnected(token, clientId, clientVersion),
+    ).resolves.not.toThrowError();
+    const elapsed = Date.now() - start;
+
+    // Gateway write landed exactly once and was unaffected by the failing mirror.
+    expect(spyPrimary).toBeCalledTimes(1);
+    expect(spyPrimary).toBeCalledWith(expectedBody);
+    // The call returned on the gateway alone, without waiting on the legacy
+    // retry budget — this is the latency isolation fire-and-forget guarantees.
+    expect(elapsed).toBeLessThan(500);
+
+    // The mirror was genuinely attempted (fire-and-forget) and is harmless on
+    // failure. Drain the background retries inside nock before teardown.
+    await firstGatewayAttempt;
+    expect(gatewayAttempts).toBeGreaterThan(0);
+    await new Promise((resolve) => setTimeout(resolve, 1600));
+  });
+
+  it('registers the full pod name with the gateway while the node dispatcher keeps the ordinal', async () => {
+    const podName = 'broker-server-3-0';
+    // Node keeps the truncated ordinal ("0"); the gateway must get the full pod
+    // name so the envoy sidecar can resolve the exact pod FQDN from Redis.
+    const nodePath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
     const gatewayPath = `/internal/brokerservers/${podName}/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
-    const gatewayScope = nock(dispatcherUrl).post(gatewayPath).reply(201);
 
+    const spyNode = jest.fn();
+    const spyGateway = jest.fn();
+    let resolveGatewayWritten;
+    const gatewayWritten = new Promise<void>((resolve) => {
+      resolveGatewayWritten = resolve;
+    });
+
+    nock(primaryUrl)
+      .post(nodePath)
+      .reply(() => {
+        spyNode();
+        return [200, 'OK'];
+      });
+    nock(gatewayUrl)
+      .post(gatewayPath)
+      .reply(() => {
+        spyGateway();
+        resolveGatewayWritten();
+        return [201, 'Created'];
+      });
+
+    process.env.DISPATCHER_URL = primaryUrl;
+    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
+    process.env.hostname = podName;
     const dispatcher = await loadDispatcher();
+
     await dispatcher.clientConnected(token, clientId, clientVersion);
+    await gatewayWritten;
 
-    expect(gatewayScope.isDone()).toBe(true);
-  });
-
-  it('uses the pod ordinal when legacy dispatcher is selected', async () => {
-    process.env.USE_GATEWAY_DISPATCHER = 'false';
-    const legacyPath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
-    const legacyScope = nock(dispatcherUrl).post(legacyPath).reply(200);
-
-    const dispatcher = await loadDispatcher();
-    await dispatcher.clientConnected(token, clientId, clientVersion);
-
-    expect(legacyScope.isDone()).toBe(true);
+    // Each interceptor only matches its own path, so these passing proves the
+    // node used the ordinal and the gateway used the full pod name.
+    expect(spyNode).toBeCalledTimes(1);
+    expect(spyGateway).toBeCalledTimes(1);
   });
 });
