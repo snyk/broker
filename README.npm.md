@@ -293,7 +293,7 @@ Public filters are for requests that are received on your broker client and are 
 
 - The broker requires at least node@4.latest
 - Broker clients are *uniquely* identified (i.e. the same ID can't be used twice)
-- If your private service is using an unrecognized certificate, you will need to supply a Certificate Authority file and add the following environment value when running the client: `CA_CERT=ca.cert.pem` - Client will load your CA certificate and use it for requests to your internal service
+- If your private service uses a certificate signed by a private or otherwise unrecognized Certificate Authority, point the client at that CA bundle with Node's own `NODE_EXTRA_CA_CERTS` environment variable, e.g. `NODE_EXTRA_CA_CERTS=/path/to/ca.cert.pem`. This is read by the Node runtime at startup and applies to all outbound TLS connections the client makes. In a container, mount the bundle in and use its in-container path. Prefer this over `NODE_TLS_REJECT_UNAUTHORIZED=0`, which disables certificate verification entirely.
 
 ## License
 

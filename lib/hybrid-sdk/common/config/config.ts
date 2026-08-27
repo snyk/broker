@@ -104,12 +104,6 @@ export const loadBrokerConfig = async (localConfigForTest?) => {
     throw refError;
   }
 
-  if (config.caCert) {
-    config.caCert = fs.readFileSync(
-      path.resolve(process.cwd(), config.caCert as string),
-    );
-  }
-
   for (const [key, value] of Object.entries(config)) {
     if (
       (key.endsWith('Pool') || key.endsWith('_POOL')) &&
