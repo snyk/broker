@@ -104,7 +104,11 @@ RUN <<EOF
     rpm --erase --nodeps tpm2-tss
     rpm --erase --nodeps vim-minimal
     rpm --erase --nodeps rpm-build-libs
-    rpm --erase --nodeps rpm-libs
+    # rpm links both librpm.so.8 (rpm-libs) and libsqlite3.so.0 (sqlite-libs),
+    # so they must be erased in one transaction. Separate calls leave the second
+    # call with a broken rpm binary.
+    rpm --erase --nodeps rpm-libs \
+        sqlite-libs
 EOF
 
 COPY --from=broker-builder --chown=snyk:snyk /home/snyk/snyk-broker/dist /home/snyk/snyk-broker/dist
