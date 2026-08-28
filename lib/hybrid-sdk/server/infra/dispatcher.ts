@@ -198,23 +198,23 @@ if (config.dispatcherUrl) {
       )
     : undefined;
 
-  // The mirror is fire-and-forget: we never await it on the primary path, so a
-  // slow or unhealthy gateway cannot add latency to (or fail) the primary write.
-  // DispatcherClient already swallows its own errors, so the promise resolves
-  // even on failure; the guard catch is belt-and-braces against a synchronous
-  // throw (e.g. URL construction) becoming an unhandledRejection.
+  // When BGD is configured it is the awaited primary write path. The legacy
+  // dispatcher remains a fire-and-forget mirror during the migration.
   const mirror = (write?: Promise<void>) => {
     void write?.catch(() => {});
   };
 
+  const primaryClient = gatewayClient || kc;
+  const mirrorClient = gatewayClient ? kc : undefined;
+
   clientConnected = async function (token, clientId, clientVersion) {
-    mirror(gatewayClient?.clientConnected(token, clientId, clientVersion));
-    await kc.clientConnected(token, clientId, clientVersion);
+    mirror(mirrorClient?.clientConnected(token, clientId, clientVersion));
+    await primaryClient.clientConnected(token, clientId, clientVersion);
   };
 
   clientPinged = async function (token, clientId, clientVersion, time) {
     mirror(
-      gatewayClient?.clientConnected(
+      mirrorClient?.clientConnected(
         token,
         clientId,
         clientVersion,
@@ -222,7 +222,7 @@ if (config.dispatcherUrl) {
         time,
       ),
     );
-    await kc.clientConnected(
+    await primaryClient.clientConnected(
       token,
       clientId,
       clientVersion,
@@ -232,20 +232,18 @@ if (config.dispatcherUrl) {
   };
 
   clientDisconnected = async function (token, clientId) {
-    mirror(gatewayClient?.clientDisconnected(token, clientId));
-    await kc.clientDisconnected(token, clientId);
+    mirror(mirrorClient?.clientDisconnected(token, clientId));
+    await primaryClient.clientDisconnected(token, clientId);
   };
 
   serverStarting = async function () {
-    mirror(gatewayClient?.serverStarting());
-    await kc.serverStarting();
+    mirror(mirrorClient?.serverStarting());
+    await primaryClient.serverStarting();
   };
 
   serverStopping = async function (cb) {
-    // Primary owns the shutdown callback; mirror with a no-op so the gateway
-    // write cannot influence shutdown.
-    mirror(gatewayClient?.serverStopping(() => {}));
-    await kc.serverStopping(cb);
+    mirror(mirrorClient?.serverStopping(() => {}));
+    await primaryClient.serverStopping(cb);
   };
 } else {
   logger.error(

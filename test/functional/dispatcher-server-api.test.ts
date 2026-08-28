@@ -226,11 +226,11 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
     delete process.env.GATEWAY_DISPATCHER_URL;
   });
 
-  it('mirrors clientConnected to both the primary and the gateway dispatcher', async () => {
+  it('writes clientConnected to the primary gateway and legacy mirror', async () => {
     const spyPrimary = jest.fn();
     const spyGateway = jest.fn();
-    // The mirror is fire-and-forget, so clientConnected resolves on the primary
-    // alone. Await this to deterministically observe the gateway write landing.
+    // The legacy mirror is fire-and-forget; await this to deterministically
+    // observe both writes landing.
     let resolveGatewayWritten;
     const gatewayWritten = new Promise<void>((resolve) => {
       resolveGatewayWritten = resolve;
@@ -287,7 +287,7 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
     expect(gatewayScope.isDone()).toBe(false);
   });
 
-  it('isolates the primary write path from an unhealthy gateway', async () => {
+  it('isolates the primary gateway path from an unhealthy legacy mirror', async () => {
     const spyPrimary = jest.fn();
     let gatewayAttempts = 0;
     let resolveFirstAttempt;
@@ -295,17 +295,17 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
       resolveFirstAttempt = resolve;
     });
 
-    nock(primaryUrl)
+    nock(gatewayUrl)
       .post(connectionPath)
       .reply((_uri, body) => {
         spyPrimary(JSON.parse(body as string));
         return [200, 'OK'];
       });
-    // Unhealthy gateway: every attempt (and axios-retry's retries) 500s.
+    // Unhealthy legacy mirror: every attempt (and axios-retry's retries) 500s.
     // persist() keeps the failures inside nock so the background retry budget
     // (~1.4s for 5xx, up to ~11s if it were black-holing) never touches the
     // real network.
-    nock(gatewayUrl)
+    nock(primaryUrl)
       .persist()
       .post(connectionPath)
       .reply(() => {
@@ -324,10 +324,10 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
     ).resolves.not.toThrowError();
     const elapsed = Date.now() - start;
 
-    // Primary write landed exactly once and was unaffected by the failing mirror.
+    // Gateway write landed exactly once and was unaffected by the failing mirror.
     expect(spyPrimary).toBeCalledTimes(1);
     expect(spyPrimary).toBeCalledWith(expectedBody);
-    // The call returned on the primary alone, without waiting on the gateway's
+    // The call returned on the gateway alone, without waiting on the legacy
     // retry budget — this is the latency isolation fire-and-forget guarantees.
     expect(elapsed).toBeLessThan(500);
 
