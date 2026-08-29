@@ -32,9 +32,12 @@ export function convertBodyToGitHubTreePayload(
 export function validateForSymlinksInCreateTree(
   createTree: GitHubCreateTreePayload,
 ): void {
-  const treesWithSymlink = createTree.tree.filter(
-    (tree) => tree.mode === '120000' && tree.type === 'commit',
-  );
+  const treesWithSymlink = createTree.tree.filter((tree) => {
+    // GitHub uses sha: null without content to delete an existing entry.
+    // Removing a symlink is safe; any entry that could create one is not.
+    const isDeletion = tree.sha === null && tree.content === undefined;
+    return tree.mode === '120000' && !isDeletion;
+  });
 
   if (treesWithSymlink.length > 0) {
     const paths = treesWithSymlink.map((tree) => tree.path).join(', ');

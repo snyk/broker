@@ -56,13 +56,13 @@ describe('client/scm/github/tree.ts', () => {
     {
       "path": "package.json",
       "content":"bla-bla-bla",
-      "type":"commit",
+      "type":"blob",
       "mode":"100644"
     },
     {
       "path":"package-lock.json",
       "content":"bla-bla-bla-lock",
-      "type":"commit",
+      "type":"blob",
       "mode":"100644"
     }
   ]
@@ -77,13 +77,13 @@ describe('client/scm/github/tree.ts', () => {
           {
             path: 'package.json',
             content: 'bla-bla-bla',
-            type: 'commit',
+            type: 'blob',
             mode: '100644',
           },
           {
             path: 'package-lock.json',
             content: 'bla-bla-bla-lock',
-            type: 'commit',
+            type: 'blob',
             mode: '100644',
           },
         ],
@@ -102,19 +102,19 @@ describe('client/scm/github/tree.ts', () => {
           {
             path: 'aaa.txt',
             content: 'content',
-            type: 'commit',
+            type: 'blob',
             mode: '120000',
           },
           {
             path: 'bbb.txt',
             content: 'content',
-            type: 'commit',
+            type: 'blob',
             mode: '100644',
           },
           {
             path: 'ccc.txt',
             content: 'content',
-            type: 'commit',
+            type: 'blob',
             mode: '120000',
           },
         ],
@@ -122,6 +122,9 @@ describe('client/scm/github/tree.ts', () => {
 
       expect(() => validateForSymlinksInCreateTree(createTree)).toThrowError(
         GitHubTreeValidationError,
+      );
+      expect(() => validateForSymlinksInCreateTree(createTree)).toThrowError(
+        'Symlinks are not allowed in GitHub tree payload: aaa.txt, ccc.txt',
       );
     });
 
@@ -134,14 +137,26 @@ describe('client/scm/github/tree.ts', () => {
           {
             path: 'aaa.txt',
             content: 'content',
-            type: 'commit',
+            type: 'blob',
             mode: '100644',
           },
           {
             path: 'bbb.txt',
             content: 'content',
-            type: 'commit',
+            type: 'blob',
             mode: '100755',
+          },
+          {
+            path: 'nested',
+            sha: '1111111111111111111111111111111111111111',
+            type: 'tree',
+            mode: '040000',
+          },
+          {
+            path: 'vendor/dependency',
+            sha: '2222222222222222222222222222222222222222',
+            type: 'commit',
+            mode: '160000',
           },
         ],
       } satisfies GitHubCreateTreePayload;
@@ -149,6 +164,47 @@ describe('client/scm/github/tree.ts', () => {
       expect(() =>
         validateForSymlinksInCreateTree(createTree),
       ).not.toThrowError(GitHubTreeValidationError);
+    });
+
+    it('should allow deleting an existing symlink', () => {
+      const createTree = {
+        owner: 'owner',
+        repo: 'repo',
+        base_tree: '0000000000000000000000000000000000000000',
+        tree: [
+          {
+            path: 'obsolete-link',
+            sha: null,
+            type: 'blob',
+            mode: '120000',
+          },
+        ],
+      } satisfies GitHubCreateTreePayload;
+
+      expect(() =>
+        validateForSymlinksInCreateTree(createTree),
+      ).not.toThrowError(GitHubTreeValidationError);
+    });
+
+    it('should reject a symlink with both null sha and content', () => {
+      const createTree = {
+        owner: 'owner',
+        repo: 'repo',
+        base_tree: '0000000000000000000000000000000000000000',
+        tree: [
+          {
+            path: 'ambiguous-link',
+            sha: null,
+            content: '/etc/passwd',
+            type: 'blob',
+            mode: '120000',
+          },
+        ],
+      } satisfies GitHubCreateTreePayload;
+
+      expect(() => validateForSymlinksInCreateTree(createTree)).toThrowError(
+        'Symlinks are not allowed in GitHub tree payload: ambiguous-link',
+      );
     });
   });
 });

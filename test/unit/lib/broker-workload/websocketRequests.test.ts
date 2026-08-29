@@ -9,6 +9,7 @@ import {
   makeStreamingRequestToDownstream,
 } from '../../../../lib/hybrid-sdk/http/request';
 import { emitError } from '../../../../lib/hybrid-sdk/client/events';
+import { prepareRequest } from '../../../../lib/broker-workload/prepareRequest';
 
 const mockSendResponse = jest.fn();
 const mockStreamDataResponse = jest.fn();
@@ -32,6 +33,7 @@ jest.mock('../../../../lib/hybrid-sdk/http/request', () => ({
 jest.mock('../../../../lib/broker-workload/prepareRequest', () => ({
   prepareRequest: jest.fn(async () => ({
     req: { url: 'http://downstream.example', headers: {}, method: 'GET' },
+    error: null,
   })),
 }));
 jest.mock(
@@ -53,6 +55,9 @@ const mockMakeStreamingRequest =
   makeStreamingRequestToDownstream as jest.MockedFunction<
     typeof makeStreamingRequestToDownstream
   >;
+const mockPrepareRequest = prepareRequest as jest.MockedFunction<
+  typeof prepareRequest
+>;
 
 // snyk-request-id is pre-populated in fixtures to reflect production reality:
 // forwardWebSocketRequest guarantees the header is a valid UUID before
@@ -185,6 +190,42 @@ describe('BrokerWorkload', () => {
           }),
         }),
       );
+    });
+
+    it('returns a preparation error without calling the downstream GitHub API', async () => {
+      mockFilterRequest.mockReturnValue(matchedRule);
+      mockPrepareRequest.mockResolvedValueOnce({
+        req: {
+          url: 'https://api.github.com/repos/owner/repo/git/trees',
+          headers: {},
+          method: 'POST',
+        },
+        error: {
+          status: 401,
+          errorMsg:
+            'Symlinks are not allowed in GitHub tree payload: config/malicious_link',
+        },
+      });
+      const workload = new BrokerWorkload(
+        connectionIdentifier,
+        options,
+        websocketConnectionHandler,
+      );
+      const payload = {
+        url: '/repos/owner/repo/git/trees',
+        method: 'POST',
+        headers: { 'snyk-request-id': '99999999-9999-4999-8999-999999999999' },
+        streamingID: '',
+      };
+
+      await workload.handler({ payload, websocketHandler: jest.fn() });
+
+      expect(mockSendResponse).toHaveBeenCalledWith({
+        status: 401,
+        body: 'Symlinks are not allowed in GitHub tree payload: config/malicious_link',
+      });
+      expect(mockMakeRequest).not.toHaveBeenCalled();
+      expect(mockMakeStreamingRequest).not.toHaveBeenCalled();
     });
 
     it('non-streaming ECONNREFUSED returns DOWNSTREAM_UNREACHABLE with 502', async () => {

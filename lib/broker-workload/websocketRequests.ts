@@ -175,6 +175,12 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
         this.connectionIdentifier,
         this.websocketConnectionHandler?.socketType,
       );
+      if (preparedRequest.error) {
+        return responseHandler.sendResponse({
+          status: preparedRequest.error.status,
+          body: preparedRequest.error.errorMsg,
+        });
+      }
       if (this.options.config.universalBrokerEnabled) {
         preparedRequest.req = await runPreRequestPlugins(
           this.options,
