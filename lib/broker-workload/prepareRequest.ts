@@ -85,6 +85,7 @@ export const prepareRequest = async (
     'x-forwarded-for',
     'x-forwarded-proto',
     'content-length',
+    'content-encoding',
     'host',
     'x-forwarded-host',
     'x-forwarded-port',

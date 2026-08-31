@@ -1,4 +1,5 @@
 import path from 'path';
+import zlib from 'zlib';
 import version from '../../lib/hybrid-sdk/common/utils/version';
 import { axiosClient } from '../setup/axios-client';
 import {
@@ -520,6 +521,48 @@ describe('proxy requests originating from behind the broker server', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toEqual(paramRequiringCompression);
+  });
+
+  describe('request bodies sent with content-encoding: gzip', () => {
+    const plaintextBody = JSON.stringify({
+      want: 'a'.repeat(2000), // over git's 1024-byte gzip threshold
+    });
+    const gzippedBody = zlib.gzipSync(Buffer.from(plaintextBody));
+
+    it('does not relay content-encoding to the downstream', async () => {
+      const response = await axiosClient.post(
+        `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
+        gzippedBody,
+        {
+          headers: {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.data).not.toHaveProperty('content-encoding');
+      expect(response.data['content-length']).toEqual(
+        String(Buffer.byteLength(plaintextBody)),
+      );
+    });
+
+    it('delivers the inflated body to the downstream intact', async () => {
+      const response = await axiosClient.post(
+        `http://localhost:${bs.port}/broker/${brokerToken}/echo-body`,
+        gzippedBody,
+        {
+          headers: {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.data).toEqual(JSON.parse(plaintextBody));
+    });
   });
 
   it('successfully stream data', async () => {

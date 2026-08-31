@@ -131,6 +131,132 @@ describe('prepareRequest — downstream x-request-id mirror', () => {
   });
 });
 
+describe('prepareRequest — request content-encoding', () => {
+  const baseResult = { url: 'https://example.com/path' } as any;
+  const baseOptions = {
+    config: { removeXForwardedHeaders: 'false', universalBrokerEnabled: false },
+  } as any;
+  const logContext: any = {};
+
+  // The broker server inflates a gzipped request body but leaves
+  // content-encoding in place, so by the time we relay it the header is a lie.
+  // Forwarding it makes the downstream SCM gunzip plaintext and fail with
+  // "fatal: zlib error inflating request, result -3".
+  const packBody = '0032want deadbeefdeadbeefdeadbeefdeadbeefdeadbeef\n0000';
+
+  it('removes content-encoding from a relayed request body', async () => {
+    const payload = {
+      method: 'POST',
+      url: '/repo.git/git-upload-pack',
+      headers: {
+        'content-encoding': 'gzip',
+        'content-type': 'application/x-git-upload-pack-request',
+      },
+      body: packBody,
+    };
+
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(req.headers['content-encoding']).toBeUndefined();
+  });
+
+  it('removes content-encoding regardless of header casing', async () => {
+    const payload = {
+      method: 'POST',
+      url: '/repo.git/git-upload-pack',
+      headers: { 'Content-Encoding': 'GZIP' },
+      body: packBody,
+    };
+
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(req.headers['Content-Encoding']).toBeUndefined();
+    expect(req.headers['content-encoding']).toBeUndefined();
+  });
+
+  it('sets content-length to the inflated body size once content-encoding is gone', async () => {
+    const payload = {
+      method: 'POST',
+      url: '/repo.git/git-upload-pack',
+      headers: { 'content-encoding': 'gzip', 'content-length': '39' },
+      body: packBody,
+    };
+
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(req.headers['content-encoding']).toBeUndefined();
+    expect(req.headers['Content-Length']).toBe(Buffer.byteLength(packBody));
+  });
+
+  it.each(['client', 'server'])(
+    'removes content-encoding on the %s leg',
+    async (socketType) => {
+      const payload = {
+        method: 'POST',
+        url: '/repo.git/git-upload-pack',
+        headers: { 'content-encoding': 'gzip' },
+        body: packBody,
+      };
+
+      const { req } = await prepareRequest(
+        { ...baseResult },
+        payload,
+        logContext,
+        baseOptions,
+        'tok',
+        socketType,
+      );
+
+      expect(req.headers['content-encoding']).toBeUndefined();
+    },
+  );
+
+  it('keeps accept-encoding so downstream responses can still be compressed', async () => {
+    const payload = {
+      method: 'POST',
+      url: '/repo.git/git-upload-pack',
+      headers: {
+        'accept-encoding': 'gzip, deflate',
+        'content-encoding': 'gzip',
+      },
+      body: packBody,
+    };
+
+    const { req } = await prepareRequest(
+      { ...baseResult },
+      payload,
+      logContext,
+      baseOptions,
+      'tok',
+      'client',
+    );
+
+    expect(req.headers['accept-encoding']).toBe('gzip, deflate');
+    expect(req.headers['content-encoding']).toBeUndefined();
+  });
+});
+
 describe('prepareRequest — GitHub create tree validation', () => {
   const baseResult = {
     url: 'https://api.github.com/repos/owner/repo/git/trees',
