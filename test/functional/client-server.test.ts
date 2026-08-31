@@ -1,4 +1,5 @@
 import path from 'path';
+import zlib from 'zlib';
 import { axiosClient } from '../setup/axios-client';
 import {
   BrokerClient,
@@ -112,6 +113,52 @@ describe('proxy requests originating from behind the broker client', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toEqual('xyz');
+  });
+
+  describe('request bodies sent with content-encoding: gzip', () => {
+    const plaintextBody = JSON.stringify({
+      some: { example: 'a'.repeat(2000) },
+    });
+    const gzippedBody = zlib.gzipSync(Buffer.from(plaintextBody));
+
+    it('does not relay content-encoding to the downstream', async () => {
+      const response = await axiosClient.post(
+        `http://localhost:${bc.port}/echo-headers`,
+        gzippedBody,
+        {
+          headers: {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.data).not.toHaveProperty('content-encoding');
+      expect(response.data['content-length']).toEqual(
+        String(Buffer.byteLength(plaintextBody)),
+      );
+    });
+
+    it('delivers the inflated body to the downstream intact', async () => {
+      const response = await axiosClient.post(
+        `http://localhost:${bc.port}/echo-body`,
+        gzippedBody,
+        {
+          headers: {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json',
+            // This leg corrupts any compressed response over ~1kb, which is a
+            // separate defect from the request header under test. Opt out of
+            // response compression so this test fails only on the request side.
+            'Accept-Encoding': 'identity',
+          },
+        },
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.data).toEqual(JSON.parse(plaintextBody));
+    });
   });
 
   it('block request for non-whitelisted url', async () => {
