@@ -33,7 +33,7 @@ export const getClientConfigMetadata = (
     debugMode: clientConfig.logLevel === 'debug' ? true : false,
     bodyLogMode: clientConfig.logEnableBody === 'true' ? true : false,
     credPooling: isCredPoolingUsed(clientConfig),
-    privateCa: clientConfig.nodeExtraCaCert ? true : false,
+    privateCa: clientConfig.nodeExtraCaCerts ? true : false,
     tlsReject:
       parseInt(clientConfig.nodeTlsRejectUnauthorized) === 0 ? true : false,
     proxy: clientConfig.httpProxy || clientConfig.httpsProxy ? true : false,

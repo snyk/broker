@@ -8,35 +8,28 @@ import {
 } from '../../lib/hybrid-sdk/common/config/config';
 import { LoadedClientOpts } from '../../lib/hybrid-sdk/common/types/options';
 
+const clearConfigEnv = () => {
+  delete process.env.LOG_LEVEL;
+  delete process.env.LOG_ENABLE_BODY;
+  delete process.env.GITHUB_TOKEN_POOL;
+  delete process.env.INSECURE_DOWNSTREAM;
+  delete process.env.BROKER_HA_MODE_ENABLED;
+  delete process.env.HTTP_PROXY;
+  delete process.env.NODE_EXTRA_CA_CERTS;
+  delete process.env.ACCEPT;
+  delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  delete process.env.UNIVERSAL_BROKER_ENABLED;
+};
+
 describe('config', () => {
   beforeAll(async () => {
+    clearConfigEnv();
     await loadBrokerConfig();
   });
-  afterEach(() => {
-    delete process.env.LOG_LEVEL;
-    delete process.env.LOG_ENABLE_BODY;
-    delete process.env.GITHUB_TOKEN_POOL;
-    delete process.env.INSECURE_DOWNSTREAM;
-    delete process.env.BROKER_HA_MODE_ENABLED;
-    delete process.env.HTTP_PROXY;
-    delete process.env.NODE_EXTRA_CA_CERT;
-    delete process.env.ACCEPT;
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    delete process.env.UNIVERSAL_BROKER_ENABLED;
-  });
+  beforeEach(clearConfigEnv);
+  afterEach(clearConfigEnv);
+  afterAll(clearConfigEnv);
 
-  afterAll(() => {
-    delete process.env.LOG_LEVEL;
-    delete process.env.LOG_ENABLE_BODY;
-    delete process.env.GITHUB_TOKEN_POOL;
-    delete process.env.INSECURE_DOWNSTREAM;
-    delete process.env.BROKER_HA_MODE_ENABLED;
-    delete process.env.HTTP_PROXY;
-    delete process.env.NODE_EXTRA_CA_CERT;
-    delete process.env.ACCEPT;
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    delete process.env.UNIVERSAL_BROKER_ENABLED;
-  });
   it('everything is false for empty config', async () => {
     await loadBrokerConfig();
     const config = getConfig();
@@ -64,7 +57,7 @@ describe('config', () => {
     process.env.INSECURE_DOWNSTREAM = 'true_but_truly_value_does_not_matter';
     process.env.BROKER_HA_MODE_ENABLED = 'true';
     process.env.HTTP_PROXY = 'http://myproxy';
-    process.env.NODE_EXTRA_CA_CERT = 'my/path';
+    process.env.NODE_EXTRA_CA_CERTS = 'my/path';
     process.env.ACCEPT = 'my/path';
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
@@ -87,6 +80,27 @@ describe('config', () => {
     });
   });
 
+  it('privateCa is true for NODE_EXTRA_CA_CERTS', async () => {
+    process.env.NODE_EXTRA_CA_CERTS = 'my/path/ca.pem';
+    await loadBrokerConfig();
+    const config = getConfig();
+    config.brokerClientId = '123';
+    expect(getClientConfigMetadata(config as LoadedClientOpts)).toEqual({
+      bodyLogMode: false,
+      brokerClientId: '123',
+      credPooling: false,
+      customAccept: false,
+      debugMode: false,
+      haMode: false,
+      privateCa: true,
+      proxy: false,
+      tlsReject: false,
+      insecureDownstream: false,
+      universalBroker: false,
+      version: 'local',
+    });
+  });
+
   it('custom accept is false if ACCEPT exists and set to accept.json', async () => {
     process.env.LOG_LEVEL = 'debug';
     process.env.LOG_ENABLE_BODY = 'true';
@@ -94,7 +108,7 @@ describe('config', () => {
     process.env.INSECURE_DOWNSTREAM = 'true_but_truly_value_does_not_matter';
     process.env.BROKER_HA_MODE_ENABLED = 'true';
     process.env.HTTP_PROXY = 'http://myproxy';
-    process.env.NODE_EXTRA_CA_CERT = 'my/path';
+    process.env.NODE_EXTRA_CA_CERTS = 'my/path';
     process.env.ACCEPT = 'accept.json';
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     process.env.UNIVERSAL_BROKER_ENABLED = 'true';
