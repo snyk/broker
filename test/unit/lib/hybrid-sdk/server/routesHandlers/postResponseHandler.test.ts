@@ -287,6 +287,43 @@ describe('handlePostResponse — four-byte prefix fragmentation evidence', () =>
     },
   );
 
+  it('logs incomplete response metadata when the request ends before the declared metadata size', () => {
+    const { req, res } = createReqRes();
+    const expectedMetadataBytes = 100;
+    const receivedMetadataBytes = 50;
+    const prefix = Buffer.alloc(4);
+    prefix.writeUInt32LE(expectedMetadataBytes);
+    handlePostResponse(req, res);
+
+    req.emit('data', prefix);
+    req.emit('data', Buffer.alloc(receivedMetadataBytes));
+    req.emit('end');
+
+    const framingErrors = (log.error as jest.Mock).mock.calls.filter(
+      ([, message]) =>
+        message ===
+        'Incomplete response metadata at end of streaming HTTP response.',
+    );
+    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(framingErrors).toHaveLength(1);
+    expect(framingErrors[0][0]).toMatchObject({
+      hashedToken: 'hashed',
+      maskedToken: 'masked',
+      streamingID: 'stream-1',
+      requestId: 'req-1',
+      receivedMetadataBytes,
+      expectedMetadataBytes,
+      error: {
+        message: `Incomplete response metadata: received ${receivedMetadataBytes} of ${expectedMetadataBytes} bytes.`,
+      },
+    });
+    expect(mockWriteStatusAndHeaders).not.toHaveBeenCalled();
+    expect(mockWriteChunk).not.toHaveBeenCalled();
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({});
+  });
+
   it('does not classify a zero-byte request as a truncated prefix', () => {
     const { req, res } = createReqRes();
     handlePostResponse(req, res);

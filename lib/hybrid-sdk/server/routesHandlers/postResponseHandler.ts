@@ -199,6 +199,23 @@ export const handlePostResponse = (req: Request, res: Response) => {
           'Incomplete metadata-length prefix at end of streaming HTTP response.',
         );
       }
+      if (
+        statusAndHeadersSize >= 0 &&
+        statusAndHeadersLength < statusAndHeadersSize
+      ) {
+        const error = new Error(
+          `Incomplete response metadata: received ${statusAndHeadersLength} of ${statusAndHeadersSize} bytes.`,
+        );
+        logger.error(
+          {
+            ...logContext,
+            receivedMetadataBytes: statusAndHeadersLength,
+            expectedMetadataBytes: statusAndHeadersSize,
+            error,
+          },
+          'Incomplete response metadata at end of streaming HTTP response.',
+        );
+      }
       logger.debug(logContext, 'Handling response-data request - end part.');
       streamHandler.finished();
       res.status(200).json({});
