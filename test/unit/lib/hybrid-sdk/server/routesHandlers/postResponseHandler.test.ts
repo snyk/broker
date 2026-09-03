@@ -219,50 +219,213 @@ describe('handlePostResponse — four-byte prefix fragmentation evidence', () =>
     ['3+1', [3, 1]],
     ['1+1+1+1', [1, 1, 1, 1]],
     ['1+1+2', [1, 1, 2]],
+    ['1+2+1', [1, 2, 1]],
     ['2+1+1', [2, 1, 1]],
   ])(
-    'logs ERR_BUFFER_OUT_OF_BOUNDS and loses a valid frame for %s prefix delivery',
+    'accepts a valid frame for %s prefix delivery',
     (_label, fragmentSizes) => {
-      const { res } = driveFrame(fragmentSizes as number[]);
-      const parserErrors = (log.error as jest.Mock).mock.calls.filter(
-        ([, message]) =>
-          message ===
-          'Caught error handling data event for streaming HTTP response.',
-      );
+      const { res, body } = driveFrame(fragmentSizes as number[]);
 
-      expect(parserErrors).toHaveLength(fragmentSizes.length);
-      for (const [context] of parserErrors) {
-        expect(context).toMatchObject({
-          statusAndHeaders: '',
-          statusAndHeadersSize: -1,
-          error: { code: 'ERR_BUFFER_OUT_OF_BOUNDS' },
-        });
-        expect(context.error.name).toBe('RangeError');
-        expect(context.error.message).toBe(
-          'Attempt to access memory outside buffer bounds',
-        );
-      }
-      expect(mockWriteStatusAndHeaders).not.toHaveBeenCalled();
-      expect(mockWriteChunk).not.toHaveBeenCalled();
-
-      // The data-event exception is swallowed. The normal end handler still
-      // closes the caller's body stream and acknowledges the POST.
+      expect(log.error).not.toHaveBeenCalled();
+      expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
+      });
+      expect(mockWriteChunk).toHaveBeenCalledWith(body, expect.any(Function));
       expect(mockFinished).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({});
     },
   );
 
-  it('reinterprets the next four metadata bytes as a replacement prefix', () => {
+  it('reads the declared metadata size after a fragmented prefix', () => {
     const { metadata } = driveFrame([1, 3]);
-    const replacementSize = metadata.readUInt32LE(0);
 
     expect(log.debug).toHaveBeenCalledWith(
-      expect.objectContaining({ statusAndHeadersSize: replacementSize }),
+      expect.objectContaining({ statusAndHeadersSize: metadata.length }),
       'Request metadata size read from stream.',
     );
-    expect(replacementSize).not.toBe(metadata.length);
+    expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+      status: 200,
+      headers: { 'content-type': 'text/plain' },
+    });
+  });
+
+  it.each([1, 2, 3])(
+    'logs an incomplete metadata-length prefix when the request ends after %d byte(s)',
+    (receivedPrefixBytes) => {
+      const { req, res } = createReqRes();
+      const { prefix } = validResponseFrame();
+      handlePostResponse(req, res);
+
+      req.emit('data', prefix.subarray(0, receivedPrefixBytes));
+      req.emit('end');
+
+      const framingErrors = (log.error as jest.Mock).mock.calls.filter(
+        ([, message]) =>
+          message ===
+          'Incomplete metadata-length prefix at end of streaming HTTP response.',
+      );
+      expect(log.error).toHaveBeenCalledTimes(1);
+      expect(framingErrors).toHaveLength(1);
+      expect(framingErrors[0][0]).toMatchObject({
+        hashedToken: 'hashed',
+        maskedToken: 'masked',
+        streamingID: 'stream-1',
+        requestId: 'req-1',
+        receivedPrefixBytes,
+        expectedPrefixBytes: 4,
+        error: {
+          message: `Incomplete metadata-length prefix: received ${receivedPrefixBytes} of 4 bytes.`,
+        },
+      });
+      expect(mockWriteStatusAndHeaders).not.toHaveBeenCalled();
+      expect(mockWriteChunk).not.toHaveBeenCalled();
+      expect(mockFinished).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({});
+    },
+  );
+
+  it('does not classify a zero-byte request as a truncated prefix', () => {
+    const { req, res } = createReqRes();
+    handlePostResponse(req, res);
+
+    req.emit('end');
+
+    expect(log.error).not.toHaveBeenCalled();
     expect(mockWriteStatusAndHeaders).not.toHaveBeenCalled();
+    expect(mockWriteChunk).not.toHaveBeenCalled();
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({});
+  });
+
+  it('parses a complete prefix, metadata, and body from one data event', () => {
+    const { req, res } = createReqRes();
+    const { prefix, metadata, body } = validResponseFrame();
+    handlePostResponse(req, res);
+
+    req.emit('data', Buffer.concat([prefix, metadata, body]));
+    req.emit('end');
+
+    expect(log.error).not.toHaveBeenCalled();
+    expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+      status: 200,
+      headers: { 'content-type': 'text/plain' },
+    });
+    expect(mockWriteChunk).toHaveBeenCalledTimes(1);
+    expect(mockWriteChunk).toHaveBeenCalledWith(body, expect.any(Function));
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({});
+  });
+
+  it('parses metadata fragmented inside a multibyte UTF-8 value', () => {
+    const { req, res } = createReqRes();
+    const headers = {
+      'content-type': 'text/plain; charset=utf-8',
+      'x-response-label': '日本語',
+    };
+    const metadata = Buffer.from(JSON.stringify({ status: 206, headers }));
+    const prefix = Buffer.alloc(4);
+    prefix.writeUInt32LE(metadata.length);
+    const body = Buffer.from('exact UTF-8 response body');
+    const multibyteValue = Buffer.from('日');
+    const codePointStart = metadata.indexOf(multibyteValue);
+    expect(codePointStart).toBeGreaterThan(-1);
+    const splitPosition = codePointStart + 1;
+    handlePostResponse(req, res);
+
+    req.emit(
+      'data',
+      Buffer.concat([prefix, metadata.subarray(0, splitPosition)]),
+    );
+    req.emit('data', Buffer.concat([metadata.subarray(splitPosition), body]));
+    req.emit('end');
+
+    expect(log.error).not.toHaveBeenCalled();
+    expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+      status: 206,
+      headers,
+    });
+    const forwardedBody = Buffer.concat(
+      mockWriteChunk.mock.calls.map(([chunk]) => chunk),
+    );
+    expect(forwardedBody).toEqual(body);
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({});
+  });
+
+  it('continues into metadata when the prefix-completing event contains both', () => {
+    const { req, res } = createReqRes();
+    const { prefix, metadata, body } = validResponseFrame();
+    handlePostResponse(req, res);
+
+    req.emit('data', prefix.subarray(0, 2));
+    req.emit(
+      'data',
+      Buffer.concat([prefix.subarray(2), metadata.subarray(0, 7)]),
+    );
+    req.emit('data', metadata.subarray(7));
+    req.emit('data', body);
+    req.emit('end');
+
+    expect(log.error).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'Caught error handling data event for streaming HTTP response.',
+    );
+    expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+      status: 200,
+      headers: { 'content-type': 'text/plain' },
+    });
+    expect(mockWriteChunk).toHaveBeenCalledWith(body, expect.any(Function));
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('forwards body bytes from the event that completes metadata', () => {
+    const { req, res } = createReqRes();
+    const { prefix, metadata, body } = validResponseFrame();
+    const metadataTailLength = 3;
+    const firstBodyLength = 5;
+    handlePostResponse(req, res);
+
+    req.emit(
+      'data',
+      Buffer.concat([
+        prefix,
+        metadata.subarray(0, metadata.length - metadataTailLength),
+      ]),
+    );
+    req.emit(
+      'data',
+      Buffer.concat([
+        metadata.subarray(metadata.length - metadataTailLength),
+        body.subarray(0, firstBodyLength),
+      ]),
+    );
+    req.emit('data', body.subarray(firstBodyLength));
+    req.emit('end');
+
+    expect(log.error).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'Caught error handling data event for streaming HTTP response.',
+    );
+    expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+      status: 200,
+      headers: { 'content-type': 'text/plain' },
+    });
+    const forwardedBody = Buffer.concat(
+      mockWriteChunk.mock.calls.map(([chunk]) => chunk),
+    );
+    expect(forwardedBody).toEqual(body);
+    expect(mockWriteChunk.mock.calls[0][0]).toEqual(
+      body.subarray(0, firstBodyLength),
+    );
+    expect(mockFinished).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('reproduces 1+3 prefix delivery through a real chunked HTTP request', async () => {
@@ -317,19 +480,15 @@ describe('handlePostResponse — four-byte prefix fragmentation evidence', () =>
         .filter(([, message]) => message === 'Received data event.')
         .map(([context]) => context.dataLength);
       expect(receivedLengths).toEqual([1, 3, metadata.length, body.length]);
-      const parserErrors = (log.error as jest.Mock).mock.calls.filter(
-        ([, message]) =>
-          message ===
-          'Caught error handling data event for streaming HTTP response.',
-      );
-      expect(parserErrors).toHaveLength(2);
-      expect(parserErrors[0][0]).toMatchObject({
-        statusAndHeaders: '',
-        statusAndHeadersSize: -1,
-        error: { code: 'ERR_BUFFER_OUT_OF_BOUNDS' },
+      expect(log.error).not.toHaveBeenCalled();
+      expect(mockWriteStatusAndHeaders).toHaveBeenCalledWith({
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
       });
-      expect(mockWriteStatusAndHeaders).not.toHaveBeenCalled();
-      expect(mockWriteChunk).not.toHaveBeenCalled();
+      const forwardedBody = Buffer.concat(
+        mockWriteChunk.mock.calls.map(([chunk]) => chunk),
+      );
+      expect(forwardedBody).toEqual(body);
       expect(mockFinished).toHaveBeenCalledTimes(1);
     } finally {
       await new Promise<void>((resolve, reject) =>

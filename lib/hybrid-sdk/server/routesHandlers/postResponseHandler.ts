@@ -67,6 +67,10 @@ export const handlePostResponse = (req: Request, res: Response) => {
   }
   let statusAndHeaders = '';
   let statusAndHeadersSize = -1;
+  const statusAndHeadersSizeBuffer = Buffer.alloc(4);
+  let statusAndHeadersSizeBytesRead = 0;
+  const statusAndHeadersBuffers: Buffer[] = [];
+  let statusAndHeadersLength = 0;
   req
     .on('data', function (data) {
       try {
@@ -76,18 +80,30 @@ export const handlePostResponse = (req: Request, res: Response) => {
         );
         let bytesRead = 0;
         if (statusAndHeadersSize === -1) {
-          bytesRead += 4;
-          statusAndHeadersSize = data.readUInt32LE();
+          const bytesToRead = Math.min(
+            statusAndHeadersSizeBuffer.length - statusAndHeadersSizeBytesRead,
+            data.length,
+          );
+          data.copy(
+            statusAndHeadersSizeBuffer,
+            statusAndHeadersSizeBytesRead,
+            bytesRead,
+            bytesRead + bytesToRead,
+          );
+          statusAndHeadersSizeBytesRead += bytesToRead;
+          bytesRead += bytesToRead;
+          if (
+            statusAndHeadersSizeBytesRead < statusAndHeadersSizeBuffer.length
+          ) {
+            return;
+          }
+          statusAndHeadersSize = statusAndHeadersSizeBuffer.readUInt32LE();
           logger.debug(
             { ...logContext, statusAndHeadersSize },
             'Request metadata size read from stream.',
           );
         }
 
-        let statusAndHeadersLength = Buffer.byteLength(
-          statusAndHeaders,
-          'utf8',
-        );
         if (
           statusAndHeadersSize > 0 &&
           statusAndHeadersLength < statusAndHeadersSize
@@ -100,10 +116,16 @@ export const handlePostResponse = (req: Request, res: Response) => {
             { ...logContext, bytesRead, endPosition },
             'Reading ioJson.',
           );
-          statusAndHeaders += data.toString('utf8', bytesRead, endPosition);
+          const statusAndHeadersChunk = data.subarray(bytesRead, endPosition);
+          statusAndHeadersBuffers.push(statusAndHeadersChunk);
+          statusAndHeadersLength += statusAndHeadersChunk.length;
           bytesRead = endPosition;
-          statusAndHeadersLength = Buffer.byteLength(statusAndHeaders, 'utf8');
           if (statusAndHeadersLength === statusAndHeadersSize) {
+            statusAndHeaders = Buffer.concat(
+              statusAndHeadersBuffers,
+              statusAndHeadersSize,
+            ).toString('utf8');
+            statusAndHeadersBuffers.length = 0;
             logger.trace(
               { ...logContext, statusAndHeaders },
               'Converting to json.',
@@ -160,6 +182,23 @@ export const handlePostResponse = (req: Request, res: Response) => {
       }
     })
     .on('end', function () {
+      if (
+        statusAndHeadersSizeBytesRead > 0 &&
+        statusAndHeadersSizeBytesRead < statusAndHeadersSizeBuffer.length
+      ) {
+        const error = new Error(
+          `Incomplete metadata-length prefix: received ${statusAndHeadersSizeBytesRead} of ${statusAndHeadersSizeBuffer.length} bytes.`,
+        );
+        logger.error(
+          {
+            ...logContext,
+            receivedPrefixBytes: statusAndHeadersSizeBytesRead,
+            expectedPrefixBytes: statusAndHeadersSizeBuffer.length,
+            error,
+          },
+          'Incomplete metadata-length prefix at end of streaming HTTP response.',
+        );
+      }
       logger.debug(logContext, 'Handling response-data request - end part.');
       streamHandler.finished();
       res.status(200).json({});
