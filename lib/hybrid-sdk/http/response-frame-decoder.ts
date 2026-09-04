@@ -1,4 +1,4 @@
-import { Transform, TransformCallback } from 'stream';
+import { Transform, TransformCallback } from 'node:stream';
 
 export interface ResponseMetadata {
   status: number;
@@ -9,6 +9,33 @@ export interface ResponseMetadata {
 export interface ResponseFrameDecoderOptions {
   maxMetadataBytes?: number;
   onMetadata?: (metadata: ResponseMetadata) => void;
+}
+
+export type ResponseFrameFailureDiagnostics =
+  | {
+      failureReason: 'incomplete-prefix';
+      receivedPrefixBytes: number;
+      expectedPrefixBytes: number;
+    }
+  | {
+      failureReason: 'incomplete-metadata';
+      receivedMetadataBytes: number;
+      expectedMetadataBytes: number;
+    }
+  | { failureReason: 'malformed-metadata' }
+  | { failureReason: 'invalid-metadata' }
+  | { failureReason: 'metadata-too-large' };
+
+/** A decoder-owned failure with safe context suitable for structured logs. */
+export class ResponseFrameError extends Error {
+  constructor(
+    message: string,
+    readonly diagnostics: ResponseFrameFailureDiagnostics,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = 'ResponseFrameError';
+  }
 }
 
 const PREFIX_BYTES = 4;
@@ -76,11 +103,14 @@ export class ResponseFrameDecoder extends Transform {
 
         this.metadataBytesExpected = this.prefix.readUInt32LE(0);
         if (this.metadataBytesExpected === 0) {
-          throw new Error('Response metadata must not be empty.');
+          throw new ResponseFrameError('Response metadata must not be empty.', {
+            failureReason: 'invalid-metadata',
+          });
         }
         if (this.metadataBytesExpected > this.maxMetadataBytes) {
-          throw new Error(
+          throw new ResponseFrameError(
             `Response metadata length ${this.metadataBytesExpected} exceeds the ${this.maxMetadataBytes}-byte limit.`,
+            { failureReason: 'metadata-too-large' },
           );
         }
       }
@@ -120,16 +150,26 @@ export class ResponseFrameDecoder extends Transform {
   _flush(callback: TransformCallback): void {
     if (this.prefixBytes < PREFIX_BYTES) {
       callback(
-        new Error(
+        new ResponseFrameError(
           `Incomplete metadata-length prefix: received ${this.prefixBytes} of ${PREFIX_BYTES} bytes.`,
+          {
+            failureReason: 'incomplete-prefix',
+            receivedPrefixBytes: this.prefixBytes,
+            expectedPrefixBytes: PREFIX_BYTES,
+          },
         ),
       );
       return;
     }
     if (!this.metadataDecoded) {
       callback(
-        new Error(
+        new ResponseFrameError(
           `Incomplete response metadata: received ${this.metadataBytes} of ${this.metadataBytesExpected} bytes.`,
+          {
+            failureReason: 'incomplete-metadata',
+            receivedMetadataBytes: this.metadataBytes,
+            expectedMetadataBytes: this.metadataBytesExpected!,
+          },
         ),
       );
       return;
@@ -146,11 +186,17 @@ export class ResponseFrameDecoder extends Transform {
     try {
       value = JSON.parse(encoded);
     } catch (error) {
-      throw new Error('Malformed response metadata JSON.', { cause: error });
+      throw new ResponseFrameError(
+        'Malformed response metadata JSON.',
+        { failureReason: 'malformed-metadata' },
+        { cause: error },
+      );
     }
 
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      throw new Error('Response metadata must be a JSON object.');
+      throw new ResponseFrameError('Response metadata must be a JSON object.', {
+        failureReason: 'invalid-metadata',
+      });
     }
     const metadata = value as Partial<ResponseMetadata>;
     if (
@@ -158,7 +204,10 @@ export class ResponseFrameDecoder extends Transform {
       metadata.status! < 100 ||
       metadata.status! > 999
     ) {
-      throw new Error('Response metadata must contain a valid status.');
+      throw new ResponseFrameError(
+        'Response metadata must contain a valid status.',
+        { failureReason: 'invalid-metadata' },
+      );
     }
     if (
       metadata.headers !== undefined &&
@@ -166,13 +215,19 @@ export class ResponseFrameDecoder extends Transform {
         metadata.headers === null ||
         Array.isArray(metadata.headers))
     ) {
-      throw new Error('Response metadata headers must be an object.');
+      throw new ResponseFrameError(
+        'Response metadata headers must be an object.',
+        { failureReason: 'invalid-metadata' },
+      );
     }
     if (
       metadata.errorType !== undefined &&
       typeof metadata.errorType !== 'string'
     ) {
-      throw new Error('Response metadata errorType must be a string.');
+      throw new ResponseFrameError(
+        'Response metadata errorType must be a string.',
+        { failureReason: 'invalid-metadata' },
+      );
     }
     return metadata as ResponseMetadata;
   }

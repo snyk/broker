@@ -10,8 +10,7 @@ import {
 import undefsafe from 'undefsafe';
 import { ExtendedLogContext } from './common/types/log';
 import { uuidv4 } from './common/utils/uuid';
-import stream from 'stream';
-import { streamsStore } from './http/server-post-stream-handler';
+import { pendingResponseRegistry } from './http/server-post-stream-handler';
 import { maskToken } from './common/utils/token';
 import { makeRequestToDownstream } from './http/request';
 
@@ -58,33 +57,29 @@ export class HybridClientRequestHandler {
 
   private makeWebsocketRequestWithStreamingResponse() {
     const streamingID = uuidv4();
-    const streamBuffer = new stream.PassThrough({ highWaterMark: 1048576 });
-    streamBuffer.on('error', (error) => {
-      // This may be a duplicate error, as the most likely cause of this is the POST handler calling destroy.
-      logger.error(
-        {
-          ...this.logContext,
-          error,
-          stackTrace: new Error('stacktrace generator').stack,
-        },
-        '[HTTP Flow][Relay] Error piping POST response stream through to HTTP response',
-      );
-      this.res.destroy(error);
-    });
     this.logContext.streamingID = streamingID;
     logger.debug(
       this.logContext,
       '[HTTP Flow][Relay] Sending request over websocket connection expecting POST stream response',
     );
 
-    streamsStore.set(streamingID, {
+    const registration = pendingResponseRegistry.register(streamingID, {
       response: this.res,
-      streamBuffer,
-      streamSize: 0,
       brokerAppClientId: this.res.locals.brokerAppClientId ?? null,
+      legacyConnectionIdentifier:
+        this.req.params?.token ??
+        (this.options.universalBrokerEnabled
+          ? this.res.locals.websocket.identifier
+          : this.options.brokerToken),
     });
+    if (registration.status === 'destination-unavailable') {
+      logger.debug(
+        this.logContext,
+        '[HTTP Flow][Relay] Requester disconnected before POST stream registration.',
+      );
+      return;
+    }
     this.res.setHeader('snyk-request-id', this.req.requestId);
-    streamBuffer.pipe(this.res);
     const simplifiedContextWithStreamingID = this.simplifiedContext;
     simplifiedContextWithStreamingID['streamingID'] = streamingID;
     logger.debug(
