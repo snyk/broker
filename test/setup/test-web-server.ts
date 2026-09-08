@@ -162,6 +162,27 @@ const applyEchoRoutes = (app: Express) => {
     },
   );
 
+  // JSON whose URLs grow when RES_BODY_URL_SUB rewrites them, served with an
+  // explicit Content-Length. no-transform keeps the compression middleware out.
+  echoRouter.get(
+    '/test-blob-param/json-url-substitution',
+    (_: express.Request, resp: express.Response) => {
+      const body = JSON.stringify({
+        versions: Array.from({ length: 20 }, (_unused, i) => ({
+          version: `1.0.${i}`,
+          dist: {
+            tarball: `http://private-registry.internal:8000/artifactory/api/npm/repo/pkg/-/pkg-1.0.${i}.tgz`,
+          },
+        })),
+      });
+      resp.setHeader('cache-control', 'no-transform');
+      resp.setHeader('content-type', 'application/json');
+      resp.setHeader('content-length', `${Buffer.byteLength(body, 'utf8')}`);
+      resp.status(200);
+      resp.end(body);
+    },
+  );
+
   echoRouter.get(
     '/test-blob-param/:param',
     (req: express.Request, resp: express.Response) => {
