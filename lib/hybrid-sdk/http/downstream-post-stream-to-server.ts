@@ -542,10 +542,12 @@ class BrokerServerPostResponseHandler {
         );
       }
       const isResponseJson = isJson(response.headers);
+      const willRewriteBody =
+        Boolean(config.RES_BODY_URL_SUB) && isResponseJson;
       const errorType = classifyDownstreamStatus(status);
       const ioData = JSON.stringify({
         status,
-        headers: response.headers,
+        headers: headersForRelay(response.headers, willRewriteBody),
         errorType,
       });
 
@@ -638,6 +640,24 @@ class BrokerServerPostResponseHandler {
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();
   }
+}
+
+/**
+ * The URL substitution below rewrites the body as it streams, which changes its
+ * length, so the downstream Content-Length stops describing what we send. Drop
+ * it and let the Broker Server frame the relayed response.
+ */
+export function headersForRelay(responseHeaders, bodyWillBeRewritten: boolean) {
+  if (!bodyWillBeRewritten) {
+    return responseHeaders;
+  }
+  const headers = { ...responseHeaders };
+  for (const name of Object.keys(headers)) {
+    if (name.toLowerCase() === 'content-length') {
+      delete headers[name];
+    }
+  }
+  return headers;
 }
 
 function isJson(responseHeaders) {

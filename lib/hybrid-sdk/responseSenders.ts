@@ -1,4 +1,7 @@
-import { BrokerServerPostResponseHandler } from './http/downstream-post-stream-to-server';
+import {
+  BrokerServerPostResponseHandler,
+  headersForRelay,
+} from './http/downstream-post-stream-to-server';
 import { legacyStreaming } from './requestsHelper';
 import { log as logger } from '../logs/logger';
 import { IncomingMessage } from 'node:http';
@@ -97,6 +100,9 @@ export class HybridResponseHandler {
     if (this.config.RES_BODY_URL_SUB && isJson(response.headers)) {
       const replaced = replaceUrlPartialChunk(response.body, null, this.config);
       response.body = replaced.newChunk;
+      // The substitution changed the body length, so the downstream
+      // Content-Length no longer describes what we send.
+      response.headers = headersForRelay(response.headers, true);
     }
     const status = (response && response.statusCode) || 500;
     logResponse(logContext, status, response, this.config);
