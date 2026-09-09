@@ -17,6 +17,7 @@ import { addServerIdAndRoleQS } from './utils';
 import { getConfig } from '../common/config/config';
 import type { ExtendedLogContext } from '../common/types/log';
 import { replaceUrlPartialChunk } from '../common/utils/replace-vars';
+import { getResponseBodyUrlSubstitutionPolicy } from '../common/utils/response-body-url-substitution';
 import { classifyDownstreamStatus } from '../common/types/telemetry';
 import { performance } from 'node:perf_hooks';
 
@@ -541,11 +542,14 @@ class BrokerServerPostResponseHandler {
           'response received, setting up stream to Broker Server',
         );
       }
-      const isResponseJson = isJson(response.headers);
+      const substitutionPolicy = getResponseBodyUrlSubstitutionPolicy(
+        config,
+        response.headers,
+      );
       const errorType = classifyDownstreamStatus(status);
       const ioData = JSON.stringify({
         status,
-        headers: response.headers,
+        headers: substitutionPolicy.headers,
         errorType,
       });
 
@@ -567,7 +571,7 @@ class BrokerServerPostResponseHandler {
             { chunkLength: chunk.length, httpBody },
             'writing data to buffer',
           );
-          if (config.RES_BODY_URL_SUB && isResponseJson) {
+          if (substitutionPolicy.applies) {
             const { newChunk, partial } = replaceUrlPartialChunk(
               Buffer.from(chunk).toString(),
               prevPartialChunk,
@@ -583,7 +587,7 @@ class BrokerServerPostResponseHandler {
 
       if (
         (config && config.LOG_ENABLE_BODY === 'true') ||
-        (config.RES_BODY_URL_SUB && isResponseJson)
+        substitutionPolicy.applies
       ) {
         this.#logger.debug('Pipelining with body logging on or Body replace ');
         await pipeline(
@@ -638,10 +642,6 @@ class BrokerServerPostResponseHandler {
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();
   }
-}
-
-function isJson(responseHeaders) {
-  return responseHeaders['content-type']?.includes('json') || false;
 }
 
 function readBody(response: http.IncomingMessage): Promise<string> {
