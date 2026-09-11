@@ -78,6 +78,213 @@ describe('HybridResponseHandler.sendDataResponse — downstream relay classifica
   );
 });
 
+describe('hybrid-sdk/client', () => {
+  describe('HybridResponseHandler', () => {
+    describe('buffered websocket response body URL substitution', () => {
+      const responseUrl = 'http://private-registry.example/artifactory';
+      const replacementUrl =
+        'http://internal-broker-server-next/broker/test-broker-token';
+      const originalBody = JSON.stringify({
+        tarball: `${responseUrl}/pkg.tgz`,
+        location: 'München',
+      });
+      const transformedBody = JSON.stringify({
+        tarball: `${replacementUrl}/pkg.tgz`,
+        location: 'München',
+      });
+
+      const sendBufferedResponse = (
+        config,
+        contentType = 'application/json',
+        body = originalBody,
+        contentLengthHeader = 'content-length',
+        additionalHeaders = {},
+      ) => {
+        const websocketResponseHandler = jest.fn();
+        const handler = new HybridResponseHandler(
+          {
+            connectionIdentifier: 'test-broker-token',
+            requestId: 'request-1',
+          } as any,
+          {} as any,
+          websocketResponseHandler,
+          { socketMaxResponseLength: '20971520', ...config } as any,
+          {} as any,
+        );
+        const headers = {
+          'content-type': contentType,
+          [contentLengthHeader]: `${Buffer.byteLength(body, 'utf8')}`,
+          'x-downstream-header': 'preserved',
+          ...additionalHeaders,
+        };
+
+        handler.sendDataResponse({ statusCode: 201, body, headers }, {});
+
+        return { headers, websocketResponseHandler };
+      };
+
+      it('recomputes content length from the complete transformed body', () => {
+        const { headers, websocketResponseHandler } = sendBufferedResponse(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'application/json',
+          originalBody,
+          'Content-Length',
+        );
+
+        expect(websocketResponseHandler).toHaveBeenCalledWith({
+          status: 201,
+          body: transformedBody,
+          headers: {
+            'content-type': 'application/json',
+            'content-length': `${Buffer.byteLength(transformedBody, 'utf8')}`,
+            'x-downstream-header': 'preserved',
+            'snyk-request-id': 'request-1',
+            'x-broker-ws-response': 'true',
+          },
+        });
+        expect(Buffer.byteLength(transformedBody, 'utf8')).not.toBe(
+          Buffer.byteLength(originalBody, 'utf8'),
+        );
+        expect(headers['Content-Length']).toBe(
+          `${Buffer.byteLength(originalBody, 'utf8')}`,
+        );
+        expect(headers).not.toHaveProperty('snyk-request-id');
+      });
+
+      it('collapses differently cased source lengths into one transformed byte length', () => {
+        const { headers, websocketResponseHandler } = sendBufferedResponse(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'application/json',
+          originalBody,
+          'Content-Length',
+          {
+            'content-length': `${Buffer.byteLength(originalBody, 'utf8')}`,
+            'CONTENT-LENGTH': `${Buffer.byteLength(originalBody, 'utf8')}`,
+          },
+        );
+
+        const relayed = websocketResponseHandler.mock.calls[0][0];
+        expect(relayed.headers).toEqual({
+          'content-type': 'application/json',
+          'content-length': `${Buffer.byteLength(transformedBody, 'utf8')}`,
+          'x-downstream-header': 'preserved',
+          'snyk-request-id': 'request-1',
+          'x-broker-ws-response': 'true',
+        });
+        expect(headers).toEqual({
+          'content-type': 'application/json',
+          'Content-Length': `${Buffer.byteLength(originalBody, 'utf8')}`,
+          'content-length': `${Buffer.byteLength(originalBody, 'utf8')}`,
+          'CONTENT-LENGTH': `${Buffer.byteLength(originalBody, 'utf8')}`,
+          'x-downstream-header': 'preserved',
+        });
+      });
+
+      it('preserves fixed-length metadata and body without configuration', () => {
+        const { websocketResponseHandler } = sendBufferedResponse({});
+
+        expect(websocketResponseHandler).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: originalBody,
+            headers: expect.objectContaining({
+              'content-length': `${Buffer.byteLength(originalBody, 'utf8')}`,
+              'x-downstream-header': 'preserved',
+            }),
+          }),
+        );
+      });
+
+      it('preserves fixed-length metadata and body for a non-JSON response', () => {
+        const { websocketResponseHandler } = sendBufferedResponse(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'text/plain',
+        );
+
+        expect(websocketResponseHandler).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: originalBody,
+            headers: expect.objectContaining({
+              'content-length': `${Buffer.byteLength(originalBody, 'utf8')}`,
+              'x-downstream-header': 'preserved',
+            }),
+          }),
+        );
+      });
+
+      it('retains the exact length for an eligible body with no matching URL', () => {
+        const bodyWithoutMatch = JSON.stringify({
+          message: 'no URL here',
+          location: 'München',
+        });
+        const { websocketResponseHandler } = sendBufferedResponse(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'application/json',
+          bodyWithoutMatch,
+        );
+
+        expect(websocketResponseHandler).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: bodyWithoutMatch,
+            headers: expect.objectContaining({
+              'content-length': `${Buffer.byteLength(
+                bodyWithoutMatch,
+                'utf8',
+              )}`,
+            }),
+          }),
+        );
+      });
+
+      it('keeps content length absent when transformed metadata had no fixed length', () => {
+        const websocketResponseHandler = jest.fn();
+        const handler = new HybridResponseHandler(
+          {
+            connectionIdentifier: 'test-broker-token',
+            requestId: 'request-1',
+          } as any,
+          {} as any,
+          websocketResponseHandler,
+          {
+            socketMaxResponseLength: '20971520',
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          } as any,
+          {} as any,
+        );
+
+        handler.sendDataResponse(
+          {
+            statusCode: 201,
+            body: originalBody,
+            headers: {
+              'content-type': 'application/json',
+              'transfer-encoding': 'chunked',
+            },
+          },
+          {},
+        );
+
+        const relayed = websocketResponseHandler.mock.calls[0][0];
+        expect(relayed.body).toBe(transformedBody);
+        expect(relayed.headers).not.toHaveProperty('content-length');
+        expect(relayed.headers['transfer-encoding']).toBe('chunked');
+      });
+    });
+  });
+});
+
 describe('HybridResponseHandler — send-back failure emits a joinable client-error', () => {
   beforeEach(() => (emitError as jest.Mock).mockClear());
 

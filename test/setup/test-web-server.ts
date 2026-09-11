@@ -163,6 +163,29 @@ const applyEchoRoutes = (app: Express) => {
   );
 
   echoRouter.get(
+    '/test-blob-param/json-url-substitution',
+    (_: express.Request, resp: express.Response) => {
+      const body = JSON.stringify({
+        versions: Array.from({ length: 20 }, (_unused, index) => ({
+          version: `1.0.${index}`,
+          dist: {
+            tarball: `http://private-registry.internal:8000/artifactory/api/npm/repo/pkg/-/pkg-1.0.${index}.tgz`,
+          },
+        })),
+      });
+      resp.setHeader('cache-control', 'no-transform');
+      resp.setHeader('content-type', 'application/json');
+      resp.setHeader('content-length', `${Buffer.byteLength(body, 'utf8')}`);
+      resp.setHeader('x-regression-header', 'preserved');
+      // Keep the Broker metadata frame in a UTF-8-safe length range. The
+      // separate framing issue is outside this Content-Length regression.
+      resp.setHeader('x-test-padding', 'x'.repeat(100));
+      resp.status(200);
+      resp.end(body);
+    },
+  );
+
+  echoRouter.get(
     '/test-blob-param/:param',
     (req: express.Request, resp: express.Response) => {
       const size = parseInt(req.params.param, 10);

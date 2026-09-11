@@ -3,8 +3,8 @@ import { legacyStreaming } from './requestsHelper';
 import { log as logger } from '../logs/logger';
 import { IncomingMessage } from 'node:http';
 import { logError, logResponse } from '../logs/log';
-import { isJson } from './common/utils/json';
 import { replaceUrlPartialChunk } from './common/utils/replace-vars';
+import { getResponseBodyUrlSubstitutionPolicy } from './common/utils/response-body-url-substitution';
 import { RequestMetadata } from './types';
 import { WebSocketConnection } from './client/types/client';
 import { WebSocketServer } from './server/types/socket';
@@ -94,9 +94,23 @@ export class HybridResponseHandler {
       });
     }
 
-    if (this.config.RES_BODY_URL_SUB && isJson(response.headers)) {
+    const substitutionPolicy = getResponseBodyUrlSubstitutionPolicy(
+      this.config,
+      response.headers,
+    );
+    if (substitutionPolicy.applies) {
+      const hadContentLength = Object.keys(response.headers).some(
+        (name) => name.toLowerCase() === 'content-length',
+      );
       const replaced = replaceUrlPartialChunk(response.body, null, this.config);
       response.body = replaced.newChunk;
+      response.headers = substitutionPolicy.headers;
+      if (hadContentLength) {
+        response.headers['content-length'] = `${Buffer.byteLength(
+          response.body,
+          'utf8',
+        )}`;
+      }
     }
     const status = (response && response.statusCode) || 500;
     logResponse(logContext, status, response, this.config);
