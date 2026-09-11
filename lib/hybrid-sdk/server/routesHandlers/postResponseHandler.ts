@@ -1,13 +1,24 @@
 import { Request, Response } from 'express';
-
-import { log as logger } from '../../../logs/logger';
-import { getDesensitizedToken } from '../utils/token';
-import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
-import { getConfig } from '../../common/config/config';
 import { decode } from 'jsonwebtoken';
-import { StreamResponseHandler } from '../../http/server-post-stream-handler';
+import { pipeline } from 'node:stream/promises';
+import { log as logger } from '../../../logs/logger';
+import { getConfig } from '../../common/config/config';
+import { incrementHttpRequestsTotal } from '../../common/utils/metrics';
+import {
+  PendingResponse,
+  pendingResponseRegistry,
+} from '../../http/server-post-stream-handler';
+import {
+  ResponseFrameDecoder,
+  ResponseFrameError,
+  ResponseMetadata,
+} from '../../http/response-frame-decoder';
+import { getDesensitizedToken } from '../utils/token';
 
-export const handlePostResponse = (req: Request, res: Response) => {
+export const handlePostResponse = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   incrementHttpRequestsTotal(false, 'data-response');
   const token = req.params.brokerToken;
   const streamingID = req.params.streamingId;
@@ -27,17 +38,12 @@ export const handlePostResponse = (req: Request, res: Response) => {
   req['maskedToken'] = desensitizedToken.maskedToken;
   req['hashedToken'] = desensitizedToken.hashedToken;
 
-  const streamHandler = StreamResponseHandler.create(streamingID);
-  if (!streamHandler) {
-    logger.error(logContext, 'Unable to find request matching streaming id.');
-    res
-      .status(500)
-      .json({ message: 'Unable to find request matching streaming id.' });
-    return;
-  }
-  if (getConfig().BROKER_SERVER_MANDATORY_AUTH_ENABLED) {
+  let pending: PendingResponse | undefined;
+  try {
+    const enforceBrokerOwnership =
+      getConfig().BROKER_SERVER_MANDATORY_AUTH_ENABLED;
     const credentials = req.headers.authorization;
-    if (!credentials) {
+    if (enforceBrokerOwnership && !credentials) {
       logger.error(
         logContext,
         'Invalid Broker client credentials on response data.',
@@ -45,18 +51,20 @@ export const handlePostResponse = (req: Request, res: Response) => {
       res.status(401).json({ message: 'Invalid Broker client credentials.' });
       return;
     }
-    const decodedJwt = credentials
-      ? decode(credentials!.replace(/bearer /i, ''), {
-          complete: true,
-        })
-      : null;
 
-    const brokerAppClientId = decodedJwt ? decodedJwt?.payload['azp'] : '';
-    if (
-      !brokerAppClientId ||
-      !streamHandler.streamResponse.brokerAppClientId ||
-      brokerAppClientId != streamHandler.streamResponse.brokerAppClientId
-    ) {
+    const decodedJwt =
+      enforceBrokerOwnership && credentials
+        ? decode(credentials.replace(/bearer /i, ''), { complete: true })
+        : null;
+    const brokerAppClientId = decodedJwt
+      ? (decodedJwt.payload['azp'] as string)
+      : undefined;
+    const claim = pendingResponseRegistry.claim(streamingID, {
+      brokerAppClientId,
+      enforceBrokerOwnership,
+    });
+
+    if (claim.status === 'owner-mismatch') {
       logger.error(
         logContext,
         'Invalid Broker client credentials for stream on response data.',
@@ -64,168 +72,61 @@ export const handlePostResponse = (req: Request, res: Response) => {
       res.status(401).json({ message: 'Invalid Broker client credentials.' });
       return;
     }
-  }
-  let statusAndHeaders = '';
-  let statusAndHeadersSize = -1;
-  const statusAndHeadersSizeBuffer = Buffer.alloc(4);
-  let statusAndHeadersSizeBytesRead = 0;
-  const statusAndHeadersBuffers: Buffer[] = [];
-  let statusAndHeadersLength = 0;
-  req
-    .on('data', function (data) {
-      try {
-        logger.trace(
-          { ...logContext, dataLength: Buffer.byteLength(data, 'utf8') },
-          'Received data event.',
-        );
-        let bytesRead = 0;
-        if (statusAndHeadersSize === -1) {
-          const bytesToRead = Math.min(
-            statusAndHeadersSizeBuffer.length - statusAndHeadersSizeBytesRead,
-            data.length,
-          );
-          data.copy(
-            statusAndHeadersSizeBuffer,
-            statusAndHeadersSizeBytesRead,
-            bytesRead,
-            bytesRead + bytesToRead,
-          );
-          statusAndHeadersSizeBytesRead += bytesToRead;
-          bytesRead += bytesToRead;
-          if (
-            statusAndHeadersSizeBytesRead < statusAndHeadersSizeBuffer.length
-          ) {
-            return;
-          }
-          statusAndHeadersSize = statusAndHeadersSizeBuffer.readUInt32LE();
-          logger.debug(
-            { ...logContext, statusAndHeadersSize },
-            'Request metadata size read from stream.',
-          );
-        }
-
-        if (
-          statusAndHeadersSize > 0 &&
-          statusAndHeadersLength < statusAndHeadersSize
-        ) {
-          const endPosition = Math.min(
-            bytesRead + statusAndHeadersSize - statusAndHeadersLength,
-            data.length,
-          );
-          logger.trace(
-            { ...logContext, bytesRead, endPosition },
-            'Reading ioJson.',
-          );
-          const statusAndHeadersChunk = data.subarray(bytesRead, endPosition);
-          statusAndHeadersBuffers.push(statusAndHeadersChunk);
-          statusAndHeadersLength += statusAndHeadersChunk.length;
-          bytesRead = endPosition;
-          if (statusAndHeadersLength === statusAndHeadersSize) {
-            statusAndHeaders = Buffer.concat(
-              statusAndHeadersBuffers,
-              statusAndHeadersSize,
-            ).toString('utf8');
-            statusAndHeadersBuffers.length = 0;
-            logger.trace(
-              { ...logContext, statusAndHeaders },
-              'Converting to json.',
-            );
-            const statusAndHeadersJson = JSON.parse(statusAndHeaders);
-            const logData = {
-              ...logContext,
-              responseStatus: statusAndHeadersJson.status,
-              errorType: statusAndHeadersJson.errorType,
-            };
-            const logMessage = 'Handling response-data request - io bits';
-            if (
-              statusAndHeadersJson.status > 299 &&
-              statusAndHeadersJson.status !== 404
-            ) {
-              logger.info(logData, logMessage);
-            } else {
-              logger.debug(logData, logMessage);
-            }
-            streamHandler.writeStatusAndHeaders(statusAndHeadersJson);
-          } else {
-            logger.trace(
-              {
-                ...logContext,
-                currentSize: statusAndHeadersLength,
-                expectedSize: statusAndHeadersSize,
-              },
-              'Was unable to fit all information into a single data object.',
-            );
-          }
-        }
-        if (bytesRead < data.length) {
-          logger.trace(
-            logContext,
-            'Handling response-data request - data part.',
-          );
-          streamHandler.writeChunk(
-            data.subarray(bytesRead, data.length),
-            (streamBuffer) => {
-              logger.trace(logContext, 'Pausing request stream.');
-              req.pause();
-              streamBuffer.once('drain', () => {
-                logger.trace(logContext, 'Resuming request stream.');
-                req.resume();
-              });
-            },
-          );
-        }
-      } catch (e) {
-        logger.error(
-          { ...logContext, statusAndHeaders, statusAndHeadersSize, error: e },
-          'Caught error handling data event for streaming HTTP response.',
-        );
-      }
-    })
-    .on('end', function () {
-      if (
-        statusAndHeadersSizeBytesRead > 0 &&
-        statusAndHeadersSizeBytesRead < statusAndHeadersSizeBuffer.length
-      ) {
-        const error = new Error(
-          `Incomplete metadata-length prefix: received ${statusAndHeadersSizeBytesRead} of ${statusAndHeadersSizeBuffer.length} bytes.`,
-        );
-        logger.error(
-          {
-            ...logContext,
-            receivedPrefixBytes: statusAndHeadersSizeBytesRead,
-            expectedPrefixBytes: statusAndHeadersSizeBuffer.length,
-            error,
-          },
-          'Incomplete metadata-length prefix at end of streaming HTTP response.',
-        );
-      }
-      if (
-        statusAndHeadersSize >= 0 &&
-        statusAndHeadersLength < statusAndHeadersSize
-      ) {
-        const error = new Error(
-          `Incomplete response metadata: received ${statusAndHeadersLength} of ${statusAndHeadersSize} bytes.`,
-        );
-        logger.error(
-          {
-            ...logContext,
-            receivedMetadataBytes: statusAndHeadersLength,
-            expectedMetadataBytes: statusAndHeadersSize,
-            error,
-          },
-          'Incomplete response metadata at end of streaming HTTP response.',
-        );
-      }
-      logger.debug(logContext, 'Handling response-data request - end part.');
-      streamHandler.finished();
-      res.status(200).json({});
-    })
-    .on('error', (err) => {
+    if (claim.status !== 'claimed') {
       logger.error(
-        { ...logContext, error: err },
-        'Received error handling POST from client.',
+        { ...logContext, claimStatus: claim.status },
+        'Unable to claim request matching streaming id.',
       );
-      streamHandler.destroy(err);
-      res.status(500).json({ err });
+      res
+        .status(500)
+        .json({ message: 'Unable to find request matching streaming id.' });
+      return;
+    }
+    pending = claim.pending;
+
+    const decoder = new ResponseFrameDecoder({
+      onMetadata: (metadata) => {
+        logMetadata(logContext, metadata);
+        pending!.applyMetadata(metadata);
+      },
     });
+
+    await pipeline(req, decoder, pending.destination);
+    pending.complete(decoder.bodyBytes);
+    res.status(200).json({});
+  } catch (error) {
+    const streamError = error as Error;
+    pending?.cancel(streamError);
+    const framingDiagnostics =
+      streamError instanceof ResponseFrameError
+        ? streamError.diagnostics
+        : undefined;
+    logger.error(
+      { ...logContext, ...framingDiagnostics, error: streamError },
+      'Failed handling POST response stream pipeline.',
+    );
+    // This slice intentionally has one generic framing/delivery failure status.
+    // A protocol-hardening slice can split malformed, oversized and server
+    // failures without making 500 the long-term wire contract here.
+    if (!res.headersSent && !res.destroyed) {
+      res.status(500).json({ message: 'Failed to handle response stream.' });
+    }
+  }
+};
+
+const logMetadata = (
+  logContext: Record<string, unknown>,
+  metadata: ResponseMetadata,
+): void => {
+  const logData = {
+    ...logContext,
+    responseStatus: metadata.status,
+    errorType: metadata.errorType,
+  };
+  const logMessage = 'Handling response-data request - io bits';
+  if (metadata.status > 299 && metadata.status !== 404) {
+    logger.info(logData, logMessage);
+  } else {
+    logger.debug(logData, logMessage);
+  }
 };

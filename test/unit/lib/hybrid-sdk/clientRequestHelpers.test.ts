@@ -1,7 +1,9 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { log as logger } from '../../../../lib/logs/logger';
 import { makeRequestToDownstream } from '../../../../lib/hybrid-sdk/http/request';
 import { HybridClientRequestHandler } from '../../../../lib/hybrid-sdk/clientRequestHelpers';
+import { pendingResponseRegistry } from '../../../../lib/hybrid-sdk/http/server-post-stream-handler';
+import { getConfig } from '../../../../lib/hybrid-sdk/common/config/config';
 
 jest.mock('../../../../lib/logs/logger');
 jest.mock('../../../../lib/hybrid-sdk/common/config/config', () => ({
@@ -11,7 +13,9 @@ jest.mock('../../../../lib/hybrid-sdk/common/config/config', () => ({
 // Silence the side-effecting transitive imports (NodeCache init + axios) —
 // they have nothing to do with the log-level under test.
 jest.mock('../../../../lib/hybrid-sdk/http/server-post-stream-handler', () => ({
-  streamsStore: { set: jest.fn(), get: jest.fn(), del: jest.fn() },
+  pendingResponseRegistry: {
+    register: jest.fn(() => ({ status: 'registered' })),
+  },
 }));
 jest.mock('../../../../lib/hybrid-sdk/http/request', () => ({
   makeRequestToDownstream: jest.fn(),
@@ -283,6 +287,122 @@ describe('HybridClientRequestHandler — response carries snyk-request-id on WS 
 
     expect(res.setHeader).toHaveBeenCalledWith('snyk-request-id', BROKER_UUID);
   });
+
+  it('does not send a WebSocket request when the response destination is unavailable', async () => {
+    const wsSend = jest.fn();
+    const res: any = Object.assign(new EventEmitter(), {
+      destroyed: true,
+      locals: {
+        websocket: { send: wsSend, identifier: 'id' },
+        capabilities: ['post-streams'],
+      },
+      setHeader: jest.fn(),
+    });
+    (pendingResponseRegistry.register as jest.Mock).mockReturnValueOnce({
+      status: 'destination-unavailable',
+    });
+    const unhandledRejection = jest.fn();
+    process.once('unhandledRejection', unhandledRejection);
+
+    try {
+      const handler = new HybridClientRequestHandler(makeMockReq() as any, res);
+      expect(() =>
+        handler.makeRequest({ url: '/some/path' } as any),
+      ).not.toThrow();
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(wsSend).not.toHaveBeenCalled();
+      expect(res.setHeader).not.toHaveBeenCalled();
+      expect(unhandledRejection).not.toHaveBeenCalled();
+    } finally {
+      process.off('unhandledRejection', unhandledRejection);
+    }
+  });
+});
+
+describe('hybrid-sdk/client HybridClientRequestHandler makeRequest()', () => {
+  const makeMockReq = (params: Record<string, string> = {}) => ({
+    url: '/some/path',
+    method: 'GET',
+    body: '{}',
+    headers: {},
+    params,
+  });
+
+  const makeMockRes = (identifier: string) => ({
+    locals: {
+      websocket: { send: jest.fn(), identifier },
+      capabilities: ['post-streams'],
+    },
+    setHeader: jest.fn(),
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('registers the route token as the legacy owner', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      universalBrokerEnabled: true,
+      brokerToken: 'classic-fallback',
+    });
+    const req: any = makeMockReq({ token: 'route-owner' });
+    const res: any = makeMockRes('universal-fallback');
+
+    const handler = new HybridClientRequestHandler(req, res);
+    handler.makeRequest({ url: '/some/path' } as any);
+
+    expect(pendingResponseRegistry.register).toHaveBeenCalledWith(
+      expect.any(String),
+      {
+        response: res,
+        brokerAppClientId: null,
+        legacyConnectionIdentifier: 'route-owner',
+      },
+    );
+  });
+
+  it('registers the broker token as the classic client-local legacy owner', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      universalBrokerEnabled: false,
+      brokerToken: 'classic-owner',
+    });
+    const req: any = makeMockReq();
+    const res: any = makeMockRes('universal-fallback');
+
+    const handler = new HybridClientRequestHandler(req, res);
+    handler.makeRequest({ url: '/some/path' } as any);
+
+    expect(pendingResponseRegistry.register).toHaveBeenCalledWith(
+      expect.any(String),
+      {
+        response: res,
+        brokerAppClientId: null,
+        legacyConnectionIdentifier: 'classic-owner',
+      },
+    );
+  });
+
+  it('registers the websocket identifier as the Universal client-local legacy owner', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      universalBrokerEnabled: true,
+      brokerToken: 'classic-fallback',
+    });
+    const req: any = makeMockReq();
+    const res: any = makeMockRes('universal-owner');
+
+    const handler = new HybridClientRequestHandler(req, res);
+    handler.makeRequest({ url: '/some/path' } as any);
+
+    expect(pendingResponseRegistry.register).toHaveBeenCalledWith(
+      expect.any(String),
+      {
+        response: res,
+        brokerAppClientId: null,
+        legacyConnectionIdentifier: 'universal-owner',
+      },
+    );
+  });
 });
 
 describe('HybridClientRequestHandler — WS paths include snyk-request-id in payload', () => {
@@ -324,8 +444,8 @@ describe('HybridClientRequestHandler — WS paths include snyk-request-id in pay
 
   it('includes snyk-request-id in WS payload (streaming response path)', () => {
     const wsSend = jest.fn();
-    // The streaming path calls streamBuffer.pipe(this.res), so res must be
-    // an EventEmitter-compatible writable to avoid a synchronous throw.
+    // Registration watches response lifecycle events, so this response mock
+    // remains EventEmitter-compatible.
     const res: any = Object.assign(new EventEmitter(), {
       locals: {
         websocket: { send: wsSend, identifier: 'test-identifier' },
