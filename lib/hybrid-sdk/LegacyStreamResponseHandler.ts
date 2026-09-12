@@ -1,6 +1,7 @@
 import {
   streamsStore,
   StreamResponse,
+  stripConnectionScopedHeaders,
 } from './http/server-post-stream-handler';
 import { log as logger } from '../logs/logger';
 import { observeResponseSize } from './common/utils/metrics';
@@ -17,7 +18,14 @@ export const legacyStreamResponseHandler = (token) => {
 
       if (streamBuffer) {
         if (ioResponse) {
-          response.status(ioResponse.status).set(ioResponse.headers);
+          response
+            .status(ioResponse.status)
+            .set(
+              stripConnectionScopedHeaders(
+                ioResponse.headers,
+                response.req?.method,
+              ),
+            );
         }
         if (chunk) {
           streamSize += chunk.length;
