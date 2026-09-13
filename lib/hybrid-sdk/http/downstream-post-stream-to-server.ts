@@ -637,7 +637,12 @@ class BrokerServerPostResponseHandler {
       this.#buffer.destroy();
       return;
     }
-    pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!); // initialized in #initHttpClientRequest above
+    // sendData intentionally resolves after scheduling the upload. The request
+    // and buffer listeners above log stream failures; own the detached pipeline
+    // rejection here without logging the same transport error a second time.
+    void pipeline(this.#buffer, this.#brokerSrvPostRequestHandler!).catch(
+      () => undefined,
+    );
     this.#sendIoData(JSON.stringify(responseData));
     this.#buffer.write(JSON.stringify(body));
     this.#buffer.end();

@@ -193,6 +193,119 @@ describe('BrokerServerPostResponseHandler', () => {
     });
   });
 
+  describe('sendData pipeline ownership', () => {
+    it('owns a pipeline rejection after a fresh socket fails without changing completion timing', async () => {
+      const server = http.createServer();
+      const acceptedSocket = new Promise<Socket>((resolve) => {
+        server.once('connection', resolve);
+      });
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', () => {
+          server.off('error', reject);
+          resolve();
+        });
+      });
+
+      const address = server.address() as AddressInfo;
+      setConfig({
+        brokerServerUrl: `http://127.0.0.1:${address.port}`,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+
+      const clientSocket = new Socket();
+      const clientConnected = new Promise<void>((resolve, reject) => {
+        clientSocket.once('error', reject);
+        clientSocket.connect(address.port, '127.0.0.1', () => {
+          clientSocket.off('error', reject);
+          resolve();
+        });
+      });
+      const [, serverSocket] = await Promise.all([
+        clientConnected,
+        acceptedSocket,
+      ]);
+      const agent = new http.Agent();
+      agent.createConnection = () => clientSocket;
+
+      const originalRequest = http.request;
+      let postRequest: http.ClientRequest;
+      let resolveRequestError: (error: Error) => void;
+      const completionOrder: string[] = [];
+      const requestError = new Promise<Error>((resolve) => {
+        resolveRequestError = resolve;
+      });
+      const requestSpy = jest.spyOn(http, 'request').mockImplementation(((
+        ...args: any[]
+      ) => {
+        args[1].agent = agent;
+        const request = (originalRequest as any)(...args);
+        postRequest = request;
+        request.once('error', (error) => {
+          completionOrder.push('request error');
+          resolveRequestError(error);
+        });
+        return request;
+      }) as typeof http.request);
+
+      const unhandledRejections: unknown[] = [];
+      const captureUnhandledRejection = (reason: unknown) => {
+        unhandledRejections.push(reason);
+      };
+      process.on('unhandledRejection', captureUnhandledRejection);
+
+      try {
+        const handler = createHandler();
+        const sendPromise = handler.sendData(
+          {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+            body: {
+              toJSON: () => {
+                // sendData serializes the body immediately after starting the
+                // pipeline, so reset this new socket while the upload is active.
+                serverSocket.resetAndDestroy();
+                return 'payload';
+              },
+            },
+          },
+          streamingId,
+        );
+
+        await sendPromise;
+        completionOrder.push('sendData fulfilled');
+
+        expect(postRequest!.reusedSocket).toBe(false);
+
+        const transportError = await requestError;
+        await new Promise<void>((resolve) => setImmediate(resolve));
+
+        expect(transportError.message).toMatch(/EPIPE|ECONNRESET/);
+        expect(completionOrder).toEqual([
+          'sendData fulfilled',
+          'request error',
+        ]);
+        expect(unhandledRejections).toEqual([]);
+        expect(
+          testLogger.errorCalls.filter(
+            (call) =>
+              call.message ===
+              'received error sending data via POST to Broker Server',
+          ),
+        ).toHaveLength(1);
+      } finally {
+        process.off('unhandledRejection', captureUnhandledRejection);
+        requestSpy.mockRestore();
+        agent.destroy();
+        server.closeAllConnections();
+        await new Promise<void>((resolve, reject) =>
+          server.close((error) => (error ? reject(error) : resolve())),
+        );
+      }
+    });
+  });
+
   describe('upstream request timeouts', () => {
     const shortTimeout = 100;
 
