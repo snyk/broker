@@ -431,13 +431,20 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.headers).not.toHaveProperty('content-length');
   });
 
-  it('content-length is set without chunked http', async () => {
+  // The relay streams the response and may rewrite it in flight when
+  // RES_BODY_URL_SUB is set, so it cannot vouch for the downstream
+  // Content-Length and no longer forwards it. Node frames what we send.
+  it('content-length is not forwarded from the downstream response', async () => {
     const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-headers`,
       {},
     );
 
-    expect(response.headers).toHaveProperty('content-length');
+    expect(response.status).toEqual(200);
+    expect(response.headers).not.toHaveProperty('content-length');
+    expect(response.headers).toHaveProperty('transfer-encoding', 'chunked');
+    // The body still arrives whole.
+    expect(response.data).toHaveProperty('host');
   });
 
   it('auth header is replaced when url contains token', async () => {
