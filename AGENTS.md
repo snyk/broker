@@ -30,6 +30,19 @@
 * Clean up clients, servers, timers, mocks, and modified environment state.
 * Local configuration loading may read the root `.env`; account for this when investigating local-only test behavior. Never overwrite or delete a user's local `.env`.
 
+### Test naming
+
+Structure Jest suites as semantic nesting so the flattened identity reads:
+
+`<domain/topic> <subject> <operation/context> <observable outcome>`
+
+* Keep domain/topic, subject, and optional operation/context as separate `describe` levels; do not concatenate them into one label.
+* Domain/topic is the stable locator for the area under test, such as a module/subsystem, service, or class.
+* Use at most three `describe` levels.
+* Put shared scenarios in `describe`; keep `it` focused on the observable outcome.
+* Prefer active wording; avoid `should`, repeated parent context, and implementation-only details.
+* Ensure the full name makes sense in CI output.
+
 ## Security-sensitive changes
 
 * Treat filters, credential handling, URL rewriting, and logging as security-sensitive.
