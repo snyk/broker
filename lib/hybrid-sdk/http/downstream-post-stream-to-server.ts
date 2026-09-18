@@ -183,7 +183,6 @@ class BrokerServerPostResponseHandler {
         'Snyk-product-line': `${this.#logContext.productLine}`,
         'Snyk-flow-name': `${this.#logContext.flow}`,
         'Content-Type': BROKER_CONTENT_TYPE,
-        Connection: 'close',
         'user-agent': 'Snyk Broker client ' + version,
         'x-broker-client-version': version,
       },
@@ -201,6 +200,8 @@ class BrokerServerPostResponseHandler {
       options.headers['authorization'] = await getAccessToken();
     }
 
+    // retries are limited to connection establishment, once an upload has started,
+    // a reset has an unknown delivery outcome and replay could duplicate a response
     const retryErrors: string[] = [];
     for (let attempt = 0; attempt <= CONNECTION_MAX_RETRIES; attempt++) {
       const startTime = performance.now();
@@ -223,30 +224,34 @@ class BrokerServerPostResponseHandler {
       }
 
       this.#brokerSrvPostRequestHandler.on('socket', (socket) => {
+        // reused sockets are already connected; connection listeners attached
+        // here would never fire and would retain this request's context
+        if (!socket.connecting) return;
+
         const lookupTime = performance.now();
-        socket.on(
-          'lookup',
-          (
-            err: Error | null,
-            address: string,
-            family: string | number,
-            host: string,
-          ) => {
-            logger.debug(
-              {
-                requestId: this.#requestId,
-                streamingId: this.#streamingId,
-                dnsLookupDurationMs: performance.now() - lookupTime,
-                resolvedAddress: address,
-                addressFamily: family,
-                hostname: host,
-                dnsError: err?.message || null,
-              },
-              'Completed DNS lookup for POST to Broker Server',
-            );
-          },
-        );
-        socket.on('connect', () => {
+        const onLookup = (
+          err: Error | null,
+          address: string,
+          family: string | number,
+          host: string,
+        ) => {
+          logger.debug(
+            {
+              requestId: this.#requestId,
+              streamingId: this.#streamingId,
+              dnsLookupDurationMs: performance.now() - lookupTime,
+              resolvedAddress: address,
+              addressFamily: family,
+              hostname: host,
+              dnsError: err?.message || null,
+            },
+            'Completed DNS lookup for POST to Broker Server',
+          );
+        };
+        socket.once('lookup', onLookup);
+        socket.once('connect', () => {
+          // direct IP connections may not emit lookup; avoid retaining request context
+          socket.off('lookup', onLookup);
           logger.debug(
             {
               requestId: this.#requestId,
@@ -260,10 +265,10 @@ class BrokerServerPostResponseHandler {
             'Established TCP connection details for POST to Broker Server',
           );
         });
-        socket.on('secureConnect', () => {
-          const isTlsReused = (
-            socket as import('tls').TLSSocket
-          ).isSessionReused();
+        const tlsSocket = socket as import('tls').TLSSocket;
+        if (typeof tlsSocket.isSessionReused !== 'function') return;
+        tlsSocket.once('secureConnect', () => {
+          const isTlsReused = tlsSocket.isSessionReused();
           if (isTlsReused) {
             logger.debug(
               {
@@ -273,9 +278,7 @@ class BrokerServerPostResponseHandler {
               'Reusing existing TLS session for POST to Broker Server',
             );
           } else {
-            const cert = (socket as import('tls').TLSSocket).getPeerCertificate(
-              false,
-            );
+            const cert = tlsSocket.getPeerCertificate(false);
             logger.debug(
               {
                 requestId: this.#requestId,
@@ -374,20 +377,22 @@ class BrokerServerPostResponseHandler {
             );
             invalidateToken();
           }
-          if (r.statusCode !== 200) {
-            const body = await readBody(r).catch(() => '');
-            logger.error(
-              {
-                durationMs: performance.now() - startTime,
-                responseStatus: r.statusCode?.toString(),
-                error: body,
-                responseHeaders: JSON.stringify(r.headers),
-                statusMessage: r.statusMessage,
-                stackTrace: new Error('stacktrace generator').stack,
-              },
-              'Received unexpected HTTP response POSTing data to Broker Server',
-            );
+          if (r.statusCode === 200) {
+            r.resume();
+            return;
           }
+          const body = await readBody(r).catch(() => '');
+          logger.error(
+            {
+              durationMs: performance.now() - startTime,
+              responseStatus: r.statusCode?.toString(),
+              error: body,
+              responseHeaders: JSON.stringify(r.headers),
+              statusMessage: r.statusMessage,
+              stackTrace: new Error('stacktrace generator').stack,
+            },
+            'Received unexpected HTTP response POSTing data to Broker Server',
+          );
         })
         .on('finish', () => {
           logger.debug(

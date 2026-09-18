@@ -1,5 +1,5 @@
-import http from 'http';
-import { AddressInfo, Socket } from 'net';
+import http from 'node:http';
+import { AddressInfo, Socket } from 'node:net';
 import nock from 'nock';
 import { uuidv4 } from '../../../../../lib/hybrid-sdk/common/utils/uuid';
 
@@ -190,6 +190,217 @@ describe('BrokerServerPostResponseHandler', () => {
       });
       expect(errorCall?.context.durationMs).toEqual(expect.any(Number));
       expect(errorCall?.context.durationMs).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  let realServer: http.Server;
+  let realServerPort: number;
+
+  const startRealServer = async () => {
+    await new Promise<void>((resolve, reject) => {
+      realServer = http.createServer();
+      realServer.once('error', reject);
+      realServer.listen(0, '127.0.0.1', () => {
+        realServer.off('error', reject);
+        realServerPort = (realServer.address() as AddressInfo).port;
+        setConfig({
+          brokerServerUrl: `http://127.0.0.1:${realServerPort}`,
+          universalBrokerEnabled: false,
+          universalBrokerGa: false,
+        });
+        resolve();
+      });
+    });
+  };
+
+  const stopRealServer = async () => {
+    if (!realServer.listening) return;
+    realServer.closeAllConnections();
+    await new Promise<void>((resolve, reject) =>
+      realServer.close((error) => (error ? reject(error) : resolve())),
+    );
+  };
+
+  function responseData(body: unknown = { test: 'data' }) {
+    return {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      body,
+    };
+  }
+
+  function matchingAgentSockets(sockets: NodeJS.Dict<Socket[]>): Socket[] {
+    return Object.values(sockets)
+      .flatMap((entries) => entries || [])
+      .filter((socket) => socket.remotePort === realServerPort);
+  }
+
+  describe('sendData()', () => {
+    describe('HTTP connection reuse', () => {
+      beforeEach(startRealServer);
+      afterEach(stopRealServer);
+
+      it('returns the socket to the free pool after each ACK and reuses it without accumulating listeners', async () => {
+        const serverRemotePorts: number[] = [];
+        const requestConnectionHeaders: Array<string | undefined> = [];
+        realServer.on('request', (req, res) => {
+          req.resume();
+          req.once('end', () => {
+            serverRemotePorts.push(req.socket.remotePort!);
+            requestConnectionHeaders.push(req.headers.connection);
+            res.writeHead(200, { 'content-type': 'application/json' });
+            res.write('{"ack":');
+            setImmediate(() => res.end('true}'));
+          });
+        });
+
+        const requests: http.ClientRequest[] = [];
+        const responseEnds: Array<Promise<http.IncomingMessage>> = [];
+        const originalRequest = http.request;
+        const requestSpy = jest.spyOn(http, 'request').mockImplementation(((
+          ...args: any[]
+        ) => {
+          const request = (originalRequest as any)(...args);
+          requests.push(request);
+          responseEnds.push(
+            new Promise<http.IncomingMessage>((resolve, reject) => {
+              request.once('error', reject);
+              request.once('response', (response: http.IncomingMessage) => {
+                response.once('error', reject);
+                response.once('end', () => resolve(response));
+              });
+            }),
+          );
+          return request;
+        }) as typeof http.request);
+
+        const sendAndWaitForFreeSocket = async (): Promise<{
+          response: http.IncomingMessage;
+          socket: Socket;
+        }> => {
+          const freeSocket = new Promise<Socket>((resolve) => {
+            const onFree = (socket: Socket) => {
+              if (socket.remotePort === realServerPort) {
+                http.globalAgent.off('free', onFree);
+                resolve(socket);
+              }
+            };
+            http.globalAgent.on('free', onFree);
+          });
+          const responseIndex = responseEnds.length;
+          await createHandler().sendData(responseData(), streamingId);
+          const [response, socket] = await Promise.all([
+            responseEnds[responseIndex],
+            freeSocket,
+          ]);
+          return { response, socket };
+        };
+
+        try {
+          const first = await sendAndWaitForFreeSocket();
+          const listenerCountsAfterFirstRequest = {
+            lookup: first.socket.listenerCount('lookup'),
+            connect: first.socket.listenerCount('connect'),
+            secureConnect: first.socket.listenerCount('secureConnect'),
+          };
+          expect(listenerCountsAfterFirstRequest).toEqual({
+            lookup: 0,
+            connect: 0,
+            secureConnect: 0,
+          });
+          const responses = [first.response];
+          let lastSocket = first.socket;
+
+          for (let cycle = 1; cycle < 20; cycle++) {
+            const completed = await sendAndWaitForFreeSocket();
+            responses.push(completed.response);
+            lastSocket = completed.socket;
+          }
+
+          expect(requests).toHaveLength(20);
+          expect(requests[0].reusedSocket).toBe(false);
+          expect(
+            requests.slice(1).every((request) => request.reusedSocket),
+          ).toBe(true);
+          expect(new Set(serverRemotePorts).size).toBe(1);
+          expect(requestConnectionHeaders).toEqual(
+            Array(20).fill('keep-alive'),
+          );
+          expect(responses.every((response) => response.complete)).toBe(true);
+          expect(responses.every((response) => response.readableEnded)).toBe(
+            true,
+          );
+          expect(
+            responses.every((response) => response.readableLength === 0),
+          ).toBe(true);
+          expect(lastSocket).toBe(first.socket);
+          expect({
+            lookup: lastSocket.listenerCount('lookup'),
+            connect: lastSocket.listenerCount('connect'),
+            secureConnect: lastSocket.listenerCount('secureConnect'),
+          }).toEqual(listenerCountsAfterFirstRequest);
+          expect(matchingAgentSockets(http.globalAgent.sockets)).toHaveLength(
+            0,
+          );
+          expect(matchingAgentSockets(http.globalAgent.freeSockets)).toEqual([
+            lastSocket,
+          ]);
+        } finally {
+          requestSpy.mockRestore();
+        }
+      });
+
+      it('uses a fresh connection for the next upload after the server closes it', async () => {
+        const serverRemotePorts: number[] = [];
+        realServer.on('request', (req, res) => {
+          req.resume();
+          req.once('end', () => {
+            serverRemotePorts.push(req.socket.remotePort!);
+            res.writeHead(200, {
+              Connection: 'close',
+              'content-type': 'application/json',
+            });
+            res.end('{}');
+          });
+        });
+
+        const requests: http.ClientRequest[] = [];
+        const responseEnds: Promise<void>[] = [];
+        const originalRequest = http.request;
+        const requestSpy = jest.spyOn(http, 'request').mockImplementation(((
+          ...args: any[]
+        ) => {
+          const request = (originalRequest as any)(...args);
+          requests.push(request);
+          responseEnds.push(
+            new Promise<void>((resolve, reject) => {
+              request.once('error', reject);
+              request.once('response', (response: http.IncomingMessage) => {
+                response.once('error', reject);
+                response.once('end', resolve);
+              });
+            }),
+          );
+          return request;
+        }) as typeof http.request);
+
+        try {
+          for (let requestIndex = 0; requestIndex < 2; requestIndex++) {
+            const responseIndex = responseEnds.length;
+            await createHandler().sendData(responseData(), streamingId);
+            await responseEnds[responseIndex];
+          }
+
+          expect(requests.map((request) => request.reusedSocket)).toEqual([
+            false,
+            false,
+          ]);
+          expect(new Set(serverRemotePorts).size).toBe(2);
+          expect(testLogger.errorCalls).toHaveLength(0);
+        } finally {
+          requestSpy.mockRestore();
+        }
+      });
     });
   });
 
