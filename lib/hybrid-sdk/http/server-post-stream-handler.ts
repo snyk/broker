@@ -81,6 +81,7 @@ interface ResponseWatchers {
 export class PendingResponseRegistry {
   private readonly activeClaims = new Map<string, PendingResponse>();
   private readonly responseWatchers = new Map<string, ResponseWatchers>();
+  private acceptingRegistrations = true;
   private readonly onExpired = (
     streamingID: string,
     registration: PendingResponseRegistration,
@@ -108,11 +109,21 @@ export class PendingResponseRegistry {
     this.store.on('expired', this.onExpired);
   }
 
+  startAcceptingRegistrations(): void {
+    this.acceptingRegistrations = true;
+  }
+
   register(
     streamingID: string,
     registration: PendingResponseRegistration,
     ttlSeconds?: number,
   ): RegistrationResult {
+    if (!this.acceptingRegistrations) {
+      if (!registration.response.destroyed) {
+        registration.response.destroy();
+      }
+      return { status: 'destination-unavailable' };
+    }
     if (this.activeClaims.has(streamingID) || this.store.has(streamingID)) {
       throw new Error(`Pending response ${streamingID} is already registered.`);
     }
@@ -217,6 +228,20 @@ export class PendingResponseRegistry {
       registration.response.destroy(error);
     }
     return true;
+  }
+
+  cancelAll(error?: Error): void {
+    // Rejecting new registrations before taking the snapshots prevents work
+    // already accepted by the HTTP server from escaping the shutdown drain.
+    this.acceptingRegistrations = false;
+    const streamingIDs = new Set([
+      ...this.store.keys(),
+      ...this.activeClaims.keys(),
+      ...this.responseWatchers.keys(),
+    ]);
+    for (const streamingID of streamingIDs) {
+      this.cancel(streamingID, error);
+    }
   }
 
   dispose(): void {
