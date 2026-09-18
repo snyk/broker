@@ -302,5 +302,76 @@ describe('hybrid-sdk/http', () => {
       expect(errors).toEqual([error]);
       expect(observeResponseSize).not.toHaveBeenCalled();
     });
+
+    it('cancels every pending response during shutdown', async () => {
+      const first = createRegistration();
+      const second = createRegistration();
+      registry.register('stream-1', first.registration);
+      registry.register('stream-2', second.registration);
+      const cancellation = new Error('server shutdown');
+
+      registry.cancelAll(cancellation);
+      registry.cancelAll(cancellation);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(first.response.destroyed).toBe(true);
+      expect(second.response.destroyed).toBe(true);
+      expect(first.errors).toEqual([cancellation]);
+      expect(second.errors).toEqual([cancellation]);
+      expect(registry.claim('stream-1')).toEqual({ status: 'not-found' });
+      expect(registry.claim('stream-2')).toEqual({ status: 'not-found' });
+      expect(first.response.listenerCount('close')).toBe(0);
+      expect(second.response.listenerCount('close')).toBe(0);
+      expect(first.response.listenerCount('error')).toBe(1);
+      expect(second.response.listenerCount('error')).toBe(1);
+    });
+
+    it('cancels every active response during shutdown', async () => {
+      const { registration, response, errors } = createRegistration();
+      registry.register('stream-1', registration);
+      const claim = registry.claim('stream-1');
+      if (claim.status !== 'claimed') {
+        throw new Error('expected claim');
+      }
+      const cancellation = new Error('server shutdown');
+
+      registry.cancelAll(cancellation);
+      registry.cancelAll(cancellation);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(response.destroyed).toBe(true);
+      expect(errors).toEqual([cancellation]);
+      expect(claim.pending.complete(1)).toBe(false);
+      expect(registry.claim('stream-1')).toEqual({ status: 'not-found' });
+      expect(response.listenerCount('close')).toBe(0);
+      expect(response.listenerCount('error')).toBe(1);
+    });
+
+    it('leaves an already completed response unchanged during shutdown', () => {
+      const { registration, response } = createRegistration();
+      registry.register('stream-1', registration);
+      const claim = registry.claim('stream-1');
+      if (claim.status !== 'claimed') {
+        throw new Error('expected claim');
+      }
+      expect(claim.pending.complete(1)).toBe(true);
+
+      registry.cancelAll(new Error('server shutdown'));
+
+      expect(response.destroyed).toBe(false);
+      expect(claim.pending.cancel()).toBe(false);
+    });
+
+    it('rejects registration after shutdown settlement begins', () => {
+      registry.cancelAll(new Error('server shutdown'));
+      const { registration, response } = createRegistration();
+
+      expect(registry.register('stream-1', registration)).toEqual({
+        status: 'destination-unavailable',
+      });
+      expect(response.destroyed).toBe(true);
+      expect(registry.claim('stream-1')).toEqual({ status: 'not-found' });
+      expect(response.listenerCount('close')).toBe(0);
+    });
   });
 });
