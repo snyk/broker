@@ -59,6 +59,7 @@ describe('hybrid-sdk/http', () => {
         contentType = 'application/json',
         body = originalBody,
         contentLengthHeader = 'content-length',
+        additionalHeaders: Record<string, string> = {},
       ) {
         setConfig({
           brokerServerUrl,
@@ -81,6 +82,7 @@ describe('hybrid-sdk/http', () => {
           'content-type': contentType,
           [contentLengthHeader]: `${Buffer.byteLength(body, 'utf8')}`,
           'x-downstream-header': 'preserved',
+          ...additionalHeaders,
         };
         downstreamResponse.headers = downstreamHeaders;
 
@@ -98,12 +100,14 @@ describe('hybrid-sdk/http', () => {
 
         const metadataLength = requestBody.readUInt32LE(0);
         const metadataEnd = 4 + metadataLength;
+        const metadataBytes = requestBody.subarray(4, metadataEnd);
         return {
           body: requestBody.subarray(metadataEnd).toString('utf8'),
+          metadataBytes,
+          metadataLength,
+          prefix: requestBody.subarray(0, 4),
           downstreamHeaders,
-          metadata: JSON.parse(
-            requestBody.subarray(4, metadataEnd).toString('utf8'),
-          ),
+          metadata: JSON.parse(metadataBytes.toString('utf8')),
         };
       }
 
@@ -187,6 +191,70 @@ describe('hybrid-sdk/http', () => {
           'x-downstream-header': 'preserved',
         });
         expect(relayed.body).toBe(bodyWithoutMatch);
+      });
+
+      it('preserves binary framing bytes outside the body transformer', async () => {
+        const targetMetadataLength = 384;
+        const headersWithoutContentLength = {
+          'content-type': 'application/json',
+          'x-downstream-header': 'preserved',
+          'x-repro-pad': '',
+        };
+        const metadataWithoutPadding = JSON.stringify({
+          status: 207,
+          headers: headersWithoutContentLength,
+        });
+        const paddingLength =
+          targetMetadataLength - Buffer.byteLength(metadataWithoutPadding);
+
+        const relayed = await relay(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'application/json',
+          originalBody,
+          'content-length',
+          { 'x-repro-pad': 'p'.repeat(paddingLength) },
+        );
+
+        expect(relayed.metadataLength).toBe(targetMetadataLength);
+        expect(relayed.prefix).toEqual(Buffer.from([0x80, 0x01, 0x00, 0x00]));
+        expect(relayed.metadataBytes).toHaveLength(targetMetadataLength);
+        expect(relayed.metadata.headers['x-repro-pad']).toHaveLength(
+          paddingLength,
+        );
+        expect(relayed.body).toBe(transformedBody);
+      });
+
+      it('keeps matching URLs in metadata while substituting the response body', async () => {
+        const metadataUrl = `${responseUrl}/repro-metadata`;
+        const expectedMetadata = JSON.stringify({
+          status: 207,
+          headers: {
+            'content-type': 'application/json',
+            'x-downstream-header': 'preserved',
+            'x-repro-url': metadataUrl,
+          },
+        });
+
+        const relayed = await relay(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            BROKER_TOKEN: 'test-broker-token',
+          },
+          'application/json',
+          originalBody,
+          'content-length',
+          { 'x-repro-url': metadataUrl },
+        );
+
+        expect(relayed.metadataLength).toBe(
+          Buffer.byteLength(expectedMetadata, 'utf8'),
+        );
+        expect(relayed.metadataBytes).toEqual(Buffer.from(expectedMetadata));
+        expect(relayed.metadata.headers['x-repro-url']).toBe(metadataUrl);
+        expect(relayed.body).toBe(transformedBody);
       });
     });
   });
