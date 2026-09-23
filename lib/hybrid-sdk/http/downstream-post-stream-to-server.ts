@@ -597,8 +597,8 @@ class BrokerServerPostResponseHandler {
         this.#logger.debug('Pipelining with body logging on or Body replace ');
         await pipeline(
           response,
-          this.#buffer,
           this.#brokerTransformer,
+          this.#buffer,
           this.#brokerSrvPostRequestHandler!, // initialized in #initHttpClientRequest above
         );
       } else {

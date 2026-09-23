@@ -10,6 +10,36 @@ ignore:
           3.x requires the 1.x CommonJS function export, so 5.x cannot be used.
         created: 2026-07-13T00:00:00.000Z
         expires: 2026-10-13T00:00:00.000Z
+  SNYK-RHEL8-LIBBLKID-19021864:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T13:55:09.604Z
+        created: 2026-09-23T13:55:09.609Z
+  SNYK-RHEL8-LIBFDISK-19021821:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T14:11:52.357Z
+        created: 2026-09-23T14:11:52.363Z
+  SNYK-RHEL8-LIBMOUNT-19021898:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T14:12:02.933Z
+        created: 2026-09-23T14:12:02.940Z
+  SNYK-RHEL8-LIBSMARTCOLS-19021926:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T14:12:14.103Z
+        created: 2026-09-23T14:12:14.108Z
+  SNYK-RHEL8-LIBUUID-19021915:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T14:12:24.145Z
+        created: 2026-09-23T14:12:24.150Z
+  SNYK-RHEL8-UTILLINUX-19021909:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-23T14:12:34.134Z
+        created: 2026-09-23T14:12:34.139Z
 patch: {}
 exclude:
   global:
