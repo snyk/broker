@@ -1,7 +1,8 @@
-import { MetricReader } from '@opentelemetry/sdk-metrics';
+import { AggregationType, MetricReader } from '@opentelemetry/sdk-metrics';
 import {
   createMeterProvider,
   parseOtelConfig,
+  RUNTIME_NODE_VIEWS,
 } from '../../../../../../lib/hybrid-sdk/common/metrics/otel';
 
 class TestMetricReader extends MetricReader {
@@ -118,6 +119,39 @@ describe('common/metrics/otel', () => {
       expect(names).not.toContain('renamed.me');
 
       await meterProvider.shutdown();
+    });
+  });
+
+  // Pinned because client and server mode share this array: renaming an exported
+  // instrument splits its series in two rather than failing anywhere visible.
+  describe('RUNTIME_NODE_VIEWS', () => {
+    const RUNTIME_NODE_METER = '@opentelemetry/instrumentation-runtime-node';
+
+    const expectedRenames: Array<[string, string]> = [
+      ['nodejs.eventloop.delay.max', 'broker.nodejs.eventloop.delay.max'],
+      ['nodejs.eventloop.delay.p99', 'broker.nodejs.eventloop.delay.p99'],
+      ['nodejs.eventloop.utilization', 'broker.nodejs.eventloop.utilization'],
+      ['v8js.gc.duration', 'broker.v8js.gc.duration'],
+    ];
+
+    it.each(expectedRenames)(
+      'renames %s under the broker. prefix',
+      (instrumentName, name) => {
+        expect(RUNTIME_NODE_VIEWS).toContainEqual({
+          instrumentName,
+          meterName: RUNTIME_NODE_METER,
+          name,
+        });
+      },
+    );
+
+    it('drops every other instrument on the runtime meter and nothing else', () => {
+      expect(RUNTIME_NODE_VIEWS).toHaveLength(expectedRenames.length + 1);
+      expect(RUNTIME_NODE_VIEWS.at(-1)).toEqual({
+        instrumentName: '*',
+        meterName: RUNTIME_NODE_METER,
+        aggregation: { type: AggregationType.DROP },
+      });
     });
   });
 });
