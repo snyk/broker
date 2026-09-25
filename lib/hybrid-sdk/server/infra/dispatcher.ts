@@ -6,19 +6,22 @@ import { uuidv4 } from '../../common/utils/uuid';
 import { axiosInstance } from '../../http/axios';
 import { incrementDispatcherWrite } from '../../common/utils/metrics';
 
+// The broker-gateway dispatcher's internal API validates the `version` query
+// param against the single version it serves, so it is fixed rather than
+// configurable.
+const DISPATCHER_API_VERSION = '2022-12-02~experimental';
+
 class DispatcherClient {
   #url;
   #hostname;
   #id;
-  #version;
   #target;
 
   // `target` labels the dispatcher this client writes to for the broker_dispatcher_write_total metric.
-  constructor(url, hostname, id, version, target) {
+  constructor(url, hostname, id, target) {
     this.#url = url;
     this.#hostname = hostname;
     this.#id = id || 0;
-    this.#version = version || '2022-12-02~experimental';
     this.#target = target;
   }
 
@@ -100,7 +103,7 @@ class DispatcherClient {
     const requestId = uuidv4();
     // version *must* be provided
     const urlWithVersion = new URL(url);
-    urlWithVersion.searchParams.append('version', this.#version);
+    urlWithVersion.searchParams.append('version', DISPATCHER_API_VERSION);
     url = urlWithVersion.toString();
     try {
       const response = await axiosInstance.request({
@@ -126,7 +129,6 @@ class DispatcherClient {
             headers,
             body,
             dispatcherUrl: this.#url,
-            dispatcherVersion: this.#version,
             serverId: this.#id,
           },
           'received unexpected status code communicating with Dispatcher',
@@ -147,7 +149,6 @@ class DispatcherClient {
           errorMessage: e.message,
           stackTrace: new Error('stack generator').stack,
           dispatcherUrl: this.#url,
-          dispatcherVersion: this.#version,
           serverId: this.#id,
         },
         'received error communicating with Dispatcher',
@@ -177,7 +178,6 @@ if (config.gatewayDispatcherUrl) {
     config.gatewayDispatcherUrl,
     config.hostname,
     config.hostname,
-    config.gatewayDispatcherVersion,
     'envoy-dispatcher',
   );
 
