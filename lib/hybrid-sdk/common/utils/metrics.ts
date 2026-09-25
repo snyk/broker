@@ -48,7 +48,7 @@ const socketCloseReasonCount = new Counter({
 
 const dispatcherWriteTotal = new Counter({
   name: 'broker_dispatcher_write_total',
-  help: 'Dispatcher lifecycle writes by target dispatcher (node-dispatcher/envoy-dispatcher) and result. During dual-write, drift is the gap between the two targets.',
+  help: 'Dispatcher lifecycle writes by target dispatcher and result.',
   labelNames: ['target', 'result'],
 });
 

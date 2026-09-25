@@ -1,4 +1,3 @@
-import { loadBrokerConfig } from '../../lib/hybrid-sdk/common/config/config';
 import { hashToken } from '../../lib/hybrid-sdk/common/utils/token';
 
 const PORT = 9999;
@@ -13,199 +12,26 @@ describe('Broker Server Dispatcher API interaction', () => {
   const hashedToken = hashToken(token);
   const clientId = '00000000-0000-0000-0000-000000000001';
   const clientVersion = '4.144.1';
+  const podName = 'broker-server-3-0';
 
-  const serverUrl = 'http://broker-server-dispatcher';
-
-  const spyLogWarn = jest
-    .spyOn(require('bunyan').prototype, 'warn')
-    .mockImplementation((value) => {
-      return value;
-    });
-  const spyLogError = jest
-    .spyOn(require('bunyan').prototype, 'error')
-    .mockImplementation((value) => {
-      return value;
-    });
-  const spyFn = jest.fn();
-  afterAll(() => {
-    spyLogWarn.mockReset();
-    spyLogError.mockReset();
-    delete process.env.BROKER_SERVER_URL;
-  });
-  beforeAll(() => {
-    const PORT = 9999;
-    process.env.BROKER_SERVER_URL = `http://localhost:${PORT}`;
-  });
-  beforeEach(() => {
-    spyFn.mockReset();
-    spyLogWarn.mockReset();
-    spyLogError.mockReset();
-  });
-
-  it('should fire off clientConnected call successfully with server response', async () => {
-    nock(`${serverUrl}`)
-      .post(
-        `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`,
-      )
-      .reply((uri, requestBody) => {
-        spyFn(JSON.parse(requestBody));
-        return [200, 'OK'];
-      });
-
-    try {
-      process.env.DISPATCHER_URL = `${serverUrl}`;
-      process.env.hostname = '0';
-      await loadBrokerConfig();
-      const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
-      await expect(
-        dispatcher.clientConnected(token, clientId, clientVersion),
-      ).resolves.not.toThrowError();
-      expect(spyLogWarn).toHaveBeenCalledTimes(0);
-      expect(spyFn).toBeCalledWith({
-        data: {
-          attributes: {
-            broker_client_version: '4.144.1',
-            health_check_link: 'http://0/healthcheck',
-          },
-        },
-      });
-    } catch (err) {
-      expect(err).toBeNull();
-    }
-  });
-
-  it.skip('should fire off clientPinged call successfully with server response', async () => {
-    const time = Date.now();
-    const fakeLatency = 1;
-    nock(`${serverUrl}`)
-      .post(
-        `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-pinged&latency=${fakeLatency}&version=${apiVersion}`,
-      )
-      .reply((uri, requestBody) => {
-        spyFn(JSON.parse(requestBody));
-        return [200, 'OK'];
-      });
-
-    process.env.DISPATCHER_URL = `${serverUrl}`;
-    process.env.hostname = '0';
-    await loadBrokerConfig();
-    const dispatcher = require('../../lib/dispatcher');
-    await expect(
-      dispatcher.clientPinged(
-        token,
-        clientId,
-        clientVersion,
-        time - fakeLatency,
-      ),
-    ).resolves.not.toThrowError();
-    expect(spyLogWarn).toHaveBeenCalledTimes(0);
-    expect(spyFn).toBeCalledWith({
-      data: {
-        attributes: {
-          broker_client_version: '4.144.1',
-          health_check_link: 'http://0/healthcheck',
-        },
-      },
-    });
-  });
-
-  it('should invoke the shutdown callback after de-registering on serverStopping', async () => {
-    nock(`${serverUrl}`)
-      .delete(`/internal/brokerservers/0?version=${apiVersion}`)
-      .reply(() => {
-        return [200, 'OK'];
-      });
-
-    process.env.DISPATCHER_URL = `${serverUrl}`;
-    process.env.hostname = '0';
-    await loadBrokerConfig();
-    const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
-
-    await expect(dispatcher.serverStopping(spyFn)).resolves.not.toThrowError();
-
-    // Regression guard: the callback used to be passed into #makeRequest's
-    // requestBody slot instead of the cb slot, so it never ran and the process
-    // never exited on SIGTERM.
-    expect(spyFn).toHaveBeenCalledTimes(1);
-  });
-
-  it('should still invoke the shutdown callback when the dispatcher errors', async () => {
-    nock(`${serverUrl}`)
-      .delete(`/internal/brokerservers/0?version=${apiVersion}`)
-      .reply(500, 'NOK')
-      .persist();
-
-    process.env.DISPATCHER_URL = `${serverUrl}`;
-    process.env.hostname = '0';
-    await loadBrokerConfig();
-    const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
-
-    await expect(dispatcher.serverStopping(spyFn)).resolves.not.toThrowError();
-
-    // Shutdown must not hang on a failing de-register: the cb still fires.
-    expect(spyFn).toHaveBeenCalledTimes(1);
-  });
-
-  it('should fire off clientConnected call successfully with warnings', async () => {
-    nock(`${serverUrl}`)
-      .post(
-        `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`,
-      )
-      .reply((uri, requestBody) => {
-        spyFn(JSON.parse(requestBody));
-        return [500, 'NOK'];
-      })
-      .persist();
-
-    try {
-      process.env.DISPATCHER_URL = `${serverUrl}`;
-      process.env.hostname = '0';
-      const dispatcher = require('../../lib/hybrid-sdk/server/infra/dispatcher');
-      await expect(
-        dispatcher.clientConnected(token, clientId, clientVersion),
-      ).resolves.not.toThrowError();
-      expect(spyLogWarn).toHaveBeenCalledTimes(1);
-
-      const output = spyLogWarn.mock.calls[0][0] as Object;
-      expect(output['errorMessage']).toEqual(
-        'Request failed with status code 500',
-      );
-      expect(output['retryCount']).toEqual(3);
-
-      expect(spyLogError).toBeCalledTimes(1);
-      const errorOutput = spyLogError.mock.calls[0][0] as Object;
-      expect(errorOutput['errorMessage']).toEqual(
-        'Request failed with status code 500',
-      );
-      expect(errorOutput['requestType']).toEqual('client-connected');
-    } catch (err) {
-      expect(err).toBeNull();
-    }
-  });
-});
-
-describe('Broker Server Dispatcher dual-write to gateway', () => {
-  const apiVersion = '2022-12-02%7Eexperimental';
-  const token = 'broker-test-token';
-  const hashedToken = hashToken(token);
-  const clientId = '00000000-0000-0000-0000-000000000001';
-  const clientVersion = '4.144.1';
-  const primaryUrl = 'http://broker-server-dispatcher';
   const gatewayUrl = 'http://broker-gateway-dispatcher';
+  // The retired node dispatcher. Nothing may be written to it any more.
+  const nodeUrl = 'http://broker-server-dispatcher';
+
+  const connectionPath = (requestType: string, extra = '') =>
+    `/internal/brokerservers/${podName}/connections/${hashedToken}?broker_client_id=${clientId}${extra}&request_type=${requestType}&version=${apiVersion}`;
 
   const expectedBody = {
     data: {
       attributes: {
         broker_client_version: clientVersion,
-        health_check_link: 'http://0/healthcheck',
+        health_check_link: `http://${podName}/healthcheck`,
       },
     },
   };
 
-  const connectionPath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
-
   // Each test re-requires config + dispatcher from a fresh module graph so the
-  // module-level `if (config.dispatcherUrl)` wiring picks up that test's env.
+  // module-level `if (config.gatewayDispatcherUrl)` wiring picks up its env.
   const loadDispatcher = async () => {
     jest.resetModules();
     const {
@@ -215,168 +41,197 @@ describe('Broker Server Dispatcher dual-write to gateway', () => {
     return require('../../lib/hybrid-sdk/server/infra/dispatcher');
   };
 
+  const nodeCalls = jest.fn();
+
   beforeEach(() => {
     nock.cleanAll();
-    process.env.hostname = '0';
+    process.env.hostname = podName;
+    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
+    // Still set in the broker-server helm templates today; it must be ignored.
+    process.env.DISPATCHER_URL = nodeUrl;
+    nodeCalls.mockReset();
+    nock(nodeUrl)
+      .persist()
+      .post(/.*/)
+      .reply(() => {
+        nodeCalls();
+        return [200, 'OK'];
+      })
+      .delete(/.*/)
+      .reply(() => {
+        nodeCalls();
+        return [200, 'OK'];
+      });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // A write to the node dispatcher would be fire-and-forget, so give any such
+    // in-flight request a moment to land before asserting none was made.
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(nodeCalls).not.toHaveBeenCalled();
     nock.cleanAll();
     delete process.env.DISPATCHER_URL;
     delete process.env.GATEWAY_DISPATCHER_URL;
   });
 
-  it('writes clientConnected to the primary gateway and legacy mirror', async () => {
-    const spyPrimary = jest.fn();
-    const spyGateway = jest.fn();
-    // The legacy mirror is fire-and-forget; await this to deterministically
-    // observe both writes landing.
-    let resolveGatewayWritten;
-    const gatewayWritten = new Promise<void>((resolve) => {
-      resolveGatewayWritten = resolve;
-    });
+  afterAll(() => {
+    delete process.env.BROKER_SERVER_URL;
+  });
 
-    nock(primaryUrl)
-      .post(connectionPath)
-      .reply((_uri, body) => {
-        spyPrimary(JSON.parse(body as string));
-        return [200, 'OK'];
-      });
+  it('registers clientConnected with the gateway using the full pod name', async () => {
+    const spyGateway = jest.fn();
     nock(gatewayUrl)
-      .post(connectionPath)
+      .post(connectionPath('client-connected'))
       .reply((_uri, body) => {
         spyGateway(JSON.parse(body as string));
-        resolveGatewayWritten();
         return [201, 'Created'];
       });
 
-    process.env.DISPATCHER_URL = primaryUrl;
-    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
     const dispatcher = await loadDispatcher();
-
     await expect(
       dispatcher.clientConnected(token, clientId, clientVersion),
     ).resolves.not.toThrowError();
-    await gatewayWritten;
 
-    expect(spyPrimary).toBeCalledWith(expectedBody);
+    expect(spyGateway).toBeCalledTimes(1);
     expect(spyGateway).toBeCalledWith(expectedBody);
   });
 
-  it('does not write to the gateway when GATEWAY_DISPATCHER_URL is unset', async () => {
-    const spyPrimary = jest.fn();
-
-    nock(primaryUrl)
-      .post(connectionPath)
-      .reply((_uri, body) => {
-        spyPrimary(JSON.parse(body as string));
-        return [200, 'OK'];
-      });
-    // Any contact with the gateway host would consume this interceptor.
-    const gatewayScope = nock(gatewayUrl).post(/.*/).reply(200);
-
-    process.env.DISPATCHER_URL = primaryUrl;
-    delete process.env.GATEWAY_DISPATCHER_URL;
-    const dispatcher = await loadDispatcher();
-
-    await expect(
-      dispatcher.clientConnected(token, clientId, clientVersion),
-    ).resolves.not.toThrowError();
-
-    expect(spyPrimary).toBeCalledTimes(1);
-    expect(gatewayScope.isDone()).toBe(false);
-  });
-
-  it('isolates the primary gateway path from an unhealthy legacy mirror', async () => {
-    const spyPrimary = jest.fn();
-    let gatewayAttempts = 0;
-    let resolveFirstAttempt;
-    const firstGatewayAttempt = new Promise<void>((resolve) => {
-      resolveFirstAttempt = resolve;
-    });
-
-    nock(gatewayUrl)
-      .post(connectionPath)
-      .reply((_uri, body) => {
-        spyPrimary(JSON.parse(body as string));
-        return [200, 'OK'];
-      });
-    // Unhealthy legacy mirror: every attempt (and axios-retry's retries) 500s.
-    // persist() keeps the failures inside nock so the background retry budget
-    // (~1.4s for 5xx, up to ~11s if it were black-holing) never touches the
-    // real network.
-    nock(primaryUrl)
-      .persist()
-      .post(connectionPath)
-      .reply(() => {
-        gatewayAttempts += 1;
-        resolveFirstAttempt();
-        return [500, 'Internal Server Error'];
-      });
-
-    process.env.DISPATCHER_URL = primaryUrl;
-    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
-    const dispatcher = await loadDispatcher();
-
-    const start = Date.now();
-    await expect(
-      dispatcher.clientConnected(token, clientId, clientVersion),
-    ).resolves.not.toThrowError();
-    const elapsed = Date.now() - start;
-
-    // Gateway write landed exactly once and was unaffected by the failing mirror.
-    expect(spyPrimary).toBeCalledTimes(1);
-    expect(spyPrimary).toBeCalledWith(expectedBody);
-    // The call returned on the gateway alone, without waiting on the legacy
-    // retry budget — this is the latency isolation fire-and-forget guarantees.
-    expect(elapsed).toBeLessThan(500);
-
-    // The mirror was genuinely attempted (fire-and-forget) and is harmless on
-    // failure. Drain the background retries inside nock before teardown.
-    await firstGatewayAttempt;
-    expect(gatewayAttempts).toBeGreaterThan(0);
-    await new Promise((resolve) => setTimeout(resolve, 1600));
-  });
-
-  it('registers the full pod name with the gateway while the node dispatcher keeps the ordinal', async () => {
-    const podName = 'broker-server-3-0';
-    // Node keeps the truncated ordinal ("0"); the gateway must get the full pod
-    // name so the envoy sidecar can resolve the exact pod FQDN from Redis.
-    const nodePath = `/internal/brokerservers/0/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
-    const gatewayPath = `/internal/brokerservers/${podName}/connections/${hashedToken}?broker_client_id=${clientId}&request_type=client-connected&version=${apiVersion}`;
-
-    const spyNode = jest.fn();
+  it('sends clientPinged to the gateway with latency', async () => {
     const spyGateway = jest.fn();
-    let resolveGatewayWritten;
-    const gatewayWritten = new Promise<void>((resolve) => {
-      resolveGatewayWritten = resolve;
-    });
-
-    nock(primaryUrl)
-      .post(nodePath)
-      .reply(() => {
-        spyNode();
-        return [200, 'OK'];
-      });
     nock(gatewayUrl)
-      .post(gatewayPath)
-      .reply(() => {
-        spyGateway();
-        resolveGatewayWritten();
+      .post(/\/connections\/.*request_type=client-pinged/)
+      .reply((uri, body) => {
+        spyGateway(uri, JSON.parse(body as string));
         return [201, 'Created'];
       });
 
-    process.env.DISPATCHER_URL = primaryUrl;
-    process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
-    process.env.hostname = podName;
     const dispatcher = await loadDispatcher();
+    await dispatcher.clientPinged(
+      token,
+      clientId,
+      clientVersion,
+      Date.now() - 5,
+    );
 
-    await dispatcher.clientConnected(token, clientId, clientVersion);
-    await gatewayWritten;
-
-    // Each interceptor only matches its own path, so these passing proves the
-    // node used the ordinal and the gateway used the full pod name.
-    expect(spyNode).toBeCalledTimes(1);
     expect(spyGateway).toBeCalledTimes(1);
+    const [uri, body] = spyGateway.mock.calls[0];
+    expect(uri).toContain(`/internal/brokerservers/${podName}/connections/`);
+    expect(uri).toMatch(/latency=\d+/);
+    expect(body).toEqual(expectedBody);
+  });
+
+  it('sends clientDisconnected to the gateway', async () => {
+    const scope = nock(gatewayUrl)
+      .delete(
+        `/internal/brokerservers/${podName}/connections/${hashedToken}?broker_client_id=${clientId}&version=${apiVersion}`,
+      )
+      .reply(200);
+
+    const dispatcher = await loadDispatcher();
+    await dispatcher.clientDisconnected(token, clientId);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('registers the server with the gateway on serverStarting', async () => {
+    const spyGateway = jest.fn();
+    nock(gatewayUrl)
+      .post(`/internal/brokerservers/${podName}?version=${apiVersion}`)
+      .reply((_uri, body) => {
+        spyGateway(JSON.parse(body as string));
+        return [201, 'Created'];
+      });
+
+    const dispatcher = await loadDispatcher();
+    await dispatcher.serverStarting();
+
+    expect(spyGateway).toBeCalledWith({
+      data: {
+        attributes: { health_check_link: `http://${podName}/healthcheck` },
+      },
+    });
+  });
+
+  it('de-registers from the gateway and then invokes the shutdown callback on serverStopping', async () => {
+    const shutdownCallback = jest.fn();
+    const scope = nock(gatewayUrl)
+      .delete(`/internal/brokerservers/${podName}?version=${apiVersion}`)
+      .reply(200);
+
+    const dispatcher = await loadDispatcher();
+    await expect(
+      dispatcher.serverStopping(shutdownCallback),
+    ).resolves.not.toThrowError();
+
+    // The de-registration must actually be sent; the no-op fallback would also
+    // invoke the callback, so the callback alone proves nothing.
+    expect(scope.isDone()).toBe(true);
+    // Regression guard: the callback used to be passed into #makeRequest's
+    // requestBody slot instead of the cb slot, so it never ran and the process
+    // never exited on SIGTERM.
+    expect(shutdownCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it('still invokes the shutdown callback when the gateway errors', async () => {
+    const shutdownCallback = jest.fn();
+    nock(gatewayUrl)
+      .persist()
+      .delete(`/internal/brokerservers/${podName}?version=${apiVersion}`)
+      .reply(500, 'NOK');
+
+    const dispatcher = await loadDispatcher();
+    await expect(
+      dispatcher.serverStopping(shutdownCallback),
+    ).resolves.not.toThrowError();
+
+    // Shutdown must not hang on a failing de-register: the cb still fires.
+    expect(shutdownCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it('swallows gateway errors on clientConnected and records a failed write', async () => {
+    nock(gatewayUrl)
+      .persist()
+      .post(connectionPath('client-connected'))
+      .reply(500, 'NOK');
+
+    const dispatcher = await loadDispatcher();
+    // Read the counter from the same fresh module graph the dispatcher loaded.
+    const { register } = require('prom-client');
+    await expect(
+      dispatcher.clientConnected(token, clientId, clientVersion),
+    ).resolves.not.toThrowError();
+
+    const metric = await register
+      .getSingleMetric('broker_dispatcher_write_total')
+      .get();
+    const failures = metric.values.find(
+      (v) =>
+        v.labels.target === 'envoy-dispatcher' && v.labels.result === 'failure',
+    );
+    expect(failures?.value).toEqual(1);
+    expect(
+      metric.values.some((v) => v.labels.target === 'node-dispatcher'),
+    ).toBe(false);
+  });
+
+  it('falls back to no-op functions when GATEWAY_DISPATCHER_URL is unset', async () => {
+    delete process.env.GATEWAY_DISPATCHER_URL;
+    const shutdownCallback = jest.fn();
+    const gatewayScope = nock(gatewayUrl)
+      .persist()
+      .post(/.*/)
+      .reply(200)
+      .delete(/.*/)
+      .reply(200);
+
+    const dispatcher = await loadDispatcher();
+    await expect(
+      dispatcher.clientConnected(token, clientId, clientVersion),
+    ).resolves.not.toThrowError();
+    await dispatcher.serverStopping(shutdownCallback);
+
+    // Even with DISPATCHER_URL set, nothing is written anywhere.
+    expect(gatewayScope.isDone()).toBe(false);
+    expect(shutdownCallback).toHaveBeenCalledTimes(1);
   });
 });
