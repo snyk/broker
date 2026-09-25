@@ -13,7 +13,7 @@ class DispatcherClient {
   #version;
   #target;
 
-  // `target` labels which dispatcher this client writes to (node-dispatcher or envoy-dispatcher) for the broker_dispatcher_write_total metric.
+  // `target` labels the dispatcher this client writes to for the broker_dispatcher_write_total metric.
   constructor(url, hostname, id, version, target) {
     this.#url = url;
     this.#hostname = hostname;
@@ -167,62 +167,26 @@ export let serverStopping;
 
 const config = getConfig();
 
-if (config.dispatcherUrl) {
-  const serverId = config.hostname?.substring(
-    config.hostname?.lastIndexOf('-') + 1,
-  );
-
-  const kc = new DispatcherClient(
-    config.dispatcherUrl,
+// Lifecycle writes go to the broker-gateway dispatcher (GATEWAY_DISPATCHER_URL).
+// It registers the FULL pod name (config.hostname) as its server id, so the envoy
+// sidecar can resolve the exact pod FQDN from Redis alone — no token-hash
+// sharding, any pod count. The legacy node dispatcher (DISPATCHER_URL) is no
+// longer written to.
+if (config.gatewayDispatcherUrl) {
+  const gatewayClient = new DispatcherClient(
+    config.gatewayDispatcherUrl,
     config.hostname,
-    serverId,
-    config.dispatcherVersion,
-    'node-dispatcher',
+    config.hostname,
+    config.gatewayDispatcherVersion,
+    'envoy-dispatcher',
   );
-
-  // Optional dual-write to the broker-gateway (Go) dispatcher. When
-  // GATEWAY_DISPATCHER_URL is set, each lifecycle event is mirrored so the new
-  // dispatcher's Redis state is populated ahead of a read-path cutover. Unlike
-  // the node dispatcher (which registers the truncated pod ordinal), the gateway
-  // registers the FULL pod name (config.hostname) as its server id, so the envoy
-  // sidecar can resolve the exact pod FQDN from Redis alone — no token-hash
-  // sharding, any pod count. The version defaults to the primary's and only needs
-  // overriding if the two dispatchers' API versions ever diverge.
-  const gatewayClient = config.gatewayDispatcherUrl
-    ? new DispatcherClient(
-        config.gatewayDispatcherUrl,
-        config.hostname,
-        config.hostname,
-        config.gatewayDispatcherVersion || config.dispatcherVersion,
-        'envoy-dispatcher',
-      )
-    : undefined;
-
-  // When BGD is configured it is the awaited primary write path. The legacy
-  // dispatcher remains a fire-and-forget mirror during the migration.
-  const mirror = (write?: Promise<void>) => {
-    void write?.catch(() => {});
-  };
-
-  const primaryClient = gatewayClient || kc;
-  const mirrorClient = gatewayClient ? kc : undefined;
 
   clientConnected = async function (token, clientId, clientVersion) {
-    mirror(mirrorClient?.clientConnected(token, clientId, clientVersion));
-    await primaryClient.clientConnected(token, clientId, clientVersion);
+    await gatewayClient.clientConnected(token, clientId, clientVersion);
   };
 
   clientPinged = async function (token, clientId, clientVersion, time) {
-    mirror(
-      mirrorClient?.clientConnected(
-        token,
-        clientId,
-        clientVersion,
-        'client-pinged',
-        time,
-      ),
-    );
-    await primaryClient.clientConnected(
+    await gatewayClient.clientConnected(
       token,
       clientId,
       clientVersion,
@@ -232,22 +196,19 @@ if (config.dispatcherUrl) {
   };
 
   clientDisconnected = async function (token, clientId) {
-    mirror(mirrorClient?.clientDisconnected(token, clientId));
-    await primaryClient.clientDisconnected(token, clientId);
+    await gatewayClient.clientDisconnected(token, clientId);
   };
 
   serverStarting = async function () {
-    mirror(mirrorClient?.serverStarting());
-    await primaryClient.serverStarting();
+    await gatewayClient.serverStarting();
   };
 
   serverStopping = async function (cb) {
-    mirror(mirrorClient?.serverStopping(() => {}));
-    await primaryClient.serverStopping(cb);
+    await gatewayClient.serverStopping(cb);
   };
 } else {
   logger.error(
-    'DISPATCHER_URL not set - creating no-op functions to ensure server still functions.',
+    'GATEWAY_DISPATCHER_URL not set - creating no-op functions to ensure server still functions.',
   );
   clientConnected = async function () {
     logger.trace('Client connected - no-op instead of notifying dispatcher.');
