@@ -7,12 +7,12 @@ import {
 } from '@opentelemetry/api';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
+import { MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics';
 import {
-  MeterProvider,
-  MetricReader,
-  AggregationType,
-} from '@opentelemetry/sdk-metrics';
-import { createMeterProvider } from '../../common/metrics/otel';
+  createMeterProvider,
+  RUNTIME_NODE_VIEWS,
+} from '../../common/metrics/otel';
+import { log as logger } from '../../../logs/logger';
 import { Client } from './client';
 import {
   CONNECTION_STATES,
@@ -34,9 +34,10 @@ export interface OtelClientConfig {
  * Client implementation backed by OpenTelemetry.
  * Exports metrics to an OTLP/gRPC endpoint using delta temporality.
  *
- * Automatically registers the Node.js event loop delay p99 metric via
- * RuntimeNodeInstrumentation, renamed to 'broker.nodejs.eventloop.delay.p99'
- * for pipeline compatibility. Other runtime metrics are filtered out.
+ * Automatically registers a selected subset of Node.js runtime metrics via
+ * RuntimeNodeInstrumentation — event loop delay (max and p99), event loop
+ * utilization, and GC duration — each renamed under the 'broker.' prefix for
+ * pipeline compatibility. Other runtime metrics are filtered out.
  *
  * For non-Kubernetes environments, container metrics (CPU, memory, network I/O)
  * are already provided by the infrastructure via cAdvisor.
@@ -45,7 +46,7 @@ export interface OtelClientConfig {
  */
 export class OtelClient implements Client {
   private readonly meterProvider: MeterProvider;
-  private readonly runtimeInstrumentation: RuntimeNodeInstrumentation;
+  private readonly runtimeInstrumentation?: RuntimeNodeInstrumentation;
 
   // Process Health
   private readonly brokerClientInitializedCounter: Counter;
@@ -74,30 +75,25 @@ export class OtelClient implements Client {
       },
       {
         reader: config.reader,
-        views: [
-          // Rename p99 event loop delay metric with `broker.` prefix to avoid being filtered out
-          // by the metrics pipeline.
-          {
-            instrumentName: 'nodejs.eventloop.delay.p99',
-            meterName: '@opentelemetry/instrumentation-runtime-node',
-            name: 'broker.nodejs.eventloop.delay.p99',
-          },
-          // Drop all other NodeJS runtime metrics. Infra automatically filter these runtime
-          // metrics out due to the large volume emitted, so we want to be selective.
-          {
-            instrumentName: '*',
-            meterName: '@opentelemetry/instrumentation-runtime-node',
-            aggregation: { type: AggregationType.DROP },
-          },
-        ],
+        views: RUNTIME_NODE_VIEWS,
       },
     );
 
-    this.runtimeInstrumentation = new RuntimeNodeInstrumentation();
-    registerInstrumentations({
-      meterProvider: this.meterProvider,
-      instrumentations: [this.runtimeInstrumentation],
-    });
+    // Guarded because a throw here propagates to index.ts, which exits the
+    // process: RuntimeNodeInstrumentation reaches into perf_hooks and v8, so a
+    // failure must cost the diagnostic metrics rather than the broker.
+    try {
+      this.runtimeInstrumentation = new RuntimeNodeInstrumentation();
+      registerInstrumentations({
+        meterProvider: this.meterProvider,
+        instrumentations: [this.runtimeInstrumentation],
+      });
+    } catch (err) {
+      logger.warn(
+        { err },
+        'Failed to register Node.js runtime instrumentation; runtime metrics will not be reported.',
+      );
+    }
 
     const meter = this.meterProvider.getMeter('broker-client');
 
@@ -275,7 +271,7 @@ export class OtelClient implements Client {
   }
 
   async shutdown(): Promise<void> {
-    this.runtimeInstrumentation.disable();
+    this.runtimeInstrumentation?.disable();
     await this.meterProvider.shutdown();
   }
 

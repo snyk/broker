@@ -1,6 +1,7 @@
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import {
   AggregationTemporality,
+  AggregationType,
   MeterProvider,
   MetricReader,
   PeriodicExportingMetricReader,
@@ -62,6 +63,50 @@ export function parseOtelConfig(raw: RawOtelConfig): OtelConfig {
 
   return { otelEndpoint, otelExportIntervalMs };
 }
+
+const RUNTIME_NODE_METER_NAME = '@opentelemetry/instrumentation-runtime-node';
+
+/**
+ * Views applied by every mode that registers RuntimeNodeInstrumentation.
+ * Shared so instrument names cannot drift between client and server mode and
+ * silently split a dashboard.
+ *
+ * The renames are required because the metrics pipeline filters the upstream
+ * `nodejs.*` and `v8js.*` namespaces out. Views match independently, so each
+ * rename survives the trailing wildcard drop.
+ *
+ * Dropping happens at export, not at collection: the instrumentation runs
+ * every collector regardless of these views.
+ */
+export const RUNTIME_NODE_VIEWS: ViewOptions[] = [
+  {
+    instrumentName: 'nodejs.eventloop.delay.max',
+    meterName: RUNTIME_NODE_METER_NAME,
+    name: 'broker.nodejs.eventloop.delay.max',
+  },
+  {
+    instrumentName: 'nodejs.eventloop.delay.p99',
+    meterName: RUNTIME_NODE_METER_NAME,
+    name: 'broker.nodejs.eventloop.delay.p99',
+  },
+  {
+    instrumentName: 'nodejs.eventloop.utilization',
+    meterName: RUNTIME_NODE_METER_NAME,
+    name: 'broker.nodejs.eventloop.utilization',
+  },
+  {
+    instrumentName: 'v8js.gc.duration',
+    meterName: RUNTIME_NODE_METER_NAME,
+    name: 'broker.v8js.gc.duration',
+  },
+  // Drop all other runtime metrics. Infra automatically filter these runtime
+  // metrics out due to the large volume emitted, so we want to be selective.
+  {
+    instrumentName: '*',
+    meterName: RUNTIME_NODE_METER_NAME,
+    aggregation: { type: AggregationType.DROP },
+  },
+];
 
 /** Options for createMeterProvider. */
 export interface CreateMeterProviderOpts {

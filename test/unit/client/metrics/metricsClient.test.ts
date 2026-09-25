@@ -432,30 +432,38 @@ describe('client/metrics', () => {
       expect(metric!.dataPoints).toHaveLength(1);
     });
 
-    it('rename view produces broker.nodejs.eventloop.delay.p99', async () => {
+    // GC duration is omitted: it only reports once a collection has actually
+    // run. Its view is pinned in common/metrics/otel.test.ts instead.
+    it.each([
+      'broker.nodejs.eventloop.delay.max',
+      'broker.nodejs.eventloop.delay.p99',
+      'broker.nodejs.eventloop.utilization',
+    ])('rename view produces %s', async (name) => {
       // Wait for the event loop delay histogram to complete at least one sampling interval.
       // The RuntimeNodeInstrumentation uses perf_hooks.monitorEventLoopDelay (default 10ms
       // resolution), so we wait longer to ensure the observable callbacks return data.
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const { resourceMetrics } = await reader.collect();
-      const names = resourceMetrics.scopeMetrics
-        .flatMap((sm) => sm.metrics)
-        .map((m) => m.descriptor.name);
+      const names = (await collectMetrics()).map((m) => m.descriptor.name);
 
-      expect(names).toContain('broker.nodejs.eventloop.delay.p99');
-      expect(names).not.toContain('nodejs.eventloop.delay.p99');
+      expect(names).toContain(name);
     });
 
-    it('drop view leaves no nodejs.* metrics in collected output', async () => {
+    it('drop view leaves no runtime metrics in collected output', async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const { resourceMetrics } = await reader.collect();
-      const nodejsMetrics = resourceMetrics.scopeMetrics
-        .flatMap((sm) => sm.metrics)
-        .filter((m) => m.descriptor.name.startsWith('nodejs.'));
+      const names = (await collectMetrics()).map((m) => m.descriptor.name);
 
-      expect(nodejsMetrics).toHaveLength(0);
+      // Two prefixes: event loop collectors emit under `nodejs.`, GC and heap
+      // collectors under `v8js.`.
+      expect(
+        names.filter((n) => n.startsWith('nodejs.') || n.startsWith('v8js.')),
+      ).toHaveLength(0);
+      // Also pinned by name, so a dependency bump that moves an instrument out
+      // of either prefix fails here rather than widening what we export.
+      expect(names).not.toContain('nodejs.eventloop.delay.p50');
+      expect(names).not.toContain('nodejs.eventloop.time');
+      expect(names).not.toContain('v8js.memory.heap.used');
     });
 
     it('shutdown resolves cleanly', async () => {

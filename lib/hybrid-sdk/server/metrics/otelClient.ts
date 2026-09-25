@@ -1,6 +1,13 @@
 import { Counter, Histogram, ValueType } from '@opentelemetry/api';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
 import { MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics';
-import { createMeterProvider, OtelConfig } from '../../common/metrics/otel';
+import {
+  createMeterProvider,
+  OtelConfig,
+  RUNTIME_NODE_VIEWS,
+} from '../../common/metrics/otel';
+import { log as logger } from '../../../logs/logger';
 import { Client } from './client';
 
 /** Constructor options for OtelClient. */
@@ -17,10 +24,16 @@ export interface OtelClientConfig {
  * Client implementation backed by OpenTelemetry.
  * Exports metrics to an OTLP/gRPC endpoint using delta temporality.
  *
+ * Automatically registers a selected subset of Node.js runtime metrics via
+ * RuntimeNodeInstrumentation — event loop delay (max and p99), event loop
+ * utilization, and GC duration — each renamed under the 'broker.' prefix for
+ * pipeline compatibility. Other runtime metrics are filtered out.
+ *
  * @param config - Constructor options.
  */
 export class OtelClient implements Client {
   private readonly meterProvider: MeterProvider;
+  private readonly runtimeInstrumentation?: RuntimeNodeInstrumentation;
   private readonly staleCredsSweepDurationHistogram: Histogram;
   private readonly staleCredsDisconnectedCounter: Counter;
 
@@ -31,7 +44,24 @@ export class OtelClient implements Client {
     };
     this.meterProvider = createMeterProvider(otelConfig, {
       reader: config.reader,
+      views: RUNTIME_NODE_VIEWS,
     });
+
+    // Guarded because a throw here propagates to index.ts, which exits the
+    // process: RuntimeNodeInstrumentation reaches into perf_hooks and v8, so a
+    // failure must cost the diagnostic metrics rather than the broker.
+    try {
+      this.runtimeInstrumentation = new RuntimeNodeInstrumentation();
+      registerInstrumentations({
+        meterProvider: this.meterProvider,
+        instrumentations: [this.runtimeInstrumentation],
+      });
+    } catch (err) {
+      logger.warn(
+        { err },
+        'Failed to register Node.js runtime instrumentation; runtime metrics will not be reported.',
+      );
+    }
 
     const meter = this.meterProvider.getMeter('broker-server');
 
@@ -72,6 +102,7 @@ export class OtelClient implements Client {
   }
 
   async shutdown(): Promise<void> {
+    this.runtimeInstrumentation?.disable();
     await this.meterProvider.shutdown();
   }
 }

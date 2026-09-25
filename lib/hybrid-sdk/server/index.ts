@@ -63,7 +63,16 @@ export const main = async (serverOpts: ServerOpts) => {
   const onSignal = async () => {
     logger.debug('Received exit signal, closing server.');
     await serverStopping(() => {
-      process.exit(0);
+      // Flush the final periodic export window before exiting, bounded so a
+      // stalled exporter cannot hold the pod past its termination grace period.
+      const flushTimeout = new Promise<void>((resolve) =>
+        setTimeout(resolve, 2000),
+      );
+      Promise.race([metricsClient.forceFlush(), flushTimeout])
+        .catch((err) =>
+          logger.warn({ err }, 'Failed to flush metrics before exit.'),
+        )
+        .finally(() => process.exit(0));
     });
   };
   process.once('SIGINT', onSignal);
