@@ -71,20 +71,44 @@ class LegacyResponseDelivery {
       this.source.destroy(error as Error);
     }
   }
+
+  cancel(error: Error): void {
+    if (this.ended) {
+      return;
+    }
+
+    this.ended = true;
+    this.source.destroy(error);
+  }
+}
+
+export interface LegacyStreamResponseHandler {
+  (
+    streamingID: string,
+    chunk: LegacyChunk,
+    finished: boolean,
+    metadata?: ResponseMetadata,
+  ): void;
+  dispose(error: Error): void;
 }
 
 export const legacyStreamResponseHandler = (
   token: string,
   registry: PendingResponseRegistry = pendingResponseRegistry,
-) => {
+): LegacyStreamResponseHandler => {
   const deliveries = new Map<string, LegacyResponseDelivery>();
+  let disposed = false;
 
-  return (
+  const handleChunk: LegacyStreamResponseHandler = (
     streamingID: string,
     chunk: LegacyChunk,
     finished: boolean,
     metadata?: ResponseMetadata,
   ): void => {
+    if (disposed) {
+      return;
+    }
+
     let delivery = deliveries.get(streamingID);
     if (!delivery) {
       const claim = registry.claim(streamingID, {
@@ -115,4 +139,17 @@ export const legacyStreamResponseHandler = (
 
     delivery.write(chunk, finished, metadata);
   };
+
+  handleChunk.dispose = (error: Error): void => {
+    if (disposed) {
+      return;
+    }
+
+    disposed = true;
+    for (const delivery of deliveries.values()) {
+      delivery.cancel(error);
+    }
+  };
+
+  return handleChunk;
 };

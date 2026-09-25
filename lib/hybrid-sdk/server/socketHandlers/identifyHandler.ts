@@ -6,7 +6,10 @@ import { metadataWithoutFilters } from '../utils/socket';
 import { getDesensitizedToken } from '../utils/token';
 import { getForwardWebSocketRequestHandler } from './initHandlers';
 import semver from 'semver';
-import { legacyStreamResponseHandler } from '../../LegacyStreamResponseHandler';
+import {
+  LegacyStreamResponseHandler,
+  legacyStreamResponseHandler,
+} from '../../LegacyStreamResponseHandler';
 import { ISpark } from 'primus';
 import { CLIENT_EVENT_MESSAGE } from '../../common/types/telemetry';
 import { ClientEventIdentity, handleClientEvent } from './clientEventHandler';
@@ -58,7 +61,7 @@ export const handleIdentifyOnSocket = (
   clientData,
   socket: ISpark,
   token: string,
-): boolean => {
+): LegacyStreamResponseHandler | undefined => {
   // clientData can be a string token coming from older broker clients,
   // OR an object coming from newer clients in the form of { token, metadata }
   if (typeof clientData === 'object') {
@@ -74,7 +77,7 @@ export const handleIdentifyOnSocket = (
       { token, metadata: metadataWithoutFilters(clientData.metadata) },
       'New client connection identified without a token.',
     );
-    return false;
+    return undefined;
   }
 
   const { maskedToken, hashedToken } = getDesensitizedToken(token);
@@ -101,7 +104,7 @@ export const handleIdentifyOnSocket = (
       message: `Broker client version is outdated. Minimal version: ${minimalSupportedBrokerVersion}. Please upgrade to latest version.`,
     });
     socket.end();
-    return false;
+    return undefined;
   }
   if (
     clientVersion != 'local' &&
@@ -150,7 +153,8 @@ export const handleIdentifyOnSocket = (
   }
   connections.set(token, clientPool);
 
-  socket.on('chunk', streamingResponse(token));
+  const legacyResponseHandler = streamingResponse(token);
+  socket.on('chunk', legacyResponseHandler);
   socket.on('request', response(token));
   // Primus Spark extends EventEmitter at runtime. CLIENT_EVENT_MESSAGE is
   // registered only here; removeAllListeners is therefore equivalent to
@@ -180,5 +184,5 @@ export const handleIdentifyOnSocket = (
     async () => await clientConnected(token, clientId, clientVersion),
   );
   incrementSocketConnectionGauge();
-  return true;
+  return legacyResponseHandler;
 };
