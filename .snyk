@@ -40,6 +40,11 @@ ignore:
         reason: No fix for rhel-ubi8 available yet
         expires: 2026-11-23T14:12:34.134Z
         created: 2026-09-23T14:12:34.139Z
+  SNYK-RHEL8-OPENSSLLIBS-19428141:
+    - '*':
+        reason: No fix for rhel-ubi8 available yet
+        expires: 2026-11-30T14:00:00.134Z
+        created: 2026-09-30T15:00:00.139Z
 patch: {}
 exclude:
   global:

@@ -94,7 +94,7 @@
     "ejson": "^2.2.0",
     "engine.io": "^6.6.7",
     "engine.io-client": "^5.2.0",
-    "express": "4.22.1",
+    "express": "4.22.3",
     "express-prom-bundle": "^5.1.5",
     "global-agent": "^3.0.0",
     "js-yaml": "4.3.1",
@@ -148,7 +148,8 @@
   },
   "overrides": {
     "express": {
-      "path-to-regexp": "^0.1.13"
+      "path-to-regexp": "^0.1.13",
+      "proxy-addr": "2.0.8"
     },
     "brace-expansion": "1.1.18",
     "form-data": "4.0.6",
