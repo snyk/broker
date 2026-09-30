@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   prodsec: snyk/prodsec-orb@1
+  publish: snyk/publish@1
   slack: circleci/slack@4.12.5
 
 defaults: &defaults
@@ -83,7 +84,13 @@ commands:
       additional_arguments:
         type: string
         default: ""
+      archive_name:
+        type: string
+        default: ""
       dockerfile:
+        type: string
+        default: ""
+      gar_alias_archive_name:
         type: string
         default: ""
       project_name:
@@ -102,16 +109,40 @@ commands:
       - run:
           name: Archive Docker image
           command: |
+            ARCHIVE_NAME="<<parameters.archive_name>>"
+            [[ -z "$ARCHIVE_NAME" ]] && ARCHIVE_NAME=<<parameters.project_name>>
             mkdir -p /tmp/workspace/images
             docker save <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID \
-              | gzip > "/tmp/workspace/images/<<parameters.project_name>>:$CIRCLE_WORKFLOW_ID.tar.gz"
+              | gzip > "/tmp/workspace/images/$ARCHIVE_NAME:$CIRCLE_WORKFLOW_ID.tar.gz"
+            <<#parameters.gar_alias_archive_name>>
+            docker tag <<parameters.project_name>>:$CIRCLE_WORKFLOW_ID broker:$CIRCLE_WORKFLOW_ID
+            docker save broker:$CIRCLE_WORKFLOW_ID \
+              | gzip > "/tmp/workspace/images/<<parameters.gar_alias_archive_name>>:$CIRCLE_WORKFLOW_ID.tar.gz"
+            <</parameters.gar_alias_archive_name>>
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - images
+  stage-docker-image-for-gar:
+    description: "Stage an archived broker alias for the GAR publish job"
+    parameters:
+      archive_name:
+        type: string
+    steps:
+      - attach_workspace:
+          at: /tmp/source-workspace
+      - run:
+          name: Stage broker image alias
+          command: |
+            mkdir -p /tmp/gar-workspace/images
+            cp "/tmp/source-workspace/images/<<parameters.archive_name>>:$CIRCLE_WORKFLOW_ID.tar.gz" \
+              "/tmp/gar-workspace/images/broker:$CIRCLE_WORKFLOW_ID.tar.gz"
   load-docker-image:
     description: "Load a saved Docker image"
     parameters:
+      archive_name:
+        type: string
+        default: ""
       project_name:
         type: string
         default: "broker"
@@ -121,7 +152,9 @@ commands:
       - run:
           name: Load archived Docker image
           command: |
-            docker load < "/tmp/workspace/images/<<parameters.project_name>>:$CIRCLE_WORKFLOW_ID.tar.gz"
+            ARCHIVE_NAME="<<parameters.archive_name>>"
+            [[ -z "$ARCHIVE_NAME" ]] && ARCHIVE_NAME=<<parameters.project_name>>
+            docker load < "/tmp/workspace/images/$ARCHIVE_NAME:$CIRCLE_WORKFLOW_ID.tar.gz"
   load-slack-templates:
     steps:
       - run:
@@ -257,8 +290,14 @@ jobs:
       additional_arguments:
         type: string
         default: ""
+      archive_name:
+        type: string
+        default: ""
       dockerfile:
         type: string
+      gar_alias_archive_name:
+        type: string
+        default: ""
       nodejs_cycle:
         type: string
         default: "24"
@@ -274,7 +313,9 @@ jobs:
           cycle: <<parameters.nodejs_cycle>>
       - build-and-save-docker-image:
           additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
+          archive_name: <<parameters.archive_name>>
           dockerfile: <<parameters.dockerfile>>
+          gar_alias_archive_name: <<parameters.gar_alias_archive_name>>
           project_name: <<parameters.project_name>>
   build-and-save-docker-ubi-image:
     <<: *defaults
@@ -303,6 +344,9 @@ jobs:
   scan-docker-image:
     <<: *defaults
     parameters:
+      archive_name:
+        type: string
+        default: ""
       mode:
         type: string
       dockerfile:
@@ -317,6 +361,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: false
       - load-docker-image:
+          archive_name: <<parameters.archive_name>>
           project_name: <<parameters.project_name>>
       - prodsec/container_scan:
           mode: <<parameters.mode>>
@@ -326,6 +371,9 @@ jobs:
   tag-and-push-docker-image:
     <<: *defaults
     parameters:
+      archive_name:
+        type: string
+        default: ""
       image_name:
         type: string
       image_tag:
@@ -339,6 +387,7 @@ jobs:
           docker_layer_caching: true
       - dockerhub-login
       - load-docker-image:
+          archive_name: <<parameters.archive_name>>
           project_name: <<parameters.project_name>>
       - install-cosign
       - tag-and-push-docker-image:
@@ -1021,6 +1070,7 @@ workflows:
           requires:
             - Scan repository for secrets
             - Release all docker images
+          archive_name: broker-base
           dockerfile: dockerfiles/base/Dockerfile
           nodejs_cycle: "24"
           project_name: broker
@@ -1035,6 +1085,7 @@ workflows:
             - prodsec-orb-runtime
           requires:
             - Build base image
+          archive_name: broker-base
           mode: "upload"
           dockerfile: dockerfiles/base/Dockerfile
           project: snyk/broker
@@ -1052,6 +1103,7 @@ workflows:
             - platformeng_access
           requires:
             - Scan base image
+          archive_name: broker-base
           image_name: snyk/broker
           image_tag: base
           project_name: broker
@@ -1520,6 +1572,7 @@ workflows:
             - Push base image
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base"
           dockerfile: dockerfiles/Dockerfile-universal
+          gar_alias_archive_name: broker-universal-gar
           project_name: universal
           post-steps:
             - notify-slack-on-failure
@@ -1538,6 +1591,24 @@ workflows:
           project_name: universal
           post-steps:
             - notify-slack-on-failure
+          <<: *filter-tags-only
+      - publish/publish:
+          name: Publish universal image to GAR
+          context:
+            - snyk-docker-build
+            - infra-publish-orb
+            - platformeng_access
+            - prodsec-orb-runtime
+          requires:
+            - Build universal image
+          image_mount_path: /tmp/gar-workspace
+          image_name: broker
+          image_tags: ${CIRCLE_TAG/v/''}-universal
+          pre-steps:
+            - stage-docker-image-for-gar:
+                archive_name: broker-universal-gar
+          snyk_organization: platformeng_access
+          snyk_target_file: dockerfiles/Dockerfile-universal
           <<: *filter-tags-only
 
       - build-and-save-docker-image:
@@ -1810,6 +1881,7 @@ workflows:
             - Push base image (edge)
           additional_arguments: "--build-arg BASE_IMAGE=snyk/broker:${CIRCLE_TAG/v/''}-base-edge"
           dockerfile: dockerfiles/Dockerfile-universal
+          gar_alias_archive_name: broker-universal-edge-gar
           project_name: universal-edge
           post-steps:
             - notify-slack-on-failure
@@ -1828,6 +1900,24 @@ workflows:
           project_name: universal-edge
           post-steps:
             - notify-slack-on-failure
+          <<: *filter-tags-only
+      - publish/publish:
+          name: Publish universal image to GAR (edge)
+          context:
+            - snyk-docker-build
+            - infra-publish-orb
+            - platformeng_access
+            - prodsec-orb-runtime
+          requires:
+            - Build universal image (edge)
+          image_mount_path: /tmp/gar-workspace
+          image_name: broker
+          image_tags: ${CIRCLE_TAG/v/''}-universal-edge
+          pre-steps:
+            - stage-docker-image-for-gar:
+                archive_name: broker-universal-edge-gar
+          snyk_organization: platformeng_access
+          snyk_target_file: dockerfiles/Dockerfile-universal
           <<: *filter-tags-only
 
       # dev images for testing (with edge variations)
