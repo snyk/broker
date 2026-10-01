@@ -6,9 +6,8 @@ import { uuidv4 } from '../../common/utils/uuid';
 import { axiosInstance } from '../../http/axios';
 import { incrementDispatcherWrite } from '../../common/utils/metrics';
 
-// The broker-gateway dispatcher's internal API validates the `version` query
-// param against the single version it serves, so it is fixed rather than
-// configurable.
+// The dispatcher API validates the `version` query param against the single
+// version it serves, so it is fixed rather than configurable.
 const DISPATCHER_API_VERSION = '2022-12-02~experimental';
 
 class DispatcherClient {
@@ -168,25 +167,45 @@ export let serverStopping;
 
 const config = getConfig();
 
-// Lifecycle writes go to the broker-gateway dispatcher (GATEWAY_DISPATCHER_URL).
-// It registers the FULL pod name (config.hostname) as its server id, so the envoy
-// sidecar can resolve the exact pod FQDN from Redis alone — no token-hash
-// sharding, any pod count. The legacy node dispatcher (DISPATCHER_URL) is no
-// longer written to.
-if (config.gatewayDispatcherUrl) {
-  const gatewayClient = new DispatcherClient(
-    config.gatewayDispatcherUrl,
-    config.hostname,
-    config.hostname,
-    'envoy-dispatcher',
-  );
+// Lifecycle events are sent to a single dispatcher. DISPATCHER_URL takes
+// precedence over GATEWAY_DISPATCHER_URL; the two are never written together.
+const selectDispatcher = (): DispatcherClient | undefined => {
+  if (config.dispatcherUrl) {
+    if (config.gatewayDispatcherUrl) {
+      logger.warn(
+        'Both DISPATCHER_URL and GATEWAY_DISPATCHER_URL set - using DISPATCHER_URL only.',
+      );
+    }
+    const serverId = config.hostname?.substring(
+      config.hostname?.lastIndexOf('-') + 1,
+    );
+    return new DispatcherClient(
+      config.dispatcherUrl,
+      config.hostname,
+      serverId,
+      'node-dispatcher',
+    );
+  }
+  if (config.gatewayDispatcherUrl) {
+    return new DispatcherClient(
+      config.gatewayDispatcherUrl,
+      config.hostname,
+      config.hostname,
+      'envoy-dispatcher',
+    );
+  }
+  return undefined;
+};
 
+const dispatcherClient = selectDispatcher();
+
+if (dispatcherClient) {
   clientConnected = async function (token, clientId, clientVersion) {
-    await gatewayClient.clientConnected(token, clientId, clientVersion);
+    await dispatcherClient.clientConnected(token, clientId, clientVersion);
   };
 
   clientPinged = async function (token, clientId, clientVersion, time) {
-    await gatewayClient.clientConnected(
+    await dispatcherClient.clientConnected(
       token,
       clientId,
       clientVersion,
@@ -196,19 +215,19 @@ if (config.gatewayDispatcherUrl) {
   };
 
   clientDisconnected = async function (token, clientId) {
-    await gatewayClient.clientDisconnected(token, clientId);
+    await dispatcherClient.clientDisconnected(token, clientId);
   };
 
   serverStarting = async function () {
-    await gatewayClient.serverStarting();
+    await dispatcherClient.serverStarting();
   };
 
   serverStopping = async function (cb) {
-    await gatewayClient.serverStopping(cb);
+    await dispatcherClient.serverStopping(cb);
   };
 } else {
   logger.error(
-    'GATEWAY_DISPATCHER_URL not set - creating no-op functions to ensure server still functions.',
+    'No dispatcher URL set - creating no-op functions to ensure server still functions.',
   );
   clientConnected = async function () {
     logger.trace('Client connected - no-op instead of notifying dispatcher.');
