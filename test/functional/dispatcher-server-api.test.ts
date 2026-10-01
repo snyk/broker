@@ -15,7 +15,7 @@ describe('Broker Server Dispatcher API interaction', () => {
   const podName = 'broker-server-3-0';
 
   const gatewayUrl = 'http://broker-gateway-dispatcher';
-  // The retired node dispatcher. Nothing may be written to it any more.
+  // The legacy node dispatcher. Only written to when DISPATCHER_URL is set.
   const nodeUrl = 'http://broker-server-dispatcher';
 
   const connectionPath = (requestType: string, extra = '') =>
@@ -31,7 +31,7 @@ describe('Broker Server Dispatcher API interaction', () => {
   };
 
   // Each test re-requires config + dispatcher from a fresh module graph so the
-  // module-level `if (config.gatewayDispatcherUrl)` wiring picks up its env.
+  // module-level dispatcher selection picks up its env.
   const loadDispatcher = async () => {
     jest.resetModules();
     const {
@@ -47,8 +47,7 @@ describe('Broker Server Dispatcher API interaction', () => {
     nock.cleanAll();
     process.env.hostname = podName;
     process.env.GATEWAY_DISPATCHER_URL = gatewayUrl;
-    // Still set in the broker-server helm templates today; it must be ignored.
-    process.env.DISPATCHER_URL = nodeUrl;
+    delete process.env.DISPATCHER_URL;
     nodeCalls.mockReset();
     nock(nodeUrl)
       .persist()
@@ -65,10 +64,6 @@ describe('Broker Server Dispatcher API interaction', () => {
   });
 
   afterEach(async () => {
-    // A write to the node dispatcher would be fire-and-forget, so give any such
-    // in-flight request a moment to land before asserting none was made.
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(nodeCalls).not.toHaveBeenCalled();
     nock.cleanAll();
     delete process.env.DISPATCHER_URL;
     delete process.env.GATEWAY_DISPATCHER_URL;
@@ -214,7 +209,108 @@ describe('Broker Server Dispatcher API interaction', () => {
     ).toBe(false);
   });
 
-  it('falls back to no-op functions when GATEWAY_DISPATCHER_URL is unset', async () => {
+  it('does not write to the node dispatcher when only GATEWAY_DISPATCHER_URL is set', async () => {
+    nock(gatewayUrl)
+      .post(connectionPath('client-connected'))
+      .reply(201, 'Created');
+
+    const dispatcher = await loadDispatcher();
+    await dispatcher.clientConnected(token, clientId, clientVersion);
+
+    expect(nodeCalls).not.toHaveBeenCalled();
+  });
+
+  describe('when DISPATCHER_URL is set (legacy node dispatcher, e.g. FedRAMP)', () => {
+    // The node dispatcher registers the bare pod ordinal, not the full pod name.
+    const nodeServerId = '0';
+    const nodeConnectionPath = (requestType: string) =>
+      `/internal/brokerservers/${nodeServerId}/connections/${hashedToken}?broker_client_id=${clientId}&request_type=${requestType}&version=${apiVersion}`;
+
+    const gatewayCalls = jest.fn();
+
+    beforeEach(() => {
+      process.env.DISPATCHER_URL = nodeUrl;
+      // The persistent catch-all from the outer beforeEach would swallow the
+      // specific interceptors below, so start from a clean slate.
+      nock.cleanAll();
+      gatewayCalls.mockReset();
+      nock(gatewayUrl)
+        .persist()
+        .post(/.*/)
+        .reply(() => {
+          gatewayCalls();
+          return [200, 'OK'];
+        })
+        .delete(/.*/)
+        .reply(() => {
+          gatewayCalls();
+          return [200, 'OK'];
+        });
+    });
+
+    afterEach(() => {
+      // No dual write: the gateway must never be touched on this path, even
+      // though GATEWAY_DISPATCHER_URL is also set.
+      expect(gatewayCalls).not.toHaveBeenCalled();
+    });
+
+    it('registers clientConnected with the node dispatcher using the pod ordinal', async () => {
+      const spyNode = jest.fn();
+      nock(nodeUrl)
+        .post(nodeConnectionPath('client-connected'))
+        .reply((_uri, body) => {
+          spyNode(JSON.parse(body as string));
+          return [201, 'Created'];
+        });
+
+      const dispatcher = await loadDispatcher();
+      await dispatcher.clientConnected(token, clientId, clientVersion);
+
+      expect(spyNode).toBeCalledTimes(1);
+      expect(spyNode).toBeCalledWith(expectedBody);
+    });
+
+    it('registers and de-registers the server with the node dispatcher', async () => {
+      const shutdownCallback = jest.fn();
+      const scope = nock(nodeUrl)
+        .post(`/internal/brokerservers/${nodeServerId}?version=${apiVersion}`)
+        .reply(201)
+        .delete(`/internal/brokerservers/${nodeServerId}?version=${apiVersion}`)
+        .reply(200);
+
+      const dispatcher = await loadDispatcher();
+      await dispatcher.serverStarting();
+      await dispatcher.serverStopping(shutdownCallback);
+
+      expect(scope.isDone()).toBe(true);
+      expect(shutdownCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('records node dispatcher writes under the node-dispatcher target', async () => {
+      nock(nodeUrl)
+        .post(nodeConnectionPath('client-connected'))
+        .reply(201, 'Created');
+
+      const dispatcher = await loadDispatcher();
+      const { register } = require('prom-client');
+      await dispatcher.clientConnected(token, clientId, clientVersion);
+
+      const metric = await register
+        .getSingleMetric('broker_dispatcher_write_total')
+        .get();
+      const successes = metric.values.find(
+        (v) =>
+          v.labels.target === 'node-dispatcher' &&
+          v.labels.result === 'success',
+      );
+      expect(successes?.value).toEqual(1);
+      expect(
+        metric.values.some((v) => v.labels.target === 'envoy-dispatcher'),
+      ).toBe(false);
+    });
+  });
+
+  it('falls back to no-op functions when neither dispatcher URL is set', async () => {
     delete process.env.GATEWAY_DISPATCHER_URL;
     const shutdownCallback = jest.fn();
     const gatewayScope = nock(gatewayUrl)
@@ -230,8 +326,8 @@ describe('Broker Server Dispatcher API interaction', () => {
     ).resolves.not.toThrowError();
     await dispatcher.serverStopping(shutdownCallback);
 
-    // Even with DISPATCHER_URL set, nothing is written anywhere.
     expect(gatewayScope.isDone()).toBe(false);
+    expect(nodeCalls).not.toHaveBeenCalled();
     expect(shutdownCallback).toHaveBeenCalledTimes(1);
   });
 });
