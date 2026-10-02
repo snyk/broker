@@ -22,6 +22,7 @@ describe('client send termination signal to broker server', () => {
   let tws: TestWebServer;
   let bs: BrokerServer;
   let bc: BrokerClient;
+  let serverSigintListeners: NodeJS.SignalsListener[];
   const spyClientDisconnected = jest.spyOn(dispatcher, 'clientDisconnected');
 
   const spyAddClientIdToTerminationMap = jest.spyOn(
@@ -37,7 +38,11 @@ describe('client send termination signal to broker server', () => {
     const PORT = 9999;
     tws = await createTestWebServer();
     process.env.RESPONSE_DATA_HIDDEN_ENABLED = 'true';
+    const sigintBeforeServer = process.listeners('SIGINT');
     bs = await createBrokerServer({ filters: serverAccept, port: PORT });
+    serverSigintListeners = process
+      .listeners('SIGINT')
+      .filter((listener) => !sigintBeforeServer.includes(listener));
 
     process.env.SNYK_BROKER_SERVER_UNIVERSAL_CONFIG_ENABLED = 'true';
     process.env.API_BASE_URL = `http://localhost:${bs.port}`;
@@ -97,6 +102,11 @@ describe('client send termination signal to broker server', () => {
 
     expect(response.status).toEqual(200);
     expect(response.data).toEqual('xyz');
+    // The Broker Server now handles SIGINT independently. This same-process
+    // test is specifically for the Client notification path.
+    for (const listener of serverSigintListeners) {
+      process.removeListener('SIGINT', listener);
+    }
     process.emit('SIGINT');
     await delay(1000);
     expect(spyAddClientIdToTerminationMap).toHaveBeenCalledWith(

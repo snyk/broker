@@ -23,6 +23,9 @@ import { authRefreshHandler } from './routesHandlers/authHandlers';
 import { disconnectConnectionsWithStaleCreds } from './auth/connectionWatchdog';
 import { serviceHandler } from './routesHandlers/serviceHandler';
 import * as metrics from './metrics';
+import { pendingResponseRegistry } from '../http/server-post-stream-handler';
+
+type CloseCallback = () => void;
 
 export const main = async (serverOpts: ServerOpts) => {
   logger.info({ version }, 'Broker starting in server mode.');
@@ -48,6 +51,8 @@ export const main = async (serverOpts: ServerOpts) => {
   }
   const classicFilters: FiltersType = filters as FiltersType;
 
+  pendingResponseRegistry.startAcceptingRegistrations();
+
   // start the local webserver to listen for relay requests
   const { app, server } = webserver(serverOpts.config, serverOpts.port);
 
@@ -60,9 +65,25 @@ export const main = async (serverOpts: ServerOpts) => {
     throw new Error('Unable to load filters.');
   }
 
+  let shutdownStarted = false;
+  const beginShutdown = () => {
+    if (shutdownStarted) {
+      return;
+    }
+    shutdownStarted = true;
+
+    pendingResponseRegistry.cancelAll(
+      new Error('Broker Server is shutting down.'),
+    );
+    // Stop accepting new HTTP connections, but do not make signal exit wait
+    // for unrelated active requests to finish.
+    server.close();
+  };
+
   const onSignal = async () => {
     logger.debug('Received exit signal, closing server.');
     await serverStopping(() => {
+      beginShutdown();
       // Flush the final periodic export window before exiting, bounded so a
       // stalled exporter cannot hold the pod past its termination grace period.
       const flushTimeout = new Promise<void>((resolve) =>
@@ -130,20 +151,38 @@ export const main = async (serverOpts: ServerOpts) => {
     res.status(200).json({ ok: true, version }),
   );
 
+  let shutdownFinished = false;
+  let gracefulShutdownStarted = false;
+  const closeCallbacks: CloseCallback[] = [];
+  const close = (done?: CloseCallback) => {
+    if (done) {
+      if (shutdownFinished) {
+        done();
+        return;
+      }
+      closeCallbacks.push(done);
+    }
+    if (gracefulShutdownStarted) {
+      return;
+    }
+    gracefulShutdownStarted = true;
+
+    logger.info('Server websocket is closing.');
+    beginShutdown();
+    metricsClient.shutdown().catch((err) => {
+      logger.warn({ err }, 'Error shutting down metrics client.');
+    });
+    websocket.destroy(function () {
+      logger.info('Server websocket is closed.');
+      shutdownFinished = true;
+      for (const callback of closeCallbacks.splice(0)) {
+        callback();
+      }
+    });
+  };
+
   return {
     websocket: websocket,
-    close: (done) => {
-      logger.info('Server websocket is closing.');
-      server.close();
-      metricsClient.shutdown().catch((err) => {
-        logger.warn({ err }, 'Error shutting down metrics client.');
-      });
-      websocket.destroy(function () {
-        logger.info('Server websocket is closed.');
-        if (done) {
-          return done();
-        }
-      });
-    },
+    close,
   };
 };
