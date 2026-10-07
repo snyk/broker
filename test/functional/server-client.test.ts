@@ -167,13 +167,16 @@ describe('proxy requests originating from behind the broker server', () => {
     expect(response.headers['x-broker-ws-response']).not.toBeNull();
   });
 
-  it('successfully broker POST with unicode body and header values', async () => {
+  it('relays a Unicode body and Latin-1 response header', async () => {
     const response = await axiosClient.post(
       `http://localhost:${bs.port}/broker/${brokerToken}/echo-with-unicode`,
       { some: { example: 'json' } },
     );
     expect(decodeURIComponent(response.headers.test)).toEqual(
       'Special-Char-碰撞.proj',
+    );
+    expect(response.headers['content-disposition']).toEqual(
+      'attachment; filename="München.txt"',
     );
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({

@@ -274,6 +274,10 @@ const applyEchoRoutes = (app: Express) => {
       if (contentType) {
         resp.type(contentType);
       }
+      resp.setHeader(
+        'content-disposition',
+        'attachment; filename="München.txt"',
+      );
       resp.setHeader('test', encodeURIComponent(unicodeValue));
       resp.send(JSON.stringify(body));
     },
