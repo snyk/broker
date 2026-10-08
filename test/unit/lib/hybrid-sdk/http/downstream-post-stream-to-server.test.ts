@@ -1,9 +1,12 @@
 import http from 'node:http';
 import { AddressInfo, Socket } from 'node:net';
+import { Readable, Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import nock from 'nock';
 import { uuidv4 } from '../../../../../lib/hybrid-sdk/common/utils/uuid';
 
 import { BrokerServerPostResponseHandler } from '../../../../../lib/hybrid-sdk/http/downstream-post-stream-to-server';
+import { ResponseFrameDecoder } from '../../../../../lib/hybrid-sdk/http/response-frame-decoder';
 import {
   setConfig,
   getConfig,
@@ -1716,6 +1719,74 @@ describe('BrokerServerPostResponseHandler', () => {
           (c) => c.message === 'Non-2xx response from downstream SCM',
         );
         expect(warnCall).toBeUndefined();
+      },
+    );
+  });
+
+  describe('POST-stream metadata framing', () => {
+    beforeEach(() => {
+      setConfig({
+        brokerServerUrl,
+        universalBrokerEnabled: false,
+        universalBrokerGa: false,
+      });
+    });
+
+    it.each([
+      ['ASCII metadata', { 'content-type': 'application/json' }],
+      [
+        'multibyte UTF-8 response-header metadata',
+        {
+          'content-disposition': 'attachment; filename="München.txt"',
+        },
+      ],
+    ])(
+      'encodes %s with a byte-length prefix accepted by ResponseFrameDecoder',
+      async (_caseName, headers) => {
+        let resolveRequestBody: (body: Buffer) => void;
+        const requestBody = new Promise<Buffer>((resolve) => {
+          resolveRequestBody = resolve;
+        });
+        nock(brokerServerUrl)
+          .post(`/response-data/${brokerToken}/${streamingId}`, (body) => {
+            resolveRequestBody(Buffer.from(body));
+            return true;
+          })
+          .query(true)
+          .reply(200, 'OK');
+        const body = { message: 'response body' };
+        await createHandler().sendData(
+          { status: 207, headers, body },
+          streamingId,
+        );
+        const framed = await requestBody;
+        const expectedMetadata = JSON.stringify({ status: 207, headers });
+        const metadataLength = framed.readUInt32LE(0);
+
+        expect(metadataLength).toBe(
+          Buffer.byteLength(expectedMetadata, 'utf8'),
+        );
+        expect(framed.subarray(4, 4 + metadataLength).toString('utf8')).toBe(
+          expectedMetadata,
+        );
+
+        const decodedBody: Buffer[] = [];
+        const onMetadata = jest.fn();
+        await pipeline(
+          Readable.from([framed]),
+          new ResponseFrameDecoder({ onMetadata }),
+          new Writable({
+            write(chunk, _encoding, callback) {
+              decodedBody.push(chunk);
+              callback();
+            },
+          }),
+        );
+
+        expect(onMetadata).toHaveBeenCalledWith({ status: 207, headers });
+        expect(Buffer.concat(decodedBody).toString('utf8')).toBe(
+          JSON.stringify(body),
+        );
       },
     );
   });

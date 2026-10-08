@@ -469,20 +469,17 @@ class BrokerServerPostResponseHandler {
   }
 
   #sendIoData(ioData) {
-    const ioDataLength = ioData.length;
+    const metadata = Buffer.from(ioData, 'utf8');
+    const ioDataLength = metadata.length;
     this.#logger.debug(
       { ioDataLength },
       `sending ioData (Status & Headers) to Broker Server`,
     );
-    // Would be nice if there were a Unit32Array or a writeUint32 method, but noooooo...
-    const ioDataLengthBinary = new Uint8Array(4);
-    ioDataLengthBinary[0] = ioDataLength & 0xff;
-    ioDataLengthBinary[1] = (ioDataLength >> 8) & 0xff;
-    ioDataLengthBinary[2] = (ioDataLength >> 16) & 0xff;
-    ioDataLengthBinary[3] = (ioDataLength >> 24) & 0xff;
+    const ioDataLengthBinary = Buffer.allocUnsafe(4);
+    ioDataLengthBinary.writeUInt32LE(ioDataLength);
     this.#buffer.cork();
     this.#buffer.write(ioDataLengthBinary);
-    this.#buffer.write(ioData);
+    this.#buffer.write(metadata);
     this.#buffer.uncork();
   }
 
