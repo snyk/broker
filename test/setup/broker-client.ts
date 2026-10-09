@@ -116,6 +116,7 @@ interface ConnectionDetails {
   brokertoken: string;
   capabilities: Array<string>;
   index: number;
+  identifier: string;
 }
 
 export const waitForBrokerServerConnections = async (
@@ -127,6 +128,7 @@ export const waitForBrokerServerConnections = async (
         index: index,
         capabilities: x.capabilities,
         brokertoken: x.identifier,
+        identifier: x.identifier,
       };
     },
   );
@@ -139,6 +141,7 @@ export const waitForBrokerServerConnections = async (
         index: index,
         capabilities: x.capabilities,
         brokertoken: x.identifier,
+        identifier: x.identifier,
       };
     });
     remainingConnectionsToWaitFor = capabilities
