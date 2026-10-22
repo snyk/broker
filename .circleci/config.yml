@@ -7,7 +7,7 @@ orbs:
 
 defaults: &defaults
   docker:
-    - image: cimg/node:24.15
+    - image: cimg/node:24.22.1
   working_directory: ~/broker
 filter-tags-only: &filter-tags-only
   filters:
@@ -55,14 +55,14 @@ commands:
     parameters:
       cycle:
         type: string
-        default: "20"
+        default: "24"
     steps:
       - run:
           name: Get latest Node.js <<parameters.cycle>> version
           command: |
-            echo "Getting latest Node.js <<parameters.cycle>> version..."
-            NODE_LATEST_VERSION=$(curl --silent https://endoflife.date/api/nodejs.json | jq -r '.[] | select (.cycle == "<<parameters.cycle>>")' | jq -r .latest)
-            echo $NODE_LATEST_VERSION
+            set -euo pipefail
+            NODE_LATEST_VERSION=$(curl -fsS https://endoflife.date/api/nodejs.json | jq -er '.[] | select(.cycle == "<<parameters.cycle>>") | .latest')
+            printf '%s\n' 24.22.1 "$NODE_LATEST_VERSION" | sort -V -C
             echo "export NODE_LATEST_VERSION=$NODE_LATEST_VERSION" >> "$BASH_ENV"
   install-cosign:
     parameters:
@@ -336,7 +336,8 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: false
       - get-and-set-tagged-broker-version
-      - get-latest-nodejs-version
+      - get-latest-nodejs-version:
+          cycle: "24"
       - build-and-save-docker-image:
           additional_arguments: <<parameters.additional_arguments>> --build-arg BROKER_VERSION=$BROKER_VERSION --build-arg NODE_VERSION=$NODE_LATEST_VERSION
           dockerfile: <<parameters.dockerfile>>
