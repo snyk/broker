@@ -1,4 +1,7 @@
-FROM snyk/broker:base-rhel-ubi
+ARG BASE_IMAGE=snyk/broker:base-rhel-ubi
+
+
+FROM ${BASE_IMAGE}
 
 
 ARG BROKER_TYPE
