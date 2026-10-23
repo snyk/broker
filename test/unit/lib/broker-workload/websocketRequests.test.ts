@@ -81,6 +81,41 @@ describe('BrokerWorkload', () => {
     mockFilterRequest.mockReturnValue(null);
   });
 
+  it('propagates the connection identifier in universal broker payload headers', async () => {
+    const universalOptions: BrokerWorkloadOptions = {
+      config: {
+        brokerType: 'client',
+        universalBrokerEnabled: true,
+      },
+    };
+    const workload = new BrokerWorkload(
+      connectionIdentifier,
+      universalOptions,
+      websocketConnectionHandler,
+    );
+    const payload: {
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      streamingID: string;
+      connectionIdentifier?: string;
+    } = {
+      url: '/api/v2/import/done',
+      method: 'POST',
+      headers: {
+        'snyk-request-id': '10101010-1010-4010-8010-101010101010',
+      },
+      streamingID: '',
+    };
+
+    await workload.handler({ payload, websocketHandler: jest.fn() });
+
+    expect(payload.connectionIdentifier).toBe(connectionIdentifier);
+    expect(payload.headers['snyk-broker-connection-identifier']).toBe(
+      connectionIdentifier,
+    );
+  });
+
   it('includes contextId in logContext when x-snyk-broker-context-id header is set', async () => {
     const workload = new BrokerWorkload(
       connectionIdentifier,

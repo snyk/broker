@@ -82,6 +82,13 @@ export class BrokerWorkload extends Workload<WorkloadType.remoteServer> {
     const websocketResponseHandler = websocketHandler;
     if (this.options.config.universalBrokerEnabled) {
       payload.connectionIdentifier = this.connectionIdentifier;
+      // Duplicate the connection identifier into the headers so the client-side
+      // websocketConnectionSelectorMiddleware — which operates on the Express
+      // request/response and has no access to the payload object — can route CR
+      // requests to the correct websocket connection when multiple CR
+      // connections of the same type exist in one org.
+      payload.headers['snyk-broker-connection-identifier'] =
+        this.connectionIdentifier;
     }
     const correlationHeaders = getCorrelationDataFromHeaders(payload.headers);
     const contextId = payload.headers['x-snyk-broker-context-id'] as
