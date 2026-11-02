@@ -1,0 +1,29 @@
+{
+  "BROKER_CLIENT_CONFIGURATION": {
+    "common": {
+      "default": {
+        "BROKER_HA_MODE_ENABLED": "false"
+      }
+    }
+  },
+  "CONNECTIONS": {
+    "registry-a": {
+      "type": "docker-hub",
+      "identifier": "${BROKER_TOKEN_1}",
+      "CR_AGENT_URL": "${TEST_CRA_URL_A}",
+      "CR_CREDENTIALS": "${TEST_CR_CREDENTIALS_A}",
+      "BROKER_CLIENT_URL": "${TEST_CALLBACK_URL}",
+      "CR_USERNAME": "user-a",
+      "CR_PASSWORD": "password-a"
+    },
+    "registry-b": {
+      "type": "docker-hub",
+      "identifier": "${BROKER_TOKEN_2}",
+      "CR_AGENT_URL": "${TEST_CRA_URL_B}",
+      "CR_CREDENTIALS": "${TEST_CR_CREDENTIALS_B}",
+      "BROKER_CLIENT_URL": "${TEST_CALLBACK_URL}",
+      "CR_USERNAME": "user-b",
+      "CR_PASSWORD": "password-b"
+    }
+  }
+}
