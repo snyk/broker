@@ -13,6 +13,7 @@ const LOG = createTestLogger();
 
 interface CreateTestWebServerOptions {
   port?: number;
+  configure?: (app: Express) => void;
   sslCertificatePath?: string;
   sslCertificateKeyPath?: string;
 }
@@ -32,6 +33,7 @@ export const createTestWebServer = async (
 ): Promise<TestWebServer> => {
   const app = express();
   applyMiddlewares(app);
+  params?.configure?.(app);
   applyEchoRoutes(app);
 
   const port = params?.port

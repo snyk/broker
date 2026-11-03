@@ -10,6 +10,7 @@ import { replace } from './common/utils/replace-vars';
 import tryJSONParse from './common/utils/try-json-parse';
 import undefsafe from 'undefsafe';
 import { log as logger } from '../logs/logger';
+import { scopeCraCallbackUrl } from './common/utils/craCallbackRouting';
 
 export const getInterpolatedRequest = (
   connectionIdentifier: string | null,
@@ -62,12 +63,18 @@ export const getInterpolatedRequest = (
         logContext.bodyVarsSubstitution = parsedBody.BROKER_VAR_SUB;
         for (const path of parsedBody.BROKER_VAR_SUB) {
           let source = undefsafe(parsedBody, path); // get the value
+          const isBrokerCallback =
+            typeof source === 'string' &&
+            source.startsWith('${BROKER_CLIENT_URL}');
           source = replace(
             source,
             config.universalBrokerEnabled
               ? getConfigForIdentifier(connectionIdentifier!, config)
               : config,
           ); // replace the variables
+          if (config.universalBrokerEnabled && isBrokerCallback) {
+            source = scopeCraCallbackUrl(source, connectionIdentifier!, config);
+          }
           undefsafe(parsedBody, path, source); // put it back in
         }
         //Remove the BROKER_VAR_SUB for the request body

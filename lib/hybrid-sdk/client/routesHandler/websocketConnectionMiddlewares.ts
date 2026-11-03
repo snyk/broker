@@ -3,6 +3,11 @@ import { getConfig } from '../../common/config/config';
 import { NextFunction, Request, Response } from 'express';
 import { WebSocketConnection } from '../types/client';
 import { isWebsocketConnOpen } from '../utils/socketHelpers';
+import {
+  craConnectionQueryParameter,
+  getCraConnections,
+} from '../../common/utils/craCallbackRouting';
+import { hashToken } from '../../common/utils/token';
 
 export const websocketConnectionSelectorMiddleware = (
   req: Request,
@@ -75,12 +80,60 @@ export const websocketConnectionSelectorMiddleware = (
       req.path.startsWith('/api/v1/') ||
       req.path.startsWith('/api/v2/') ||
       req.path.startsWith('/v1/') ||
-      req.path.startsWith('/v2/')
+      req.path.startsWith('/v2/') ||
+      req.path === '/rest/scan/result'
     ) {
-      const craCompatibleAvailableTypes = getCraCompatibleTypes(config);
-      if (craCompatibleAvailableTypes.length > 0) {
-        inboundRequestType = craCompatibleAvailableTypes[0];
-      } else {
+      const queryIndex = req.url.indexOf('?');
+      const queryComponents =
+        queryIndex === -1 ? [] : req.url.slice(queryIndex + 1).split('&');
+      const selectors = queryComponents.flatMap((component) =>
+        new URLSearchParams(`?${component}`).getAll(
+          craConnectionQueryParameter,
+        ),
+      );
+      const eligibleConnections = getCraConnections(config);
+      if (
+        selectors.length > 1 ||
+        (selectors.length === 1 && !/^[a-f0-9]{64}$/.test(selectors[0]))
+      ) {
+        logger.warn(
+          {
+            requestId: req.requestId,
+            reasonCode: 'cra_callback_invalid_selector',
+          },
+          'Rejected container registry callback routing request.',
+        );
+        res.status(400).send('Invalid container registry callback connection.');
+        return;
+      }
+      const matchingConnections = selectors.length
+        ? eligibleConnections.filter(
+            (connection) =>
+              connection.identifier &&
+              hashToken(connection.identifier) === selectors[0],
+          )
+        : eligibleConnections;
+      if (selectors.length && matchingConnections.length === 0) {
+        logger.warn(
+          {
+            requestId: req.requestId,
+            reasonCode: 'cra_callback_connection_not_found',
+          },
+          'Rejected container registry callback routing request.',
+        );
+        res
+          .status(404)
+          .send('Container registry callback connection not found.');
+        return;
+      }
+      if (matchingConnections.length === 0) {
+        logger.warn(
+          {
+            requestId: req.requestId,
+            reasonCode: 'cra_callback_no_compatible_connection',
+          },
+          'Rejected container registry callback routing request.',
+        );
         res
           .status(505)
           .send(
@@ -88,6 +141,55 @@ export const websocketConnectionSelectorMiddleware = (
           );
         return;
       }
+      if (matchingConnections.length !== 1) {
+        logger.warn(
+          {
+            requestId: req.requestId,
+            reasonCode: 'cra_callback_ambiguous_connection',
+          },
+          'Rejected container registry callback routing request.',
+        );
+        res
+          .status(400)
+          .send('Ambiguous container registry callback connection.');
+        return;
+      }
+      const selectedConnection = websocketConnections.find(
+        (connection) =>
+          !matchingConnections[0].isDisabled &&
+          connection.identifier === matchingConnections[0].identifier &&
+          connection.supportedIntegrationType === matchingConnections[0].type &&
+          isWebsocketConnOpen(connection),
+      );
+      if (!selectedConnection) {
+        logger.warn(
+          {
+            requestId: req.requestId,
+            reasonCode: 'cra_callback_connection_unavailable',
+          },
+          'Rejected container registry callback routing request.',
+        );
+        res
+          .status(503)
+          .send('Container registry callback connection unavailable.');
+        return;
+      }
+      if (selectors.length) {
+        const remainingComponents = queryComponents.filter(
+          (component) =>
+            !new URLSearchParams(`?${component}`).has(
+              craConnectionQueryParameter,
+            ),
+        );
+        req.url =
+          req.url.slice(0, queryIndex) +
+          (remainingComponents.length
+            ? `?${remainingComponents.join('&')}`
+            : '');
+      }
+      res.locals.websocket = selectedConnection;
+      next();
+      return;
     } else {
       logger.error(
         { url: req.path, requestId: req.requestId },
@@ -113,14 +215,3 @@ export const websocketConnectionSelectorMiddleware = (
     next();
   }
 };
-
-export function getCraCompatibleTypes(config: Record<string, any>): string[] {
-  const connectionsList = Object.values(config.connections) as Record<
-    string,
-    string
-  >[];
-  const craCompatibleTypeNames = config.CRA_COMPATIBLE_TYPES as string[];
-  return connectionsList
-    .filter((x) => x && craCompatibleTypeNames.includes(x.type))
-    .map((x) => x.type);
-}
