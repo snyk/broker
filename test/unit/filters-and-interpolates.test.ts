@@ -98,6 +98,26 @@ describe('filters and interpolates', () => {
         expect(result.url).toMatch(url);
       });
 
+      it('should allow adding labels to a pull request', () => {
+        const filterResponse = filter({
+          url: '/repos/test-org/test-repo/issues/1/labels',
+          method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        });
+        expect((filterResponse as Rule).path).toEqual(
+          '/repos/:name/:repo/issues/:pull_number/labels',
+        );
+      });
+
+      it('should block removing labels from a pull request', () => {
+        const filterResponse = filter({
+          url: '/repos/test-org/test-repo/issues/1/labels',
+          method: 'DELETE',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        });
+        expect(filterResponse).toBeFalsy();
+      });
+
       it('should allow updating a general pull request comment', () => {
         const url = '/repos/test-org/test-repo/issues/comments/12345';
 
@@ -206,6 +226,17 @@ describe('filters and interpolates', () => {
           requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         });
         expect(filterResponse).toBeTruthy();
+      });
+
+      it('should allow adding labels to a pull request', () => {
+        const filterResponse = filter({
+          url: '/repos/test-org/test-repo/issues/1/labels',
+          method: 'POST',
+          requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        });
+        expect((filterResponse as Rule).path).toEqual(
+          '/repos/:name/:repo/issues/:pull_number/labels',
+        );
       });
     });
 
