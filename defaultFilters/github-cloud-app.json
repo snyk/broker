@@ -2028,6 +2028,16 @@
         }
       },
       {
+        "//": "add pull request labels",
+        "method": "POST",
+        "path": "/repos/:name/:repo/issues/:pull_number/labels",
+        "origin": "https://${GITHUB_API}",
+        "auth": {
+          "scheme": "bearer",
+          "token": "${GHA_ACCESS_TOKEN}"
+        }
+      },
+      {
         "//": "update ref",
         "method": "PATCH",
         "path": "/repos/:name/:repo/git/refs/:sha",

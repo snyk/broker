@@ -4839,6 +4839,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -6255,6 +6261,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -13235,6 +13247,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -14651,6 +14669,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -21631,6 +21655,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -23047,6 +23077,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -30027,6 +30063,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -31443,6 +31485,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -38423,6 +38471,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -39839,6 +39893,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -46873,6 +46933,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -48301,6 +48367,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -56043,6 +56115,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -57519,6 +57597,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -64553,6 +64637,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -65975,6 +66065,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -73054,6 +73150,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -74488,6 +74590,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -81643,6 +81751,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -83089,6 +83203,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -90222,6 +90342,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -91656,6 +91782,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -102001,6 +102133,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -104295,6 +104433,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -105735,6 +105879,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -107285,6 +107435,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -116054,6 +116210,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -117470,6 +117632,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -124450,6 +124618,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -125866,6 +126040,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -132854,6 +133034,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -134270,6 +134456,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -141292,6 +141484,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -142708,6 +142906,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
@@ -149688,6 +149892,12 @@ Object {
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
     },
     Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
+    },
+    Object {
       "//": "update ref",
       "method": "PATCH",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
@@ -151104,6 +151314,12 @@ Object {
       "method": "POST",
       "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
       "path": "/repos/:name/:repo/issues/:pull_number/assignees",
+    },
+    Object {
+      "//": "add pull request labels",
+      "method": "POST",
+      "origin": "https://\${GITHUB_TOKEN}@\${GITHUB_API}",
+      "path": "/repos/:name/:repo/issues/:pull_number/labels",
     },
     Object {
       "//": "update ref",
