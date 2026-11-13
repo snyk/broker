@@ -102,7 +102,12 @@ export class HybridResponseHandler {
       const hadContentLength = Object.keys(response.headers).some(
         (name) => name.toLowerCase() === 'content-length',
       );
-      const replaced = replaceUrlPartialChunk(response.body, null, this.config);
+      const replaced = replaceUrlPartialChunk(
+        response.body,
+        null,
+        this.config,
+        this.connectionIdentifier,
+      );
       response.body = replaced.newChunk;
       response.headers = substitutionPolicy.headers;
       if (hadContentLength) {
@@ -197,6 +202,7 @@ export class HybridResponseHandler {
           this.config,
           this.websocketConnectionHandler,
           this.requestMetadata.payloadStreamingId,
+          this.connectionIdentifier,
         );
       } else {
         this.websocketConnectionHandler?.send(

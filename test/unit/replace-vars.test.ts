@@ -17,8 +17,10 @@ describe('replacePartialChunk', () => {
   const config = {
     RES_BODY_URL_SUB: 'http://replac.ed',
     BROKER_SERVER_URL: 'broker.com',
-    BROKER_TOKEN: 'a-tok-en',
   };
+  const connectionIdentifier = 'a-tok-en';
+  const replaceUrlInChunk = (chunk, prevPartial) =>
+    replaceUrlPartialChunk(chunk, prevPartial, config, connectionIdentifier);
 
   it('Replaces string completely in chunk', () => {
     const chunk =
@@ -27,7 +29,7 @@ describe('replacePartialChunk', () => {
     const expectedChunk =
       'Replace the "http://internal-broker-server-next/broker/a-tok-en/get/some/artifact" url please.';
 
-    expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
+    expect(replaceUrlInChunk(chunk, prevPartial)).toEqual({
       newChunk: expectedChunk,
       partial: undefined,
     });
@@ -38,7 +40,7 @@ describe('replacePartialChunk', () => {
     const prevPartial = null;
     const expectedChunk = 'Replace the "';
 
-    expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
+    expect(replaceUrlInChunk(chunk, prevPartial)).toEqual({
       newChunk: expectedChunk,
       partial: 'http://repla',
     });
@@ -50,7 +52,7 @@ describe('replacePartialChunk', () => {
     const expectedChunk =
       'http://internal-broker-server-next/broker/a-tok-en/get/some/artifact" url please.';
 
-    expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
+    expect(replaceUrlInChunk(chunk, prevPartial)).toEqual({
       newChunk: expectedChunk,
       partial: undefined,
     });
@@ -61,7 +63,7 @@ describe('replacePartialChunk', () => {
     const prevPartial = 'http://repla';
     const expectedChunk = 'http://replaac.ed/get/some/artifact" url please.';
 
-    expect(replaceUrlPartialChunk(chunk, prevPartial, config)).toEqual({
+    expect(replaceUrlInChunk(chunk, prevPartial)).toEqual({
       newChunk: expectedChunk,
       partial: undefined,
     });

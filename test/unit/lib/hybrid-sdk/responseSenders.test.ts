@@ -82,8 +82,8 @@ describe('hybrid-sdk/client', () => {
   describe('HybridResponseHandler', () => {
     describe('buffered websocket response body URL substitution', () => {
       const responseUrl = 'http://private-registry.example/artifactory';
-      const replacementUrl =
-        'http://internal-broker-server-next/broker/test-broker-token';
+      const connectionIdentifier = 'legacy-broker-token';
+      const replacementUrl = `http://internal-broker-server-next/broker/${connectionIdentifier}`;
       const originalBody = JSON.stringify({
         tarball: `${responseUrl}/pkg.tgz`,
         location: 'München',
@@ -103,7 +103,7 @@ describe('hybrid-sdk/client', () => {
         const websocketResponseHandler = jest.fn();
         const handler = new HybridResponseHandler(
           {
-            connectionIdentifier: 'test-broker-token',
+            connectionIdentifier,
             requestId: 'request-1',
           } as any,
           {} as any,
@@ -127,7 +127,6 @@ describe('hybrid-sdk/client', () => {
         const { headers, websocketResponseHandler } = sendBufferedResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'application/json',
           originalBody,
@@ -158,7 +157,6 @@ describe('hybrid-sdk/client', () => {
         const { headers, websocketResponseHandler } = sendBufferedResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'application/json',
           originalBody,
@@ -204,7 +202,6 @@ describe('hybrid-sdk/client', () => {
         const { websocketResponseHandler } = sendBufferedResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'text/plain',
         );
@@ -228,7 +225,6 @@ describe('hybrid-sdk/client', () => {
         const { websocketResponseHandler } = sendBufferedResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'application/json',
           bodyWithoutMatch,
@@ -251,7 +247,7 @@ describe('hybrid-sdk/client', () => {
         const websocketResponseHandler = jest.fn();
         const handler = new HybridResponseHandler(
           {
-            connectionIdentifier: 'test-broker-token',
+            connectionIdentifier,
             requestId: 'request-1',
           } as any,
           {} as any,
@@ -259,7 +255,6 @@ describe('hybrid-sdk/client', () => {
           {
             socketMaxResponseLength: '20971520',
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           } as any,
           {} as any,
         );
