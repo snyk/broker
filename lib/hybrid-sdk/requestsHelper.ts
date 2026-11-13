@@ -9,6 +9,7 @@ export const legacyStreaming = (
   config,
   io,
   streamingID,
+  connectionIdentifier,
 ) => {
   let prevPartialChunk;
   logger.info(
@@ -34,6 +35,7 @@ export const legacyStreaming = (
           Buffer.from(chunk).toString(),
           prevPartialChunk,
           config,
+          connectionIdentifier,
         );
         prevPartialChunk = partial;
         chunk = newChunk;

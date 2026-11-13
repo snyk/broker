@@ -8,8 +8,8 @@ describe('hybrid-sdk/http', () => {
   describe('BrokerServerPostResponseHandler', () => {
     describe('response body URL substitution', () => {
       const responseUrl = 'http://private-registry.example/artifactory';
-      const replacementUrl =
-        'http://internal-broker-server-next/broker/test-broker-token';
+      const classicConnectionIdentifier = 'legacy-broker-token';
+      const replacementUrl = `http://broker-snyk-server-v2.default/broker/${classicConnectionIdentifier}`;
       const originalBody = JSON.stringify({
         tarball: `${responseUrl}/pkg.tgz`,
       });
@@ -17,15 +17,18 @@ describe('hybrid-sdk/http', () => {
         tarball: `${replacementUrl}/pkg.tgz`,
       });
       let brokerServer: http.Server;
+      let brokerServerRequestUrl: string | undefined;
       let brokerServerUrl: string;
       let requestBodyPromise: Promise<Buffer>;
 
       beforeEach(async () => {
+        brokerServerRequestUrl = undefined;
         let resolveRequestBody: (body: Buffer) => void;
         requestBodyPromise = new Promise<Buffer>((resolve) => {
           resolveRequestBody = resolve;
         });
         brokerServer = http.createServer((request, response) => {
+          brokerServerRequestUrl = request.url;
           const chunks: Buffer[] = [];
           request.on('data', (chunk) => chunks.push(chunk));
           request.on('end', () => {
@@ -60,6 +63,7 @@ describe('hybrid-sdk/http', () => {
         body = originalBody,
         contentLengthHeader = 'content-length',
         additionalHeaders: Record<string, string> = {},
+        activeConnectionIdentifier = classicConnectionIdentifier,
       ) {
         setConfig({
           brokerServerUrl,
@@ -70,7 +74,7 @@ describe('hybrid-sdk/http', () => {
         const handler = new BrokerServerPostResponseHandler(
           {} as any,
           configWithServerUrl(config),
-          'test-broker-token',
+          activeConnectionIdentifier,
           123,
           'test-request-id',
           'primary',
@@ -106,6 +110,7 @@ describe('hybrid-sdk/http', () => {
           metadataBytes,
           metadataLength,
           prefix: requestBody.subarray(0, 4),
+          requestUrl: brokerServerRequestUrl,
           downstreamHeaders,
           metadata: JSON.parse(metadataBytes.toString('utf8')),
         };
@@ -120,11 +125,11 @@ describe('hybrid-sdk/http', () => {
         };
       }
 
-      it('removes stale content length and streams the transformed body', async () => {
+      it('preserves the Classic Broker token in the transformed body', async () => {
         const relayed = await relay(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
+            BROKER_TOKEN: classicConnectionIdentifier,
           },
           'application/json',
           originalBody,
@@ -149,6 +154,29 @@ describe('hybrid-sdk/http', () => {
         });
       });
 
+      it('uses the active Universal Broker connection identifier in the transformed URL', async () => {
+        const activeConnectionIdentifier = 'universal-connection-id';
+        const relayed = await relay(
+          {
+            RES_BODY_URL_SUB: responseUrl,
+            universalBrokerEnabled: true,
+          },
+          'application/json',
+          originalBody,
+          'content-length',
+          {},
+          activeConnectionIdentifier,
+        );
+
+        expect(relayed.requestUrl).toContain(
+          `/response-data/${activeConnectionIdentifier}/`,
+        );
+        expect(relayed.body).toContain(
+          `/broker/${activeConnectionIdentifier}/pkg.tgz`,
+        );
+        expect(relayed.body).not.toContain('/broker/undefined/pkg.tgz');
+      });
+
       it('preserves fixed-length metadata and body without configuration', async () => {
         const relayed = await relay({});
 
@@ -163,7 +191,7 @@ describe('hybrid-sdk/http', () => {
         const relayed = await relay(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
+            BROKER_TOKEN: classicConnectionIdentifier,
           },
           'text/plain',
         );
@@ -180,7 +208,7 @@ describe('hybrid-sdk/http', () => {
         const relayed = await relay(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
+            BROKER_TOKEN: classicConnectionIdentifier,
           },
           'application/json',
           bodyWithoutMatch,
@@ -210,7 +238,7 @@ describe('hybrid-sdk/http', () => {
         const relayed = await relay(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
+            BROKER_TOKEN: classicConnectionIdentifier,
           },
           'application/json',
           originalBody,
@@ -241,7 +269,7 @@ describe('hybrid-sdk/http', () => {
         const relayed = await relay(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
+            BROKER_TOKEN: classicConnectionIdentifier,
           },
           'application/json',
           originalBody,

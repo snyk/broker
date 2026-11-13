@@ -110,7 +110,7 @@ class BrokerServerPostResponseHandler {
   #brokerTransformer;
   #logContext: ExtendedLogContext;
   #config;
-  #brokerToken: string;
+  #connectionIdentifier: string;
   #streamingId?: string;
   #serverId;
   #role;
@@ -122,7 +122,7 @@ class BrokerServerPostResponseHandler {
    * Creates a new handler for posting responses to the Broker Server.
    * @param logContext - Logging context with request metadata
    * @param config - Broker configuration
-   * @param brokerToken - Token identifying the broker connection
+   * @param connectionIdentifier - Identifier for the connection that owns the response
    * @param serverId - Server identifier
    * @param requestId - Unique request identifier
    * @param role - Broker role
@@ -131,7 +131,7 @@ class BrokerServerPostResponseHandler {
   constructor(
     logContext: ExtendedLogContext,
     config,
-    brokerToken: string,
+    connectionIdentifier: string,
     serverId,
     requestId: string,
     role,
@@ -140,7 +140,7 @@ class BrokerServerPostResponseHandler {
     this.#logger = logger.child({ ...logContext, requestId });
     this.#logContext = logContext;
     this.#config = config;
-    this.#brokerToken = brokerToken;
+    this.#connectionIdentifier = connectionIdentifier;
     this.#serverId = serverId;
     this.#role = role;
     this.#requestId = requestId;
@@ -163,7 +163,7 @@ class BrokerServerPostResponseHandler {
         : `${this.#config.brokerServerUrl}`;
 
     let url = new URL(
-      `${backendHostname}/response-data/${this.#brokerToken}/${
+      `${backendHostname}/response-data/${this.#connectionIdentifier}/${
         this.#streamingId
       }`,
     );
@@ -506,6 +506,7 @@ class BrokerServerPostResponseHandler {
    */
   async forwardRequest(response: http.IncomingMessage, streamingID) {
     const config = this.#config;
+    const connectionIdentifier = this.#connectionIdentifier;
     try {
       this.#streamingId = streamingID;
       let prevPartialChunk;
@@ -578,6 +579,7 @@ class BrokerServerPostResponseHandler {
               Buffer.from(chunk).toString(),
               prevPartialChunk,
               config,
+              connectionIdentifier,
             );
             prevPartialChunk = partial;
             chunk = newChunk;

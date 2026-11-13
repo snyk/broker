@@ -27,7 +27,14 @@ describe('legacyStreaming — capability-fallback log level', () => {
     rqst.on = jest.fn(() => rqst);
     const io: any = { send: jest.fn() };
 
-    legacyStreaming(logContext, rqst, {}, io, 'stream-1');
+    legacyStreaming(
+      logContext,
+      rqst,
+      {},
+      io,
+      'stream-1',
+      'legacy-broker-token',
+    );
 
     expect(logger.info).toHaveBeenCalledWith(
       expect.anything(),
@@ -44,8 +51,8 @@ describe('hybrid-sdk/client', () => {
   describe('legacyStreaming', () => {
     describe('response body URL substitution', () => {
       const responseUrl = 'http://private-registry.example/artifactory';
-      const replacementUrl =
-        'http://internal-broker-server-next/broker/test-broker-token';
+      const connectionIdentifier = 'legacy-broker-token';
+      const replacementUrl = `http://broker-snyk-server-v2.default/broker/${connectionIdentifier}`;
       const originalBody = JSON.stringify({
         tarball: `${responseUrl}/pkg.tgz`,
       });
@@ -71,7 +78,7 @@ describe('hybrid-sdk/client', () => {
         };
         const handler = new HybridResponseHandler(
           {
-            connectionIdentifier: 'test-broker-token',
+            connectionIdentifier,
             payloadStreamingId: 'stream-1',
             requestId: 'request-1',
           } as any,
@@ -97,7 +104,6 @@ describe('hybrid-sdk/client', () => {
         const { headers, websocketConnection } = relayLegacyStreamingResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'application/json',
           originalBody,
@@ -152,7 +158,6 @@ describe('hybrid-sdk/client', () => {
         const { websocketConnection } = relayLegacyStreamingResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'application/json',
           bodyWithoutMatch,
@@ -170,7 +175,6 @@ describe('hybrid-sdk/client', () => {
         const { headers, websocketConnection } = relayLegacyStreamingResponse(
           {
             RES_BODY_URL_SUB: responseUrl,
-            BROKER_TOKEN: 'test-broker-token',
           },
           'text/plain',
         );

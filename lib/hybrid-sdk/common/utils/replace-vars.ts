@@ -33,7 +33,12 @@ export const replace = (input, source) => {
   });
 };
 
-export const replaceUrlPartialChunk = (chunk, prevPartial, config) => {
+export const replaceUrlPartialChunk = (
+  chunk,
+  prevPartial,
+  config,
+  connectionIdentifier,
+) => {
   // 1/ make sure no protocol is present
   const protocolFreeURI = config.RES_BODY_URL_SUB.replace(/(^\w+:|^)\/\//, '');
 
@@ -41,7 +46,7 @@ export const replaceUrlPartialChunk = (chunk, prevPartial, config) => {
   const replaceRegExp = new RegExp(`(\\w+:)//${protocolFreeURI}`, 'g');
 
   // 3/ create replacement string
-  const replaceWith = `http://internal-broker-server-next/broker/${config.BROKER_TOKEN}`;
+  const replaceWith = `http://broker-snyk-server-v2.default/broker/${connectionIdentifier}`;
 
   if (prevPartial) {
     chunk = prevPartial + chunk;
