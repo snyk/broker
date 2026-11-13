@@ -83,7 +83,7 @@ describe('hybrid-sdk/client', () => {
     describe('buffered websocket response body URL substitution', () => {
       const responseUrl = 'http://private-registry.example/artifactory';
       const connectionIdentifier = 'legacy-broker-token';
-      const replacementUrl = `http://internal-broker-server-next/broker/${connectionIdentifier}`;
+      const replacementUrl = `http://broker-snyk-server-v2.default/broker/${connectionIdentifier}`;
       const originalBody = JSON.stringify({
         tarball: `${responseUrl}/pkg.tgz`,
         location: 'München',

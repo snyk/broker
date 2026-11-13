@@ -46,7 +46,7 @@ export const replaceUrlPartialChunk = (
   const replaceRegExp = new RegExp(`(\\w+:)//${protocolFreeURI}`, 'g');
 
   // 3/ create replacement string
-  const replaceWith = `http://internal-broker-server-next/broker/${connectionIdentifier}`;
+  const replaceWith = `http://broker-snyk-server-v2.default/broker/${connectionIdentifier}`;
 
   if (prevPartial) {
     chunk = prevPartial + chunk;

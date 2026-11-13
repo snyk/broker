@@ -67,7 +67,7 @@ describe('broker server API', () => {
         );
         const originalBody = origin.data as string;
         const replacementUrl =
-          'http://internal-broker-server-next/broker/broker-token-12345';
+          'http://broker-snyk-server-v2.default/broker/broker-token-12345';
         const expectedBody = originalBody.replaceAll(
           responseUrl,
           replacementUrl,

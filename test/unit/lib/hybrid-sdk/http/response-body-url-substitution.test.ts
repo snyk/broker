@@ -9,7 +9,7 @@ describe('hybrid-sdk/http', () => {
     describe('response body URL substitution', () => {
       const responseUrl = 'http://private-registry.example/artifactory';
       const classicConnectionIdentifier = 'legacy-broker-token';
-      const replacementUrl = `http://internal-broker-server-next/broker/${classicConnectionIdentifier}`;
+      const replacementUrl = `http://broker-snyk-server-v2.default/broker/${classicConnectionIdentifier}`;
       const originalBody = JSON.stringify({
         tarball: `${responseUrl}/pkg.tgz`,
       });
