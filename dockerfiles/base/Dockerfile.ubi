@@ -130,6 +130,14 @@ RUN <<EOF
     rpm --erase --nodeps tpm2-tss
     rpm --erase --nodeps vim-minimal
     rpm --erase --nodeps rpm-build-libs
+    # util-linux and its libraries have open CVEs with no RHEL 8 fix yet.
+    # Node.js and the broker do not link or exec them.
+    rpm --erase --nodeps util-linux \
+        libblkid \
+        libfdisk \
+        libmount \
+        libsmartcols \
+        libuuid
     # rpm links both librpm.so.8 (rpm-libs) and libsqlite3.so.0 (sqlite-libs),
     # so they must be erased in one transaction. Separate calls leave the second
     # call with a broken rpm binary.
