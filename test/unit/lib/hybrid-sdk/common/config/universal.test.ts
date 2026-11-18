@@ -65,5 +65,29 @@ describe('common/config/universal.ts', () => {
         value: 'Bearer $BITBUCKET_PAT',
       });
     });
+
+    it.each([
+      'acr',
+      'artifactory-cr',
+      'container-registry-agent',
+      'digitalocean-cr',
+      'docker-hub',
+      'ecr',
+      'gcr',
+      'github-cr',
+      'gitlab-cr',
+      'google-artifact-cr',
+      'harbor-cr',
+      'nexus-cr',
+      'quay-cr',
+    ])('should define no validations for a %s connection', (type) => {
+      const config = {
+        connections: { connection: { type } },
+      };
+
+      expect(
+        getConfigForConnection('connection', config).validations,
+      ).toBeUndefined();
+    });
   });
 });

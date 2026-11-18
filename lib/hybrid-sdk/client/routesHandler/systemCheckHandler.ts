@@ -17,30 +17,65 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
   // being proxied by the broker client.
   const clientOpts = res.locals.clientOpts as LoadedClientOpts;
   if (clientOpts.config.universalBrokerEnabled) {
-    const configForAllConnections = getConfigForConnections();
-    const validationResults: ValidationResult[] = [];
-    let isValidationPassing = true;
-    for (const [connectionName, config] of configForAllConnections.entries()) {
-      config.validations = expandConfigObjectRecursively(
-        config.validations,
+    try {
+      const configForAllConnections = getConfigForConnections();
+      const validationResults: ValidationResult[] = [];
+      let isValidationPassing = true;
+      for (const [
+        connectionName,
         config,
-      );
-      logger.info({ connectionName }, '[System Check] Validating connection.');
-      const { passing, data } = await validateConnection(config);
-      const result = {
-        connectionName: connectionName,
-        validated: passing,
-        results: data,
-      };
-      if (!passing) {
-        result[
-          'message'
-        ] = `Validation failed, please review connection details for ${connectionName}.`;
-        isValidationPassing = false;
+      ] of configForAllConnections.entries()) {
+        // Some connection types (e.g. container registries, workload) define
+        // no validations. They cannot be validated, but that must not fail the
+        // check of the other connections, nor crash the handler.
+        if (!config.validations || config.validations.length === 0) {
+          logger.info(
+            { connectionName, type: config.type },
+            '[System Check] No validations defined for connection, skipping.',
+          );
+          validationResults.push({
+            connectionName,
+            validated: false,
+            skipped: true,
+            results: [],
+            message: `No validations defined for connection type ${config.type}; not validated.`,
+          });
+          continue;
+        }
+        // Connections of the same type share one validations array from the
+        // global config, so expand a copy to keep each connection's values
+        // out of the others' checks.
+        config.validations = expandConfigObjectRecursively(
+          structuredClone(config.validations),
+          config,
+        );
+        logger.info(
+          { connectionName },
+          '[System Check] Validating connection.',
+        );
+        const { passing, data } = await validateConnection(config);
+        const result: ValidationResult = {
+          connectionName: connectionName,
+          validated: passing,
+          results: data,
+        };
+        if (!passing) {
+          result.message = `Validation failed, please review connection details for ${connectionName}.`;
+          isValidationPassing = false;
+        }
+        validationResults.push(result);
       }
-      validationResults.push(result);
+      res.status(isValidationPassing ? 200 : 500).json(validationResults);
+    } catch (err) {
+      // An async Express 4 handler that rejects never sends a response, which
+      // leaves the request hanging until the client times out.
+      logger.error({ err }, '[System Check] Unexpected error running check.');
+      if (!res.headersSent) {
+        res.status(500).json({
+          message: 'System check failed unexpectedly, see the broker logs.',
+        });
+      }
     }
-    res.status(isValidationPassing ? 200 : 500).json(validationResults);
   } else {
     const brokerClientValidationMethod =
       clientOpts.config.brokerClientValidationMethod || 'GET';

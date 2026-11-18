@@ -89,4 +89,6 @@ export interface ValidationResult {
   connectionName: string;
   validated: boolean;
   results: Record<any, any>;
+  skipped?: boolean;
+  message?: string;
 }

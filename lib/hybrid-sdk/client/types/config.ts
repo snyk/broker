@@ -38,7 +38,7 @@ export type Config = BackendAPI &
   Record<string, any>;
 
 export interface ConnectionValidations {
-  validations: ConnectionValidation[];
+  validations?: ConnectionValidation[];
 }
 
 export interface ConnectionValidation {

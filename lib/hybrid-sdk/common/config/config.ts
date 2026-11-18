@@ -256,6 +256,9 @@ export const expandConfigObjectRecursively = (
   objToExpand: Object,
   referenceConfig: Object,
 ) => {
+  if (objToExpand === undefined || objToExpand === null) {
+    return objToExpand as any;
+  }
   for (const key of Object.keys(objToExpand)) {
     if (typeof objToExpand[key] == 'string') {
       objToExpand[key] = expandValue(referenceConfig, objToExpand[key]);

@@ -8,8 +8,9 @@ import { validateResponseForBitbucketPAT } from './credentials';
 export const validateConnection = async (config: ConnectionConfig) => {
   let passing = false;
   const data: Object[] = [];
-  for (let i = 0; i < config.validations.length; i++) {
-    const validation = config.validations[i] ?? {};
+  const validations = config.validations ?? [];
+  for (let i = 0; i < validations.length; i++) {
+    const validation = validations[i] ?? {};
     const method = validation?.method ?? 'GET';
     const { auth, url } = validation;
     const headers: Record<string, string> = validation?.headers ?? {};

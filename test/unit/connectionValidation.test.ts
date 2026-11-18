@@ -30,7 +30,7 @@ describe('client/utils/connectionValidation.ts', () => {
 
       // The shared config's url must be left untouched — this is the mutation
       // the fix prevents.
-      expect(config.validations[0].url).toBe(originalUrl);
+      expect(config.validations?.[0].url).toBe(originalUrl);
 
       // Both calls authenticate (200 requires the matchHeader interceptor).
       // Before the fix, the second call would be 401 -> passing false.
@@ -97,5 +97,19 @@ describe('client/utils/connectionValidation.ts', () => {
       expect(result.passing).toBe(true);
       expect(receivedHeaders?.authorization).toBe('token github-token');
     });
+
+    it.each([
+      ['undefined', undefined],
+      ['empty', []],
+    ])(
+      'returns not passing with no results when validations are %s',
+      async (_label, validations) => {
+        const result = await validateConnection({
+          validations,
+        } as unknown as ConnectionConfig);
+
+        expect(result).toEqual({ passing: false, data: [] });
+      },
+    );
   });
 });
