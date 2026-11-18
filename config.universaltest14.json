@@ -1,0 +1,51 @@
+{
+  "BROKER_CLIENT_CONFIGURATION": {
+    "common": {
+      "default": {
+        "BROKER_SERVER_URL": "https://broker.dev.snyk.io",
+        "BROKER_HA_MODE_ENABLED": "false",
+        "BROKER_DISPATCHER_BASE_URL": "https://api.dev.snyk.io"
+      },
+      "oauth": {
+        "clientId": "${CLIENT_ID}",
+        "clientSecret": "${CLIENT_SECRET}"
+      }
+    },
+    "github": {
+      "validations": [
+        {
+          "url": "https://snyk.io/no-such-url-ever"
+        }
+      ]
+    },
+    "gitlab": {
+      "validations": [
+        {
+          "url": "https://snyk.io/no-such-url-ever"
+        }
+      ]
+    }
+  },
+  "CONNECTIONS": {
+    "my github connection": {
+      "type": "github",
+      "id": "1",
+      "identifier": "${BROKER_TOKEN_1}",
+      "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+    },
+    "my second nexus registry": {
+      "type": "nexus-cr",
+      "identifier": "${BROKER_TOKEN_2}",
+      "CR_AGENT_URL": "http://localhost:9999",
+      "CR_CREDENTIALS": "${CR_CREDENTIALS}",
+      "BROKER_CLIENT_URL": "http://localhost:9998"
+    },
+    "my gitlab connection": {
+      "type": "gitlab",
+      "id": "2",
+      "identifier": "${BROKER_TOKEN_3}",
+      "GITLAB_TOKEN": "${GITLAB_TOKEN}",
+      "GITLAB": "gitlab.dev.snyk.io"
+    }
+  }
+}
