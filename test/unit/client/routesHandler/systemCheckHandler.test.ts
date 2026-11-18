@@ -228,6 +228,102 @@ describe('client/routesHandler', () => {
       });
     });
 
+    describe('with two connections of the same type', () => {
+      // Connections of one type all get the same validations array from the
+      // global client configuration, as getValidationConfigForType does.
+      const sharedValidations = () => [
+        {
+          url: 'https://$GITHUB_API/user',
+          auth: {
+            type: 'header',
+            name: 'Authorization',
+            value: 'token $GITHUB_TOKEN',
+          },
+        },
+      ];
+      const githubConfig = (
+        name: string,
+        api: string,
+        token: string,
+        validations,
+      ): ConnectionConfig => ({
+        type: 'github',
+        name,
+        GITHUB_API: api,
+        GITHUB_TOKEN: token,
+        validations,
+      });
+
+      beforeEach(() => {
+        mockedValidateConnection.mockResolvedValue({ passing: true, data: [] });
+      });
+
+      it('validates each connection against its own host and token', async () => {
+        const validations = sharedValidations();
+        mockedGetConfigForConnections.mockReturnValue(
+          new Map([
+            [
+              'github a',
+              githubConfig('github a', 'a.example', 'tokA', validations),
+            ],
+            [
+              'github b',
+              githubConfig('github b', 'b.example', 'tokB', validations),
+            ],
+          ]),
+        );
+
+        await callHandler();
+
+        expect(mockedValidateConnection).toHaveBeenCalledTimes(2);
+        const validatedWith = mockedValidateConnection.mock.calls.map(
+          ([config]) => config.validations,
+        );
+        expect(validatedWith).toEqual([
+          [
+            {
+              url: 'https://a.example/user',
+              auth: {
+                type: 'header',
+                name: 'Authorization',
+                value: 'token tokA',
+              },
+            },
+          ],
+          [
+            {
+              url: 'https://b.example/user',
+              auth: {
+                type: 'header',
+                name: 'Authorization',
+                value: 'token tokB',
+              },
+            },
+          ],
+        ]);
+      });
+
+      it('leaves the shared validations config unexpanded', async () => {
+        const validations = sharedValidations();
+        mockedGetConfigForConnections.mockReturnValue(
+          new Map([
+            [
+              'github a',
+              githubConfig('github a', 'a.example', 'tokA', validations),
+            ],
+            [
+              'github b',
+              githubConfig('github b', 'b.example', 'tokB', validations),
+            ],
+          ]),
+        );
+
+        await callHandler();
+
+        expect(validations).toEqual(sharedValidations());
+      });
+    });
+
     describe('sending the response', () => {
       it('sends exactly one response for a registry-only deployment', async () => {
         mockedGetConfigForConnections.mockReturnValue(

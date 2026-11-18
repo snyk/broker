@@ -42,8 +42,11 @@ export const systemCheckHandler = async (req: Request, res: Response) => {
           });
           continue;
         }
+        // Connections of the same type share one validations array from the
+        // global config, so expand a copy to keep each connection's values
+        // out of the others' checks.
         config.validations = expandConfigObjectRecursively(
-          config.validations,
+          structuredClone(config.validations),
           config,
         );
         logger.info(
