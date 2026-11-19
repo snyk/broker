@@ -28,6 +28,29 @@ const stripEmptyRequestBody = (req, res, next) => {
   next();
 };
 
+const DEFAULT_SERVER_KEEPALIVE_TIMEOUT_MS = 650000;
+
+// The broker server sits behind a proxy that pools upstream connections.
+// The long keep-alive below only applies to the broker server.
+// Node's default keep-alive (5s) makes the server close idle pooled
+// connections, so bursts of requests need new TCP connections, which fail
+// with connect timeouts whenever the event loop is briefly busy.
+// brokerType is set by lib/index.ts; BROKER_TYPE is kept for compatibility
+// (on the client it holds the SCM type, so it can't be relied on).
+const isBrokerServer = (config): boolean =>
+  config?.brokerType === 'server' || process.env.BROKER_TYPE === 'server';
+
+const positiveIntOrDefault = (value, fallback: number): number => {
+  const parsed = parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const getServerKeepAliveTimeout = (config): number =>
+  positiveIntOrDefault(
+    config?.BROKER_WEBSERVER_KEEPALIVE_TIMEOUT,
+    DEFAULT_SERVER_KEEPALIVE_TIMEOUT_MS,
+  );
+
 export const webserver = (config, altPort: number) => {
   let { httpsKey = null, httpsCert = null, port = 7341 } = config; // eslint-disable-line prefer-const
   const isHttp = !httpsKey && !httpsCert; // no https if there's no certs
@@ -86,13 +109,16 @@ export const webserver = (config, altPort: number) => {
   server.requestTimeout = process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT
     ? parseInt(process.env.BROKER_WEBSERVER_REQUEST_TIMEOUT)
     : 600000;
-  if (process.env.BROKER_TYPE === 'server') {
-    server.keepAliveTimeout =
-      config.BROKER_WEBSERVER_KEEPALIVE_TIMEOUT ?? 650000;
+  if (isBrokerServer(config)) {
+    server.keepAliveTimeout = getServerKeepAliveTimeout(config);
   }
   server.listen(port);
   logger.info(
-    { port, requestTimeout: server.requestTimeout },
+    {
+      port,
+      requestTimeout: server.requestTimeout,
+      keepAliveTimeout: server.keepAliveTimeout,
+    },
     'local server is listening.',
   );
   return { app, server };
